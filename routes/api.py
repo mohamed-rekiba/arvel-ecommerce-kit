@@ -11,6 +11,7 @@ from arvel.auth.tokens import TokenGuard, create_token
 from arvel.http import Response
 from arvel.security import Hasher
 
+from app.controllers import catalog_controller as catalog
 from app.models.user import User
 
 
@@ -52,3 +53,8 @@ async def me(request) -> UserOut:
 Route.get("/health", health, name="api.health")
 Route.post("/login", login, name="api.login")
 Route.get("/user", me, name="api.user").secure("bearer")  # shows the lock + 'Authorize' in API docs
+
+# --- Catalog (public read API) ------------------------------------------------
+Route.get("/categories", catalog.categories_index, name="api.categories.index")
+Route.get("/products", catalog.products_index, name="api.products.index")
+Route.get("/products/{slug:str}", catalog.products_show, name="api.products.show")
