@@ -11,6 +11,7 @@ from arvel.auth.tokens import TokenGuard, create_token
 from arvel.http import Response
 from arvel.security import Hasher
 
+from app.controllers import auth_controller as auth
 from app.controllers import catalog_controller as catalog
 from app.models.user import User
 
@@ -53,6 +54,12 @@ async def me(request) -> UserOut:
 Route.get("/health", health, name="api.health")
 Route.post("/login", login, name="api.login")
 Route.get("/user", me, name="api.user").secure("bearer")  # shows the lock + 'Authorize' in API docs
+
+# --- Customer auth ------------------------------------------------------------
+Route.post("/register", auth.register, name="api.register")
+Route.post("/logout", auth.logout, name="api.logout").secure("bearer")
+Route.post("/forgot-password", auth.forgot_password, name="api.password.forgot")
+Route.post("/reset-password", auth.reset_password, name="api.password.reset")
 
 # --- Catalog (public read API) ------------------------------------------------
 Route.get("/categories", catalog.categories_index, name="api.categories.index")
