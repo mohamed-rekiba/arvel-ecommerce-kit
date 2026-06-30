@@ -7,6 +7,7 @@ collection and each upload generates ``thumb`` + ``preview`` conversions automat
 from typing import Any, ClassVar
 
 from arvel import Model
+from arvel.localization import HasTranslations, Translatable
 from arvel.media import HasMedia, MediaConversion
 
 from app.enums import ProductStatus
@@ -14,12 +15,12 @@ from app.enums import ProductStatus
 IMAGES = "images"  # the product image gallery collection
 
 
-class Product(HasMedia, Model):
+class Product(HasMedia, HasTranslations, Model):
     __table_name__ = "products"
     __fields__: ClassVar[dict[str, type]] = {
         "category_id": int,
         "vendor_id": int,
-        "name": str,
+        "name": dict,  # translatable JSON {locale: value} (read as a str via the Translatable cast)
         "slug": str,
         "description": str,
         "price_cents": int,
@@ -38,7 +39,11 @@ class Product(HasMedia, Model):
         "status",
         "published",
     ]
-    __casts__: ClassVar[dict[str, Any]] = {"status": ProductStatus, "published": bool}
+    __casts__: ClassVar[dict[str, Any]] = {
+        "status": ProductStatus,
+        "published": bool,
+        "name": Translatable(),  # per-locale {locale: value}, read as the current locale
+    }
 
     def register_media_conversions(self) -> list[MediaConversion]:
         """Derived versions generated for every gallery image (Spatie conversions)."""

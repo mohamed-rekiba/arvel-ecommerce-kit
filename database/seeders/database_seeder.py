@@ -28,10 +28,15 @@ class DatabaseSeeder(Seeder):
         acme = await Vendor.create(name="Acme Goods", slug="acme", published=True)
         await Vendor.create(name="Shady Imports", slug="shady", published=False)  # unpublished vendor
 
-        # --- a published category tree (these branches are visible) ---
-        electronics = await Category.create(name="Electronics", slug="electronics", published=True)
+        # --- a published category tree (these branches are visible; some names are translated) ---
+        electronics = await Category.create(
+            name={"en": "Electronics", "fr": "Électronique"}, slug="electronics", published=True
+        )
         phones = await Category.create(
-            name="Phones", slug="phones", parent_id=electronics.id, published=True
+            name={"en": "Phones", "fr": "Téléphones"},
+            slug="phones",
+            parent_id=electronics.id,
+            published=True,
         )
         laptops = await Category.create(
             name="Laptops", slug="laptops", parent_id=electronics.id, published=True

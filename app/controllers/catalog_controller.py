@@ -6,6 +6,7 @@ schemas are generated.
 """
 
 from arvel.http import Request
+from arvel.localization import current_locale
 from arvel.media import Media
 
 from app.enums import ProductStatus
@@ -72,8 +73,8 @@ async def products_index(
     `category` (id), `per_page`, `page`."""
     visible = await CatalogVisibilityService().retrievable_product_ids()
     query = Product.with_("category", "variants", "media").where_in("id", visible or [0])
-    if q:
-        query = query.where("name", "like", f"%{q}%")
+    if q:  # search the current locale's translatable name (jsonb → name->><locale>)
+        query = query.where_json_like("name", current_locale.get(), f"%{q}%")
     if category:
         query = query.where("category_id", category)
 
