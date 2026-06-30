@@ -65,5 +65,5 @@ routes/           web.py · api.py · console.py
 app/              models · controllers · services · policies · jobs · listeners · mail · events · auth
 database/         migrations · seeders · factories
 storefront/       Vue 3 SPA (catalog) — `cd storefront && npm install && npm run dev`
-docker-compose.yml  PostgreSQL (add Redis/RabbitMQ/Keycloak/RustFS as those modules are exercised)
+docker-compose.yml  Postgres · Valkey · RabbitMQ · RustFS (S3) · Keycloak (OIDC) · Mailpit
 ```
