@@ -133,6 +133,11 @@ class CreateRetrievableViews(Migration):
     def up(self, schema: Schema) -> None:
         schema.create_materialized_view("retrievable_products", _retrievable_products_select())
         schema.create_materialized_view("retrievable_categories", _retrievable_categories_select())
+        if schema.dialect == "postgresql":
+            # a unique index on id makes the EXISTS/visibility lookups index scans AND unlocks
+            # REFRESH MATERIALIZED VIEW CONCURRENTLY (no read-lock during the debounced refresh).
+            schema.execute(sa.text("CREATE UNIQUE INDEX ON retrievable_products (id)"))
+            schema.execute(sa.text("CREATE UNIQUE INDEX ON retrievable_categories (id)"))
 
     def down(self, schema: Schema) -> None:
         keyword = "MATERIALIZED VIEW" if schema.dialect == "postgresql" else "VIEW"
