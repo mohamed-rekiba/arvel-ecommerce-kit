@@ -37,9 +37,9 @@ def client(tmp_path, monkeypatch):
                           role=UserRole.ADMIN)
         await User.create(name="Cara", email="cara@example.com", password="secret-cara",
                           role=UserRole.CUSTOMER)
-        cat = await Category.create(name="Shirts", slug="shirts")
+        cat = await Category.create(name="Shirts", slug="shirts", published=True)
         await Product.create(category_id=cat.id, name="Tee", slug="tee", price_cents=2000,
-                             currency="USD", status=ProductStatus.ACTIVE)
+                             currency="USD", status=ProductStatus.ACTIVE, published=True)
         for model in (User, Category, Product):
             model.set_connection(None)
         await db.dispose()

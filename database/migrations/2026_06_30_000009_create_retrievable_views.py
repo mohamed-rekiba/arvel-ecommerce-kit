@@ -86,12 +86,13 @@ def _retrievable_products_select() -> Any:
             _products.c.status,
         )
         .select_from(
-            _products.join(_vendors, _vendors.c.id == _products.c.vendor_id).join(
+            _products.outerjoin(_vendors, _vendors.c.id == _products.c.vendor_id).join(
                 eff, eff.c.category_id == _products.c.category_id
             )
         )
         .where(_products.c.published)
-        .where(_vendors.c.published)
+        # a vendor, if set, must be published; a first-party product (no vendor) is allowed
+        .where(sa.or_(_products.c.vendor_id.is_(None), _vendors.c.published))
         .where(eff.c.eff == 1)
     )
 

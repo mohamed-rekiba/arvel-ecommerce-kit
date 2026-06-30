@@ -12,6 +12,7 @@ from app.enums import ProductStatus
 from app.models.category import Category
 from app.models.product import IMAGES, Product
 from app.schemas import CategoryOut, GalleryImageOut, ProductOut, ProductPage, VariantOut
+from app.services.catalog_visibility_service import CatalogVisibilityService
 
 
 def variant_out(v: Product) -> VariantOut:
@@ -50,8 +51,12 @@ async def product_out(p: Product) -> ProductOut:
 
 
 async def categories_index(request: Request) -> list[CategoryOut]:
-    """List all product categories."""
-    rows = await Category.order_by("name").get()
+    """List **retrievable** categories — published, fully-published ancestor chain, and at least one
+    viewable product in the subtree (the retrievable_categories materialized view)."""
+    ids = await CatalogVisibilityService().retrievable_category_ids()
+    if not ids:
+        return []
+    rows = await Category.where_in("id", ids).order_by("name").get()
     return [category_out(c) for c in rows]
 
 
@@ -59,22 +64,20 @@ async def products_index(
     request: Request,
     q: str | None = None,
     category: int | None = None,
-    status: str | None = None,
     per_page: int = 15,
     page: int = 1,
 ) -> ProductPage:
-    """List active products. Typed query params (documented in OpenAPI): `q` (name search),
-    `category` (id), `status`, `per_page`, `page`."""
-    query = Product.with_("category", "variants", "media")
+    """List **retrievable** products (the storefront view): published, with a published vendor, under a
+    fully-published category. Typed query params (documented in OpenAPI): `q` (name search),
+    `category` (id), `per_page`, `page`."""
+    visible = await CatalogVisibilityService().retrievable_product_ids()
+    query = Product.with_("category", "variants", "media").where_in("id", visible or [0])
     if q:
         query = query.where("name", "like", f"%{q}%")
     if category:
         query = query.where("category_id", category)
-    # default to ACTIVE products unless an explicit status filter is given
-    chosen = ProductStatus(status).value if status else ProductStatus.ACTIVE.value
-    query = query.where("status", chosen).order_by("name")
 
-    result = await query.paginate(per_page, page)
+    result = await query.order_by("name").paginate(per_page, page)
     return ProductPage(
         data=[await product_out(p) for p in result.items()],
         current_page=result.current_page(),
@@ -85,8 +88,14 @@ async def products_index(
 
 
 async def products_show(request: Request) -> ProductOut:
-    """Show one product (by slug) with its category, variants + image gallery eager-loaded."""
+    """Show one **retrievable** product by slug (a non-retrievable product 404s — it isn't public)."""
     slug = request.path_param("slug")
+    visible = await CatalogVisibilityService().retrievable_product_ids()
     # first_or_fail raises ModelNotFound → the kernel renders it 404 (no manual guard)
-    product = await Product.with_("category", "variants", "media").where("slug", slug).first_or_fail()
+    product = (
+        await Product.with_("category", "variants", "media")
+        .where("slug", slug)
+        .where_in("id", visible or [0])
+        .first_or_fail()
+    )
     return await product_out(product)

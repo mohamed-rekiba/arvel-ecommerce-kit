@@ -30,9 +30,10 @@ def client(tmp_path, monkeypatch):
             model.set_connection(db)
         await User.create(name="Cara", email="cara@example.com", password="secret-cara",
                           role=UserRole.CUSTOMER)
-        cat = await Category.create(name="Shirts", slug="shirts")
+        cat = await Category.create(name="Shirts", slug="shirts", published=True)
         p = await Product.create(category_id=cat.id, name="Tee", slug="tee",
-                                 price_cents=1000, currency="USD", status=ProductStatus.ACTIVE)
+                                 price_cents=1000, currency="USD", status=ProductStatus.ACTIVE,
+                                 published=True)
         await ProductVariant.create(product_id=p.id, sku="TEE-S", name="S",
                                     price_adjustment_cents=0, stock=5)  # only 5 in stock
         for model in (User, Category, Product, ProductVariant):
