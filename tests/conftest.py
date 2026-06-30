@@ -1,5 +1,14 @@
 """Shared test fixtures."""
 
+import os
+
+# The suite is infra-independent: force in-process cache/queue regardless of a developer's local
+# .env (which may point at Redis for `arvel serve`). Set before any app boots — arvel's
+# load_dotenv(override=False) then leaves these alone. The production path uses whatever .env /
+# docker-compose provides; tests must not depend on running infra.
+os.environ.setdefault("CACHE_STORE", "array")
+os.environ.setdefault("QUEUE_CONNECTION", "memory")
+
 import pytest
 
 from arvel.http import reset_rate_limiter, reset_sessions
