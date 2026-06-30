@@ -27,18 +27,19 @@ def client(tmp_path, monkeypatch):  # type: ignore[no-untyped-def]
             model.set_connection(db)
         acme = await Vendor.create(name="Acme", slug="acme", published=True)
         shady = await Vendor.create(name="Shady", slug="shady", published=False)
-        root = await Category.create(name="Root", slug="root", published=True)
-        phones = await Category.create(name="Phones", slug="phones", parent_id=root.id, published=True)
-        await Category.create(name="Empty", slug="empty", parent_id=root.id, published=True)
-        hidden_root = await Category.create(name="HiddenRoot", slug="hroot", published=False)
+        root = await Category.create(translations={"en": {"name": "Root"}}, slug="root", published=True)
+        phones = await Category.create(translations={"en": {"name": "Phones"}}, slug="phones", parent_id=root.id, published=True)
+        await Category.create(translations={"en": {"name": "Empty"}}, slug="empty", parent_id=root.id, published=True)
+        hidden_root = await Category.create(translations={"en": {"name": "HiddenRoot"}}, slug="hroot", published=False)
         hidden_child = await Category.create(
-            name="HiddenChild", slug="hchild", parent_id=hidden_root.id, published=True
+            translations={"en": {"name": "HiddenChild"}}, slug="hchild", parent_id=hidden_root.id, published=True
         )
 
         async def product(slug, category_id, vendor_id, published) -> None:  # type: ignore[no-untyped-def]
             await Product.create(
-                name=slug, slug=slug, category_id=category_id, vendor_id=vendor_id,
-                description="d", price_cents=1000, currency="USD",
+                translations={"en": {"name": slug, "description": "d"}},
+                slug=slug, category_id=category_id, vendor_id=vendor_id,
+                price_cents=1000, currency="USD",
                 status="active" if published else "draft", published=published,
             )
 

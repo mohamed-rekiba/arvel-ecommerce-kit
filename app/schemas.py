@@ -15,10 +15,18 @@ from arvel import Schema
 # --- shared / catalog ---------------------------------------------------------
 
 
+class Translate(Schema):
+    """One locale's translatable fields (the value of `translations[locale]`)."""
+
+    name: str
+    description: str | None = None
+    locale: str = ""
+
+
 class CategoryOut(Schema):
     id: int
-    name: str
     slug: str
+    translation: Translate
 
 
 class VariantOut(Schema):
@@ -40,9 +48,8 @@ class GalleryImageOut(Schema):
 
 class ProductOut(Schema, omit_defaults=True):
     id: int
-    name: str
     slug: str
-    description: str | None
+    translation: Translate  # the active locale's name/description (scope_in_locale)
     price_cents: int
     currency: str
     status: str
@@ -65,12 +72,12 @@ class ProductPage(Schema):
 
 
 class AdminProductOut(Schema):
-    """A product as the admin sees it — every row, with `is_visible` = whether the storefront shows it
-    (published ∧ vendor published ∧ category chain published)."""
+    """A product as the admin sees it — every row, ALL translations, and `is_visible` (whether the
+    storefront shows it: published ∧ vendor published ∧ category chain published)."""
 
     id: int
-    name: str
     slug: str
+    translations: list[Translate]
     status: str
     published: bool
     is_visible: bool
@@ -86,8 +93,8 @@ class AdminProductPage(Schema):
 
 class AdminCategoryOut(Schema):
     id: int
-    name: str
     slug: str
+    translations: list[Translate]
     parent_id: int | None = None
     published: bool = False
     is_visible: bool = False
@@ -177,6 +184,7 @@ class ProductIn(Schema):
     category_id: int
     name: str
     price_cents: int
+    description: str | None = None
 
 
 class UpdateProductIn(Schema):

@@ -37,8 +37,8 @@ def client(db_url):
             model.set_connection(db)
         await User.create(name="Cara", email="cara@example.com", password="secret-cara",
                           role=UserRole.CUSTOMER)
-        cat = await Category.create(name="Shirts", slug="shirts")
-        p = await Product.create(category_id=cat.id, name="Tee", slug="tee", price_cents=2000,
+        cat = await Category.create(translations={"en": {"name": "Shirts"}}, slug="shirts")
+        p = await Product.create(category_id=cat.id, translations={"en": {"name": "Tee"}}, slug="tee", price_cents=2000,
                                  currency="USD", status=ProductStatus.ACTIVE)
         await ProductVariant.create(product_id=p.id, sku="TEE-S", name="S",
                                     price_adjustment_cents=0, stock=100)

@@ -30,8 +30,8 @@ def client(tmp_path, monkeypatch):
                           role=UserRole.ADMIN)
         await User.create(name="Cara", email="cara@example.com", password="secret-cara",
                           role=UserRole.CUSTOMER)
-        cat = await Category.create(name="Shirts", slug="shirts")
-        await Product.create(category_id=cat.id, name="Existing", slug="existing",
+        cat = await Category.create(translations={"en": {"name": "Shirts"}}, slug="shirts")
+        await Product.create(category_id=cat.id, translations={"en": {"name": "Existing"}}, slug="existing",
                              price_cents=1000, currency="USD", status="active")
         for model in (User, Category, Product):
             model.set_connection(None)
@@ -92,7 +92,7 @@ def test_admin_can_mutate_catalog(client) -> None:
         headers=_auth(token),
     )
     assert upd.status_code == 200
-    assert upd.json()["name"] == "Admin Tee v2"
+    assert upd.json()["translations"][0]["name"] == "Admin Tee v2"
     assert upd.json()["status"] == "active"
 
     assert client.delete(f"/api/admin/products/{new_id}", headers=_auth(token)).status_code == 200

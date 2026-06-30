@@ -9,14 +9,14 @@ class CreateProductsTable(Migration):
             t.id()
             t.foreign_id("category_id").constrained("categories").index()
             t.foreign_id("vendor_id").nullable().constrained("vendors").index()
-            t.jsonb("name")  # translatable {locale: value} (HasTranslations / Translatable cast)
             t.string("slug").unique()
-            t.text("description").nullable()  # (translatable description lands in the translations refactor)
+            # ONE translatable column, locale-major: {"en": {"name","description"}, "fr": {...}}
+            t.jsonb("translations")
             t.integer("price_cents")
             t.string("currency", length=3).default(value="USD")
             t.string("status").default(value="draft").index()
             t.boolean("published").default(value=False).index()  # retrievability: published ∧ vendor ∧ category-chain
-            t.btree_index("name->>'en'")  # fast filter/sort on the English name (i18n)
+            t.btree_index("translations->'en'->>'name'")  # fast filter/sort on the English name (i18n)
             t.timestamps()
             # product images live in the media library (HasMedia / media table), not a column
 

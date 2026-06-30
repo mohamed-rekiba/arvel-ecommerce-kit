@@ -14,7 +14,8 @@ class CategoryFactory(Factory[Category]):
     def definition(self) -> dict[str, Any]:
         name = self.faker.unique.word().title()
         return {
-            "name": name,
+            "translations": {"en": {"name": name}},
             "slug": Str.slug(f"{name}-{self.faker.unique.random_int(1, 1_000_000)}"),
             "parent_id": None,
+            "published": True,
         }

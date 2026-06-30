@@ -31,8 +31,8 @@ def client(tmp_path, monkeypatch):
                           role=UserRole.CUSTOMER)
         await User.create(name="Admin", email="admin@example.com", password="secret-admin",
                           role=UserRole.ADMIN)
-        cat = await Category.create(name="Shirts", slug="shirts")
-        p = await Product.create(category_id=cat.id, name="Tee", slug="tee",
+        cat = await Category.create(translations={"en": {"name": "Shirts"}}, slug="shirts")
+        p = await Product.create(category_id=cat.id, translations={"en": {"name": "Tee"}}, slug="tee",
                                  price_cents=2000, currency="USD", status=ProductStatus.ACTIVE)
         await ProductVariant.create(product_id=p.id, sku="TEE-S", name="S",
                                     price_adjustment_cents=0, stock=100)

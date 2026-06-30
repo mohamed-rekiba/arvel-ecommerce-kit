@@ -7,13 +7,23 @@ collection and each upload generates ``thumb`` + ``preview`` conversions automat
 from typing import Any, ClassVar, TypedDict
 
 from arvel import Model
-from arvel.localization import HasTranslations, Translatable
+from arvel.localization import current_locale
 from arvel.media import HasMedia, MediaConversion
 from arvel.search import Searchable
 
+from app.casts.translations import TranslationCast, TranslationsCast
 from app.enums import ProductStatus
+from app.schemas import Translate
 
 IMAGES = "images"  # the product image gallery collection
+SUPPORTED_LOCALES = {"en", "fr"}  # storefront locales; whitelisted → no SQL injection via Accept-Language
+DEFAULT_LOCALE = "en"
+
+
+class TranslationDoc(TypedDict):
+    locale: str
+    name: str
+    description: str | None
 
 
 class SearchableProduct(TypedDict):
@@ -21,18 +31,16 @@ class SearchableProduct(TypedDict):
 
     id: int
     slug: str
-    name: dict[str, str]  # {locale: value} — Meilisearch searches the nested values
-    description: str | None
+    translations: list[TranslationDoc]  # Meilisearch searches the nested per-locale name/description
 
 
-class Product(HasMedia, HasTranslations, Searchable, Model):
+class Product(HasMedia, Searchable, Model):
     __table_name__ = "products"
     __fields__: ClassVar[dict[str, type]] = {
         "category_id": int,
         "vendor_id": int,
-        "name": dict,  # translatable JSON {locale: value} (read as a str via the Translatable cast)
         "slug": str,
-        "description": str,
+        "translations": dict,  # ONE locale-major jsonb: {"en": {"name","description"}, "fr": {...}}
         "price_cents": int,
         "currency": str,
         "status": str,
@@ -41,9 +49,8 @@ class Product(HasMedia, HasTranslations, Searchable, Model):
     __fillable__: ClassVar[list[str]] = [
         "category_id",
         "vendor_id",
-        "name",
         "slug",
-        "description",
+        "translations",
         "price_cents",
         "currency",
         "status",
@@ -52,8 +59,25 @@ class Product(HasMedia, HasTranslations, Searchable, Model):
     __casts__: ClassVar[dict[str, Any]] = {
         "status": ProductStatus,
         "published": bool,
-        "name": Translatable(),  # per-locale {locale: value}, read as the current locale
+        "translations": TranslationsCast(),  # full column → list[Translate] (admin)
+        "translation": TranslationCast(),  # the scope_in_locale projection → Translate (storefront)
     }
+
+    # the scalar columns the storefront fetches (NOT translations — only the active-locale `translation`)
+    _LOCALE_COLUMNS = (
+        "id, slug, price_cents, currency, status, category_id, vendor_id, published, "
+        "created_at, updated_at"
+    )
+
+    def scope_in_locale(self, query: Any, locale: str | None = None) -> Any:
+        """Project ONLY the active locale's object as `translation` (Translate cast), not the whole
+        translations map — `translations->'<locale>'` with a fallback to the default locale."""
+        loc = locale or current_locale.get()
+        if loc not in SUPPORTED_LOCALES:
+            loc = DEFAULT_LOCALE
+        return query.select_raw(Product._LOCALE_COLUMNS).select_raw(
+            f"COALESCE(translations->'{loc}', translations->'{DEFAULT_LOCALE}') AS translation"
+        )
 
     def register_media_conversions(self) -> list[MediaConversion]:
         """Derived versions generated for every gallery image (Spatie conversions)."""
@@ -63,15 +87,16 @@ class Product(HasMedia, HasTranslations, Searchable, Model):
         ]
 
     def to_searchable_array(self) -> dict[str, Any]:
-        """The search document (Searchable contract → ``dict[str, Any]``): the slug, the per-locale
-        ``name`` map (Meilisearch searches the nested ``name.en`` / ``name.fr`` … values), and the
-        description. Keyed by id (``get_search_key``)."""
-        name: dict[str, str] = self.translations("name")
+        """The search document (Searchable contract → ``dict[str, Any]``): slug + every locale's
+        name/description (Meilisearch searches the nested values). Keyed by id (``get_search_key``)."""
+        translations: list[Translate] = self.translations
         record: SearchableProduct = {
             "id": int(self.id),
             "slug": str(self.slug),
-            "name": name,
-            "description": self.description,
+            "translations": [
+                {"locale": t.locale, "name": t.name, "description": t.description}
+                for t in translations
+            ],
         }
         return dict(record)
 

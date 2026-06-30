@@ -30,27 +30,31 @@ class DatabaseSeeder(Seeder):
 
         # --- a published category tree (these branches are visible; some names are translated) ---
         electronics = await Category.create(
-            name={"en": "Electronics", "fr": "Électronique"}, slug="electronics", published=True
+            translations={"en": {"name": "Electronics"}, "fr": {"name": "Électronique"}},
+            slug="electronics",
+            published=True,
         )
         phones = await Category.create(
-            name={"en": "Phones", "fr": "Téléphones"},
+            translations={"en": {"name": "Phones"}, "fr": {"name": "Téléphones"}},
             slug="phones",
             parent_id=electronics.id,
             published=True,
         )
         laptops = await Category.create(
-            name="Laptops", slug="laptops", parent_id=electronics.id, published=True
+            translations={"en": {"name": "Laptops"}}, slug="laptops", parent_id=electronics.id, published=True
         )
-        apparel = await Category.create(name="Apparel", slug="apparel", published=True)
+        apparel = await Category.create(translations={"en": {"name": "Apparel"}}, slug="apparel", published=True)
         shirts = await Category.create(
-            name="Shirts", slug="shirts", parent_id=apparel.id, published=True
+            translations={"en": {"name": "Shirts"}}, slug="shirts", parent_id=apparel.id, published=True
         )
         # an empty published category — must be HIDDEN (no products in its subtree)
-        await Category.create(name="Gift Cards", slug="gift-cards", published=True)
+        await Category.create(translations={"en": {"name": "Gift Cards"}}, slug="gift-cards", published=True)
         # an unpublished branch — its (published) child + products must be HIDDEN
-        coming = await Category.create(name="Coming Soon", slug="coming-soon", published=False)
+        coming = await Category.create(
+            translations={"en": {"name": "Coming Soon"}}, slug="coming-soon", published=False
+        )
         teasers = await Category.create(
-            name="Teasers", slug="teasers", parent_id=coming.id, published=True
+            translations={"en": {"name": "Teasers"}}, slug="teasers", parent_id=coming.id, published=True
         )
 
         # --- retrievable products (published + Acme + published category) with real galleries ---
@@ -77,11 +81,10 @@ class DatabaseSeeder(Seeder):
     async def _product(name: str, category_id: int, vendor_id: int, *, published: bool) -> Product:
         slug = name.lower().replace(" ", "-")
         return await Product.create(
-            name=name,
+            translations={"en": {"name": name, "description": f"{name} — a quality item."}},
             slug=slug,
             category_id=category_id,
             vendor_id=vendor_id,
-            description=f"{name} — a quality item.",
             price_cents=1999,
             currency="USD",
             status="active" if published else "draft",

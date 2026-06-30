@@ -10,7 +10,6 @@ from arvel.http import Request
 from arvel.support import Str, current_user
 from arvel.validation import ValidationException, Validator
 
-from app.controllers.catalog_controller import product_out
 from app.enums import ProductStatus
 from app.models.category import Category
 from app.models.product import Product
@@ -22,7 +21,7 @@ from app.schemas import (
     AdminProductPage,
     MessageOut,
     ProductIn,
-    ProductOut,
+    Translate,
     UpdateProductIn,
 )
 
@@ -51,8 +50,8 @@ async def products_index(request: Request, per_page: int = 20, page: int = 1) ->
         data=[
             AdminProductOut(
                 id=p.id,
-                name=p.name,
                 slug=p.slug,
+                translations=p.translations,
                 status=ProductStatus(p.status).value,
                 published=bool(p.published),
                 is_visible=bool(getattr(p, "is_visible", False)),
@@ -74,8 +73,8 @@ async def categories_index(request: Request, per_page: int = 50, page: int = 1) 
         data=[
             AdminCategoryOut(
                 id=c.id,
-                name=c.name,
                 slug=c.slug,
+                translations=c.translations,
                 parent_id=c.parent_id,
                 published=bool(c.published),
                 is_visible=bool(getattr(c, "is_visible", False)),
@@ -89,8 +88,19 @@ async def categories_index(request: Request, per_page: int = 50, page: int = 1) 
     )
 
 
-async def store(request: Request, data: ProductIn) -> ProductOut:
-    """Create a product (admins only)."""
+def _admin_product_out(product: Product, *, is_visible: bool) -> AdminProductOut:
+    return AdminProductOut(
+        id=product.id,
+        slug=product.slug,
+        translations=product.translations,
+        status=ProductStatus(product.status).value,
+        published=bool(product.published),
+        is_visible=is_visible,
+    )
+
+
+async def store(request: Request, data: ProductIn) -> AdminProductOut:
+    """Create a product (admins only). The name/description are stored in the default (en) locale."""
     user = _current_user()
     if not await user.can("create", Product):
         abort(403, "Only admins may create products.")
@@ -106,29 +116,33 @@ async def store(request: Request, data: ProductIn) -> ProductOut:
         raise ValidationException(validator.errors())
     product = await Product.create(
         category_id=data.category_id,
-        name=data.name,
+        translations={"en": {"name": data.name, "description": data.description}},
         slug=Str.slug(data.name),
         price_cents=data.price_cents,
         currency="USD",
         status=ProductStatus.DRAFT,
     )
-    return await product_out(product)
+    return _admin_product_out(product, is_visible=False)  # a new draft is never visible
 
 
-async def update(request: Request, data: UpdateProductIn) -> ProductOut:
+async def update(request: Request, data: UpdateProductIn) -> AdminProductOut:
     """Update a product (admins only; 404 to non-admins so existence isn't leaked)."""
     user = _current_user()
     product = await Product.find_or_fail(int(request.path_param("id")))
     if not await user.can("update", product):
         abort(404, "Product not found")
-    if data.name is not None:
-        product.name = data.name
+    if data.name is not None:  # update the en translation, preserving other locales
+        existing: list[Translate] = product.translations
+        current = {t.locale: {"name": t.name, "description": t.description} for t in existing}
+        current["en"] = {"name": data.name, "description": current.get("en", {}).get("description")}
+        product.translations = current
     if data.price_cents is not None:
         product.price_cents = data.price_cents
     if data.status is not None:
         product.status = ProductStatus(data.status)
     await product.save()
-    return await product_out(product)
+    refreshed = await Product.with_visibility().where("id", product.id).first_or_fail()
+    return _admin_product_out(refreshed, is_visible=bool(getattr(refreshed, "is_visible", False)))
 
 
 async def destroy(request: Request) -> MessageOut:

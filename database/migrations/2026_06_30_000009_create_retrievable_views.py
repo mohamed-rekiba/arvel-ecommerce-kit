@@ -18,13 +18,10 @@ import sqlalchemy as sa
 
 from arvel.database import Migration, Schema
 
+# the views only need the columns that drive retrievability + the keys; they're membership sets, so a
+# unique index on id makes them index lookups (EXISTS / refresh CONCURRENTLY).
 _categories = sa.table(
-    "categories",
-    sa.column("id"),
-    sa.column("parent_id"),
-    sa.column("name"),
-    sa.column("slug"),
-    sa.column("published"),
+    "categories", sa.column("id"), sa.column("parent_id"), sa.column("published")
 )
 _vendors = sa.table("vendors", sa.column("id"), sa.column("published"))
 _products = sa.table(
@@ -32,12 +29,6 @@ _products = sa.table(
     sa.column("id"),
     sa.column("category_id"),
     sa.column("vendor_id"),
-    sa.column("name"),
-    sa.column("slug"),
-    sa.column("description"),
-    sa.column("price_cents"),
-    sa.column("currency"),
-    sa.column("status"),
     sa.column("published"),
 )
 
@@ -74,17 +65,7 @@ def _effective_published() -> Any:
 def _retrievable_products_select() -> Any:
     eff = _effective_published()
     return (
-        sa.select(
-            _products.c.id,
-            _products.c.category_id,
-            _products.c.vendor_id,
-            _products.c.name,
-            _products.c.slug,
-            _products.c.description,
-            _products.c.price_cents,
-            _products.c.currency,
-            _products.c.status,
-        )
+        sa.select(_products.c.id, _products.c.category_id)  # membership set: id (+ category_id for the category view)
         .select_from(
             _products.outerjoin(_vendors, _vendors.c.id == _products.c.vendor_id).join(
                 eff, eff.c.category_id == _products.c.category_id
@@ -117,12 +98,7 @@ def _retrievable_categories_select() -> Any:
         .exists()
     )
     return (
-        sa.select(
-            _categories.c.id,
-            _categories.c.parent_id,
-            _categories.c.name,
-            _categories.c.slug,
-        )
+        sa.select(_categories.c.id)  # membership set
         .select_from(_categories.join(eff, eff.c.category_id == _categories.c.id))
         .where(eff.c.eff == 1)
         .where(has_retrievable_product)

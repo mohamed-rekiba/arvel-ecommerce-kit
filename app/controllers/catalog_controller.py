@@ -5,6 +5,8 @@ typed response schemas (app.schemas), so the API is strict-typed and its OpenAPI
 schemas are generated.
 """
 
+from typing import Any
+
 from arvel.http import Request
 from arvel.localization import current_locale
 from arvel.media import Media
@@ -15,6 +17,11 @@ from app.models.product import IMAGES, Product
 from app.schemas import CategoryOut, GalleryImageOut, ProductOut, ProductPage, VariantOut
 
 
+def _in_locale(query: Any) -> Any:
+    """Constrained eager-load callback — project the relation in the active locale (its `translation`)."""
+    return query.in_locale()
+
+
 def variant_out(v: Product) -> VariantOut:
     return VariantOut(
         id=v.id, sku=v.sku, name=v.name,
@@ -23,7 +30,7 @@ def variant_out(v: Product) -> VariantOut:
 
 
 def category_out(c: Category) -> CategoryOut:
-    return CategoryOut(id=c.id, name=c.name, slug=c.slug)
+    return CategoryOut(id=c.id, slug=c.slug, translation=c.translation)
 
 
 def gallery_image_out(media: Media) -> GalleryImageOut:
@@ -38,11 +45,11 @@ def gallery_image_out(media: Media) -> GalleryImageOut:
 
 
 async def product_out(p: Product) -> ProductOut:
-    category = p.relation("category")
+    category = p.relation("category")  # eager-loaded with in_locale → carries .translation
     variants = p.relation("variants")
     images = await p.get_media(IMAGES)  # uses the eager-loaded `media` relation when present
     return ProductOut(
-        id=p.id, name=p.name, slug=p.slug, description=p.description,
+        id=p.id, slug=p.slug, translation=p.translation,
         price_cents=p.price_cents, currency=p.currency, status=ProductStatus(p.status).value,
         category=category_out(category) if category is not None else None,
         variants=[variant_out(v) for v in variants] if variants is not None else None,
@@ -53,7 +60,7 @@ async def product_out(p: Product) -> ProductOut:
 async def categories_index(request: Request) -> list[CategoryOut]:
     """List **retrievable** categories — published, fully-published ancestor chain, and at least one
     viewable product in the subtree (the retrievable_categories materialized view)."""
-    rows = await Category.with_visibility(only_visible=True).order_by("name").get()
+    rows = await Category.with_visibility(only_visible=True).in_locale().order_by("slug").get()
     return [category_out(c) for c in rows]
 
 
@@ -67,14 +74,19 @@ async def products_index(
     """List **retrievable** products (the storefront view): published, with a published vendor, under a
     fully-published category. Typed query params (documented in OpenAPI): `q` (name search),
     `category` (id), `per_page`, `page`."""
-    # filter to the retrievable set DB-side via the model scope (one EXISTS, no app-side id list)
-    query = Product.with_("category", "variants", "media").with_visibility(only_visible=True)
-    if q:  # search the current locale's translatable name (jsonb → name->><locale>)
-        query = query.where_json_like("name", current_locale.get(), f"%{q}%")
+    # scopes: only-visible (EXISTS filter), in_locale (project the active locale's `translation`); the
+    # eager-loaded category is also locale-projected so its translation comes along.
+    query = (
+        Product.with_("variants", "media", category=_in_locale)
+        .with_visibility(only_visible=True)
+        .in_locale()
+    )
+    if q:  # search the active locale's name inside the translations jsonb (translations->'<loc>'->>'name')
+        query = query.where_json_like("translations", f"{current_locale.get()}->name", f"%{q}%")
     if category:
         query = query.where("category_id", category)
 
-    result = await query.order_by("name").paginate(per_page, page)
+    result = await query.order_by("slug").paginate(per_page, page)
     return ProductPage(
         data=[await product_out(p) for p in result.items()],
         current_page=result.current_page(),
@@ -89,9 +101,10 @@ async def products_show(request: Request) -> ProductOut:
     slug = request.path_param("slug")
     # first_or_fail raises ModelNotFound → the kernel renders it 404 (a non-retrievable product 404s)
     product = (
-        await Product.with_("category", "variants", "media")
+        await Product.with_("variants", "media", category=_in_locale)
         .where("slug", slug)
         .with_visibility(only_visible=True)
+        .in_locale()
         .first_or_fail()
     )
     return await product_out(product)

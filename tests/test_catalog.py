@@ -26,15 +26,14 @@ def client(tmp_path, monkeypatch):
         await Migrator(db).run(discover_migrations(["database/migrations"]))
         for model in (Category, Product, ProductVariant):
             model.set_connection(db)
-        shirts = await Category.create(name="Shirts", slug="shirts", published=True)
-        await Category.create(name="Shoes", slug="shoes", published=True)  # empty → still hidden
+        shirts = await Category.create(translations={"en": {"name": "Shirts"}}, slug="shirts", published=True)
+        await Category.create(translations={"en": {"name": "Shoes"}}, slug="shoes", published=True)  # empty → still hidden
         # 25 active "Aero" products (to test pagination) + 1 draft (to test the status filter)
         for i in range(25):
             p = await Product.create(
                 category_id=shirts.id,
-                name=f"Aero Shirt {i:02d}",
+                translations={"en": {"name": f"Aero Shirt {i:02d}", "description": "A breathable shirt."}},
                 slug=f"aero-shirt-{i:02d}",
-                description="A breathable shirt.",
                 price_cents=1999 + i,
                 currency="USD",
                 status=ProductStatus.ACTIVE,
@@ -45,9 +44,8 @@ def client(tmp_path, monkeypatch):
             )
         await Product.create(
             category_id=shirts.id,
-            name="Secret Draft Shirt",
+            translations={"en": {"name": "Secret Draft Shirt", "description": "not public yet"}},
             slug="secret-draft",
-            description="not public yet",
             price_cents=5000,
             currency="USD",
             status=ProductStatus.DRAFT,
@@ -68,7 +66,7 @@ def client(tmp_path, monkeypatch):
 def test_categories_index(client) -> None:
     resp = client.get("/api/categories")
     assert resp.status_code == 200
-    names = [c["name"] for c in resp.json()]
+    names = [c["translation"]["name"] for c in resp.json()]
     assert names == ["Shirts"]  # Shoes is empty (no retrievable products) → hidden
 
 
@@ -112,7 +110,7 @@ def test_product_show_eager_loads_and_404s(client) -> None:
     product = ok.json()
     assert product["slug"] == "aero-shirt-03"
     assert product["status"] == "active"  # enum cast serializes to its string value
-    assert product["category"]["name"] == "Shirts"
+    assert product["category"]["translation"]["name"] == "Shirts"
     assert product["variants"][0]["stock"] == 10
 
     missing = client.get("/api/products/does-not-exist")
