@@ -12,6 +12,7 @@ from arvel.auth.tokens import TokenGuard, create_token
 from arvel.http import Response
 from arvel.security import Hasher
 
+from app.controllers import admin_controller as admin
 from app.controllers import admin_product_controller as admin_products
 from app.controllers import auth_controller as auth
 from app.controllers import cart_controller as cart
@@ -88,6 +89,9 @@ Route.put(
 Route.delete(
     "/admin/products/{id:int}", admin_products.destroy, name="api.admin.products.destroy"
 ).middleware(Authenticate).secure("bearer")
+
+# --- Admin (OIDC / Keycloak) --------------------------------------------------
+Route.get("/admin/me", admin.me, name="api.admin.me").secure("oidc")
 
 # --- Cart (guest by X-Cart-Token, or the authenticated user's cart) -----------
 Route.get("/cart", cart.show, name="api.cart.show")

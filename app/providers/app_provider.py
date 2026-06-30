@@ -23,6 +23,12 @@ class AppServiceProvider(ServiceProvider):
 
         self.app.singleton("user_resolver", lambda _app: _resolve_user)
 
+        # The admin OIDC guard (validates a Keycloak JWT against the realm JWKS). Lazy singleton so
+        # the app boots without Keycloak reachable; a test rebinds it with a fake-verifier guard.
+        from app.auth.admin_oidc import build_admin_oidc_guard
+
+        self.app.singleton("admin_oidc_guard", lambda _app: build_admin_oidc_guard())
+
     def boot(self) -> None:
         """Boot-time wiring (runs after every provider has registered)."""
         # Register authorization policies on the app-bound Gate (Laravel AuthServiceProvider).

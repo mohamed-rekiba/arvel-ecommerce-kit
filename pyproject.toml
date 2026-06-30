@@ -2,7 +2,7 @@
 name = "arvel-ecommerce-kit"
 version = "0.1.0"
 requires-python = ">=3.14"
-dependencies = ["arvel[standard,sqlite,telemetry]"]
+dependencies = ["arvel[standard,sqlite,telemetry,jwt]"]
 
 [project.optional-dependencies]
 dev = ["pytest", "pytest-asyncio", "faker"]
