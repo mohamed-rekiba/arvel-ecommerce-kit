@@ -9,13 +9,14 @@ from typing import Any, ClassVar
 from arvel import Model
 from arvel.localization import HasTranslations, Translatable
 from arvel.media import HasMedia, MediaConversion
+from arvel.search import Searchable
 
 from app.enums import ProductStatus
 
 IMAGES = "images"  # the product image gallery collection
 
 
-class Product(HasMedia, HasTranslations, Model):
+class Product(HasMedia, HasTranslations, Searchable, Model):
     __table_name__ = "products"
     __fields__: ClassVar[dict[str, type]] = {
         "category_id": int,
@@ -51,6 +52,17 @@ class Product(HasMedia, HasTranslations, Model):
             MediaConversion("thumb", width=256, height=320, fmt="PNG"),
             MediaConversion("preview", width=600, height=750, fmt="PNG"),
         ]
+
+    def to_searchable_array(self) -> dict[str, Any]:
+        """What gets indexed: the slug + every locale of the name (so search works in any language) +
+        the description. The id is the document key (get_search_key)."""
+        names = self.translations("name")
+        return {
+            "id": self.id,
+            "slug": self.slug,
+            "description": self.description,
+            **{f"name_{locale}": value for locale, value in names.items()},
+        }
 
     def category(self) -> Any:
         from app.models.category import Category
