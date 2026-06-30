@@ -9,6 +9,10 @@ from arvel import env
 
 config = {
     "default": env("MAIL_MAILER", "log"),  # "log" | "smtp"
+    "from": {
+        "address": env("MAIL_FROM_ADDRESS", "shop@arvel.test"),
+        "name": env("MAIL_FROM_NAME", "Arvel Shop"),
+    },
     "smtp": {
         "host": env("MAIL_HOST", "localhost"),
         "port": env("MAIL_PORT", 25),

@@ -8,6 +8,7 @@ import os
 # docker-compose provides; tests must not depend on running infra.
 os.environ.setdefault("CACHE_STORE", "array")
 os.environ.setdefault("QUEUE_CONNECTION", "memory")
+os.environ.setdefault("MAIL_MAILER", "log")
 
 import pytest
 
