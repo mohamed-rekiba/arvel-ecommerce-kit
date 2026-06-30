@@ -13,3 +13,10 @@ class ProductStatus(str, Enum):
     DRAFT = "draft"
     ACTIVE = "active"
     ARCHIVED = "archived"
+
+
+class UserRole(str, Enum):
+    """A user's role. Customers self-register; admins are seeded / provisioned via the IdP."""
+
+    CUSTOMER = "customer"
+    ADMIN = "admin"

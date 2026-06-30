@@ -11,5 +11,23 @@ class AppServiceProvider(ServiceProvider):
 
         self.app.singleton("seeder", lambda _app: DatabaseSeeder())
 
+        # Bind the API guard: resolve the request's user from its bearer token, so
+        # AuthenticateMiddleware can populate `current_user` (Laravel Sanctum guard).
+        async def _resolve_user(request):
+            from arvel.auth.tokens import TokenGuard
+
+            from app.models.user import User
+
+            user_id = await TokenGuard().user_id(request)
+            return await User.find(user_id) if user_id is not None else None
+
+        self.app.singleton("user_resolver", lambda _app: _resolve_user)
+
     def boot(self) -> None:
         """Boot-time wiring (runs after every provider has registered)."""
+        # Register authorization policies on the app-bound Gate (Laravel AuthServiceProvider).
+        from app.models.product import Product
+        from app.policies.product_policy import ProductPolicy
+
+        if self.app.bound("gate"):
+            self.app.make("gate").policy(Product, ProductPolicy())

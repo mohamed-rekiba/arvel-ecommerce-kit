@@ -7,10 +7,12 @@ at /schema) AND the request body is validated — a missing or malformed body is
 """
 
 from arvel import Route, Schema, abort
+from arvel.auth.middleware import Authenticate
 from arvel.auth.tokens import TokenGuard, create_token
 from arvel.http import Response
 from arvel.security import Hasher
 
+from app.controllers import admin_product_controller as admin_products
 from app.controllers import auth_controller as auth
 from app.controllers import catalog_controller as catalog
 from app.models.user import User
@@ -65,3 +67,16 @@ Route.post("/reset-password", auth.reset_password, name="api.password.reset")
 Route.get("/categories", catalog.categories_index, name="api.categories.index")
 Route.get("/products", catalog.products_index, name="api.products.index")
 Route.get("/products/{slug:str}", catalog.products_show, name="api.products.show")
+
+# --- Admin product CRUD (auth-guarded by middleware; policy-guarded in the controller) --------
+# Authenticate (401 if guest) runs as route middleware BEFORE body parsing — Laravel ordering; the
+# ProductPolicy then decides admin-vs-customer (403/404) inside the controller.
+Route.post("/admin/products", admin_products.store, name="api.admin.products.store").middleware(
+    Authenticate
+).secure("bearer")
+Route.put(
+    "/admin/products/{id:int}", admin_products.update, name="api.admin.products.update"
+).middleware(Authenticate).secure("bearer")
+Route.delete(
+    "/admin/products/{id:int}", admin_products.destroy, name="api.admin.products.destroy"
+).middleware(Authenticate).secure("bearer")

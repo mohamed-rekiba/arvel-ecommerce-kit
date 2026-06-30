@@ -11,6 +11,7 @@ class CreateUsersTable(Migration):
             t.string("email").unique()
             t.datetime("email_verified_at").nullable()  # set when the user verifies their email
             t.string("password")
+            t.string("role").default(value="customer").index()  # customer | admin (UserRole)
             t.timestamps()
 
         schema.create("users", define)
