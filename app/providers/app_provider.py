@@ -31,3 +31,9 @@ class AppServiceProvider(ServiceProvider):
 
         if self.app.bound("gate"):
             self.app.make("gate").policy(Product, ProductPolicy())
+
+        # Register event listeners (Laravel EventServiceProvider).
+        if self.app.bound("events"):
+            from app.listeners.record_order_metrics import record_order_metrics
+
+            self.app.make("events").listen("order.placed", record_order_metrics)

@@ -20,3 +20,27 @@ class UserRole(str, Enum):
 
     CUSTOMER = "customer"
     ADMIN = "admin"
+
+
+class OrderStatus(str, Enum):
+    """An order's lifecycle state."""
+
+    PENDING = "pending"
+    PAID = "paid"
+    SHIPPED = "shipped"
+    DELIVERED = "delivered"
+    CANCELLED = "cancelled"
+
+
+# The order state machine: which transitions are legal from each state.
+ORDER_TRANSITIONS: dict[OrderStatus, set[OrderStatus]] = {
+    OrderStatus.PENDING: {OrderStatus.PAID, OrderStatus.CANCELLED},
+    OrderStatus.PAID: {OrderStatus.SHIPPED, OrderStatus.CANCELLED},
+    OrderStatus.SHIPPED: {OrderStatus.DELIVERED},
+    OrderStatus.DELIVERED: set(),
+    OrderStatus.CANCELLED: set(),
+}
+
+
+def can_transition(current: OrderStatus, target: OrderStatus) -> bool:
+    return target in ORDER_TRANSITIONS.get(current, set())

@@ -16,6 +16,7 @@ from app.controllers import admin_product_controller as admin_products
 from app.controllers import auth_controller as auth
 from app.controllers import cart_controller as cart
 from app.controllers import catalog_controller as catalog
+from app.controllers import checkout_controller as checkout
 from app.models.user import User
 
 
@@ -87,3 +88,13 @@ Route.get("/cart", cart.show, name="api.cart.show")
 Route.post("/cart/items", cart.add_item, name="api.cart.items.add")
 Route.patch("/cart/items/{id:int}", cart.update_item, name="api.cart.items.update")
 Route.delete("/cart/items/{id:int}", cart.remove_item, name="api.cart.items.remove")
+
+# --- Checkout & orders --------------------------------------------------------
+Route.post("/checkout", checkout.checkout, name="api.checkout")
+Route.get("/metrics/orders-placed", checkout.orders_placed_count, name="api.metrics.orders_placed")
+Route.get("/orders", checkout.my_orders, name="api.orders.index").middleware(Authenticate).secure(
+    "bearer"
+)
+Route.post(
+    "/admin/orders/{id:int}/status", checkout.update_status, name="api.admin.orders.status"
+).middleware(Authenticate).secure("bearer")
