@@ -55,29 +55,32 @@ async def categories_index(request: Request) -> list[CategoryOut]:
     return [category_out(c) for c in rows]
 
 
-async def products_index(request: Request) -> ProductPage:
-    """List active products with optional `q` search, `category`/`status` filters, paginated."""
-    q = request.query("q")
-    category_id = request.query("category")
-    status = request.query("status")
-    per_page = int(request.query("per_page", 15))
-
+async def products_index(
+    request: Request,
+    q: str | None = None,
+    category: int | None = None,
+    status: str | None = None,
+    per_page: int = 15,
+    page: int = 1,
+) -> ProductPage:
+    """List active products. Typed query params (documented in OpenAPI): `q` (name search),
+    `category` (id), `status`, `per_page`, `page`."""
     query = Product.with_("category", "variants", "media")
     if q:
         query = query.where("name", "like", f"%{q}%")
-    if category_id:
-        query = query.where("category_id", category_id)
+    if category:
+        query = query.where("category_id", category)
     # default to ACTIVE products unless an explicit status filter is given
     chosen = ProductStatus(status).value if status else ProductStatus.ACTIVE.value
     query = query.where("status", chosen).order_by("name")
 
-    page = await query.paginate(per_page)
+    result = await query.paginate(per_page, page)
     return ProductPage(
-        data=[await product_out(p) for p in page.items()],
-        current_page=page.current_page(),
-        last_page=page.last_page(),
-        per_page=page.per_page(),
-        total=page.total(),
+        data=[await product_out(p) for p in result.items()],
+        current_page=result.current_page(),
+        last_page=result.last_page(),
+        per_page=result.per_page(),
+        total=result.total(),
     )
 
 
