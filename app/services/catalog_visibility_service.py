@@ -48,15 +48,3 @@ class CatalogVisibilityService:
         async with Cache.lock(_LOCK, ttl=120):
             for view in _VIEWS:
                 await DB.execute(sa.text(f"REFRESH MATERIALIZED VIEW CONCURRENTLY {view}"))  # noqa: S608 # nosec B608
-
-    @staticmethod
-    def retrievable_product_ids_subquery() -> sa.Select[tuple[int]]:
-        """A subquery of retrievable product ids — pass to where_in so the storefront filters DB-side
-        (WHERE id IN (SELECT id FROM retrievable_products)) in one query, no app-side id list."""
-        view = sa.table("retrievable_products", sa.column("id"))
-        return sa.select(view.c.id)
-
-    @staticmethod
-    def retrievable_category_ids_subquery() -> sa.Select[tuple[int]]:
-        view = sa.table("retrievable_categories", sa.column("id"))
-        return sa.select(view.c.id)

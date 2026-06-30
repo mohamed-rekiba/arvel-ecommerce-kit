@@ -11,7 +11,7 @@ class CreateProductsTable(Migration):
             t.foreign_id("vendor_id").nullable().constrained("vendors").index()
             t.jsonb("name")  # translatable {locale: value} (HasTranslations / Translatable cast)
             t.string("slug").unique()
-            t.text("description").nullable()
+            t.text("description").nullable()  # (translatable description lands in the translations refactor)
             t.integer("price_cents")
             t.string("currency", length=3).default(value="USD")
             t.string("status").default(value="draft").index()

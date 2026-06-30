@@ -17,6 +17,14 @@ class Category(HasTranslations, Model):
     __fillable__: ClassVar[list[str]] = ["name", "slug", "parent_id", "published"]
     __casts__: ClassVar[dict[str, Any]] = {"published": bool, "name": Translatable()}
 
+    _VISIBLE = "EXISTS(SELECT 1 FROM retrievable_categories rc WHERE rc.id = categories.id)"
+
+    def scope_with_visibility(self, query: Any, only_visible: bool = False) -> Any:
+        """``is_visible`` flag (admin) and/or keep only visible categories (storefront)."""
+        if only_visible:
+            return query.where_raw(Category._VISIBLE)
+        return query.select_raw("categories.*").select_raw(f"{Category._VISIBLE} AS is_visible")
+
     def products(self) -> Any:
         from app.models.product import Product
 

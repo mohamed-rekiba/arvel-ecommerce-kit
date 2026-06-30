@@ -89,3 +89,14 @@ class Product(HasMedia, HasTranslations, Searchable, Model):
         from app.models.product_variant import ProductVariant
 
         return self.has_many(ProductVariant)
+
+    # one correlated EXISTS against the retrievability view, used as a flag (admin) and a filter
+    # (storefront) — see CatalogVisibilityService for how the view is refreshed.
+    _VISIBLE = "EXISTS(SELECT 1 FROM retrievable_products rp WHERE rp.id = products.id)"
+
+    def scope_with_visibility(self, query: Any, only_visible: bool = False) -> Any:
+        """Annotate each row with ``is_visible`` (admin) and/or keep only the visible rows
+        (``only_visible=True``, storefront). Same EXISTS predicate for both."""
+        if only_visible:
+            return query.where_raw(Product._VISIBLE)
+        return query.select_raw("products.*").select_raw(f"{Product._VISIBLE} AS is_visible")

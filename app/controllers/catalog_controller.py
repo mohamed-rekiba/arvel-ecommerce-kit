@@ -13,7 +13,6 @@ from app.enums import ProductStatus
 from app.models.category import Category
 from app.models.product import IMAGES, Product
 from app.schemas import CategoryOut, GalleryImageOut, ProductOut, ProductPage, VariantOut
-from app.services.catalog_visibility_service import CatalogVisibilityService
 
 
 def variant_out(v: Product) -> VariantOut:
@@ -54,11 +53,7 @@ async def product_out(p: Product) -> ProductOut:
 async def categories_index(request: Request) -> list[CategoryOut]:
     """List **retrievable** categories — published, fully-published ancestor chain, and at least one
     viewable product in the subtree (the retrievable_categories materialized view)."""
-    rows = (
-        await Category.where_in("id", CatalogVisibilityService.retrievable_category_ids_subquery())
-        .order_by("name")
-        .get()
-    )
+    rows = await Category.with_visibility(only_visible=True).order_by("name").get()
     return [category_out(c) for c in rows]
 
 
@@ -72,10 +67,8 @@ async def products_index(
     """List **retrievable** products (the storefront view): published, with a published vendor, under a
     fully-published category. Typed query params (documented in OpenAPI): `q` (name search),
     `category` (id), `per_page`, `page`."""
-    # filter to the retrievable set DB-side (single query, no app-side id list)
-    query = Product.with_("category", "variants", "media").where_in(
-        "id", CatalogVisibilityService.retrievable_product_ids_subquery()
-    )
+    # filter to the retrievable set DB-side via the model scope (one EXISTS, no app-side id list)
+    query = Product.with_("category", "variants", "media").with_visibility(only_visible=True)
     if q:  # search the current locale's translatable name (jsonb → name->><locale>)
         query = query.where_json_like("name", current_locale.get(), f"%{q}%")
     if category:
@@ -98,7 +91,7 @@ async def products_show(request: Request) -> ProductOut:
     product = (
         await Product.with_("category", "variants", "media")
         .where("slug", slug)
-        .where_in("id", CatalogVisibilityService.retrievable_product_ids_subquery())
+        .with_visibility(only_visible=True)
         .first_or_fail()
     )
     return await product_out(product)

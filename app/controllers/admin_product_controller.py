@@ -42,26 +42,11 @@ async def _require_admin() -> User:
     return user
 
 
-# is_visible computed inline as a correlated EXISTS column — the flag rides in the same SELECT (one
-# query for the page, no separate visibility lookup, no N+1).
-_PRODUCT_IS_VISIBLE = (
-    "EXISTS(SELECT 1 FROM retrievable_products rp WHERE rp.id = products.id) AS is_visible"
-)
-_CATEGORY_IS_VISIBLE = (
-    "EXISTS(SELECT 1 FROM retrievable_categories rc WHERE rc.id = categories.id) AS is_visible"
-)
-
-
 async def products_index(request: Request, per_page: int = 20, page: int = 1) -> AdminProductPage:
     """List **all** products (admin) — including hidden ones — each annotated with `is_visible`
-    (whether the storefront currently shows it), computed inline in the page query."""
+    (the with_visibility scope adds the inline EXISTS column; one query for the page)."""
     await _require_admin()
-    result = await (
-        Product.select_raw("products.*")
-        .select_raw(_PRODUCT_IS_VISIBLE)
-        .order_by("id")
-        .paginate(per_page, page)
-    )
+    result = await Product.with_visibility().order_by("id").paginate(per_page, page)
     return AdminProductPage(
         data=[
             AdminProductOut(
@@ -84,12 +69,7 @@ async def products_index(request: Request, per_page: int = 20, page: int = 1) ->
 async def categories_index(request: Request, per_page: int = 50, page: int = 1) -> AdminCategoryPage:
     """List **all** categories (admin) with `is_visible` (inline EXISTS column)."""
     await _require_admin()
-    result = await (
-        Category.select_raw("categories.*")
-        .select_raw(_CATEGORY_IS_VISIBLE)
-        .order_by("id")
-        .paginate(per_page, page)
-    )
+    result = await Category.with_visibility().order_by("id").paginate(per_page, page)
     return AdminCategoryPage(
         data=[
             AdminCategoryOut(
