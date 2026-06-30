@@ -14,6 +14,7 @@ from arvel.security import Hasher
 
 from app.controllers import admin_product_controller as admin_products
 from app.controllers import auth_controller as auth
+from app.controllers import cart_controller as cart
 from app.controllers import catalog_controller as catalog
 from app.models.user import User
 
@@ -80,3 +81,9 @@ Route.put(
 Route.delete(
     "/admin/products/{id:int}", admin_products.destroy, name="api.admin.products.destroy"
 ).middleware(Authenticate).secure("bearer")
+
+# --- Cart (guest by X-Cart-Token, or the authenticated user's cart) -----------
+Route.get("/cart", cart.show, name="api.cart.show")
+Route.post("/cart/items", cart.add_item, name="api.cart.items.add")
+Route.patch("/cart/items/{id:int}", cart.update_item, name="api.cart.items.update")
+Route.delete("/cart/items/{id:int}", cart.remove_item, name="api.cart.items.remove")
