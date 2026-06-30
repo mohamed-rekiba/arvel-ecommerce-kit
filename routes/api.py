@@ -17,6 +17,7 @@ from app.controllers import auth_controller as auth
 from app.controllers import cart_controller as cart
 from app.controllers import catalog_controller as catalog
 from app.controllers import checkout_controller as checkout
+from app.controllers import payment_controller as payment
 from app.models.user import User
 
 
@@ -98,3 +99,9 @@ Route.get("/orders", checkout.my_orders, name="api.orders.index").middleware(Aut
 Route.post(
     "/admin/orders/{id:int}/status", checkout.update_status, name="api.admin.orders.status"
 ).middleware(Authenticate).secure("bearer")
+
+# --- Payments -----------------------------------------------------------------
+Route.post("/orders/{id:int}/pay", payment.pay, name="api.orders.pay").middleware(
+    Authenticate
+).secure("bearer")
+Route.post("/webhooks/payment", payment.webhook, name="api.webhooks.payment")  # gateway → us

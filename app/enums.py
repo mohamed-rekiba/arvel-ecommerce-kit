@@ -44,3 +44,11 @@ ORDER_TRANSITIONS: dict[OrderStatus, set[OrderStatus]] = {
 
 def can_transition(current: OrderStatus, target: OrderStatus) -> bool:
     return target in ORDER_TRANSITIONS.get(current, set())
+
+
+class PaymentStatus(str, Enum):
+    """A payment's state, mirrored from the gateway."""
+
+    PENDING = "pending"
+    SUCCEEDED = "succeeded"
+    FAILED = "failed"
