@@ -9,7 +9,7 @@ at /schema) AND the request body is validated — a missing or malformed body is
 from arvel import Route, Schema, abort
 from arvel.auth.middleware import Authenticate
 from arvel.auth.tokens import TokenGuard, create_token
-from arvel.http import Response
+from arvel.http import Request
 from arvel.security import Hasher
 
 from app.controllers import admin_controller as admin
@@ -21,58 +21,54 @@ from app.controllers import checkout_controller as checkout
 from app.controllers import media_controller as media
 from app.controllers import payment_controller as payment
 from app.models.user import User
+from app.schemas import CredentialsIn, TokenOut, UserOut
 
 
 class HealthStatus(Schema):
     status: str
 
 
-class Credentials(Schema):
-    email: str
-    password: str
-
-
-class UserOut(Schema):
-    id: int
-    name: str
-    email: str
-
-
-async def health(request) -> HealthStatus:
+async def health(request: Request) -> HealthStatus:
+    """Liveness probe."""
     return HealthStatus(status="ok")
 
 
-async def login(request, data: Credentials):  # `data: Credentials` → parsed + validated request body
+async def login(request: Request, data: CredentialsIn) -> TokenOut:
+    """Verify credentials and issue a personal access token."""
     user = await User.where("email", data.email).first()
     if user is None or not Hasher().check(data.password, user.password):
         abort(401, "Invalid credentials")
     token, _ = await create_token(user, name="api")
-    return Response(content={"token": token}, status=200)
+    return TokenOut(token=token)
 
 
-async def me(request) -> UserOut:
+async def me(request: Request) -> UserOut:
+    """The authenticated user (requires a bearer token)."""
     user_id = await TokenGuard().user_id(request)
     if user_id is None:
         abort(401, "Unauthenticated")
     user = await User.find(user_id)
+    if user is None:
+        abort(401, "Unauthenticated")
     return UserOut(id=user.id, name=user.name, email=user.email)
 
 
 Route.get("/health", health, name="api.health")
-Route.post("/login", login, name="api.login")
+Route.post("/login", login, name="api.login").status(200)  # action, not a resource creation
 Route.get("/user", me, name="api.user").secure("bearer")  # shows the lock + 'Authorize' in API docs
 
 # --- Customer auth ------------------------------------------------------------
-Route.post("/register", auth.register, name="api.register")
-Route.post("/logout", auth.logout, name="api.logout").secure("bearer")
-Route.post("/forgot-password", auth.forgot_password, name="api.password.forgot")
-Route.post("/reset-password", auth.reset_password, name="api.password.reset")
+Route.post("/register", auth.register, name="api.register")  # creates a user → 201
+Route.post("/logout", auth.logout, name="api.logout").status(200).secure("bearer")
+Route.post("/forgot-password", auth.forgot_password, name="api.password.forgot").status(200)
+Route.post("/reset-password", auth.reset_password, name="api.password.reset").status(200)
 
 # --- Catalog (public read API) ------------------------------------------------
 Route.get("/categories", catalog.categories_index, name="api.categories.index")
 Route.get("/products", catalog.products_index, name="api.products.index")
 Route.get("/products/{slug:str}", catalog.products_show, name="api.products.show")
 Route.get("/products/{slug:str}/image", media.serve_image, name="api.products.image")
+Route.get("/products/{slug:str}/thumbnail", media.serve_thumbnail, name="api.products.thumbnail")
 Route.post(
     "/admin/products/{id:int}/image", media.upload_image, name="api.admin.products.image"
 ).middleware(Authenticate).secure("bearer")
@@ -107,7 +103,7 @@ Route.get("/orders", checkout.my_orders, name="api.orders.index").middleware(Aut
 )
 Route.post(
     "/admin/orders/{id:int}/status", checkout.update_status, name="api.admin.orders.status"
-).middleware(Authenticate).secure("bearer")
+).status(200).middleware(Authenticate).secure("bearer")  # a transition, not a creation
 
 # --- Payments -----------------------------------------------------------------
 Route.post("/orders/{id:int}/pay", payment.pay, name="api.orders.pay").middleware(

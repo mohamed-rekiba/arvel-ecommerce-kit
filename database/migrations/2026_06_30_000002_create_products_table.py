@@ -1,11 +1,11 @@
 """Create the products table."""
 
-from arvel.database import Migration
+from arvel.database import Blueprint, Migration, Schema
 
 
 class CreateProductsTable(Migration):
-    def up(self, schema):
-        def define(t):
+    def up(self, schema: Schema) -> None:
+        def define(t: Blueprint) -> None:
             t.id()
             t.foreign_id("category_id").constrained("categories").index()
             t.string("name")
@@ -14,10 +14,11 @@ class CreateProductsTable(Migration):
             t.integer("price_cents")
             t.string("currency", length=3).default(value="USD")
             t.string("status").default(value="draft").index()
-            t.string("image_path").nullable()  # path on the Storage disk (set on image upload)
+            t.string("image_path").nullable()  # original image path on the Storage disk
+            t.string("image_thumb_path").nullable()  # generated thumbnail (arvel.media)
             t.timestamps()
 
         schema.create("products", define)
 
-    def down(self, schema):
+    def down(self, schema: Schema) -> None:
         schema.drop("products")

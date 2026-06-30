@@ -1,11 +1,11 @@
 """Create the users table."""
 
-from arvel.database import Migration
+from arvel.database import Blueprint, Migration, Schema
 
 
 class CreateUsersTable(Migration):
-    def up(self, schema):
-        def define(t):
+    def up(self, schema: Schema) -> None:
+        def define(t: Blueprint) -> None:
             t.id()
             t.string("name")
             t.string("email").unique()
@@ -16,5 +16,5 @@ class CreateUsersTable(Migration):
 
         schema.create("users", define)
 
-    def down(self, schema):
+    def down(self, schema: Schema) -> None:
         schema.drop("users")

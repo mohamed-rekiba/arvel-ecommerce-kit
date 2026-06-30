@@ -68,12 +68,25 @@ def test_admin_uploads_and_image_is_served(client) -> None:
         headers=admin,
     )
     assert up.status_code == 201
-    assert up.json()["image_path"].startswith("products/")
+    body = up.json()
+    assert body["image_path"].startswith("products/")
+    assert body["thumb_path"].startswith("products/thumbs/")
 
+    # the original is served back unchanged
     served = client.get("/api/products/tee/image")
     assert served.status_code == 200
     assert served.headers["content-type"].startswith("image/png")
     assert served.content == _PNG
+
+    # the generated thumbnail (arvel.media) is a valid, decodable PNG
+    thumb = client.get("/api/products/tee/thumbnail")
+    assert thumb.status_code == 200
+    assert thumb.headers["content-type"].startswith("image/png")
+    from io import BytesIO
+
+    from PIL import Image as PILImage
+
+    PILImage.open(BytesIO(thumb.content)).verify()  # raises if not a valid image
 
 
 def test_non_admin_cannot_upload(client) -> None:

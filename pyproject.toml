@@ -2,10 +2,20 @@
 name = "arvel-ecommerce-kit"
 version = "0.1.0"
 requires-python = ">=3.14"
-dependencies = ["arvel[standard,sqlite,telemetry,jwt]"]
+dependencies = ["arvel[standard,sqlite,telemetry,jwt,media]"]
 
 [project.optional-dependencies]
-dev = ["pytest", "pytest-asyncio", "faker"]
+dev = ["pytest", "pytest-asyncio", "faker", "pyright", "ruff"]
+
+[tool.pyright]
+# the application code is strict-typed (mirrors arvel's own `include = ["src"]` stance — tests use
+# the untyped litestar TestClient, so strict-typing them is noise, not signal).
+include = ["app", "routes", "database", "bootstrap"]
+typeCheckingMode = "strict"
+pythonVersion = "3.14"
+venvPath = "."
+venv = ".venv"
+reportMissingTypeStubs = false  # third-party (faker, …) ship no stubs; our own code stays strict
 
 [tool.uv.sources]
 # arvel is not yet published — the kit is the proof app for the local framework build.

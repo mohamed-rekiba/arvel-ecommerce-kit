@@ -1,11 +1,11 @@
 """Create the product_variants table."""
 
-from arvel.database import Migration
+from arvel.database import Blueprint, Migration, Schema
 
 
 class CreateProductVariantsTable(Migration):
-    def up(self, schema):
-        def define(t):
+    def up(self, schema: Schema) -> None:
+        def define(t: Blueprint) -> None:
             t.id()
             t.foreign_id("product_id").constrained("products").index()
             t.string("sku").unique()
@@ -16,5 +16,5 @@ class CreateProductVariantsTable(Migration):
 
         schema.create("product_variants", define)
 
-    def down(self, schema):
+    def down(self, schema: Schema) -> None:
         schema.drop("product_variants")

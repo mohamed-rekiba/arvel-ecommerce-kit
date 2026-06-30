@@ -1,11 +1,11 @@
 """Create the jobs table (database queue driver)."""
 
-from arvel.database import Migration
+from arvel.database import Blueprint, Migration, Schema
 
 
 class CreateJobsTable(Migration):
-    def up(self, schema):
-        def define(t):
+    def up(self, schema: Schema) -> None:
+        def define(t: Blueprint) -> None:
             t.id()
             t.string("queue").index()
             t.text("payload")
@@ -16,5 +16,5 @@ class CreateJobsTable(Migration):
 
         schema.create("jobs", define)
 
-    def down(self, schema):
+    def down(self, schema: Schema) -> None:
         schema.drop("jobs")

@@ -1,19 +1,29 @@
 """The application's service provider — register bindings + boot-time wiring."""
 
+from __future__ import annotations
+
+from typing import TYPE_CHECKING, Any
+
 from arvel.kernel import ServiceProvider
+
+if TYPE_CHECKING:
+    from arvel.http import Request
+
+    from app.models.user import User
 
 
 class AppServiceProvider(ServiceProvider):
     def register(self) -> None:
         """Bind your services into the container."""
-        # Make `arvel db:seed` run the root seeder.
+        from app.auth.admin_oidc import build_admin_oidc_guard
         from database.seeders.database_seeder import DatabaseSeeder
 
-        self.app.singleton("seeder", lambda _app: DatabaseSeeder())
+        def _seeder(_app: Any) -> DatabaseSeeder:
+            return DatabaseSeeder()
 
-        # Bind the API guard: resolve the request's user from its bearer token, so
+        # The API guard: resolve the request's user from its bearer token, so
         # AuthenticateMiddleware can populate `current_user` (Laravel Sanctum guard).
-        async def _resolve_user(request):
+        async def _resolve_user(request: Request) -> User | None:
             from arvel.auth.tokens import TokenGuard
 
             from app.models.user import User
@@ -21,13 +31,17 @@ class AppServiceProvider(ServiceProvider):
             user_id = await TokenGuard().user_id(request)
             return await User.find(user_id) if user_id is not None else None
 
-        self.app.singleton("user_resolver", lambda _app: _resolve_user)
+        def _user_resolver(_app: Any) -> Any:
+            return _resolve_user
 
-        # The admin OIDC guard (validates a Keycloak JWT against the realm JWKS). Lazy singleton so
-        # the app boots without Keycloak reachable; a test rebinds it with a fake-verifier guard.
-        from app.auth.admin_oidc import build_admin_oidc_guard
+        # The admin OIDC guard (validates a Keycloak JWT against the realm JWKS). Lazy so the app
+        # boots without Keycloak reachable; a test rebinds it with a fake-verifier guard.
+        def _oidc_guard(_app: Any) -> Any:
+            return build_admin_oidc_guard()
 
-        self.app.singleton("admin_oidc_guard", lambda _app: build_admin_oidc_guard())
+        self.app.singleton("seeder", _seeder)
+        self.app.singleton("user_resolver", _user_resolver)
+        self.app.singleton("admin_oidc_guard", _oidc_guard)
 
     def boot(self) -> None:
         """Boot-time wiring (runs after every provider has registered)."""

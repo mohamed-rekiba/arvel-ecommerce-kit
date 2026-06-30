@@ -1,11 +1,11 @@
 """Create the notifications table (database notification channel)."""
 
-from arvel.database import Migration
+from arvel.database import Blueprint, Migration, Schema
 
 
 class CreateNotificationsTable(Migration):
-    def up(self, schema):
-        def define(t):
+    def up(self, schema: Schema) -> None:
+        def define(t: Blueprint) -> None:
             t.uuid("id").primary()
             t.string("type")
             t.string("notifiable_type")
@@ -16,5 +16,5 @@ class CreateNotificationsTable(Migration):
 
         schema.create("notifications", define)
 
-    def down(self, schema):
+    def down(self, schema: Schema) -> None:
         schema.drop("notifications")

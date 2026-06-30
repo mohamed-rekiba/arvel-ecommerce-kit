@@ -1,45 +1,53 @@
 """Checkout + orders — turn a cart into an order atomically, fire a domain event, and drive the
-order state machine.
+order state machine. Typed end to end (request, response schemas).
 
-Exercises arvel's DB transactions (DB.transaction — the order + items are created and the cart
-cleared atomically; a failure rolls all of it back), events (Event.dispatch('order.placed') →
-the registered listener), validation, and the typed OrderStatus state machine (app.enums).
+Exercises arvel's DB transactions (DB.transaction — order + items created and the cart cleared
+atomically; a failure rolls all of it back), events (Event.dispatch('order.placed') → the registered
+listener), telemetry (a checkout span), and the typed OrderStatus state machine (app.enums).
 """
 
-from typing import Any
-
-from arvel import DB, Event, abort
+from arvel import DB, Cache, Event, abort
+from arvel.http import Request
 from arvel.support import current_user
 from arvel.telemetry import span
+from arvel.validation import ValidationException
 
-from app.controllers.cart_controller import _resolve_cart
+from app.controllers.cart_controller import resolve_cart
 from app.enums import OrderStatus, can_transition
 from app.events.order_placed import OrderPlaced
+from app.jobs.fulfill_order import ORDERS_FULFILLED_KEY
+from app.listeners.record_order_metrics import ORDERS_PLACED_KEY
 from app.models.cart_item import CartItem
 from app.models.order import Order
 from app.models.order_item import OrderItem
 from app.models.product_variant import ProductVariant
+from app.schemas import MetricsOut, OrderLineOut, OrderOut, OrderStatusIn
 
 
-def _order_dict(order: Order, items: list[OrderItem]) -> dict[str, Any]:
-    return {
-        "id": order.id,
-        "status": order.status.value if isinstance(order.status, OrderStatus) else order.status,
-        "total_cents": order.total_cents,
-        "items": [
-            {
-                "product_variant_id": i.product_variant_id,
-                "quantity": i.quantity,
-                "unit_price_cents": i.unit_price_cents,
-            }
+def _status_value(order: Order) -> str:
+    status = order.status
+    return status.value if isinstance(status, OrderStatus) else str(status)
+
+
+def _order_out(order: Order, items: list[OrderItem]) -> OrderOut:
+    return OrderOut(
+        id=order.id,
+        status=_status_value(order),
+        total_cents=order.total_cents,
+        items=[
+            OrderLineOut(
+                product_variant_id=i.product_variant_id,
+                quantity=i.quantity,
+                unit_price_cents=i.unit_price_cents,
+            )
             for i in items
         ],
-    }
+    )
 
 
-async def checkout(request) -> Any:
-    """POST /api/checkout — convert the current cart into a PENDING order, atomically."""
-    cart, _ = await _resolve_cart(request, create=False)
+async def checkout(request: Request) -> OrderOut:
+    """Convert the current cart into a PENDING order, atomically (stock locked, cart cleared)."""
+    cart, _ = await resolve_cart(request, create=False)
     if cart is None:
         abort(422, "Your cart is empty.")
     items = await cart.items().get()
@@ -49,21 +57,16 @@ async def checkout(request) -> Any:
     total = sum(i.unit_price_cents * i.quantity for i in items)
     user = current_user.get()
 
-    # a business span over the whole checkout — the DB queries inside auto-nest under it, so a
-    # trace shows the full request→checkout→queries tree (Grafana Tempo/Jaeger/etc.)
+    # a business span over the whole checkout — the DB queries inside auto-nest under it.
     with span(
         "checkout.place_order",
         attributes={"checkout.total_cents": total, "checkout.line_count": len(items)},
     ):
-        # Atomic: stock is decremented under a row lock, the order + its lines are created, and the
-        # cart is cleared — all together. If anything raises (e.g. oversell), the whole unit rolls
-        # back: no stock taken, no half-placed order, no half-cleared cart.
         async with DB.transaction():
             # Decrement stock under SELECT ... FOR UPDATE so concurrent checkouts can't oversell.
             for item in items:
                 variant = (
-                    await ProductVariant.query()
-                    .where("id", item.product_variant_id)
+                    await ProductVariant.where("id", item.product_variant_id)
                     .lock_for_update()
                     .first()
                 )
@@ -71,8 +74,10 @@ async def checkout(request) -> Any:
                     abort(404, "Product variant not found")
                 if variant.stock < item.quantity:
                     # rolls the whole transaction back — no stock taken, no order created
-                    abort(409, {"product_variant_id": item.product_variant_id,
-                                "message": "Insufficient stock."})
+                    raise ValidationException(
+                        {"product_variant_id": [f"Insufficient stock for {item.product_variant_id}."]},
+                        status=409,
+                    )
                 variant.stock = variant.stock - item.quantity
                 await variant.save()
 
@@ -81,7 +86,7 @@ async def checkout(request) -> Any:
                 status=OrderStatus.PENDING,
                 total_cents=total,
             )
-            order_items = []
+            order_items: list[OrderItem] = []
             for item in items:
                 order_items.append(
                     await OrderItem.create(
@@ -99,56 +104,41 @@ async def checkout(request) -> Any:
         "order.placed",
         OrderPlaced(order_id=order.id, user_id=order.user_id, total_cents=order.total_cents),
     )
-    from arvel.http import Response
-
-    return Response(content=_order_dict(order, order_items), status=201)
+    return _order_out(order, order_items)
 
 
-async def orders_placed_count(request) -> Any:
-    """GET /api/metrics/orders-placed — counters bumped by the order.placed listeners: the metrics
-    listener (orders_placed) and the queued FulfillOrderJob (orders_fulfilled, proving the job ran
-    on the queue)."""
-    from arvel import Cache
-
-    from app.jobs.fulfill_order import ORDERS_FULFILLED_KEY
-    from app.listeners.record_order_metrics import ORDERS_PLACED_KEY
-
-    return {
-        "orders_placed": int(await Cache.get(ORDERS_PLACED_KEY, 0)),
-        "orders_fulfilled": int(await Cache.get(ORDERS_FULFILLED_KEY, 0)),
-    }
+async def orders_placed_count(request: Request) -> MetricsOut:
+    """Order metrics bumped by the order.placed listeners (proves event→listener + the queued job)."""
+    return MetricsOut(
+        orders_placed=int(await Cache.get(ORDERS_PLACED_KEY, 0)),
+        orders_fulfilled=int(await Cache.get(ORDERS_FULFILLED_KEY, 0)),
+    )
 
 
-async def my_orders(request) -> Any:
-    """GET /api/orders — the authenticated user's orders (newest first)."""
+async def my_orders(request: Request) -> list[OrderOut]:
+    """The authenticated user's orders (newest first)."""
     user = current_user.get()
     if user is None:
         abort(401, "Unauthenticated")
     orders = await Order.where("user_id", user.id).order_by("id", "desc").get()
-    return [_order_dict(o, await o.items().get()) for o in orders]
+    return [_order_out(o, await o.items().get()) for o in orders]
 
 
-async def update_status(request) -> Any:
-    """POST /api/admin/orders/{id}/status — transition an order, enforcing the state machine.
-    Admin-only (the Authenticate middleware already rejected guests)."""
+async def update_status(request: Request, data: OrderStatusIn) -> OrderOut:
+    """Transition an order, enforcing the state machine. Admin-only (guests already 401'd)."""
     user = current_user.get()
     if user is None or not user.is_admin():
         abort(403, "Only admins may change order status.")
-    order = await Order.find(int(request.path_param("id")))
-    if order is None:
-        abort(404, "Order not found")
-    data = await request.json()
-    raw = data.get("status", "")
+    order = await Order.find_or_fail(int(request.path_param("id")))
     try:
-        target = OrderStatus(raw)
+        target = OrderStatus(data.status)
     except ValueError:
-        abort(422, {"status": [f"Unknown status '{raw}'."]})
+        raise ValidationException({"status": [f"Unknown status '{data.status}'."]}) from None
     current = order.status if isinstance(order.status, OrderStatus) else OrderStatus(order.status)
     if not can_transition(current, target):
-        abort(422, {"status": [f"Cannot transition from {current.value} to {target.value}."]})
+        raise ValidationException(
+            {"status": [f"Cannot transition from {current.value} to {target.value}."]}
+        )
     order.status = target
     await order.save()
-    from arvel.http import Response
-
-    # a state transition is a 200 (not a 201) — POST defaults to 201, so set it explicitly
-    return Response(content=_order_dict(order, await order.items().get()), status=200)
+    return _order_out(order, await order.items().get())

@@ -1,11 +1,11 @@
 """Create the orders + order_items tables."""
 
-from arvel.database import Migration
+from arvel.database import Blueprint, Migration, Schema
 
 
 class CreateOrdersTable(Migration):
-    def up(self, schema):
-        def orders(t):
+    def up(self, schema: Schema) -> None:
+        def orders(t: Blueprint) -> None:
             t.id()
             t.foreign_id("user_id").nullable().constrained("users").index()
             t.string("status").default(value="pending").index()
@@ -14,7 +14,7 @@ class CreateOrdersTable(Migration):
 
         schema.create("orders", orders)
 
-        def order_items(t):
+        def order_items(t: Blueprint) -> None:
             t.id()
             t.foreign_id("order_id").constrained("orders").index()
             t.foreign_id("product_variant_id").constrained("product_variants").index()
@@ -24,6 +24,6 @@ class CreateOrdersTable(Migration):
 
         schema.create("order_items", order_items)
 
-    def down(self, schema):
+    def down(self, schema: Schema) -> None:
         schema.drop("order_items")
         schema.drop("orders")
