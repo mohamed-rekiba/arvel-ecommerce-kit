@@ -35,21 +35,3 @@ class CatalogVisibilityService:
     def retrievable_category_ids_subquery() -> sa.Select[tuple[int]]:
         view = sa.table("retrievable_categories", sa.column("id"))
         return sa.select(view.c.id)
-
-    @staticmethod
-    async def visible_product_ids_among(ids: list[int]) -> set[int]:
-        """Which of ``ids`` are retrievable — for annotating an admin page with is_visible (one query
-        bounded by the page size, not the whole catalog)."""
-        if not ids:
-            return set()
-        view = sa.table("retrievable_products", sa.column("id"))
-        rows = await DB.fetch_all(sa.select(view.c.id).where(view.c.id.in_(ids)))
-        return {int(row["id"]) for row in rows}
-
-    @staticmethod
-    async def visible_category_ids_among(ids: list[int]) -> set[int]:
-        if not ids:
-            return set()
-        view = sa.table("retrievable_categories", sa.column("id"))
-        rows = await DB.fetch_all(sa.select(view.c.id).where(view.c.id.in_(ids)))
-        return {int(row["id"]) for row in rows}

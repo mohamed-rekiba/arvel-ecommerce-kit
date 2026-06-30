@@ -25,7 +25,6 @@ from app.schemas import (
     ProductOut,
     UpdateProductIn,
 )
-from app.services.catalog_visibility_service import CatalogVisibilityService
 
 
 def _current_user() -> User:
@@ -43,13 +42,26 @@ async def _require_admin() -> User:
     return user
 
 
+# is_visible computed inline as a correlated EXISTS column — the flag rides in the same SELECT (one
+# query for the page, no separate visibility lookup, no N+1).
+_PRODUCT_IS_VISIBLE = (
+    "EXISTS(SELECT 1 FROM retrievable_products rp WHERE rp.id = products.id) AS is_visible"
+)
+_CATEGORY_IS_VISIBLE = (
+    "EXISTS(SELECT 1 FROM retrievable_categories rc WHERE rc.id = categories.id) AS is_visible"
+)
+
+
 async def products_index(request: Request, per_page: int = 20, page: int = 1) -> AdminProductPage:
     """List **all** products (admin) — including hidden ones — each annotated with `is_visible`
-    (whether the storefront currently shows it)."""
+    (whether the storefront currently shows it), computed inline in the page query."""
     await _require_admin()
-    result = await Product.order_by("id").paginate(per_page, page)
-    items = result.items()
-    visible = await CatalogVisibilityService.visible_product_ids_among([p.id for p in items])
+    result = await (
+        Product.select_raw("products.*")
+        .select_raw(_PRODUCT_IS_VISIBLE)
+        .order_by("id")
+        .paginate(per_page, page)
+    )
     return AdminProductPage(
         data=[
             AdminProductOut(
@@ -58,9 +70,9 @@ async def products_index(request: Request, per_page: int = 20, page: int = 1) ->
                 slug=p.slug,
                 status=ProductStatus(p.status).value,
                 published=bool(p.published),
-                is_visible=p.id in visible,
+                is_visible=bool(getattr(p, "is_visible", False)),
             )
-            for p in items
+            for p in result.items()
         ],
         current_page=result.current_page(),
         last_page=result.last_page(),
@@ -70,11 +82,14 @@ async def products_index(request: Request, per_page: int = 20, page: int = 1) ->
 
 
 async def categories_index(request: Request, per_page: int = 50, page: int = 1) -> AdminCategoryPage:
-    """List **all** categories (admin) with `is_visible`."""
+    """List **all** categories (admin) with `is_visible` (inline EXISTS column)."""
     await _require_admin()
-    result = await Category.order_by("id").paginate(per_page, page)
-    items = result.items()
-    visible = await CatalogVisibilityService.visible_category_ids_among([c.id for c in items])
+    result = await (
+        Category.select_raw("categories.*")
+        .select_raw(_CATEGORY_IS_VISIBLE)
+        .order_by("id")
+        .paginate(per_page, page)
+    )
     return AdminCategoryPage(
         data=[
             AdminCategoryOut(
@@ -83,9 +98,9 @@ async def categories_index(request: Request, per_page: int = 50, page: int = 1) 
                 slug=c.slug,
                 parent_id=c.parent_id,
                 published=bool(c.published),
-                is_visible=c.id in visible,
+                is_visible=bool(getattr(c, "is_visible", False)),
             )
-            for c in items
+            for c in result.items()
         ],
         current_page=result.current_page(),
         last_page=result.last_page(),
