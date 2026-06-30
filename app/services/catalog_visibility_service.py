@@ -24,10 +24,14 @@ class CatalogVisibilityService:
         for view in _VIEWS:
             await DB.execute(sa.text(f"REFRESH MATERIALIZED VIEW {view}"))  # noqa: S608 # nosec B608
 
-    async def retrievable_product_ids(self) -> list[int]:
-        rows = await DB.fetch_all(sa.text("SELECT id FROM retrievable_products"))
-        return [int(row["id"]) for row in rows]
+    @staticmethod
+    def retrievable_product_ids_subquery() -> sa.Select[tuple[int]]:
+        """A subquery of retrievable product ids — pass to where_in so the storefront filters DB-side
+        (WHERE id IN (SELECT id FROM retrievable_products)) in one query, no app-side id list."""
+        view = sa.table("retrievable_products", sa.column("id"))
+        return sa.select(view.c.id)
 
-    async def retrievable_category_ids(self) -> list[int]:
-        rows = await DB.fetch_all(sa.text("SELECT id FROM retrievable_categories"))
-        return [int(row["id"]) for row in rows]
+    @staticmethod
+    def retrievable_category_ids_subquery() -> sa.Select[tuple[int]]:
+        view = sa.table("retrievable_categories", sa.column("id"))
+        return sa.select(view.c.id)

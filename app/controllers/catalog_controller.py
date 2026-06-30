@@ -54,10 +54,11 @@ async def product_out(p: Product) -> ProductOut:
 async def categories_index(request: Request) -> list[CategoryOut]:
     """List **retrievable** categories — published, fully-published ancestor chain, and at least one
     viewable product in the subtree (the retrievable_categories materialized view)."""
-    ids = await CatalogVisibilityService().retrievable_category_ids()
-    if not ids:
-        return []
-    rows = await Category.where_in("id", ids).order_by("name").get()
+    rows = (
+        await Category.where_in("id", CatalogVisibilityService.retrievable_category_ids_subquery())
+        .order_by("name")
+        .get()
+    )
     return [category_out(c) for c in rows]
 
 
@@ -71,8 +72,10 @@ async def products_index(
     """List **retrievable** products (the storefront view): published, with a published vendor, under a
     fully-published category. Typed query params (documented in OpenAPI): `q` (name search),
     `category` (id), `per_page`, `page`."""
-    visible = await CatalogVisibilityService().retrievable_product_ids()
-    query = Product.with_("category", "variants", "media").where_in("id", visible or [0])
+    # filter to the retrievable set DB-side (single query, no app-side id list)
+    query = Product.with_("category", "variants", "media").where_in(
+        "id", CatalogVisibilityService.retrievable_product_ids_subquery()
+    )
     if q:  # search the current locale's translatable name (jsonb → name->><locale>)
         query = query.where_json_like("name", current_locale.get(), f"%{q}%")
     if category:
@@ -91,12 +94,11 @@ async def products_index(
 async def products_show(request: Request) -> ProductOut:
     """Show one **retrievable** product by slug (a non-retrievable product 404s — it isn't public)."""
     slug = request.path_param("slug")
-    visible = await CatalogVisibilityService().retrievable_product_ids()
-    # first_or_fail raises ModelNotFound → the kernel renders it 404 (no manual guard)
+    # first_or_fail raises ModelNotFound → the kernel renders it 404 (a non-retrievable product 404s)
     product = (
         await Product.with_("category", "variants", "media")
         .where("slug", slug)
-        .where_in("id", visible or [0])
+        .where_in("id", CatalogVisibilityService.retrievable_product_ids_subquery())
         .first_or_fail()
     )
     return await product_out(product)
