@@ -16,7 +16,7 @@ from app.models.product import Product
 
 async def categories_index(request) -> Any:
     """GET /api/categories — all categories (flat)."""
-    return await Category.query().order_by("name").get()
+    return await Category.order_by("name").get()
 
 
 async def products_index(request) -> Any:
@@ -46,7 +46,7 @@ async def products_index(request) -> Any:
 async def products_show(request) -> Any:
     """GET /api/products/{slug} — one product with its category + variants eager-loaded."""
     slug = request.path_param("slug")
-    product = await Product.query().with_("category", "variants").where("slug", slug).first()
+    product = await Product.with_("category", "variants").where("slug", slug).first()
     if product is None:
         abort(404, "Product not found")
     return product

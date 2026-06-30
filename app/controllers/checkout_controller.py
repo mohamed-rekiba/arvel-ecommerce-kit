@@ -98,13 +98,18 @@ async def checkout(request) -> Any:
 
 
 async def orders_placed_count(request) -> Any:
-    """GET /api/metrics/orders-placed — the placed-orders counter the OrderPlaced listener bumps
-    (proves the event → listener path ran, end to end)."""
+    """GET /api/metrics/orders-placed — counters bumped by the order.placed listeners: the metrics
+    listener (orders_placed) and the queued FulfillOrderJob (orders_fulfilled, proving the job ran
+    on the queue)."""
     from arvel import Cache
 
+    from app.jobs.fulfill_order import ORDERS_FULFILLED_KEY
     from app.listeners.record_order_metrics import ORDERS_PLACED_KEY
 
-    return {"orders_placed": int(await Cache.get(ORDERS_PLACED_KEY, 0))}
+    return {
+        "orders_placed": int(await Cache.get(ORDERS_PLACED_KEY, 0)),
+        "orders_fulfilled": int(await Cache.get(ORDERS_FULFILLED_KEY, 0)),
+    }
 
 
 async def my_orders(request) -> Any:
@@ -112,7 +117,7 @@ async def my_orders(request) -> Any:
     user = current_user.get()
     if user is None:
         abort(401, "Unauthenticated")
-    orders = await Order.query().where("user_id", user.id).order_by("id", "desc").get()
+    orders = await Order.where("user_id", user.id).order_by("id", "desc").get()
     return [_order_dict(o, await o.items().get()) for o in orders]
 
 

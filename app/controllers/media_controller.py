@@ -45,7 +45,7 @@ async def upload_image(request) -> Any:
 
 async def serve_image(request) -> Any:
     """GET /api/products/{slug}/image — stream the stored product image."""
-    product = await Product.query().where("slug", request.path_param("slug")).first()
+    product = await Product.where("slug", request.path_param("slug")).first()
     if product is None or not product.image_path:
         abort(404, "Image not found")
     if not await Storage.exists(product.image_path):

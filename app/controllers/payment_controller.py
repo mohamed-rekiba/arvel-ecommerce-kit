@@ -66,14 +66,14 @@ async def webhook(request) -> Any:
 
     # Idempotency: record the event id first (unique). If it's already recorded, this is a
     # redelivery — acknowledge without re-running the side effects.
-    if await WebhookEvent.query().where("event_id", event_id).first() is not None:
+    if await WebhookEvent.where("event_id", event_id).first() is not None:
         return {"status": "already_processed"}
 
     async with DB.transaction():
         await WebhookEvent.create(event_id=event_id, type=event_type)
         if event_type == "charge.succeeded":
             charge_id = payload.get("data", {}).get("charge_id")
-            payment = await Payment.query().where("gateway_charge_id", charge_id).first()
+            payment = await Payment.where("gateway_charge_id", charge_id).first()
             if payment is not None:
                 payment.status = PaymentStatus.SUCCEEDED
                 await payment.save()

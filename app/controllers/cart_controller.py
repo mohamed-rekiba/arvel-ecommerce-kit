@@ -31,13 +31,13 @@ async def _resolve_cart(request, *, create: bool) -> tuple[Cart | None, str | No
     for a guest so the client can send it next time)."""
     user = current_user.get()
     if user is not None:
-        cart = await Cart.query().where("user_id", user.id).first()
+        cart = await Cart.where("user_id", user.id).first()
         if cart is None and create:
             cart = await Cart.create(user_id=user.id)
         return cart, None
     token = request.header("x-cart-token")
     if token:
-        cart = await Cart.query().where("token", token).first()
+        cart = await Cart.where("token", token).first()
         if cart is not None:
             return cart, None
     if create:

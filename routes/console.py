@@ -22,3 +22,10 @@ app (handler args come from the CLI; everything else is autowired from the conta
 Signature tokens: `{arg}` (required), `{arg?}` (optional), `{--flag}` (boolean option). For larger
 commands, prefer a class via `arvel make:command` (type-safe, DI-aware).
 """
+
+from arvel import Schedule
+
+from app.console.abandoned_carts import sweep_abandoned_carts
+
+# Nightly sweep of abandoned guest carts (run by `arvel schedule:run` via cron).
+Schedule.call(sweep_abandoned_carts).daily_at("03:00")

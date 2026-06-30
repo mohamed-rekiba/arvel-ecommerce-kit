@@ -36,7 +36,7 @@ async def register(request, data: Registration) -> Any:
     )
     if validator.fails():
         abort(422, validator.errors())
-    if await User.query().where("email", data.email).first() is not None:
+    if await User.where("email", data.email).first() is not None:
         abort(422, {"email": ["This email is already registered."]})
     user = await User.create(name=data.name, email=data.email, password=data.password)
     token, _ = await create_token(user, name="customer", abilities=[CUSTOMER_ABILITY])
@@ -61,7 +61,7 @@ async def forgot_password(request) -> Any:
     app emails the token rather than returning it."""
     data = await request.json()
     email = data.get("email", "")
-    user = await User.query().where("email", email).first()
+    user = await User.where("email", email).first()
     payload: dict[str, Any] = {"message": "If that email exists, a reset link has been sent."}
     if user is not None:
         secret = Config.get("app.key", "")
