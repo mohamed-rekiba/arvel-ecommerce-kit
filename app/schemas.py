@@ -61,6 +61,46 @@ class ProductPage(Schema):
     total: int
 
 
+# --- admin views (all rows, incl. hidden, each annotated with is_visible) ------
+
+
+class AdminProductOut(Schema):
+    """A product as the admin sees it — every row, with `is_visible` = whether the storefront shows it
+    (published ∧ vendor published ∧ category chain published)."""
+
+    id: int
+    name: str
+    slug: str
+    status: str
+    published: bool
+    is_visible: bool
+
+
+class AdminProductPage(Schema):
+    data: list[AdminProductOut]
+    current_page: int
+    last_page: int
+    per_page: int
+    total: int
+
+
+class AdminCategoryOut(Schema):
+    id: int
+    name: str
+    slug: str
+    parent_id: int | None = None
+    published: bool = False
+    is_visible: bool = False
+
+
+class AdminCategoryPage(Schema):
+    data: list[AdminCategoryOut]
+    current_page: int
+    last_page: int
+    per_page: int
+    total: int
+
+
 # --- auth ---------------------------------------------------------------------
 
 

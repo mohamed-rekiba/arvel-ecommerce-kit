@@ -106,3 +106,25 @@ def test_admin_create_validates(client) -> None:
         headers=_auth(token),
     )
     assert bad.status_code == 422
+
+
+def test_admin_lists_all_products_with_is_visible(client) -> None:
+    token = _token(client, "admin@example.com", "secret-admin")
+    body = client.get("/api/admin/products", headers=_auth(token)).json()
+    assert body["total"] == 1  # admin sees the product even though it's hidden from the storefront
+    product = body["data"][0]
+    assert product["slug"] == "existing"
+    assert product["is_visible"] is False  # not published → not retrievable
+    assert product["published"] is False
+
+
+def test_admin_lists_all_categories_with_is_visible(client) -> None:
+    token = _token(client, "admin@example.com", "secret-admin")
+    body = client.get("/api/admin/categories", headers=_auth(token)).json()
+    assert {c["slug"] for c in body["data"]} == {"shirts"}
+    assert all("is_visible" in c for c in body["data"])
+
+
+def test_customer_cannot_list_admin_products(client) -> None:
+    token = _token(client, "cara@example.com", "secret-cara")
+    assert client.get("/api/admin/products", headers=_auth(token)).status_code == 403

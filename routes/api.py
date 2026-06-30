@@ -77,6 +77,14 @@ Route.post(
 # --- Admin product CRUD (auth-guarded by middleware; policy-guarded in the controller) --------
 # Authenticate (401 if guest) runs as route middleware BEFORE body parsing — Laravel ordering; the
 # ProductPolicy then decides admin-vs-customer (403/404) inside the controller.
+# Admin listings return EVERY row (incl. hidden) with an is_visible flag — vs the storefront, which
+# only returns the retrievable set.
+Route.get(
+    "/admin/products", admin_products.products_index, name="api.admin.products.index"
+).middleware(Authenticate).secure("bearer")
+Route.get(
+    "/admin/categories", admin_products.categories_index, name="api.admin.categories.index"
+).middleware(Authenticate).secure("bearer")
 Route.post("/admin/products", admin_products.store, name="api.admin.products.store").middleware(
     Authenticate
 ).secure("bearer")

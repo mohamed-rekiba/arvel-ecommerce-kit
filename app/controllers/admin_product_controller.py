@@ -12,9 +12,20 @@ from arvel.validation import ValidationException, Validator
 
 from app.controllers.catalog_controller import product_out
 from app.enums import ProductStatus
+from app.models.category import Category
 from app.models.product import Product
 from app.models.user import User
-from app.schemas import MessageOut, ProductIn, ProductOut, UpdateProductIn
+from app.schemas import (
+    AdminCategoryOut,
+    AdminCategoryPage,
+    AdminProductOut,
+    AdminProductPage,
+    MessageOut,
+    ProductIn,
+    ProductOut,
+    UpdateProductIn,
+)
+from app.services.catalog_visibility_service import CatalogVisibilityService
 
 
 def _current_user() -> User:
@@ -23,6 +34,64 @@ def _current_user() -> User:
     if user is None:
         abort(401, "Unauthenticated")
     return user
+
+
+async def _require_admin() -> User:
+    user = _current_user()
+    if not await user.can("create", Product):  # the catalog-write gate == admin-only
+        abort(403, "Admins only.")
+    return user
+
+
+async def products_index(request: Request, per_page: int = 20, page: int = 1) -> AdminProductPage:
+    """List **all** products (admin) — including hidden ones — each annotated with `is_visible`
+    (whether the storefront currently shows it)."""
+    await _require_admin()
+    result = await Product.order_by("id").paginate(per_page, page)
+    items = result.items()
+    visible = await CatalogVisibilityService.visible_product_ids_among([p.id for p in items])
+    return AdminProductPage(
+        data=[
+            AdminProductOut(
+                id=p.id,
+                name=p.name,
+                slug=p.slug,
+                status=ProductStatus(p.status).value,
+                published=bool(p.published),
+                is_visible=p.id in visible,
+            )
+            for p in items
+        ],
+        current_page=result.current_page(),
+        last_page=result.last_page(),
+        per_page=result.per_page(),
+        total=result.total(),
+    )
+
+
+async def categories_index(request: Request, per_page: int = 50, page: int = 1) -> AdminCategoryPage:
+    """List **all** categories (admin) with `is_visible`."""
+    await _require_admin()
+    result = await Category.order_by("id").paginate(per_page, page)
+    items = result.items()
+    visible = await CatalogVisibilityService.visible_category_ids_among([c.id for c in items])
+    return AdminCategoryPage(
+        data=[
+            AdminCategoryOut(
+                id=c.id,
+                name=c.name,
+                slug=c.slug,
+                parent_id=c.parent_id,
+                published=bool(c.published),
+                is_visible=c.id in visible,
+            )
+            for c in items
+        ],
+        current_page=result.current_page(),
+        last_page=result.last_page(),
+        per_page=result.per_page(),
+        total=result.total(),
+    )
 
 
 async def store(request: Request, data: ProductIn) -> ProductOut:
