@@ -14,9 +14,8 @@ class CreateProductsTable(Migration):
             t.integer("price_cents")
             t.string("currency", length=3).default(value="USD")
             t.string("status").default(value="draft").index()
-            t.string("image_path").nullable()  # original image path on the Storage disk
-            t.string("image_thumb_path").nullable()  # generated thumbnail (arvel.media)
             t.timestamps()
+            # product images live in the media library (HasMedia / media table), not a column
 
         schema.create("products", define)
 

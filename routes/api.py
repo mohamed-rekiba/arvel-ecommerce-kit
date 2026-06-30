@@ -67,8 +67,9 @@ Route.post("/reset-password", auth.reset_password, name="api.password.reset").st
 Route.get("/categories", catalog.categories_index, name="api.categories.index")
 Route.get("/products", catalog.products_index, name="api.products.index")
 Route.get("/products/{slug:str}", catalog.products_show, name="api.products.show")
-Route.get("/products/{slug:str}/image", media.serve_image, name="api.products.image")
-Route.get("/products/{slug:str}/thumbnail", media.serve_thumbnail, name="api.products.thumbnail")
+# Media library: serve a gallery item (original) or a named conversion (thumb/preview)
+Route.get("/media/{id:int}", media.serve_media, name="api.media.show")
+Route.get("/media/{id:int}/{conversion:str}", media.serve_media, name="api.media.conversion")
 Route.post(
     "/admin/products/{id:int}/image", media.upload_image, name="api.admin.products.image"
 ).middleware(Authenticate).secure("bearer")

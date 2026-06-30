@@ -12,7 +12,7 @@ config = {
     "version": "0.1.0",
     "description": "The arvel-ecommerce-kit API.",
     "path": "/docs",  # docs UI here; raw document at /docs/openapi.json
-    "ui": "stoplight",  # swagger | redoc | scalar | rapidoc | stoplight
+    "ui": "swagger",  # swagger | redoc | scalar | rapidoc | stoplight
     "use_handler_docstrings": True,
     "security": {"bearer": {"format": "JWT", "description": "Paste your access token from POST /api/login"}},
 }

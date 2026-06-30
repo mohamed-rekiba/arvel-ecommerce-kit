@@ -1,42 +1,25 @@
-"""Product media — admin image upload + serving.
+"""Product media — admin gallery upload + serving, via arvel's media library.
 
-Showcases arvel's media module (``arvel.media.Image``: decode → resize → encode) and filesystem
-(``Storage`` / ``UploadedFile.store``). On upload the image is **decoded** (real validation, not just
-a content-type header), the original is stored, and a **thumbnail variant** is generated via the
-media module and stored alongside. The default disk is ``local``; FILESYSTEM_DISK=s3 → RustFS/S3.
+Admin upload attaches an image to the product's ``images`` collection (conversions auto-generated);
+serving streams a media item (original or a named conversion) from its disk. Showcases the media
+library (HasMedia / add_media / conversions) + the filesystem.
 """
 
-from arvel import Storage, abort
+from arvel import abort
 from arvel.http import Request, Response
-from arvel.media import Image
-from arvel.support import Str, current_user
+from arvel.kernel import app
+from arvel.media import Media
+from arvel.support import current_user
 from arvel.validation import ValidationException
 
-from app.models.product import Product
-from app.schemas import ImageOut
-
-_THUMB_MAX = 256  # longest-edge thumbnail size
-_EXT_CONTENT_TYPE = {
-    "png": "image/png",
-    "jpg": "image/jpeg",
-    "jpeg": "image/jpeg",
-    "webp": "image/webp",
-    "gif": "image/gif",
-}
+from app.controllers.catalog_controller import gallery_image_out
+from app.models.product import IMAGES, Product
+from app.schemas import GalleryImageOut
+from app.services.product_image_service import ProductImageService
 
 
-def _thumbnail(image: Image) -> Image:
-    """Fit the image within a _THUMB_MAX square, preserving aspect ratio (no upscaling)."""
-    width, height = image.width, image.height
-    longest = max(width, height)
-    if longest <= _THUMB_MAX:
-        return image
-    scale = _THUMB_MAX / longest
-    return image.resize(max(1, int(width * scale)), max(1, int(height * scale)))
-
-
-async def upload_image(request: Request) -> ImageOut:
-    """Store an uploaded product image + a generated thumbnail (admins only)."""
+async def upload_image(request: Request) -> list[GalleryImageOut]:
+    """Attach an uploaded image to the product gallery (admins only); returns the updated gallery."""
     user = current_user.get()
     if user is None or not user.is_admin():
         abort(403, "Only admins may upload product images.")
@@ -47,41 +30,26 @@ async def upload_image(request: Request) -> ImageOut:
         raise ValidationException({"image": ["An image file is required."]})
     raw = await upload.read()
     try:
-        image = Image.open(raw)  # real decode — rejects a mislabeled / corrupt upload
-    except Exception as exc:  # noqa: BLE001 — any decode failure is a client error
+        await ProductImageService().attach_uploaded(
+            product, raw, file_name=upload.client_name or "image.png", mime_type=upload.content_type
+        )
+    except Exception as exc:  # noqa: BLE001 — any decode/store failure is a client error
         raise ValidationException({"image": ["The file is not a valid image."]}) from exc
 
-    # store the original (the bytes we already read — don't re-read the consumed upload stream),
-    # then generate + store a thumbnail via the media module
-    name = Str.random(40)
-    ext = (upload.extension or "png").lower()
-    original_path = f"products/{name}.{ext}"
-    await Storage.put(original_path, raw)
-    thumb_path = f"products/thumbs/{name}.png"
-    await Storage.put(thumb_path, _thumbnail(image).encode("PNG"))
-
-    product.image_path = original_path
-    product.image_thumb_path = thumb_path
-    await product.save()
-    return ImageOut(image_path=original_path, thumb_path=thumb_path)
+    return [gallery_image_out(m) for m in await product.get_media(IMAGES)]
 
 
-async def _serve(path: str | None) -> Response:
-    if not path or not await Storage.exists(path):
-        abort(404, "Image not found")
-    data = await Storage.get(path)
-    ext = path.rsplit(".", 1)[-1].lower()
-    media_type = _EXT_CONTENT_TYPE.get(ext, "application/octet-stream")
-    return Response(content=data, status=200, headers={"content-type": media_type})
-
-
-async def serve_image(request: Request) -> Response:
-    """Stream the stored original product image (by slug)."""
-    product = await Product.where("slug", request.path_param("slug")).first_or_fail()
-    return await _serve(product.image_path)
-
-
-async def serve_thumbnail(request: Request) -> Response:
-    """Stream the generated product thumbnail (by slug)."""
-    product = await Product.where("slug", request.path_param("slug")).first_or_fail()
-    return await _serve(product.image_thumb_path)
+async def serve_media(request: Request) -> Response:
+    """Stream a media item — the original, or a named conversion (thumb/preview)."""
+    media = await Media.find_or_fail(int(request.path_param("id")))
+    conversion = request.path_param("conversion", None)
+    path = media.get_path(conversion)
+    if path is None:
+        abort(404, "Media not found")
+    disk = app("filesystem").disk(media.disk)
+    if not await disk.exists(path):
+        abort(404, "Media not found")
+    data = await disk.get(path)
+    # conversions are PNG; the original keeps its stored mime type
+    content_type = "image/png" if conversion else (media.mime_type or "application/octet-stream")
+    return Response(content=data, status=200, headers={"content-type": content_type})

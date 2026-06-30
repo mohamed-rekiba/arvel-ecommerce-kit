@@ -29,6 +29,15 @@ class VariantOut(Schema):
     stock: int
 
 
+class GalleryImageOut(Schema):
+    """One product gallery image (media-library) with its conversion URLs."""
+
+    id: int
+    url: str
+    thumb_url: str
+    preview_url: str
+
+
 class ProductOut(Schema, omit_defaults=True):
     id: int
     name: str
@@ -37,7 +46,7 @@ class ProductOut(Schema, omit_defaults=True):
     price_cents: int
     currency: str
     status: str
-    image_path: str | None
+    gallery: list[GalleryImageOut]  # always present (possibly empty)
     category: CategoryOut | None = None
     variants: list[VariantOut] | None = None
 
@@ -136,9 +145,6 @@ class UpdateProductIn(Schema):
     status: str | None = None
 
 
-class ImageOut(Schema):
-    image_path: str
-    thumb_path: str
 
 
 # --- checkout / orders / payments ---------------------------------------------

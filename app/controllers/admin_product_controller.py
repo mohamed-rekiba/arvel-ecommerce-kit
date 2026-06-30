@@ -48,7 +48,7 @@ async def store(request: Request, data: ProductIn) -> ProductOut:
         currency="USD",
         status=ProductStatus.DRAFT,
     )
-    return product_out(product)
+    return await product_out(product)
 
 
 async def update(request: Request, data: UpdateProductIn) -> ProductOut:
@@ -64,7 +64,7 @@ async def update(request: Request, data: UpdateProductIn) -> ProductOut:
     if data.status is not None:
         product.status = ProductStatus(data.status)
     await product.save()
-    return product_out(product)
+    return await product_out(product)
 
 
 async def destroy(request: Request) -> MessageOut:

@@ -57,10 +57,14 @@ def _auth(client, email, password) -> dict:
     return {"Authorization": f"Bearer {token}"}
 
 
-def test_admin_uploads_and_image_is_served(client) -> None:
+def test_admin_uploads_to_gallery_and_media_is_served(client) -> None:
+    from io import BytesIO
+
+    from PIL import Image as PILImage
+
     admin = _auth(client, "admin@example.com", "secret-admin")
-    # no image yet → 404
-    assert client.get("/api/products/tee/image").status_code == 404
+    # product starts with an empty gallery
+    assert client.get("/api/products/tee").json()["gallery"] == []
 
     up = client.post(
         "/api/admin/products/1/image",
@@ -68,25 +72,23 @@ def test_admin_uploads_and_image_is_served(client) -> None:
         headers=admin,
     )
     assert up.status_code == 201
-    body = up.json()
-    assert body["image_path"].startswith("products/")
-    assert body["thumb_path"].startswith("products/thumbs/")
+    gallery = up.json()
+    assert len(gallery) == 1
+    item = gallery[0]
+    assert item["url"] == f"/api/media/{item['id']}"
 
-    # the original is served back unchanged
-    served = client.get("/api/products/tee/image")
-    assert served.status_code == 200
-    assert served.headers["content-type"].startswith("image/png")
-    assert served.content == _PNG
+    # the product now exposes the gallery
+    assert len(client.get("/api/products/tee").json()["gallery"]) == 1
 
-    # the generated thumbnail (arvel.media) is a valid, decodable PNG
-    thumb = client.get("/api/products/tee/thumbnail")
-    assert thumb.status_code == 200
-    assert thumb.headers["content-type"].startswith("image/png")
-    from io import BytesIO
+    # the original media serves back unchanged
+    original = client.get(item["url"])
+    assert original.status_code == 200 and original.content == _PNG
 
-    from PIL import Image as PILImage
-
-    PILImage.open(BytesIO(thumb.content)).verify()  # raises if not a valid image
+    # the auto-generated thumb + preview conversions are valid, decodable PNGs
+    for conv_url in (item["thumb_url"], item["preview_url"]):
+        conv = client.get(conv_url)
+        assert conv.status_code == 200 and conv.headers["content-type"] == "image/png"
+        PILImage.open(BytesIO(conv.content)).verify()
 
 
 def test_non_admin_cannot_upload(client) -> None:

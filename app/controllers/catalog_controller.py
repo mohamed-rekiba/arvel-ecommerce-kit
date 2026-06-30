@@ -6,11 +6,12 @@ schemas are generated.
 """
 
 from arvel.http import Request
+from arvel.media import Media
 
 from app.enums import ProductStatus
 from app.models.category import Category
-from app.models.product import Product
-from app.schemas import CategoryOut, ProductOut, ProductPage, VariantOut
+from app.models.product import IMAGES, Product
+from app.schemas import CategoryOut, GalleryImageOut, ProductOut, ProductPage, VariantOut
 
 
 def variant_out(v: Product) -> VariantOut:
@@ -24,15 +25,27 @@ def category_out(c: Category) -> CategoryOut:
     return CategoryOut(id=c.id, name=c.name, slug=c.slug)
 
 
-def product_out(p: Product) -> ProductOut:
+def gallery_image_out(media: Media) -> GalleryImageOut:
+    """A media-library item → its kit serving URLs (original + thumb/preview conversions)."""
+    mid = media.id
+    return GalleryImageOut(
+        id=mid,
+        url=f"/api/media/{mid}",
+        thumb_url=f"/api/media/{mid}/thumb",
+        preview_url=f"/api/media/{mid}/preview",
+    )
+
+
+async def product_out(p: Product) -> ProductOut:
     category = p.relation("category")
     variants = p.relation("variants")
+    images = await p.get_media(IMAGES)  # uses the eager-loaded `media` relation when present
     return ProductOut(
         id=p.id, name=p.name, slug=p.slug, description=p.description,
         price_cents=p.price_cents, currency=p.currency, status=ProductStatus(p.status).value,
-        image_path=p.image_path,
         category=category_out(category) if category is not None else None,
         variants=[variant_out(v) for v in variants] if variants is not None else None,
+        gallery=[gallery_image_out(m) for m in images],
     )
 
 
@@ -49,7 +62,7 @@ async def products_index(request: Request) -> ProductPage:
     status = request.query("status")
     per_page = int(request.query("per_page", 15))
 
-    query = Product.with_("category", "variants")
+    query = Product.with_("category", "variants", "media")
     if q:
         query = query.where("name", "like", f"%{q}%")
     if category_id:
@@ -60,7 +73,7 @@ async def products_index(request: Request) -> ProductPage:
 
     page = await query.paginate(per_page)
     return ProductPage(
-        data=[product_out(p) for p in page.items()],
+        data=[await product_out(p) for p in page.items()],
         current_page=page.current_page(),
         last_page=page.last_page(),
         per_page=page.per_page(),
@@ -69,8 +82,8 @@ async def products_index(request: Request) -> ProductPage:
 
 
 async def products_show(request: Request) -> ProductOut:
-    """Show one product (by slug) with its category + variants eager-loaded."""
+    """Show one product (by slug) with its category, variants + image gallery eager-loaded."""
     slug = request.path_param("slug")
     # first_or_fail raises ModelNotFound → the kernel renders it 404 (no manual guard)
-    product = await Product.with_("category", "variants").where("slug", slug).first_or_fail()
-    return product_out(product)
+    product = await Product.with_("category", "variants", "media").where("slug", slug).first_or_fail()
+    return await product_out(product)
