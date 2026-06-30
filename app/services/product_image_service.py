@@ -29,8 +29,9 @@ class ProductImageService:
         """Download an image from ``url`` (arvel Http client) and attach it to the gallery. Returns
         False (a no-op) if the fetch fails — so seeding never crashes when offline."""
         try:
-            response = await Http.timeout(15).get(url)
-            if response.status_code >= 400:
+            # follow_redirects: image CDNs (Picsum, etc.) 302 to the actual file
+            response = await Http.timeout(15).get(url, follow_redirects=True)
+            if response.status_code >= 400 or not response.content:
                 return False
             await product.add_media(
                 response.content,

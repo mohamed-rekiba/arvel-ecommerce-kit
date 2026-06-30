@@ -1,0 +1,20 @@
+# Local infrastructure for the kit. `docker compose up -d` then `arvel migrate && arvel db:seed`.
+services:
+  db:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: arvel
+      POSTGRES_PASSWORD: arvel
+      POSTGRES_DB: arvel_ecommerce_kit
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U arvel -d arvel_ecommerce_kit"]
+      interval: 3s
+      timeout: 3s
+      retries: 10
+
+volumes:
+  pgdata:

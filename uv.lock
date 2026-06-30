@@ -214,6 +214,11 @@ jwt = [
 media = [
     { name = "pillow" },
 ]
+postgres = [
+    { name = "alembic" },
+    { name = "asyncpg" },
+    { name = "sqlalchemy", extra = ["asyncio"] },
+]
 sqlite = [
     { name = "aiosqlite" },
     { name = "alembic" },
@@ -379,7 +384,7 @@ name = "arvel-ecommerce-kit"
 version = "0.1.0"
 source = { virtual = "." }
 dependencies = [
-    { name = "arvel", extra = ["jwt", "media", "sqlite", "standard", "telemetry"] },
+    { name = "arvel", extra = ["jwt", "media", "postgres", "sqlite", "standard", "telemetry"] },
 ]
 
 [package.optional-dependencies]
@@ -393,7 +398,7 @@ dev = [
 
 [package.metadata]
 requires-dist = [
-    { name = "arvel", extras = ["standard", "sqlite", "telemetry", "jwt", "media"], editable = "../arvel" },
+    { name = "arvel", extras = ["standard", "sqlite", "postgres", "telemetry", "jwt", "media"], editable = "../arvel" },
     { name = "faker", marker = "extra == 'dev'" },
     { name = "pyright", marker = "extra == 'dev'" },
     { name = "pytest", marker = "extra == 'dev'" },
