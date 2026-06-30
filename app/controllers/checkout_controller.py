@@ -10,6 +10,7 @@ from typing import Any
 
 from arvel import DB, Event, abort
 from arvel.support import current_user
+from arvel.telemetry import span
 
 from app.controllers.cart_controller import _resolve_cart
 from app.enums import OrderStatus, can_transition
@@ -48,44 +49,50 @@ async def checkout(request) -> Any:
     total = sum(i.unit_price_cents * i.quantity for i in items)
     user = current_user.get()
 
-    # Atomic: stock is decremented under a row lock, the order + its lines are created, and the
-    # cart is cleared — all together. If anything raises (e.g. oversell), the whole unit rolls back:
-    # no stock taken, no half-placed order, no half-cleared cart.
-    async with DB.transaction():
-        # Decrement stock under SELECT ... FOR UPDATE so concurrent checkouts can't oversell.
-        for item in items:
-            variant = (
-                await ProductVariant.query()
-                .where("id", item.product_variant_id)
-                .lock_for_update()
-                .first()
-            )
-            if variant is None:
-                abort(404, "Product variant not found")
-            if variant.stock < item.quantity:
-                # rolls the whole transaction back — no stock taken, no order created
-                abort(409, {"product_variant_id": item.product_variant_id,
-                            "message": "Insufficient stock."})
-            variant.stock = variant.stock - item.quantity
-            await variant.save()
-
-        order = await Order.create(
-            user_id=user.id if user is not None else None,
-            status=OrderStatus.PENDING,
-            total_cents=total,
-        )
-        order_items = []
-        for item in items:
-            order_items.append(
-                await OrderItem.create(
-                    order_id=order.id,
-                    product_variant_id=item.product_variant_id,
-                    quantity=item.quantity,
-                    unit_price_cents=item.unit_price_cents,
+    # a business span over the whole checkout — the DB queries inside auto-nest under it, so a
+    # trace shows the full request→checkout→queries tree (Grafana Tempo/Jaeger/etc.)
+    with span(
+        "checkout.place_order",
+        attributes={"checkout.total_cents": total, "checkout.line_count": len(items)},
+    ):
+        # Atomic: stock is decremented under a row lock, the order + its lines are created, and the
+        # cart is cleared — all together. If anything raises (e.g. oversell), the whole unit rolls
+        # back: no stock taken, no half-placed order, no half-cleared cart.
+        async with DB.transaction():
+            # Decrement stock under SELECT ... FOR UPDATE so concurrent checkouts can't oversell.
+            for item in items:
+                variant = (
+                    await ProductVariant.query()
+                    .where("id", item.product_variant_id)
+                    .lock_for_update()
+                    .first()
                 )
+                if variant is None:
+                    abort(404, "Product variant not found")
+                if variant.stock < item.quantity:
+                    # rolls the whole transaction back — no stock taken, no order created
+                    abort(409, {"product_variant_id": item.product_variant_id,
+                                "message": "Insufficient stock."})
+                variant.stock = variant.stock - item.quantity
+                await variant.save()
+
+            order = await Order.create(
+                user_id=user.id if user is not None else None,
+                status=OrderStatus.PENDING,
+                total_cents=total,
             )
-        await CartItem.where("cart_id", cart.id).delete()
-        await cart.delete()
+            order_items = []
+            for item in items:
+                order_items.append(
+                    await OrderItem.create(
+                        order_id=order.id,
+                        product_variant_id=item.product_variant_id,
+                        quantity=item.quantity,
+                        unit_price_cents=item.unit_price_cents,
+                    )
+                )
+            await CartItem.where("cart_id", cart.id).delete()
+            await cart.delete()
 
     # the listener (record_order_metrics) reacts — the controller doesn't know about it
     await Event.dispatch(
