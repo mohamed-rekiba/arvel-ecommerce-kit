@@ -49,11 +49,13 @@ services:
   # (or import a realm export) — see README "Admin OIDC".
   keycloak:
     image: quay.io/keycloak/keycloak:26.0
-    command: ["start-dev"]
+    command: ["start-dev", "--import-realm"] # imports the `arvel` realm on first boot
     environment:
       KC_BOOTSTRAP_ADMIN_USERNAME: admin
       KC_BOOTSTRAP_ADMIN_PASSWORD: admin
     ports: ["8080:8080"]
+    volumes:
+      - ./docker/keycloak/realm-export.json:/opt/keycloak/data/import/realm-export.json:ro
 
   # Mail catcher — SMTP on :1025, web UI on http://localhost:8025
   mailpit:
