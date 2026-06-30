@@ -38,7 +38,7 @@ services:
 
   # Full-text search (Meilisearch) — the product catalog search engine.
   meilisearch:
-    image: getmeili/meilisearch:v1.11
+    image: getmeili/meilisearch:v1.48
     environment:
       MEILI_MASTER_KEY: arvel-dev-master-key
       MEILI_ENV: development
@@ -77,7 +77,15 @@ services:
     image: axllent/mailpit:latest
     ports: ["1025:1025", "8025:8025"]
 
+  # Observability — Grafana LGTM (Loki/Grafana/Tempo/Mimir) + OTel collector in one image.
+  # Grafana UI http://localhost:3000 (admin/admin); OTLP receivers on 4317 (gRPC) / 4318 (HTTP).
+  lgtm:
+    image: grafana/otel-lgtm:latest
+    ports: ["3000:3000", "4317:4317", "4318:4318", "3200:3200"] # +Tempo query API
+    volumes: ["lgtm_data:/data"]
+
 volumes:
   pgdata:
   rustfs_data:
   meili_data:
+  lgtm_data:
