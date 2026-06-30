@@ -17,6 +17,7 @@ from app.events.order_placed import OrderPlaced
 from app.models.cart_item import CartItem
 from app.models.order import Order
 from app.models.order_item import OrderItem
+from app.models.product_variant import ProductVariant
 
 
 def _order_dict(order: Order, items: list[OrderItem]) -> dict[str, Any]:
@@ -47,9 +48,27 @@ async def checkout(request) -> Any:
     total = sum(i.unit_price_cents * i.quantity for i in items)
     user = current_user.get()
 
-    # Atomic: the order + its lines are created and the cart is cleared together. If anything
-    # raises, the whole unit rolls back — no half-placed order, no half-cleared cart.
+    # Atomic: stock is decremented under a row lock, the order + its lines are created, and the
+    # cart is cleared — all together. If anything raises (e.g. oversell), the whole unit rolls back:
+    # no stock taken, no half-placed order, no half-cleared cart.
     async with DB.transaction():
+        # Decrement stock under SELECT ... FOR UPDATE so concurrent checkouts can't oversell.
+        for item in items:
+            variant = (
+                await ProductVariant.query()
+                .where("id", item.product_variant_id)
+                .lock_for_update()
+                .first()
+            )
+            if variant is None:
+                abort(404, "Product variant not found")
+            if variant.stock < item.quantity:
+                # rolls the whole transaction back — no stock taken, no order created
+                abort(409, {"product_variant_id": item.product_variant_id,
+                            "message": "Insufficient stock."})
+            variant.stock = variant.stock - item.quantity
+            await variant.save()
+
         order = await Order.create(
             user_id=user.id if user is not None else None,
             status=OrderStatus.PENDING,
