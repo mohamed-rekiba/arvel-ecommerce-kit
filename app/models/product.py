@@ -4,7 +4,7 @@ Product images use arvel's **media library** (``HasMedia``): images attach to th
 collection and each upload generates ``thumb`` + ``preview`` conversions automatically.
 """
 
-from typing import Any, ClassVar
+from typing import Any, ClassVar, TypedDict
 
 from arvel import Model
 from arvel.localization import HasTranslations, Translatable
@@ -14,6 +14,15 @@ from arvel.search import Searchable
 from app.enums import ProductStatus
 
 IMAGES = "images"  # the product image gallery collection
+
+
+class SearchableProduct(TypedDict):
+    """The typed search-index document for a product (see Product.to_searchable_array)."""
+
+    id: int
+    slug: str
+    name: dict[str, str]  # {locale: value} — Meilisearch searches the nested values
+    description: str | None
 
 
 class Product(HasMedia, HasTranslations, Searchable, Model):
@@ -54,15 +63,17 @@ class Product(HasMedia, HasTranslations, Searchable, Model):
         ]
 
     def to_searchable_array(self) -> dict[str, Any]:
-        """What gets indexed: the slug + every locale of the name (so search works in any language) +
-        the description. The id is the document key (get_search_key)."""
-        names = self.translations("name")
-        return {
-            "id": self.id,
-            "slug": self.slug,
+        """The search document (Searchable contract → ``dict[str, Any]``): the slug, the per-locale
+        ``name`` map (Meilisearch searches the nested ``name.en`` / ``name.fr`` … values), and the
+        description. Keyed by id (``get_search_key``)."""
+        name: dict[str, str] = self.translations("name")
+        record: SearchableProduct = {
+            "id": int(self.id),
+            "slug": str(self.slug),
+            "name": name,
             "description": self.description,
-            **{f"name_{locale}": value for locale, value in names.items()},
         }
+        return dict(record)
 
     def category(self) -> Any:
         from app.models.category import Category
