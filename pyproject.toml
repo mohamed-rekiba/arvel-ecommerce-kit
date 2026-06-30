@@ -2,12 +2,19 @@
 name = "arvel-ecommerce-kit"
 version = "0.1.0"
 requires-python = ">=3.14"
-dependencies = ["arvel[standard,oidc,s3,oauth,telemetry]"]
+dependencies = ["arvel[standard,oidc,s3,telemetry]"]
 
 [project.optional-dependencies]
 # aiosqlite: the suite runs on in-process sqlite (see conftest). uv doesn't reliably install it from
 # arvel's nested `standard` self-extra under an editable path dep, so depend on it directly.
-dev = ["pytest", "pytest-asyncio", "faker", "pyright", "ruff", "aiosqlite>=0.22.1"]
+dev = [
+    "aiosqlite>=0.22.1",
+    "faker>=40.26.0",
+    "pyright>=1.1.411",
+    "pytest>=9.1.1",
+    "pytest-asyncio>=1.4.0",
+    "ruff>=0.15.20",
+]
 
 [tool.pyright]
 # the application code is strict-typed (mirrors arvel's own `include = ["src"]` stance — tests use

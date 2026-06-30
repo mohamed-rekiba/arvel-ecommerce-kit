@@ -4,7 +4,7 @@
 # Then `make setup` (migrate + seed). Credentials match .env.example, so no edits are needed.
 services:
   db:
-    image: postgres:16-alpine
+    image: postgres:18-alpine
     environment:
       POSTGRES_USER: arvel
       POSTGRES_PASSWORD: arvel
@@ -19,7 +19,7 @@ services:
 
   # Valkey — Redis-protocol cache + queue backend (wire-compatible, so URLs stay redis://).
   valkey:
-    image: valkey/valkey:8-alpine
+    image: valkey/valkey:9-alpine
     ports: ["6379:6379"]
     healthcheck:
       test: ["CMD", "valkey-cli", "ping"]
@@ -28,12 +28,26 @@ services:
       retries: 10
 
   rabbitmq:
-    image: rabbitmq:3-management-alpine
+    image: rabbitmq:4-management-alpine
     ports: ["5672:5672", "15672:15672"] # AMQP + management UI (guest/guest)
     healthcheck:
       test: ["CMD", "rabbitmq-diagnostics", "-q", "ping"]
       interval: 5s
       timeout: 5s
+      retries: 10
+
+  # Full-text search (Meilisearch) — the product catalog search engine.
+  meilisearch:
+    image: getmeili/meilisearch:v1.11
+    environment:
+      MEILI_MASTER_KEY: arvel-dev-master-key
+      MEILI_ENV: development
+    ports: ["7700:7700"]
+    volumes: ["meili_data:/meili_data"]
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://localhost:7700/health"]
+      interval: 3s
+      timeout: 3s
       retries: 10
 
   # S3-compatible object storage (RustFS). S3 API on :9000.
@@ -49,14 +63,14 @@ services:
   # Admin SSO. Dev mode, no TLS. Create the `arvel` realm + `arvel-admin` client after first boot
   # (or import a realm export) — see README "Admin OIDC".
   keycloak:
-    image: quay.io/keycloak/keycloak:26.0
+    image: quay.io/keycloak/keycloak:26.6
     command: ["start-dev", "--import-realm"] # imports the `arvel` realm on first boot
     environment:
       KC_BOOTSTRAP_ADMIN_USERNAME: admin
       KC_BOOTSTRAP_ADMIN_PASSWORD: admin
     ports: ["8080:8080"]
     volumes:
-      - ./docker/keycloak/realm-export.json:/opt/keycloak/data/import/realm-export.json:ro
+      - ./.docker/keycloak/realm-export.json:/opt/keycloak/data/import/realm-export.json:ro
 
   # Mail catcher — SMTP on :1025, web UI on http://localhost:8025
   mailpit:
@@ -66,3 +80,4 @@ services:
 volumes:
   pgdata:
   rustfs_data:
+  meili_data:

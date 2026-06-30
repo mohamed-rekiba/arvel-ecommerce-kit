@@ -11,7 +11,7 @@ install: ## Install dependencies (arvel from ../arvel)
 env: ## Create .env from the template if missing
 	@test -f .env || (cp .env.example .env && echo "created .env")
 
-up: ## Start all infrastructure (Postgres, Valkey, RabbitMQ, RustFS, Keycloak, Mailpit)
+up: ## Start all infrastructure (Postgres, Valkey, RabbitMQ, Meilisearch, RustFS, Keycloak, Mailpit)
 	docker compose up -d
 
 down: ## Stop all infrastructure
