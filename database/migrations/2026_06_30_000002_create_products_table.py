@@ -14,6 +14,7 @@ class CreateProductsTable(Migration):
             t.integer("price_cents")
             t.string("currency", length=3).default(value="USD")
             t.string("status").default(value="draft").index()
+            t.string("image_path").nullable()  # path on the Storage disk (set on image upload)
             t.timestamps()
 
         schema.create("products", define)

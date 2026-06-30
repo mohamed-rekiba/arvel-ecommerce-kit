@@ -17,6 +17,7 @@ class Product(Model):
         "price_cents": int,
         "currency": str,
         "status": str,
+        "image_path": str,
     }
     __fillable__: ClassVar[list[str]] = [
         "category_id",

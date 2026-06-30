@@ -9,3 +9,4 @@ __pycache__/
 /bootstrap/cache/*.py
 .pytest_cache/
 .ruff_cache/
+storage/

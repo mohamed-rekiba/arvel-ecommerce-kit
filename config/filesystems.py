@@ -10,7 +10,7 @@ from arvel import env
 config = {
     "default": env("FILESYSTEM_DISK", "local"),
     "disks": {
-        "local": {"driver": "local", "root": "storage/app"},
+        "local": {"driver": "local", "root": env("FILESYSTEM_LOCAL_ROOT", "storage/app")},
         "s3": {
             "driver": "s3",
             "key": env("AWS_ACCESS_KEY_ID", ""),

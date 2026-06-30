@@ -17,6 +17,7 @@ from app.controllers import auth_controller as auth
 from app.controllers import cart_controller as cart
 from app.controllers import catalog_controller as catalog
 from app.controllers import checkout_controller as checkout
+from app.controllers import media_controller as media
 from app.controllers import payment_controller as payment
 from app.models.user import User
 
@@ -70,6 +71,10 @@ Route.post("/reset-password", auth.reset_password, name="api.password.reset")
 Route.get("/categories", catalog.categories_index, name="api.categories.index")
 Route.get("/products", catalog.products_index, name="api.products.index")
 Route.get("/products/{slug:str}", catalog.products_show, name="api.products.show")
+Route.get("/products/{slug:str}/image", media.serve_image, name="api.products.image")
+Route.post(
+    "/admin/products/{id:int}/image", media.upload_image, name="api.admin.products.image"
+).middleware(Authenticate).secure("bearer")
 
 # --- Admin product CRUD (auth-guarded by middleware; policy-guarded in the controller) --------
 # Authenticate (401 if guest) runs as route middleware BEFORE body parsing — Laravel ordering; the
