@@ -10,6 +10,7 @@ class CreateCategoriesTable(Migration):
             t.string("name")
             t.string("slug").unique()
             t.foreign_id("parent_id").nullable().constrained("categories")
+            t.boolean("published").default(value=True)  # admin intent; retrievability also needs ancestors published
             t.timestamps()
 
         schema.create("categories", define)

@@ -18,23 +18,27 @@ class Product(HasMedia, Model):
     __table_name__ = "products"
     __fields__: ClassVar[dict[str, type]] = {
         "category_id": int,
+        "vendor_id": int,
         "name": str,
         "slug": str,
         "description": str,
         "price_cents": int,
         "currency": str,
         "status": str,
+        "published": bool,
     }
     __fillable__: ClassVar[list[str]] = [
         "category_id",
+        "vendor_id",
         "name",
         "slug",
         "description",
         "price_cents",
         "currency",
         "status",
+        "published",
     ]
-    __casts__: ClassVar[dict[str, Any]] = {"status": ProductStatus}
+    __casts__: ClassVar[dict[str, Any]] = {"status": ProductStatus, "published": bool}
 
     def register_media_conversions(self) -> list[MediaConversion]:
         """Derived versions generated for every gallery image (Spatie conversions)."""
@@ -47,6 +51,11 @@ class Product(HasMedia, Model):
         from app.models.category import Category
 
         return self.belongs_to(Category)
+
+    def vendor(self) -> Any:
+        from app.models.vendor import Vendor
+
+        return self.belongs_to(Vendor)
 
     def variants(self) -> Any:
         from app.models.product_variant import ProductVariant

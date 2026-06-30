@@ -11,8 +11,10 @@ class Category(Model):
         "name": str,
         "slug": str,
         "parent_id": int,
+        "published": bool,
     }
-    __fillable__: ClassVar[list[str]] = ["name", "slug", "parent_id"]
+    __fillable__: ClassVar[list[str]] = ["name", "slug", "parent_id", "published"]
+    __casts__: ClassVar[dict[str, Any]] = {"published": bool}
 
     def products(self) -> Any:
         from app.models.product import Product

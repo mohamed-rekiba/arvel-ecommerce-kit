@@ -10,7 +10,7 @@ services:
       POSTGRES_PASSWORD: arvel
       POSTGRES_DB: arvel_ecommerce_kit
     ports: ["5432:5432"]
-    volumes: ["pgdata:/var/lib/postgresql/data"]
+    volumes: ["pgdata:/var/lib/postgresql"] # postgres:18 stores data in a version-specific subdir here
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U arvel -d arvel_ecommerce_kit"]
       interval: 3s

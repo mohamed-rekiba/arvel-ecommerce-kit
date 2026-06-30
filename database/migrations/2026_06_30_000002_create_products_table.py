@@ -8,12 +8,14 @@ class CreateProductsTable(Migration):
         def define(t: Blueprint) -> None:
             t.id()
             t.foreign_id("category_id").constrained("categories").index()
+            t.foreign_id("vendor_id").nullable().constrained("vendors").index()
             t.string("name")
             t.string("slug").unique()
             t.text("description").nullable()
             t.integer("price_cents")
             t.string("currency", length=3).default(value="USD")
             t.string("status").default(value="draft").index()
+            t.boolean("published").default(value=False).index()  # retrievability: published ∧ vendor ∧ category-chain
             t.timestamps()
             # product images live in the media library (HasMedia / media table), not a column
 
