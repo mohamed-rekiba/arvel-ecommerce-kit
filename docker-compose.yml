@@ -1,4 +1,7 @@
-# Local infrastructure for the kit. `docker compose up -d` then `arvel migrate && arvel db:seed`.
+# Local infrastructure for the kit — every service the app exercises.
+#   docker compose up -d          # start all
+#   docker compose up -d db redis # or a subset
+# Then `make setup` (migrate + seed). Credentials match .env.example, so no edits are needed.
 services:
   db:
     image: postgres:16-alpine
@@ -6,15 +9,57 @@ services:
       POSTGRES_USER: arvel
       POSTGRES_PASSWORD: arvel
       POSTGRES_DB: arvel_ecommerce_kit
-    ports:
-      - "5432:5432"
-    volumes:
-      - pgdata:/var/lib/postgresql/data
+    ports: ["5432:5432"]
+    volumes: ["pgdata:/var/lib/postgresql/data"]
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U arvel -d arvel_ecommerce_kit"]
       interval: 3s
       timeout: 3s
       retries: 10
 
+  redis:
+    image: redis:7-alpine
+    ports: ["6379:6379"]
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 3s
+      timeout: 3s
+      retries: 10
+
+  rabbitmq:
+    image: rabbitmq:3-management-alpine
+    ports: ["5672:5672", "15672:15672"] # AMQP + management UI (guest/guest)
+    healthcheck:
+      test: ["CMD", "rabbitmq-diagnostics", "-q", "ping"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  # S3-compatible object storage (RustFS). S3 API on :9000.
+  rustfs:
+    image: rustfs/rustfs:latest
+    ports: ["9000:9000"]
+    environment:
+      RUSTFS_ACCESS_KEY: arvel
+      RUSTFS_SECRET_KEY: arvelsecret
+      RUSTFS_VOLUMES: /data
+    volumes: ["rustfs_data:/data"]
+
+  # Admin SSO. Dev mode, no TLS. Create the `arvel` realm + `arvel-admin` client after first boot
+  # (or import a realm export) — see README "Admin OIDC".
+  keycloak:
+    image: quay.io/keycloak/keycloak:26.0
+    command: ["start-dev"]
+    environment:
+      KC_BOOTSTRAP_ADMIN_USERNAME: admin
+      KC_BOOTSTRAP_ADMIN_PASSWORD: admin
+    ports: ["8080:8080"]
+
+  # Mail catcher — SMTP on :1025, web UI on http://localhost:8025
+  mailpit:
+    image: axllent/mailpit:latest
+    ports: ["1025:1025", "8025:8025"]
+
 volumes:
   pgdata:
+  rustfs_data:
