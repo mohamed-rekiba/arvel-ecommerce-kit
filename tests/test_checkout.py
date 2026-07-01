@@ -184,3 +184,45 @@ def test_admin_lists_all_orders(client) -> None:
 
     # a customer cannot list all orders (lacks orders.view)
     assert client.get("/api/admin/orders", headers=customer).status_code == 403
+
+
+def test_shipping_an_order_notifies_the_customer(client) -> None:
+    """The database channel of the notification system: shipping an order stores a notification the
+    customer sees in /api/notifications, and mark-read clears the unread state."""
+    customer = _login(client, "cara@example.com", "secret-cara")
+    admin = _login(client, "admin@example.com", "secret-admin")
+    client.post(
+        "/api/cart/items",
+        json={"product_variant_id": 1, "quantity": 1},
+        headers=customer,
+    )
+    order_id = client.post("/api/checkout", headers=customer).json()["id"]
+
+    # no notifications yet
+    assert client.get("/api/notifications", headers=customer).json() == []
+
+    # advance pending → paid → shipped (the shipped transition notifies)
+    for nxt in ("paid", "shipped"):
+        assert (
+            client.post(
+                f"/api/admin/orders/{order_id}/status",
+                json={"status": nxt},
+                headers=admin,
+            ).status_code
+            == 200
+        )
+
+    notes = client.get("/api/notifications", headers=customer).json()
+    assert len(notes) == 1
+    note = notes[0]
+    assert note["type"] == "OrderShippedNotification"
+    assert f"#{order_id}" in note["message"]
+    assert note["read"] is False
+
+    # mark all read
+    assert client.post("/api/notifications/read", headers=customer).status_code == 200
+    assert client.get("/api/notifications", headers=customer).json()[0]["read"] is True
+
+    # a different customer sees none of it (scoped by notifiable)
+    other = _login(client, "admin@example.com", "secret-admin")
+    assert client.get("/api/notifications", headers=other).json() == []

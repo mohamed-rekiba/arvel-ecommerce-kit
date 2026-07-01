@@ -20,6 +20,8 @@ from app.listeners.record_order_metrics import ORDERS_PLACED_KEY
 from app.models.cart_item import CartItem
 from app.models.order import Order
 from app.models.order_item import OrderItem
+from app.models.user import User
+from app.notifications.order_shipped_notification import OrderShippedNotification
 from app.models.product_variant import ProductVariant
 from app.schemas import MetricsOut, OrderLineOut, OrderOut, OrderStatusIn
 
@@ -162,4 +164,9 @@ async def update_status(request: Request, data: OrderStatusIn) -> OrderOut:
         )
     order.status = target
     await order.save()
+    # Notify the customer when their order ships (mail + database channels → shown in their account).
+    if target is OrderStatus.SHIPPED and order.user_id is not None:
+        customer = await User.find(order.user_id)
+        if customer is not None:
+            await customer.notify(OrderShippedNotification(order.id, order.total_cents))
     return _order_out(order, await order.items().get())

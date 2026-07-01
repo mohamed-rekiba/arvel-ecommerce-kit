@@ -5,11 +5,12 @@ from typing import Any, ClassVar
 
 from arvel import Model
 from arvel.auth import Authenticatable, HasRoles
+from arvel.notifications import Notifiable
 
 from app.enums import UserRole
 
 
-class User(Authenticatable, HasRoles, Model):
+class User(Authenticatable, HasRoles, Notifiable, Model):
     __table_name__ = "users"
     __fields__: ClassVar[dict[str, type]] = {
         "name": str,

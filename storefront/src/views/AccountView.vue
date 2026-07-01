@@ -1,6 +1,6 @@
 <script setup lang="ts">
-import { onMounted, ref } from "vue";
-import { type Order, ApiError, api, formatPrice } from "../api";
+import { computed, onMounted, ref } from "vue";
+import { type Notification, type Order, ApiError, api, formatPrice } from "../api";
 import { useAuth } from "../auth";
 
 const { state, restore, login, register, logout } = useAuth();
@@ -14,6 +14,8 @@ const busy = ref(false);
 
 const orders = ref<Order[]>([]);
 const ordersLoading = ref(false);
+const notifications = ref<Notification[]>([]);
+const unread = computed(() => notifications.value.filter((n) => !n.read).length);
 
 async function loadOrders() {
   ordersLoading.value = true;
@@ -26,13 +28,26 @@ async function loadOrders() {
   }
 }
 
+async function loadNotifications() {
+  try {
+    notifications.value = await api.notifications();
+  } catch {
+    notifications.value = [];
+  }
+}
+
+async function markAllRead() {
+  await api.markNotificationsRead();
+  await loadNotifications();
+}
+
 async function submit() {
   busy.value = true;
   error.value = null;
   try {
     if (mode.value === "login") await login(email.value, password.value);
     else await register(name.value, email.value, password.value);
-    await loadOrders();
+    await Promise.all([loadOrders(), loadNotifications()]);
   } catch (e) {
     error.value =
       e instanceof ApiError && e.status === 401
@@ -48,11 +63,12 @@ async function submit() {
 async function signOut() {
   await logout();
   orders.value = [];
+  notifications.value = [];
 }
 
 onMounted(async () => {
   await restore();
-  if (state.customer) await loadOrders();
+  if (state.customer) await Promise.all([loadOrders(), loadNotifications()]);
 });
 </script>
 
@@ -67,6 +83,22 @@ onMounted(async () => {
         <button class="btn" @click="signOut">Sign out</button>
       </div>
       <p class="account__email">{{ state.customer.email }}</p>
+
+      <section v-if="notifications.length" class="notes">
+        <div class="notes__head">
+          <h2 class="orders__title">
+            Notifications
+            <span v-if="unread" class="notes__badge">{{ unread }}</span>
+          </h2>
+          <button v-if="unread" class="notes__mark" @click="markAllRead">Mark all read</button>
+        </div>
+        <ul class="notes__list">
+          <li v-for="n in notifications" :key="n.id" class="note" :class="{ 'note--unread': !n.read }">
+            <span v-if="!n.read" class="note__dot" aria-hidden="true" />
+            <span class="note__msg">{{ n.message }}</span>
+          </li>
+        </ul>
+      </section>
 
       <section class="orders">
         <h2 class="orders__title">Order history</h2>
@@ -139,6 +171,16 @@ onMounted(async () => {
 .switch { margin-top: var(--space-6); color: var(--color-text-muted); font-size: var(--text-sm); }
 .link { border: none; background: none; padding: 0; color: var(--color-accent); font: inherit; cursor: pointer; text-decoration: underline; text-underline-offset: 2px; }
 .orders__title { font-size: var(--text-xl); margin-bottom: var(--space-5); }
+.notes { margin-bottom: var(--space-10); }
+.notes__head { display: flex; align-items: center; justify-content: space-between; margin-bottom: var(--space-4); }
+.notes__head .orders__title { margin-bottom: 0; display: inline-flex; align-items: center; gap: var(--space-3); }
+.notes__badge { display: inline-flex; align-items: center; justify-content: center; min-width: 1.4rem; height: 1.4rem; padding: 0 6px; background: var(--color-accent); color: var(--color-text-inverse); border-radius: var(--radius-full); font-family: var(--font-text); font-size: var(--text-xs); font-weight: var(--weight-semibold); }
+.notes__mark { border: none; background: none; padding: 0; color: var(--color-accent); font: inherit; font-size: var(--text-sm); cursor: pointer; text-decoration: underline; text-underline-offset: 2px; }
+.notes__list { list-style: none; margin: 0; padding: 0; }
+.note { display: flex; align-items: center; gap: var(--space-3); padding: var(--space-3) 0; border-top: 1px solid var(--color-border); color: var(--color-text-muted); }
+.note--unread { color: var(--color-text); }
+.note__dot { width: 7px; height: 7px; border-radius: 50%; background: var(--color-accent); flex-shrink: 0; }
+.note__msg { font-size: var(--text-sm); }
 .orders__list { list-style: none; margin: 0; padding: 0; }
 .order { display: grid; grid-template-columns: 1fr auto auto; align-items: center; gap: var(--space-4); padding: var(--space-4) 0; border-top: 1px solid var(--color-border); }
 .order__id { font-family: var(--font-display); font-size: var(--text-lg); margin-right: var(--space-3); }

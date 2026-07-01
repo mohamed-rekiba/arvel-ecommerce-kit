@@ -84,6 +84,14 @@ export interface Customer {
   email: string;
 }
 
+export interface Notification {
+  id: string;
+  type: string;
+  message: string;
+  read: boolean;
+  created_at: string | null;
+}
+
 // The guest cart is keyed by an X-Cart-Token the server issues on first write; we persist it.
 const CART_TOKEN_KEY = "arvel_cart_token";
 const cartToken = {
@@ -177,6 +185,12 @@ export const api = {
   },
   myOrders() {
     return get<Order[]>(`/orders`);
+  },
+  notifications() {
+    return get<Notification[]>(`/notifications`);
+  },
+  markNotificationsRead() {
+    return request<{ message: string }>("POST", `/notifications/read`);
   },
   async logout() {
     try {

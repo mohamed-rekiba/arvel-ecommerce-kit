@@ -136,6 +136,14 @@ class MessageOut(Schema):
     message: str
 
 
+class NotificationOut(Schema):
+    id: str
+    type: str
+    message: str
+    read: bool
+    created_at: str | None
+
+
 # --- RBAC / audit (admin) -----------------------------------------------------
 
 

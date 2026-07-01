@@ -20,6 +20,7 @@ from app.controllers import cart_controller as cart
 from app.controllers import catalog_controller as catalog
 from app.controllers import checkout_controller as checkout
 from app.controllers import media_controller as media
+from app.controllers import notification_controller as notifications
 from app.controllers import payment_controller as payment
 from app.models.user import User
 from app.schemas import CredentialsIn, TokenOut, UserOut
@@ -157,6 +158,13 @@ Route.get(
 Route.get("/orders", checkout.my_orders, name="api.orders.index").middleware(
     Authenticate
 ).secure("bearer")
+# --- Customer notifications (database channel of the notification system) ------
+Route.get(
+    "/notifications", notifications.index, name="api.notifications.index"
+).middleware(Authenticate).secure("bearer")
+Route.post(
+    "/notifications/read", notifications.mark_read, name="api.notifications.read"
+).status(200).middleware(Authenticate).secure("bearer")
 Route.get(
     "/admin/orders", checkout.admin_orders_index, name="api.admin.orders.index"
 ).middleware(Authenticate).secure("bearer")
