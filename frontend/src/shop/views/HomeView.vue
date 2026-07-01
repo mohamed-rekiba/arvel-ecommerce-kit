@@ -10,6 +10,7 @@ const loading = ref(true);
 const hero = computed(() => products.value[0] ?? null);
 const heroImage = computed(() => hero.value?.gallery[0]?.url ?? hero.value?.gallery[0]?.preview_url ?? null);
 const featured = computed(() => products.value.slice(1, 7));
+const more = computed(() => products.value.slice(7, 13));
 
 onMounted(async () => {
   try {
@@ -76,6 +77,26 @@ onMounted(async () => {
       </div>
     </section>
 
+    <!-- editorial band -->
+    <section class="band wrap">
+      <div class="band__inner">
+        <div>
+          <span class="eyebrow" style="color: var(--blush-300)">The Arvel promise</span>
+          <h2>Free 30-day returns.<br />Considered, not disposable.</h2>
+        </div>
+        <RouterLink :to="{ name: 'catalog' }" class="band__cta">Shop the collection →</RouterLink>
+      </div>
+    </section>
+
+    <!-- more to explore -->
+    <section v-if="more.length" class="wrap block">
+      <div class="head">
+        <div><span class="eyebrow">The rest</span><h2>More to explore</h2></div>
+        <RouterLink :to="{ name: 'catalog' }" class="head__link">Browse all <span aria-hidden="true">→</span></RouterLink>
+      </div>
+      <div class="grid"><ProductCard v-for="p in more" :key="p.id" :product="p" /></div>
+    </section>
+
     <!-- brand statement -->
     <section class="say">
       <p>“The best technology is the kind you stop noticing — it simply works, and then gets out of the way.”</p>
@@ -135,6 +156,12 @@ onMounted(async () => {
 .tile:hover .tile__go span { transform: translateX(4px); }
 
 /* brand statement */
+.band { margin-top: clamp(4rem, 9vw, 7.5rem); }
+.band__inner { background: linear-gradient(120deg, #011627, #283D3B); color: #F3EDE7; border-radius: var(--radius-xl); padding: clamp(2.5rem, 5vw, 4rem); display: flex; align-items: center; justify-content: space-between; gap: 28px; box-shadow: var(--shadow-2); }
+.band__inner h2 { font-family: var(--font-display); font-size: clamp(1.6rem, 3vw, 2.4rem); font-weight: 700; letter-spacing: -.02em; line-height: 1.16; margin-top: 10px; }
+.band__cta { flex: none; height: 48px; padding: 0 24px; border-radius: var(--radius-full); background: var(--blush-300); color: var(--ink-900); font-weight: 700; display: inline-flex; align-items: center; text-decoration: none; }
+.band__cta:hover { opacity: .92; }
+
 .say { margin-top: clamp(4rem, 9vw, 7.5rem); border-top: 1px solid var(--border); }
 .say p { max-width: 900px; margin: 0 auto; padding: clamp(3.5rem, 8vw, 6.5rem) clamp(1.25rem, 5vw, 3.5rem); text-align: center; font-family: var(--font-display); font-size: clamp(1.5rem, 3vw, 2.4rem); line-height: 1.35; letter-spacing: -.01em; color: var(--text-muted); font-weight: 600; }
 
