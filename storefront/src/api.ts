@@ -78,6 +78,12 @@ export interface Order {
   items: OrderLine[];
 }
 
+export interface Customer {
+  id: number;
+  name: string;
+  email: string;
+}
+
 // The guest cart is keyed by an X-Cart-Token the server issues on first write; we persist it.
 const CART_TOKEN_KEY = "arvel_cart_token";
 const cartToken = {
@@ -87,17 +93,33 @@ const cartToken = {
   },
 };
 
+// A signed-in customer holds a bearer personal-access token (Sanctum-style).
+const AUTH_TOKEN_KEY = "arvel_auth_token";
+export const authToken = {
+  get: () => localStorage.getItem(AUTH_TOKEN_KEY),
+  set: (t: string) => localStorage.setItem(AUTH_TOKEN_KEY, t),
+  clear: () => localStorage.removeItem(AUTH_TOKEN_KEY),
+};
+
+export class ApiError extends Error {
+  constructor(public status: number, message: string) {
+    super(message);
+  }
+}
+
 async function request<T>(method: string, path: string, body?: unknown): Promise<T> {
   const headers: Record<string, string> = { Accept: "application/json" };
-  const token = cartToken.get();
-  if (token) headers["X-Cart-Token"] = token;
+  const cart = cartToken.get();
+  if (cart) headers["X-Cart-Token"] = cart;
+  const auth = authToken.get();
+  if (auth) headers["Authorization"] = `Bearer ${auth}`;
   if (body !== undefined) headers["Content-Type"] = "application/json";
   const res = await fetch(`/api${path}`, {
     method,
     headers,
     body: body !== undefined ? JSON.stringify(body) : undefined,
   });
-  if (!res.ok) throw new Error(`API ${res.status} for ${method} ${path}`);
+  if (!res.ok) throw new ApiError(res.status, `API ${res.status} for ${method} ${path}`);
   return (await res.json()) as T;
 }
 
@@ -139,6 +161,29 @@ export const api = {
     const order = await request<Order>("POST", `/checkout`);
     localStorage.removeItem(CART_TOKEN_KEY); // the cart was consumed
     return order;
+  },
+  async register(name: string, email: string, password: string) {
+    const res = await request<{ token: string }>("POST", `/register`, { name, email, password });
+    authToken.set(res.token);
+    return res.token;
+  },
+  async login(email: string, password: string) {
+    const res = await request<{ token: string }>("POST", `/login`, { email, password });
+    authToken.set(res.token);
+    return res.token;
+  },
+  me() {
+    return get<Customer>(`/user`);
+  },
+  myOrders() {
+    return get<Order[]>(`/orders`);
+  },
+  async logout() {
+    try {
+      await request("POST", `/logout`);
+    } finally {
+      authToken.clear();
+    }
   },
 };
 

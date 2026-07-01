@@ -1,22 +1,149 @@
 <script setup lang="ts">
-// Placeholder account view — the storefront checkout is guest-first (cart by X-Cart-Token). Full
-// customer auth (register/login via the bearer-token API) is a follow-up; this documents the entry point.
+import { onMounted, ref } from "vue";
+import { type Order, ApiError, api, formatPrice } from "../api";
+import { useAuth } from "../auth";
+
+const { state, restore, login, register, logout } = useAuth();
+
+const mode = ref<"login" | "register">("login");
+const name = ref("");
+const email = ref("");
+const password = ref("");
+const error = ref<string | null>(null);
+const busy = ref(false);
+
+const orders = ref<Order[]>([]);
+const ordersLoading = ref(false);
+
+async function loadOrders() {
+  ordersLoading.value = true;
+  try {
+    orders.value = await api.myOrders();
+  } catch {
+    orders.value = [];
+  } finally {
+    ordersLoading.value = false;
+  }
+}
+
+async function submit() {
+  busy.value = true;
+  error.value = null;
+  try {
+    if (mode.value === "login") await login(email.value, password.value);
+    else await register(name.value, email.value, password.value);
+    await loadOrders();
+  } catch (e) {
+    error.value =
+      e instanceof ApiError && e.status === 401
+        ? "Those credentials don't match."
+        : e instanceof ApiError && e.status === 422
+          ? "Please check your details and try again."
+          : "Something went wrong. Please try again.";
+  } finally {
+    busy.value = false;
+  }
+}
+
+async function signOut() {
+  await logout();
+  orders.value = [];
+}
+
+onMounted(async () => {
+  await restore();
+  if (state.customer) await loadOrders();
+});
 </script>
 
 <template>
   <main class="account">
     <p class="eyebrow">Your account</p>
-    <h1>Guest checkout</h1>
-    <p class="account__note">
-      You're shopping as a guest — your cart travels with you via a secure token, so nothing is lost
-      between visits. Sign-in and order history are served by the API (register / login) and arrive here next.
-    </p>
-    <RouterLink class="btn btn--primary" to="/">Back to the collection</RouterLink>
+
+    <!-- signed in -->
+    <template v-if="state.customer">
+      <div class="account__head">
+        <h1>Hello, {{ state.customer.name }}</h1>
+        <button class="btn" @click="signOut">Sign out</button>
+      </div>
+      <p class="account__email">{{ state.customer.email }}</p>
+
+      <section class="orders">
+        <h2 class="orders__title">Order history</h2>
+        <p v-if="ordersLoading" class="muted">Loading…</p>
+        <p v-else-if="orders.length === 0" class="muted">You haven't placed any orders yet.</p>
+        <ul v-else class="orders__list">
+          <li v-for="o in orders" :key="o.id" class="order">
+            <div>
+              <span class="order__id">Order #{{ o.id }}</span>
+              <span class="order__items">{{ o.items.length }} item{{ o.items.length === 1 ? "" : "s" }}</span>
+            </div>
+            <span class="order__status">{{ o.status }}</span>
+            <span class="order__total">{{ formatPrice(o.total_cents) }}</span>
+          </li>
+        </ul>
+      </section>
+    </template>
+
+    <!-- signed out -->
+    <template v-else>
+      <h1>{{ mode === "login" ? "Sign in" : "Create an account" }}</h1>
+      <p class="account__sub">
+        {{ mode === "login" ? "Access your orders and check out faster." : "Save your details and track every order." }}
+      </p>
+      <form class="form" @submit.prevent="submit">
+        <label v-if="mode === 'register'" class="field">
+          <span>Name</span>
+          <input v-model="name" type="text" autocomplete="name" required />
+        </label>
+        <label class="field">
+          <span>Email</span>
+          <input v-model="email" type="email" autocomplete="email" required />
+        </label>
+        <label class="field">
+          <span>Password</span>
+          <input v-model="password" type="password" :autocomplete="mode === 'login' ? 'current-password' : 'new-password'" required />
+        </label>
+        <p v-if="error" class="error" role="alert">{{ error }}</p>
+        <button class="btn btn--primary submit" :disabled="busy" type="submit">
+          {{ busy ? "Please wait…" : mode === "login" ? "Sign in" : "Create account" }}
+        </button>
+      </form>
+      <p class="switch">
+        <template v-if="mode === 'login'">
+          New here? <button class="link" @click="mode = 'register'">Create an account</button>
+        </template>
+        <template v-else>
+          Already have an account? <button class="link" @click="mode = 'login'">Sign in</button>
+        </template>
+      </p>
+    </template>
   </main>
 </template>
 
 <style scoped>
-.account { max-width: 560px; margin: 0 auto; padding: var(--space-20) var(--container-pad) 0; }
-.account h1 { font-size: var(--text-3xl); margin: var(--space-2) 0 var(--space-5); }
-.account__note { color: var(--color-text-muted); line-height: var(--leading-normal); margin-bottom: var(--space-8); max-width: 52ch; }
+.account { max-width: 480px; margin: 0 auto; padding: var(--space-20) var(--container-pad) 0; }
+.account__head { display: flex; align-items: baseline; justify-content: space-between; gap: var(--space-4); margin: var(--space-2) 0 var(--space-1); }
+.account__head h1 { font-size: var(--text-3xl); }
+.account__head .btn { white-space: nowrap; flex-shrink: 0; }
+.account__email { color: var(--color-text-muted); margin: 0 0 var(--space-10); }
+.account h1 { font-size: var(--text-3xl); margin: var(--space-2) 0 var(--space-3); }
+.account__sub { color: var(--color-text-muted); margin: 0 0 var(--space-8); }
+.form { display: flex; flex-direction: column; gap: var(--space-4); }
+.field { display: flex; flex-direction: column; gap: var(--space-2); }
+.field span { font-size: var(--text-sm); font-weight: var(--weight-medium); }
+.field input { padding: var(--space-3) var(--space-4); border: 1px solid var(--color-border-strong); border-radius: var(--radius-md); background: var(--color-bg); font: inherit; }
+.field input:focus { outline: none; border-color: var(--color-text); }
+.error { color: var(--color-danger); font-size: var(--text-sm); margin: 0; }
+.submit { width: 100%; padding: var(--space-4); margin-top: var(--space-2); }
+.switch { margin-top: var(--space-6); color: var(--color-text-muted); font-size: var(--text-sm); }
+.link { border: none; background: none; padding: 0; color: var(--color-accent); font: inherit; cursor: pointer; text-decoration: underline; text-underline-offset: 2px; }
+.orders__title { font-size: var(--text-xl); margin-bottom: var(--space-5); }
+.orders__list { list-style: none; margin: 0; padding: 0; }
+.order { display: grid; grid-template-columns: 1fr auto auto; align-items: center; gap: var(--space-4); padding: var(--space-4) 0; border-top: 1px solid var(--color-border); }
+.order__id { font-family: var(--font-display); font-size: var(--text-lg); margin-right: var(--space-3); }
+.order__items { color: var(--color-text-muted); font-size: var(--text-sm); }
+.order__status { padding: 2px var(--space-3); background: var(--color-accent-soft); color: var(--color-accent); border-radius: var(--radius-full); font-size: var(--text-xs); text-transform: capitalize; }
+.order__total { font-weight: var(--weight-medium); min-width: 4rem; text-align: right; }
+.muted { color: var(--color-text-muted); }
 </style>
