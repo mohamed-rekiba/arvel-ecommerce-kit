@@ -1,120 +1,162 @@
 <script setup lang="ts">
-import { onMounted, ref, watch } from "vue";
-import { type Paginated, type Product, api } from "../api";
+import Select from "primevue/select";
+import { computed, onMounted, ref, watch } from "vue";
+import { useRoute, useRouter } from "vue-router";
+import { type Category, type Product, api } from "../api";
 import ProductCard from "../components/ProductCard.vue";
 
+const route = useRoute();
+const router = useRouter();
+
 const products = ref<Product[]>([]);
-const page = ref(1);
-const lastPage = ref(1);
+const categories = ref<Category[]>([]);
 const total = ref(0);
-const query = ref("");
-const status = ref<"idle" | "loading" | "error" | "ready">("idle");
+const lastPage = ref(1);
+const status = ref<"loading" | "error" | "ready">("loading");
+
+const sortOptions = [
+  { label: "Featured", value: "featured" },
+  { label: "Price: low to high", value: "price_asc" },
+  { label: "Price: high to low", value: "price_desc" },
+  { label: "Newest", value: "newest" },
+  { label: "Name", value: "name" },
+];
+
+// filters are the URL — shareable, and the header search drives ?q here
+const activeCategory = computed(() => (route.query.category as string) || "");
+const q = computed(() => (route.query.q as string) || "");
+const sort = computed(() => (route.query.sort as string) || "featured");
+const page = computed(() => Number(route.query.page) || 1);
+const activeName = computed(
+  () => categories.value.find((c) => c.slug === activeCategory.value)?.translation.name ?? "All products",
+);
+
+function setQuery(patch: Record<string, string | number | undefined>) {
+  const query = { ...route.query, ...patch };
+  for (const k of Object.keys(query)) if (!query[k]) delete query[k];
+  router.replace({ name: "catalog", query });
+}
 
 async function load() {
   status.value = "loading";
   try {
-    const res: Paginated<Product> = await api.products({ q: query.value || undefined, page: page.value });
+    const res = await api.products({
+      q: q.value || undefined,
+      category: activeCategory.value || undefined,
+      sort: sort.value,
+      page: page.value,
+    });
     products.value = res.data;
-    lastPage.value = res.last_page;
     total.value = res.total;
+    lastPage.value = res.last_page;
     status.value = "ready";
   } catch {
     status.value = "error";
   }
 }
 
-onMounted(load);
-watch(page, load);
-
-let debounce: ReturnType<typeof setTimeout>;
-watch(query, () => {
-  clearTimeout(debounce);
-  debounce = setTimeout(() => {
-    page.value = 1;
-    load();
-  }, 250);
+onMounted(async () => {
+  categories.value = await api.categories().catch(() => []);
+  await load();
 });
+watch(() => route.query, load);
 </script>
 
 <template>
-  <section class="hero">
-    <div class="hero__inner">
-      <p class="eyebrow">Arvel Shop — Collection {{ new Date().getFullYear() }}</p>
-      <h1 class="hero__title">Considered goods,<br /><em>calmly presented.</em></h1>
-      <p class="hero__sub">
-        A reference storefront built on the arvel framework — where the product and the type do the work.
-      </p>
-    </div>
-  </section>
-
-  <main class="catalog">
-    <div class="catalog__bar">
-      <p class="catalog__count">
-        <span v-if="status === 'ready'">{{ total }} {{ total === 1 ? "product" : "products" }}</span>
-        <span v-else>&nbsp;</span>
-      </p>
-      <label class="search">
-        <svg class="search__icon" viewBox="0 0 24 24" width="16" height="16" aria-hidden="true">
-          <circle cx="11" cy="11" r="7" fill="none" stroke="currentColor" stroke-width="2" />
-          <line x1="16.5" y1="16.5" x2="21" y2="21" stroke="currentColor" stroke-width="2" stroke-linecap="round" />
-        </svg>
-        <span class="visually-hidden">Search products</span>
-        <input v-model="query" type="search" placeholder="Search the collection" />
-      </label>
-    </div>
-
-    <div v-if="status === 'loading'" class="grid" aria-busy="true">
-      <div v-for="n in 8" :key="n" class="skeleton" />
-    </div>
-
-    <div v-else-if="status === 'error'" class="state" role="alert">
-      <p>We couldn't load the collection.</p>
-      <button class="btn" @click="load">Try again</button>
-    </div>
-
-    <div v-else-if="products.length === 0" class="state">
-      <p>Nothing matches “{{ query }}”.</p>
-      <button v-if="query" class="btn" @click="query = ''">Clear search</button>
-    </div>
-
-    <template v-else>
-      <div class="grid">
-        <ProductCard v-for="p in products" :key="p.id" :product="p" />
+  <div class="shop-page">
+    <aside class="filters">
+      <div class="filters__group">
+        <h3 class="filters__h">Categories</h3>
+        <ul class="cats">
+          <li>
+            <button class="cat" :class="{ on: !activeCategory }" @click="setQuery({ category: undefined, page: undefined })">
+              All products
+            </button>
+          </li>
+          <li v-for="c in categories" :key="c.id">
+            <button
+              class="cat"
+              :class="{ on: c.slug === activeCategory }"
+              @click="setQuery({ category: c.slug, page: undefined })"
+            >
+              {{ c.translation.name }}
+            </button>
+          </li>
+        </ul>
       </div>
-      <nav v-if="lastPage > 1" class="pager" aria-label="Pagination">
-        <button class="btn" :disabled="page <= 1" @click="page--">Previous</button>
-        <span class="pager__label">Page {{ page }} of {{ lastPage }}</span>
-        <button class="btn" :disabled="page >= lastPage" @click="page++">Next</button>
-      </nav>
-    </template>
-  </main>
+    </aside>
+
+    <main class="results">
+      <div class="results__head">
+        <div>
+          <p class="eyebrow">Shop</p>
+          <h1>{{ activeName }}</h1>
+          <p class="count">
+            <span v-if="status === 'ready'">{{ total }} {{ total === 1 ? "product" : "products" }}</span>
+            <span v-else>&nbsp;</span>
+          </p>
+        </div>
+        <Select
+          class="sort"
+          :model-value="sort"
+          :options="sortOptions"
+          option-label="label"
+          option-value="value"
+          @update:model-value="(v: string) => setQuery({ sort: v, page: undefined })"
+        />
+      </div>
+
+      <div v-if="status === 'loading'" class="grid"><div v-for="n in 9" :key="n" class="sk" /></div>
+      <div v-else-if="status === 'error'" class="state">
+        <p>We couldn't load the collection.</p>
+        <button class="link" @click="load">Try again</button>
+      </div>
+      <div v-else-if="!products.length" class="state">
+        <p v-if="q">Nothing matches “{{ q }}”.</p>
+        <p v-else>No products in this category yet.</p>
+        <button class="link" @click="setQuery({ q: undefined, category: undefined })">Clear filters</button>
+      </div>
+      <template v-else>
+        <div class="grid"><ProductCard v-for="p in products" :key="p.id" :product="p" /></div>
+        <nav v-if="lastPage > 1" class="pager" aria-label="Pagination">
+          <button class="link" :disabled="page <= 1" @click="setQuery({ page: page - 1 })">← Prev</button>
+          <span class="pager__n">Page {{ page }} of {{ lastPage }}</span>
+          <button class="link" :disabled="page >= lastPage" @click="setQuery({ page: page + 1 })">Next →</button>
+        </nav>
+      </template>
+    </main>
+  </div>
 </template>
 
 <style scoped>
-.hero { border-bottom: 1px solid var(--color-border); }
-.hero__inner { max-width: var(--container-max); margin: 0 auto; padding: var(--space-20) var(--container-pad) var(--space-16); }
-.hero__title { font-size: clamp(2.5rem, 7vw, var(--text-5xl)); margin: var(--space-4) 0 var(--space-5); max-width: 16ch; }
-.hero__title em { font-style: italic; color: var(--color-accent); }
-.hero__sub { color: var(--color-text-muted); font-size: var(--text-lg); max-width: 46ch; line-height: var(--leading-snug); }
+.shop-page { max-width: 1280px; margin: 0 auto; padding: clamp(1.5rem, 4vw, 3rem) clamp(1.25rem, 5vw, 3.5rem) 0; display: grid; grid-template-columns: 220px 1fr; gap: clamp(2rem, 4vw, 3.5rem); }
+.eyebrow { font-size: 11px; text-transform: uppercase; letter-spacing: .2em; color: var(--accent); font-weight: 600; }
+.filters { position: sticky; top: 96px; align-self: start; }
+.filters__h { font-size: 11px; text-transform: uppercase; letter-spacing: .14em; color: var(--text-subtle); font-weight: 600; margin: 0 0 14px; }
+.cats { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 2px; }
+.cat { display: block; width: 100%; text-align: left; border: 0; background: none; padding: 8px 10px; border-radius: var(--radius-md); font: inherit; font-size: 14px; color: var(--text-muted); cursor: pointer; transition: background var(--motion-base), color var(--motion-base); }
+.cat:hover { background: color-mix(in srgb, var(--text) 5%, transparent); color: var(--text); }
+.cat.on { background: color-mix(in srgb, var(--accent) 14%, transparent); color: var(--accent); font-weight: 600; }
 
-.catalog { max-width: var(--container-max); margin: 0 auto; padding: var(--space-10) var(--container-pad) 0; }
-.catalog__bar { display: flex; align-items: center; justify-content: space-between; gap: var(--space-4); margin-bottom: var(--space-8); flex-wrap: wrap; }
-.catalog__count { color: var(--color-text-muted); font-size: var(--text-sm); margin: 0; }
-.search { position: relative; display: inline-flex; align-items: center; }
-.search__icon { position: absolute; left: var(--space-4); color: var(--color-text-muted); pointer-events: none; }
-.search input {
-  font: inherit; padding: var(--space-3) var(--space-4) var(--space-3) var(--space-10);
-  border: 1px solid var(--color-border-strong); border-radius: var(--radius-full);
-  background: var(--color-bg); min-width: 18rem; transition: border-color var(--motion-base) var(--ease);
+.results__head { display: flex; align-items: flex-end; justify-content: space-between; gap: 20px; margin-bottom: clamp(1.5rem, 3vw, 2.25rem); }
+.results__head h1 { font-family: var(--font-display); font-size: clamp(1.6rem, 3vw, 2.4rem); font-weight: 700; letter-spacing: -.02em; margin: 8px 0 4px; }
+.count { color: var(--text-subtle); font-size: 13px; margin: 0; }
+.sort { min-width: 200px; }
+
+.grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: clamp(1.25rem, 2.5vw, 2.25rem); }
+.sk { aspect-ratio: 4/5; border-radius: var(--radius-lg); background: var(--surface-2); animation: pulse 1.5s ease-in-out infinite; }
+@keyframes pulse { 50% { opacity: .55; } }
+.state { text-align: center; padding: 80px 0; color: var(--text-subtle); }
+.link { border: 0; background: none; color: var(--accent); font: inherit; font-weight: 600; cursor: pointer; margin-top: 12px; }
+.link:disabled { opacity: .4; cursor: default; }
+.pager { display: flex; align-items: center; justify-content: center; gap: 24px; margin-top: 48px; }
+.pager__n { color: var(--text-subtle); font-size: 13px; }
+
+@media (max-width: 900px) {
+  .shop-page { grid-template-columns: 1fr; }
+  .filters { position: static; }
+  .cats { flex-direction: row; flex-wrap: wrap; }
+  .grid { grid-template-columns: repeat(2, 1fr); }
 }
-.search input:focus { outline: none; border-color: var(--color-text); }
-
-.grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: var(--space-8) var(--space-6); }
-.skeleton { aspect-ratio: 3 / 4; background: var(--color-surface); border-radius: var(--radius-md); animation: pulse 1.4s var(--ease) infinite; }
-@keyframes pulse { 0%,100% { opacity: 1; } 50% { opacity: 0.55; } }
-.state { text-align: center; padding: var(--space-24) 0; color: var(--color-text-muted); }
-.state .btn { margin-top: var(--space-4); }
-.pager { display: flex; align-items: center; justify-content: center; gap: var(--space-6); margin-top: var(--space-16); }
-.pager__label { color: var(--color-text-muted); font-size: var(--text-sm); }
-.visually-hidden { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); }
+@media (max-width: 520px) { .grid { grid-template-columns: 1fr; } }
 </style>

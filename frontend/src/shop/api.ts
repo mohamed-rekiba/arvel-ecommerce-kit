@@ -139,10 +139,11 @@ function withCartToken(cart: Cart): Cart {
 }
 
 export const api = {
-  products(params: { q?: string; category?: string; page?: number } = {}) {
+  products(params: { q?: string; category?: string; sort?: string; page?: number } = {}) {
     const qs = new URLSearchParams();
     if (params.q) qs.set("q", params.q);
     if (params.category) qs.set("category", params.category);
+    if (params.sort) qs.set("sort", params.sort);
     if (params.page) qs.set("page", String(params.page));
     const suffix = qs.toString() ? `?${qs}` : "";
     return get<Paginated<Product>>(`/products${suffix}`);
