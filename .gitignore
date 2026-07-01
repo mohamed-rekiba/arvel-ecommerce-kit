@@ -11,3 +11,5 @@ __pycache__/
 .ruff_cache/
 storage/
 .vite/
+node_modules/
+dist/

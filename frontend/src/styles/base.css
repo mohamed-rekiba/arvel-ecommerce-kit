@@ -1,0 +1,25 @@
+/* global base — everything else is component-scoped and token-driven */
+*,*::before,*::after { box-sizing: border-box; }
+html { -webkit-text-size-adjust: 100%; }
+body {
+  margin: 0;
+  font-family: var(--font-text);
+  font-size: 15px;
+  line-height: var(--leading-normal);
+  color: var(--text);
+  background: var(--bg);
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+h1,h2,h3,h4 { font-family: var(--font-display); letter-spacing: var(--tracking-tight); line-height: var(--leading-tight); margin: 0; }
+a { color: inherit; }
+img,svg { display: block; max-width: 100%; }
+button { font: inherit; }
+:where(a,button,input,select,textarea,[tabindex]):focus-visible {
+  outline: 2px solid var(--focus); outline-offset: 2px; border-radius: 4px;
+}
+.tnum { font-variant-numeric: tabular-nums; }
+::selection { background: color-mix(in srgb, var(--accent) 30%, transparent); }
+@media (prefers-reduced-motion: reduce) {
+  *,*::before,*::after { animation-duration: .01ms !important; animation-iteration-count: 1 !important; transition-duration: .01ms !important; }
+}
