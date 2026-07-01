@@ -7,6 +7,7 @@ schemas are generated.
 
 from typing import Any
 
+from arvel import config
 from arvel.http import Request
 from arvel.localization import current_locale
 from arvel.media import Media
@@ -20,6 +21,17 @@ from app.schemas import CategoryOut, GalleryImageOut, ProductOut, ProductPage, V
 def _in_locale(query: Any) -> Any:
     """Constrained eager-load callback — project the relation in the active locale (its `translation`)."""
     return query.in_locale()
+
+
+async def _apply_search(query: Any, q: str) -> Any:
+    """Full-text `q` search. With a real engine (Meilisearch) go through `Product.search` (Scout) and
+    constrain the query to the hit ids — which the visibility scope already intersects with the
+    retrievable set. Otherwise (the in-process array engine / tests) fall back to a locale-aware SQL
+    match on `translations->'<loc>'->>'name'`, which needs no separately-populated index."""
+    if config("search.driver", "array") == "meilisearch":
+        hits = await Product.search(q)
+        return query.where_in("id", [h.id for h in hits] or [0])  # empty hits → match nothing
+    return query.where_json_like("translations", f"{current_locale.get()}->name", f"%{q}%")
 
 
 def variant_out(v: Product) -> VariantOut:
@@ -81,8 +93,8 @@ async def products_index(
         .with_visibility(only_visible=True)
         .in_locale()
     )
-    if q:  # search the active locale's name inside the translations jsonb (translations->'<loc>'->>'name')
-        query = query.where_json_like("translations", f"{current_locale.get()}->name", f"%{q}%")
+    if q:
+        query = await _apply_search(query, q)
     if category:
         query = query.where("category_id", category)
 

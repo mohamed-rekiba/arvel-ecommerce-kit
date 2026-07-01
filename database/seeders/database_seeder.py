@@ -76,6 +76,7 @@ class DatabaseSeeder(Seeder):
         await self._product("Draft Phone", phones.id, acme.id, published=False)  # not published
 
         await CatalogVisibilityService().refresh()
+        await Product.make_all_searchable()  # populate the search engine (Scout scout:import parity)
 
     @staticmethod
     async def _product(name: str, category_id: int, vendor_id: int, *, published: bool) -> Product:
