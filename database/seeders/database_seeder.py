@@ -23,33 +23,49 @@ from database.seeders.roles_permissions_seeder import RolesPermissionsSeeder
 # curated, clean PRODUCT photos (Unsplash) per product type — a real studio shot of the actual item,
 # not a keyword-tagged random photo. Fetched via the Http client + stored through the media library.
 _UNSPLASH = {
-    "headphones": "1505740420928-5e560c06d30e", "earbuds": "1590658268037-6bf12165a8df",
-    "speaker": "1608043152269-423dbba4e7e1", "smartphone": "1511707171634-5f897ff02aa9",
-    "phone": "1511707171634-5f897ff02aa9", "laptop": "1496181133206-80ce9b88a853",
-    "monitor": "1527443224154-c4a3942d3acf", "smartwatch": "1523275335684-37898b6baf30",
-    "camera": "1502920917128-1aa500764cbd", "keyboard": "1587829741301-dc798b83add3",
-    "mouse": "1527814050087-3793815479db", "charger": "1588872657578-7efd1f1555ed",
+    "headphones": "1505740420928-5e560c06d30e",
+    "earbuds": "1590658268037-6bf12165a8df",
+    "speaker": "1608043152269-423dbba4e7e1",
+    "smartphone": "1511707171634-5f897ff02aa9",
+    "phone": "1511707171634-5f897ff02aa9",
+    "laptop": "1496181133206-80ce9b88a853",
+    "monitor": "1527443224154-c4a3942d3acf",
+    "smartwatch": "1523275335684-37898b6baf30",
+    "camera": "1502920917128-1aa500764cbd",
+    "keyboard": "1587829741301-dc798b83add3",
+    "mouse": "1527814050087-3793815479db",
+    "charger": "1588872657578-7efd1f1555ed",
     "bag": "1553062407-98eeb64c6a62",
 }
 # two crops of the shot → a small gallery (test_product_images asserts the first product has 2 images)
-_IMG_PARAMS = ["?w=900&h=1125&fit=crop&q=80", "?w=900&h=1125&fit=crop&crop=entropy&q=80"]
+_IMG_PARAMS = [
+    "?w=900&h=1125&fit=crop&q=80",
+    "?w=900&h=1125&fit=crop&crop=entropy&q=80",
+]
 _GALLERY_SIZE = 2
 
 
 class DatabaseSeeder(Seeder):
     async def run(self) -> None:
         images = ProductImageService()
-        await RolesPermissionsSeeder().run()  # permissions, roles, one back-office user per role
+        await (
+            RolesPermissionsSeeder().run()
+        )  # permissions, roles, one back-office user per role
         await UserFactory().create(name="Test User", email="test@example.com")
 
         # --- vendors (brands) -------------------------------------------------
-        vendors = {}
+        vendors: dict[str, Vendor] = {}
         for name, slug in [
-            ("Nordic Audio", "nordic-audio"), ("Lumen", "lumen"),
-            ("Cobalt", "cobalt"), ("Aperture", "aperture"), ("Verge", "verge"),
+            ("Nordic Audio", "nordic-audio"),
+            ("Lumen", "lumen"),
+            ("Cobalt", "cobalt"),
+            ("Aperture", "aperture"),
+            ("Verge", "verge"),
         ]:
             vendors[slug] = await Vendor.create(name=name, slug=slug, published=True)
-        await Vendor.create(name="Shady Imports", slug="shady", published=False)  # unpublished vendor
+        await Vendor.create(
+            name="Shady Imports", slug="shady", published=False
+        )  # unpublished vendor
 
         # --- category tree (parents + published children) ---------------------
         audio = await self._cat("Audio", "audio", fr="Audio")
@@ -66,12 +82,30 @@ class DatabaseSeeder(Seeder):
 
         # --- catalog: (category, vendor, price_cents, image keyword, name) ----
         catalog = [
-            (headphones, "nordic-audio", 29900, "headphones", "Aurora Over-Ear Headphones"),
-            (headphones, "nordic-audio", 34900, "headphones,studio", "Eclipse Studio Headphones"),
+            (
+                headphones,
+                "nordic-audio",
+                29900,
+                "headphones",
+                "Aurora Over-Ear Headphones",
+            ),
+            (
+                headphones,
+                "nordic-audio",
+                34900,
+                "headphones,studio",
+                "Eclipse Studio Headphones",
+            ),
             (earbuds, "nordic-audio", 14900, "earbuds", "Pulse Wireless Earbuds"),
             (earbuds, "nordic-audio", 9900, "earbuds,wireless", "Drift Earbuds"),
             (speakers, "nordic-audio", 24900, "speaker", "Resonate Bookshelf Speaker"),
-            (speakers, "nordic-audio", 12900, "speaker,bluetooth", "Nomad Portable Speaker"),
+            (
+                speakers,
+                "nordic-audio",
+                12900,
+                "speaker,bluetooth",
+                "Nomad Portable Speaker",
+            ),
             (phones, "lumen", 89900, "smartphone", "Nimbus 5G Phone"),
             (phones, "lumen", 79900, "smartphone,phone", "Aurora Phone"),
             (phones, "lumen", 59900, "phone", "Vertex Mini"),
@@ -83,14 +117,24 @@ class DatabaseSeeder(Seeder):
             (wearables, "verge", 29900, "smartwatch,sport", "Orbit Sport"),
             (cameras, "aperture", 129900, "camera", "Aperture X100 Camera"),
             (cameras, "aperture", 79900, "camera,lens", "Field Zoom Lens"),
-            (accessories, "cobalt", 16900, "keyboard,mechanical", "Cobalt Mechanical Keyboard"),
+            (
+                accessories,
+                "cobalt",
+                16900,
+                "keyboard,mechanical",
+                "Cobalt Mechanical Keyboard",
+            ),
             (accessories, "cobalt", 7900, "mouse,computer", "Cobalt Wireless Mouse"),
             (accessories, "verge", 5900, "charger,dock", "Verge Charging Dock"),
             (accessories, "verge", 8900, "bag", "Verge Leather Sleeve"),
         ]
-        for i, (category, vendor_slug, price, keyword, name) in enumerate(catalog):
+        for category, vendor_slug, price, keyword, name in catalog:
             product = await self._product(
-                name, category.id, vendors[vendor_slug].id, price_cents=price, published=True
+                name,
+                category.id,
+                vendors[vendor_slug].id,
+                price_cents=price,
+                published=True,
             )
             for _ in range(2):
                 await ProductVariantFactory().create(product_id=product.id)
@@ -100,25 +144,42 @@ class DatabaseSeeder(Seeder):
                     break
                 url = f"https://images.unsplash.com/photo-{photo_id}{_IMG_PARAMS[n % len(_IMG_PARAMS)]}"
                 for _attempt in range(3):
-                    if await images.download_and_attach(product, url, file_name=f"{product.slug}-{n}.jpg"):
+                    if await images.download_and_attach(
+                        product, url, file_name=f"{product.slug}-{n}.jpg"
+                    ):
                         break
                     await asyncio.sleep(0.4)
 
         # --- retrievability edge cases (hidden; no galleries needed) ----------
         await self._cat("Gift Cards", "gift-cards")  # empty published category → hidden
-        coming = await self._cat("Coming Soon", "coming-soon", published=False)  # unpublished branch
+        coming = await self._cat(
+            "Coming Soon", "coming-soon", published=False
+        )  # unpublished branch
         teasers = await self._cat("Teasers", "teasers", parent=coming.id)
         acme = vendors["nordic-audio"].id
-        await self._product("Secret Gadget", teasers.id, acme, price_cents=1999, published=True)
-        await self._product("Grey Market Phone", phones.id, 6, price_cents=1999, published=True)  # unpub vendor (id 6)
-        await self._product("Draft Phone", phones.id, acme, price_cents=1999, published=False)
+        await self._product(
+            "Secret Gadget", teasers.id, acme, price_cents=1999, published=True
+        )
+        await self._product(
+            "Grey Market Phone", phones.id, 6, price_cents=1999, published=True
+        )  # unpub vendor (id 6)
+        await self._product(
+            "Draft Phone", phones.id, acme, price_cents=1999, published=False
+        )
 
         await CatalogVisibilityService().refresh()
-        await Product.make_all_searchable()  # populate the search engine (Scout scout:import parity)
+        await (
+            Product.make_all_searchable()
+        )  # populate the search engine (Scout scout:import parity)
 
     @staticmethod
     async def _cat(
-        name: str, slug: str, *, parent: int | None = None, published: bool = True, fr: str | None = None
+        name: str,
+        slug: str,
+        *,
+        parent: int | None = None,
+        published: bool = True,
+        fr: str | None = None,
     ) -> Category:
         translations: dict[str, dict[str, str]] = {"en": {"name": name}}
         if fr:
@@ -129,11 +190,21 @@ class DatabaseSeeder(Seeder):
 
     @staticmethod
     async def _product(
-        name: str, category_id: int, vendor_id: int, *, price_cents: int, published: bool
+        name: str,
+        category_id: int,
+        vendor_id: int,
+        *,
+        price_cents: int,
+        published: bool,
     ) -> Product:
         slug = name.lower().replace(" ", "-")
         return await Product.create(
-            translations={"en": {"name": name, "description": f"{name} — considered design, built to last."}},
+            translations={
+                "en": {
+                    "name": name,
+                    "description": f"{name} — considered design, built to last.",
+                }
+            },
             slug=slug,
             category_id=category_id,
             vendor_id=vendor_id,

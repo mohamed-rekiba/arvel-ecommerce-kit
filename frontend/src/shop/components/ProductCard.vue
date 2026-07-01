@@ -11,7 +11,8 @@ const busy = ref(false);
 
 const variants = computed(() => props.product.variants ?? []);
 const soldOut = computed(() => variants.value.length > 0 && variants.value.every((v) => v.stock <= 0));
-const image = computed(() => props.product.gallery[0]?.thumb_url ?? props.product.gallery[0]?.url ?? null);
+// cards are large — use the 600×750 `preview` conversion, not the 256×320 thumb (which upscales/softens)
+const image = computed(() => props.product.gallery[0]?.preview_url ?? props.product.gallery[0]?.url ?? null);
 const name = computed(() => props.product.translation.name);
 
 async function addToBag() {

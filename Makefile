@@ -1,6 +1,6 @@
 # arvel-ecommerce-kit — common tasks. `make help` lists them.
 .DEFAULT_GOAL := help
-.PHONY: help install env up down setup migrate fresh seed serve front front-build worker schedule test typecheck lint check
+.PHONY: help install env up down setup migrate fresh seed bucket serve front front-build worker schedule test typecheck lint check
 
 help: ## Show this help
 	@grep -hE '^[a-zA-Z_-]+:.*?## ' $(MAKEFILE_LIST) | awk 'BEGIN{FS=":.*?## "}{printf "  \033[36m%-12s\033[0m %s\n", $$1, $$2}'
@@ -21,8 +21,12 @@ setup: install env up ## One-shot: deps + .env + infra + key + migrate + seed
 	@echo "waiting for Postgres..." && until docker compose exec -T db pg_isready -U arvel -d arvel_ecommerce_kit >/dev/null 2>&1; do sleep 1; done
 	uv run arvel key:generate
 	uv run arvel migrate:fresh
+	uv run python tools/setup_bucket.py
 	uv run arvel db:seed
 	@echo "\nReady. 'make serve' → http://127.0.0.1:8000 (API docs at /docs)"
+
+bucket: ## Ensure the S3/RustFS bucket exists + is public-read (product images are public)
+	uv run python tools/setup_bucket.py
 
 migrate: ## Apply outstanding migrations
 	uv run arvel migrate

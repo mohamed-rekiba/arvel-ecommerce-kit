@@ -22,6 +22,14 @@ config = {
             "endpoint_url": env(
                 "AWS_ENDPOINT", ""
             ),  # set for non-AWS S3 (RustFS/MinIO/R2)
+            # Public base joined by media.get_url(): a CDN via AWS_URL, else the endpoint + bucket
+            # (path-style). Product images are public assets — the bucket is public-read (`make bucket`).
+            "url": env("AWS_URL", "")
+            or (
+                f"{env('AWS_ENDPOINT', '').rstrip('/')}/{env('AWS_BUCKET', '')}"
+                if env("AWS_ENDPOINT", "")
+                else ""
+            ),
         },
     },
 }
