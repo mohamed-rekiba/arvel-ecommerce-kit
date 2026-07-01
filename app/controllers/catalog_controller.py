@@ -113,16 +113,47 @@ async def categories_index(request: Request) -> list[CategoryOut]:
     return [category_out(c) for c in rows]
 
 
+_SORTS: dict[str, tuple[str, str]] = {
+    "featured": ("slug", "asc"),
+    "price_asc": ("price_cents", "asc"),
+    "price_desc": ("price_cents", "desc"),
+    "newest": ("id", "desc"),
+    "name": ("slug", "asc"),
+}
+
+
+async def _category_subtree_ids(slug: str) -> list[int]:
+    """The category with ``slug`` plus all its descendants — so browsing a parent (e.g. Audio) shows
+    products in its child categories (Headphones/Earbuds/…), not just ones filed directly on it."""
+    root = await Category.where("slug", slug).first()
+    if root is None:
+        return []
+    cats = await Category.all()
+    children: dict[int, list[int]] = {}
+    for c in cats:
+        if c.parent_id is not None:
+            children.setdefault(c.parent_id, []).append(c.id)
+    ids: list[int] = []
+    stack: list[int] = [root.id]
+    while stack:
+        cid = stack.pop()
+        ids.append(cid)
+        stack.extend(children.get(cid, []))
+    return ids
+
+
 async def products_index(
     request: Request,
     q: str | None = None,
-    category: int | None = None,
+    category: str | None = None,
+    sort: str = "featured",
     per_page: int = 15,
     page: int = 1,
 ) -> ProductPage:
     """List **retrievable** products (the storefront view): published, with a published vendor, under a
-    fully-published category. Typed query params (documented in OpenAPI): `q` (name search),
-    `category` (id), `per_page`, `page`."""
+    fully-published category. Query params (documented in OpenAPI): `q` (name search), `category`
+    (slug — includes descendant categories), `sort` (featured|price_asc|price_desc|newest|name),
+    `per_page`, `page`."""
     # scopes: only-visible (EXISTS filter), in_locale (project the active locale's `translation`); the
     # eager-loaded category is also locale-projected so its translation comes along.
     query = (
@@ -133,9 +164,12 @@ async def products_index(
     if q:
         query = await _apply_search(query, q)
     if category:
-        query = query.where("category_id", category)
+        query = query.where_in(
+            "category_id", await _category_subtree_ids(category) or [0]
+        )
 
-    result = await query.order_by("slug").paginate(per_page, page)
+    column, direction = _SORTS.get(sort, _SORTS["featured"])
+    result = await query.order_by(column, direction).paginate(per_page, page)
     return ProductPage(
         data=[await product_out(p) for p in result.items()],
         current_page=result.current_page(),
