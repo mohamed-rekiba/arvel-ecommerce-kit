@@ -20,6 +20,22 @@ button { font: inherit; }
 }
 .tnum { font-variant-numeric: tabular-nums; }
 ::selection { background: color-mix(in srgb, var(--accent) 30%, transparent); }
+
+/* form controls — explicit color + surface so text stays legible in BOTH themes
+   (native inputs/selects otherwise fall back to UA colors → invisible text on dark) */
+input, select, textarea { font: inherit; color: var(--text); }
+input:not([type="checkbox"]):not([type="radio"]):not([type="range"]),
+select, textarea {
+  background-color: var(--surface-2);
+  color: var(--text);
+  border: 1px solid var(--border-2);
+  border-radius: var(--radius-md);
+  accent-color: var(--accent);
+}
+input::placeholder, textarea::placeholder { color: var(--text-subtle); }
+option { background: var(--surface); color: var(--text); }
+select { color-scheme: light dark; }
+input:disabled, select:disabled, textarea:disabled { opacity: .6; cursor: not-allowed; }
 @media (prefers-reduced-motion: reduce) {
   *,*::before,*::after { animation-duration: .01ms !important; animation-iteration-count: 1 !important; transition-duration: .01ms !important; }
 }
