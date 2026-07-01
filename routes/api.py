@@ -136,6 +136,8 @@ Route.get("/admin/audit", rbac.audit_index, name="api.admin.audit.index").middle
 
 # --- Admin (OIDC / Keycloak) --------------------------------------------------
 Route.get("/admin/me", admin.me, name="api.admin.me").secure("oidc")
+# Exchange a Keycloak token (from the SPA's auth-code+PKCE flow) for an arvel bearer PAT (DR-0030).
+Route.post("/admin/oidc/token", admin.oidc_exchange, name="api.admin.oidc.token").status(200).secure("oidc")
 
 # --- Cart (guest by X-Cart-Token, or the authenticated user's cart) -----------
 Route.get("/cart", cart.show, name="api.cart.show")

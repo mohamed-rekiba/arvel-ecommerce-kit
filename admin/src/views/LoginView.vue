@@ -3,9 +3,20 @@ import { ref } from "vue";
 import { useRouter } from "vue-router";
 import { ApiError } from "../api";
 import { useAuth } from "../auth";
+import { startKeycloakLogin } from "../oidc";
 
 const router = useRouter();
 const { login } = useAuth();
+
+const ssoBusy = ref(false);
+async function signInWithSSO() {
+  ssoBusy.value = true;
+  try {
+    await startKeycloakLogin(); // redirects to Keycloak
+  } catch {
+    ssoBusy.value = false;
+  }
+}
 
 const email = ref("catalog@example.com");
 const password = ref("secret-admin");
@@ -36,6 +47,12 @@ async function submit() {
       <h1 class="login__title">Sign in</h1>
       <p class="login__sub">Back-office access for the Arvel store.</p>
 
+      <button class="btn sso" :disabled="ssoBusy" @click="signInWithSSO">
+        <span class="sso__mark" aria-hidden="true" />
+        {{ ssoBusy ? "Redirecting…" : "Continue with SSO" }}
+      </button>
+      <div class="divider"><span>or with email</span></div>
+
       <form class="form" @submit.prevent="submit">
         <label class="field">
           <span class="field__label">Email</span>
@@ -60,7 +77,6 @@ async function submit() {
           <li><code>support@example.com</code> — read-only + audit</li>
         </ul>
       </div>
-      <p class="oidc">Production sign-in uses Keycloak (OIDC); the same roles map through.</p>
     </div>
   </div>
 </template>
@@ -75,6 +91,10 @@ async function submit() {
 .brand__name span { color: var(--color-text-muted); font-weight: var(--weight-regular); }
 .login__title { font-size: var(--text-2xl); }
 .login__sub { color: var(--color-text-muted); margin: var(--space-1) 0 var(--space-6); }
+.sso { width: 100%; padding: var(--space-3); font-weight: var(--weight-medium); }
+.sso__mark { width: 16px; height: 16px; border-radius: 4px; background: var(--color-accent); flex-shrink: 0; }
+.divider { display: flex; align-items: center; gap: var(--space-3); margin: var(--space-5) 0; color: var(--color-text-faint); font-size: var(--text-xs); }
+.divider::before, .divider::after { content: ""; height: 1px; flex: 1; background: var(--color-border); }
 .form { display: flex; flex-direction: column; gap: var(--space-4); }
 .field { display: flex; flex-direction: column; gap: var(--space-2); }
 .field__label { font-size: var(--text-sm); font-weight: var(--weight-medium); }

@@ -43,9 +43,13 @@ def _realm_roles(claims: dict[str, Any]) -> list[str]:
     return [str(r) for r in cast("list[Any]", roles)]
 
 
-async def resolve_admin(request: Request) -> User:
+async def resolve_admin(request: Request, *, persist_roles: bool = False) -> User:
     """Authenticate + authorize an admin from the request's OIDC bearer token, JIT-provisioning a
-    local admin User. 401 if the token is missing/invalid; 403 if it lacks the admin realm role."""
+    local admin User. 401 if the token is missing/invalid; 403 if it lacks the admin realm role.
+
+    The Keycloak realm roles map to arvel RBAC roles (claim_map). By default they're carried as
+    ephemeral, request-scoped grants (DR-0011). With ``persist_roles=True`` (the bearer-bridge, DR-0030)
+    they're written to the user's RBAC membership so an issued bearer PAT carries them."""
     guard = app("admin_oidc_guard")
     principal = await guard.verify(request)
     if principal is None:
@@ -70,13 +74,19 @@ async def resolve_admin(request: Request) -> User:
         user.role = UserRole.ADMIN  # promote: Keycloak says they're an admin
         await user.save()
 
-    # Map the Keycloak realm roles → arvel RBAC roles (claim_map) and carry them as ephemeral,
-    # request-scoped grants (DR-0011): the admin's permissions follow their Keycloak roles without
-    # writing membership. e.g. realm role "catalog-manager" → arvel role "catalog-manager".
+    # Map the Keycloak realm roles → arvel RBAC roles (claim_map). e.g. realm role "catalog-manager"
+    # → arvel role "catalog-manager".
     from arvel.auth.claim_map import roles_for_claims
 
     idp_roles = roles_for_claims(
         claims, ROLE_CLAIM_MAP, claim_paths=("realm_access.roles",)
     )
-    user.set_idp_roles(idp_roles)
+    if persist_roles:
+        # DR-0030: write the mapping to RBAC membership so an issued bearer PAT carries the roles.
+        existing = {role.name for role in await user.roles()}
+        for role_name in idp_roles - existing:
+            await user.assign_role(role_name)
+    else:
+        # DR-0011: carry them as ephemeral, request-scoped grants (no membership written).
+        user.set_idp_roles(idp_roles)
     return user

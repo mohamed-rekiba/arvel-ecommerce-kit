@@ -4,6 +4,7 @@ import "./tokens.css";
 import App from "./App.vue";
 import { token } from "./api";
 import AuditView from "./views/AuditView.vue";
+import CallbackView from "./views/CallbackView.vue";
 import DashboardView from "./views/DashboardView.vue";
 import LoginView from "./views/LoginView.vue";
 import OrdersView from "./views/OrdersView.vue";
@@ -14,6 +15,7 @@ const router = createRouter({
   history: createWebHistory(),
   routes: [
     { path: "/login", name: "login", component: LoginView, meta: { public: true } },
+    { path: "/callback", name: "callback", component: CallbackView, meta: { public: true } },
     { path: "/", redirect: "/dashboard" },
     { path: "/dashboard", name: "dashboard", component: DashboardView },
     { path: "/products", name: "products", component: ProductsView },

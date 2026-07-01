@@ -17,7 +17,7 @@ _ADMIN_CLAIMS = {
     "sub": "kc-admin-001",
     "email": "boss@shop.test",
     "name": "Boss Admin",
-    "realm_access": {"roles": ["admin", "offline_access"]},
+    "realm_access": {"roles": ["admin", "catalog-manager", "offline_access"]},
 }
 _USER_CLAIMS = {
     "sub": "kc-user-002",
@@ -36,8 +36,16 @@ def client(tmp_path, monkeypatch):
     monkeypatch.setenv("DATABASE_URL", url)
 
     async def migrate() -> None:
+        from arvel.auth import Permission as PermissionModel
+        from arvel.auth import Role
+
+        from tests.rbac_helpers import seed_rbac
+
         db = ConnectionResolver({"default": {"url": url}})
         await Migrator(db).run(discover_migrations(["database/migrations"]))
+        await seed_rbac(db)  # roles/permissions must exist for the OIDC→bearer role sync (DR-0030)
+        for model in (Role, PermissionModel):
+            model.set_connection(None)  # reset so the served app uses its own connection
         await db.dispose()
 
     asyncio.run(migrate())
@@ -88,3 +96,18 @@ def test_claim_map_maps_keycloak_realm_roles_to_arvel_roles() -> None:
     assert mapped == {
         "catalog-manager"
     }  # "admin"/"offline_access" aren't RBAC roles → dropped
+
+
+def test_oidc_exchange_issues_bearer_with_synced_roles(client) -> None:
+    """DR-0030: a Keycloak token → an arvel bearer PAT that carries the claim-mapped RBAC roles, so it
+    works against the bearer-guarded admin APIs. The 'catalog-manager' realm role syncs to catalog.*."""
+    exchange = client.post("/api/admin/oidc/token", headers=_bearer("admin-jwt"))
+    assert exchange.status_code == 200
+    bearer = exchange.json()["token"]
+
+    # the issued bearer can read the admin catalog (catalog.view via the synced catalog-manager role)
+    assert client.get("/api/admin/products", headers=_bearer(bearer)).status_code == 200
+
+    # a non-admin Keycloak token cannot exchange (403), and no token is 401
+    assert client.post("/api/admin/oidc/token", headers=_bearer("user-jwt")).status_code == 403
+    assert client.post("/api/admin/oidc/token").status_code == 401
