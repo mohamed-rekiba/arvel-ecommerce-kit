@@ -168,7 +168,11 @@ def test_order_state_machine(client) -> None:
 def test_admin_lists_all_orders(client) -> None:
     # a customer places an order
     customer = _login(client, "cara@example.com", "secret-cara")
-    client.post("/api/cart/items", json={"product_variant_id": 1, "quantity": 2}, headers=customer)
+    client.post(
+        "/api/cart/items",
+        json={"product_variant_id": 1, "quantity": 2},
+        headers=customer,
+    )
     order_id = client.post("/api/checkout", headers=customer).json()["id"]
 
     # the admin (orders.view via super-admin) sees it in the back-office list

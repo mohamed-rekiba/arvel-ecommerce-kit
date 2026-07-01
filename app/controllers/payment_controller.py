@@ -30,7 +30,9 @@ async def _verify_signature(request: Request) -> None:
     Without this, anyone could POST a `charge.succeeded` and mark an order PAID for free."""
     secret = Config.get("services.payment_gateway.secret") or ""
     provided = request.header(SIGNATURE_HEADER, "") or ""
-    expected = hmac.new(secret.encode(), await request.raw.body(), hashlib.sha256).hexdigest()
+    expected = hmac.new(
+        secret.encode(), await request.raw.body(), hashlib.sha256
+    ).hexdigest()
     if not secret or not hmac.compare_digest(provided, expected):
         abort(401, "Invalid webhook signature.")
 
