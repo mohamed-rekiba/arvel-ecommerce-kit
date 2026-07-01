@@ -43,9 +43,13 @@ def client(tmp_path, monkeypatch):
 
         db = ConnectionResolver({"default": {"url": url}})
         await Migrator(db).run(discover_migrations(["database/migrations"]))
-        await seed_rbac(db)  # roles/permissions must exist for the OIDC→bearer role sync (DR-0030)
+        await seed_rbac(
+            db
+        )  # roles/permissions must exist for the OIDC→bearer role sync (DR-0030)
         for model in (Role, PermissionModel):
-            model.set_connection(None)  # reset so the served app uses its own connection
+            model.set_connection(
+                None
+            )  # reset so the served app uses its own connection
         await db.dispose()
 
     asyncio.run(migrate())
@@ -109,5 +113,8 @@ def test_oidc_exchange_issues_bearer_with_synced_roles(client) -> None:
     assert client.get("/api/admin/products", headers=_bearer(bearer)).status_code == 200
 
     # a non-admin Keycloak token cannot exchange (403), and no token is 401
-    assert client.post("/api/admin/oidc/token", headers=_bearer("user-jwt")).status_code == 403
+    assert (
+        client.post("/api/admin/oidc/token", headers=_bearer("user-jwt")).status_code
+        == 403
+    )
     assert client.post("/api/admin/oidc/token").status_code == 401

@@ -26,6 +26,8 @@ async def oidc_exchange(request: Request) -> TokenOut:
     the admin (resolve_admin), then **persists** the Keycloak-mapped RBAC roles so the issued bearer
     carries them into the bearer-guarded admin APIs. The browser admin SPA calls this after its
     auth-code+PKCE flow, then uses the returned token like any password login."""
-    admin = await resolve_admin(request, persist_roles=True)  # syncs the Keycloak-mapped RBAC roles
+    admin = await resolve_admin(
+        request, persist_roles=True
+    )  # syncs the Keycloak-mapped RBAC roles
     token, _ = await create_token(admin, name="admin-oidc")
     return TokenOut(token=token)

@@ -28,7 +28,9 @@ def _post_webhook(client, event: dict, *, sign: bool = True):
     body = json.dumps(event).encode()
     headers = {"Content-Type": "application/json"}
     if sign:
-        headers["X-Signature"] = hmac.new(_WEBHOOK_SECRET.encode(), body, hashlib.sha256).hexdigest()
+        headers["X-Signature"] = hmac.new(
+            _WEBHOOK_SECRET.encode(), body, hashlib.sha256
+        ).hexdigest()
     return client.post("/api/webhooks/payment", content=body, headers=headers)
 
 
