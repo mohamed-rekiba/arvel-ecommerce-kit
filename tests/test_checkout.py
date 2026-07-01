@@ -163,3 +163,20 @@ def test_order_state_machine(client) -> None:
         ).status_code
         == 422
     )
+
+
+def test_admin_lists_all_orders(client) -> None:
+    # a customer places an order
+    customer = _login(client, "cara@example.com", "secret-cara")
+    client.post("/api/cart/items", json={"product_variant_id": 1, "quantity": 2}, headers=customer)
+    order_id = client.post("/api/checkout", headers=customer).json()["id"]
+
+    # the admin (orders.view via super-admin) sees it in the back-office list
+    admin = _login(client, "admin@example.com", "secret-admin")
+    orders = client.get("/api/admin/orders", headers=admin)
+    assert orders.status_code == 200
+    ids = {o["id"] for o in orders.json()}
+    assert order_id in ids
+
+    # a customer cannot list all orders (lacks orders.view)
+    assert client.get("/api/admin/orders", headers=customer).status_code == 403

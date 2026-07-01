@@ -6,6 +6,7 @@ import { token } from "./api";
 import AuditView from "./views/AuditView.vue";
 import DashboardView from "./views/DashboardView.vue";
 import LoginView from "./views/LoginView.vue";
+import OrdersView from "./views/OrdersView.vue";
 import ProductsView from "./views/ProductsView.vue";
 import RolesView from "./views/RolesView.vue";
 
@@ -16,6 +17,7 @@ const router = createRouter({
     { path: "/", redirect: "/dashboard" },
     { path: "/dashboard", name: "dashboard", component: DashboardView },
     { path: "/products", name: "products", component: ProductsView },
+    { path: "/orders", name: "orders", component: OrdersView },
     { path: "/roles", name: "roles", component: RolesView },
     { path: "/audit", name: "audit", component: AuditView },
   ],

@@ -12,6 +12,7 @@ onMounted(restore);
 const nav = [
   { to: "/dashboard", label: "Overview" },
   { to: "/products", label: "Products" },
+  { to: "/orders", label: "Orders" },
   { to: "/roles", label: "Roles" },
   { to: "/audit", label: "Audit log" },
 ];

@@ -130,6 +130,15 @@ async def my_orders(request: Request) -> list[OrderOut]:
     return [_order_out(o, await o.items().get()) for o in orders]
 
 
+async def admin_orders_index(request: Request) -> list[OrderOut]:
+    """List every order (newest first) for the back office. Requires orders.view."""
+    user = current_user.get()
+    if user is None or not await user.can(Permission.ORDERS_VIEW.value):
+        abort(403, "You may not view orders.")
+    orders = await Order.order_by("id", "desc").get()
+    return [_order_out(o, await o.items().get()) for o in orders]
+
+
 async def update_status(request: Request, data: OrderStatusIn) -> OrderOut:
     """Transition an order, enforcing the state machine. Requires orders.update (guests already 401'd)."""
     user = current_user.get()
