@@ -1,11 +1,15 @@
 <script setup lang="ts">
-import { onMounted, ref } from "vue";
-import { type Category, type Product, api } from "../api";
+import { computed, onMounted, ref } from "vue";
+import { type Category, type Product, api, formatPrice } from "../api";
 import ProductCard from "../components/ProductCard.vue";
 
 const categories = ref<Category[]>([]);
 const products = ref<Product[]>([]);
 const loading = ref(true);
+
+const hero = computed(() => products.value[0] ?? null);
+const heroImage = computed(() => hero.value?.gallery[0]?.url ?? hero.value?.gallery[0]?.preview_url ?? null);
+const featured = computed(() => products.value.slice(1, 7));
 
 onMounted(async () => {
   try {
@@ -20,98 +24,125 @@ onMounted(async () => {
 
 <template>
   <div class="home">
-    <!-- hero -->
-    <section class="hero">
+    <!-- hero: product as hero -->
+    <section class="hero wrap">
       <div class="hero__copy">
-        <span class="hero__ey">Best choice of the year</span>
-        <h1>High-End<br />Electronics</h1>
-        <p>Full accessories · free next-day delivery on orders over $120.</p>
-        <RouterLink class="btn-amber" to="/">Discover now</RouterLink>
+        <span class="eyebrow">New — 2026 Collection</span>
+        <h1>High-end electronics,<br />quietly considered.</h1>
+        <p>Sound, vision and the objects around them — chosen for how they feel, not how loud they shout.</p>
+        <RouterLink :to="{ name: 'catalog' }" class="link">Explore the collection <span aria-hidden="true">→</span></RouterLink>
       </div>
-      <div class="hero__art" aria-hidden="true" />
+      <div class="hero__media">
+        <div class="hero__glow" aria-hidden="true" />
+        <RouterLink v-if="hero" :to="`/products/${hero.slug}`" class="hero__frame">
+          <img v-if="heroImage" :src="heroImage" :alt="hero.translation.name" />
+          <div v-else class="hero__ph" aria-hidden="true" />
+          <div class="hero__tag">
+            <span>{{ hero.translation.name }}</span>
+            <b class="tnum">{{ formatPrice(hero.price_cents, hero.currency) }}</b>
+          </div>
+        </RouterLink>
+        <div v-else class="hero__frame hero__frame--empty" />
+      </div>
     </section>
 
-    <!-- service strip -->
-    <section class="svc">
-      <div class="svc__it"><b>Free Delivery</b><span>orders over $120</span></div>
-      <div class="svc__it"><b>Safe Payment</b><span>100% secure</span></div>
-      <div class="svc__it"><b>Shop Confidently</b><span>issue? refunded</span></div>
-      <div class="svc__it"><b>24/7 Help Center</b><span>dedicated support</span></div>
-      <div class="svc__it"><b>Friendly Returns</b><span>30-day guarantee</span></div>
+    <!-- featured -->
+    <section class="wrap block">
+      <div class="head">
+        <div><span class="eyebrow">Featured</span><h2>New this season</h2></div>
+        <RouterLink :to="{ name: 'catalog' }" class="head__link">View all <span aria-hidden="true">→</span></RouterLink>
+      </div>
+      <div v-if="loading" class="grid"><div v-for="i in 3" :key="i" class="sk" /></div>
+      <p v-else-if="!featured.length" class="empty">The collection is being prepared — check back soon.</p>
+      <div v-else class="grid"><ProductCard v-for="p in featured" :key="p.id" :product="p" /></div>
     </section>
 
-    <!-- promo tiles -->
-    <section class="promos">
-      <div class="promo" style="background:#283D3B"><h3>Smartphone Bestsellers</h3><span class="promo__lk">Shop now →</span></div>
-      <div class="promo" style="background:#795663"><h3>30% off Trending Cameras</h3><span class="promo__lk">Shop now →</span></div>
-      <div class="promo" style="background:#12324A"><h3>Top Fresh Accessories</h3><span class="promo__lk">Shop now →</span></div>
-    </section>
-
-    <!-- top categories (live) -->
-    <section class="sec">
-      <div class="sec__hd"><h2>Top Categories <b>of the Month</b></h2><RouterLink class="sec__all" to="/">Browse all →</RouterLink></div>
-      <div v-if="loading" class="cats"><div v-for="i in 6" :key="i" class="cat skeleton" /></div>
-      <div v-else class="cats">
-        <RouterLink v-for="c in categories.slice(0, 6)" :key="c.id" class="cat" :to="{ name: 'catalog', query: { category: c.slug } }">
-          <span class="cat__thumb" />
-          <b>{{ c.translation.name }}</b><span>Shop now</span>
+    <!-- collections: editorial index -->
+    <section class="wrap block">
+      <div class="head"><div><span class="eyebrow">Collections</span><h2>Explore by category</h2></div></div>
+      <div class="coll">
+        <RouterLink
+          v-for="(c, i) in categories.slice(0, 3)"
+          :key="c.id"
+          class="tile"
+          :to="{ name: 'catalog', query: { category: c.slug } }"
+        >
+          <span class="tile__idx">{{ String(i + 1).padStart(2, "0") }}</span>
+          <div class="tile__foot">
+            <h3>{{ c.translation.name }}</h3>
+            <span class="tile__go">Discover <span aria-hidden="true">→</span></span>
+          </div>
         </RouterLink>
       </div>
     </section>
 
-    <!-- flash deals (live products) -->
-    <section class="sec">
-      <div class="sec__hd"><h2>Top <b>Flash Deals</b></h2><RouterLink class="sec__all" to="/">View all →</RouterLink></div>
-      <div v-if="loading" class="prods"><div v-for="i in 5" :key="i" class="skeleton skeleton--card" /></div>
-      <p v-else-if="!products.length" class="empty">No products yet — seed the catalog to see deals here.</p>
-      <div v-else class="prods">
-        <ProductCard v-for="p in products.slice(0, 10)" :key="p.id" :product="p" />
-      </div>
+    <!-- brand statement -->
+    <section class="say">
+      <p>“The best technology is the kind you stop noticing — it simply works, and then gets out of the way.”</p>
     </section>
   </div>
 </template>
 
 <style scoped>
-.home { display: flex; flex-direction: column; gap: 34px; }
-.btn-amber { display: inline-flex; align-items: center; height: 44px; padding: 0 22px; border-radius: var(--radius-md); background: var(--accent); color: var(--on-accent); font-weight: 700; text-decoration: none; }
+.wrap { max-width: 1280px; margin: 0 auto; padding-left: clamp(1.25rem, 5vw, 3.5rem); padding-right: clamp(1.25rem, 5vw, 3.5rem); }
+.eyebrow { font-size: 11px; text-transform: uppercase; letter-spacing: .2em; color: var(--accent); font-weight: 600; }
+.block { margin-top: clamp(4rem, 9vw, 7.5rem); }
 
-.hero { position: relative; border-radius: var(--radius-lg); overflow: hidden; background: linear-gradient(135deg,#011627,#283D3B); color: #fff; min-height: 320px; display: flex; align-items: center; padding: 44px; box-shadow: var(--shadow-2); }
-.hero__ey { font-size: 12px; letter-spacing: .14em; text-transform: uppercase; opacity: .85; font-weight: 700; }
-.hero h1 { font-size: 48px; line-height: 1.02; margin: 12px 0; font-weight: 800; }
-.hero p { opacity: .9; max-width: 360px; margin-bottom: 22px; }
-.hero__art { position: absolute; right: 44px; top: 50%; transform: translateY(-50%); width: 210px; height: 250px; border-radius: 26px; background: linear-gradient(160deg,#0A2033,#283D3B); box-shadow: 0 20px 50px rgba(0,0,0,.35); border: 6px solid rgba(217,188,175,.12); }
+/* hero */
+.hero { display: grid; grid-template-columns: 1.02fr .98fr; align-items: center; gap: clamp(2rem, 5vw, 5rem); padding-top: clamp(2.5rem, 6vw, 5.5rem); }
+.hero__copy .eyebrow { display: block; margin-bottom: 22px; }
+.hero h1 { font-family: var(--font-display); font-size: clamp(2.6rem, 5.6vw, 4.6rem); line-height: 1.03; letter-spacing: -.025em; font-weight: 700; color: var(--text); }
+.hero p { margin: 26px 0 34px; font-size: 17px; line-height: 1.65; color: var(--text-muted); max-width: 42ch; }
+.link { font-size: 14px; font-weight: 600; color: var(--accent); text-decoration: none; border-bottom: 1px solid color-mix(in srgb, var(--accent) 40%, transparent); padding-bottom: 3px; transition: border-color var(--motion-base); }
+.link span { display: inline-block; transition: transform var(--motion-base); }
+.link:hover { border-color: var(--accent); }
+.link:hover span { transform: translateX(4px); }
+.hero__media { position: relative; }
+.hero__glow { position: absolute; inset: -12% -6% -6% 6%; background: radial-gradient(60% 60% at 60% 40%, color-mix(in srgb, var(--accent) 30%, transparent), transparent 70%); filter: blur(30px); z-index: 0; }
+.hero__frame { position: relative; z-index: 1; display: block; aspect-ratio: 4 / 5; border-radius: var(--radius-xl); overflow: hidden; background: var(--surface-2); box-shadow: var(--shadow-3); text-decoration: none; }
+.hero__frame img { width: 100%; height: 100%; object-fit: cover; transition: transform 1.2s var(--ease-out); }
+.hero__frame:hover img { transform: scale(1.04); }
+.hero__ph, .hero__frame--empty { width: 100%; height: 100%; aspect-ratio: 4/5; background: linear-gradient(150deg, var(--surface-2), color-mix(in srgb, var(--accent) 10%, var(--surface-2))); }
+.hero__tag { position: absolute; left: 18px; bottom: 18px; right: 18px; display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 12px 16px; border-radius: var(--radius-md); background: color-mix(in srgb, var(--bg) 82%, transparent); backdrop-filter: blur(8px); }
+.hero__tag span { font-size: 13px; font-weight: 600; color: var(--text); }
+.hero__tag b { font-family: var(--font-display); font-size: 14px; color: var(--text); }
 
-.svc { display: grid; grid-template-columns: repeat(5,1fr); gap: 10px; background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-lg); padding: 16px; box-shadow: var(--shadow-1); }
-.svc__it { padding-left: 16px; border-left: 1px solid var(--border); }
-.svc__it:first-child { border-left: 0; }
-.svc__it b { font-size: 13px; display: block; }
-.svc__it span { font-size: 11.5px; color: var(--text-subtle); }
+/* section head */
+.head { display: flex; align-items: flex-end; justify-content: space-between; gap: 20px; margin-bottom: clamp(1.75rem, 4vw, 3rem); }
+.head .eyebrow { display: block; margin-bottom: 12px; }
+.head h2 { font-family: var(--font-display); font-size: clamp(1.6rem, 3vw, 2.4rem); font-weight: 700; letter-spacing: -.02em; color: var(--text); }
+.head__link { font-size: 13px; font-weight: 600; color: var(--text-muted); text-decoration: none; white-space: nowrap; }
+.head__link:hover { color: var(--accent); }
+.head__link span { display: inline-block; transition: transform var(--motion-base); }
+.head__link:hover span { transform: translateX(3px); }
 
-.promos { display: grid; grid-template-columns: repeat(3,1fr); gap: 16px; }
-.promo { border-radius: var(--radius-lg); padding: 24px; color: #fff; min-height: 140px; display: flex; flex-direction: column; justify-content: center; box-shadow: var(--shadow-2); border: 1px solid rgba(255,255,255,.06); }
-.promo h3 { font-size: 21px; font-weight: 800; line-height: 1.15; }
-.promo__lk { font-size: 12px; font-weight: 700; margin-top: 12px; }
+/* product grid */
+.grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: clamp(1.5rem, 3vw, 2.75rem); }
+.empty { color: var(--text-subtle); padding: 40px 0; font-size: 15px; }
+.sk { aspect-ratio: 4/5; border-radius: var(--radius-lg); background: var(--surface-2); animation: pulse 1.5s ease-in-out infinite; }
+@keyframes pulse { 50% { opacity: .55; } }
 
-.sec__hd { display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px; }
-.sec__hd h2 { font-size: 22px; font-weight: 700; }
-.sec__hd h2 b { color: var(--accent); }
-.sec__all { font-size: 12.5px; font-weight: 700; color: var(--accent); text-decoration: none; }
+/* collections — editorial dark tiles, unified tone */
+.coll { display: grid; grid-template-columns: repeat(3, 1fr); gap: clamp(1rem, 2vw, 1.5rem); }
+.tile { position: relative; aspect-ratio: 3 / 3.7; border-radius: var(--radius-lg); overflow: hidden; padding: 26px; display: flex; flex-direction: column; justify-content: space-between; text-decoration: none; color: #F3EDE7; background: radial-gradient(120% 90% at 20% 0%, #12283E 0%, #011627 60%); box-shadow: var(--shadow-2); transition: transform var(--motion-slow) var(--ease-out); }
+.tile:hover { transform: translateY(-4px); }
+.tile::after { content: ""; position: absolute; inset: 0; background: radial-gradient(80% 60% at 90% 100%, color-mix(in srgb, var(--accent) 45%, transparent), transparent 60%); opacity: .5; }
+.tile__idx { position: relative; z-index: 1; font-family: var(--font-display); font-size: 13px; letter-spacing: .1em; opacity: .7; }
+.tile__foot { position: relative; z-index: 1; }
+.tile__foot h3 { font-family: var(--font-display); font-size: clamp(1.4rem, 2.4vw, 2rem); font-weight: 700; letter-spacing: -.02em; margin-bottom: 8px; }
+.tile__go { font-size: 12px; font-weight: 600; letter-spacing: .04em; opacity: .85; }
+.tile__go span { display: inline-block; transition: transform var(--motion-base); }
+.tile:hover .tile__go span { transform: translateX(4px); }
 
-.cats { display: grid; grid-template-columns: repeat(6,1fr); gap: 12px; }
-.cat { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-lg); padding: 16px; text-align: center; box-shadow: var(--shadow-1); text-decoration: none; color: var(--text); }
-.cat:hover { box-shadow: var(--shadow-2); }
-.cat__thumb { width: 64px; height: 64px; border-radius: var(--radius-md); margin: 0 auto 10px; display: block; background: color-mix(in srgb, var(--accent) 10%, var(--surface-2)); }
-.cat b { font-size: 13px; display: block; }
-.cat span { font-size: 11px; color: var(--text-subtle); }
+/* brand statement */
+.say { margin-top: clamp(4rem, 9vw, 7.5rem); border-top: 1px solid var(--border); }
+.say p { max-width: 900px; margin: 0 auto; padding: clamp(3.5rem, 8vw, 6.5rem) clamp(1.25rem, 5vw, 3.5rem); text-align: center; font-family: var(--font-display); font-size: clamp(1.5rem, 3vw, 2.4rem); line-height: 1.35; letter-spacing: -.01em; color: var(--text-muted); font-weight: 600; }
 
-.prods { display: grid; grid-template-columns: repeat(5,1fr); gap: 16px; }
-.empty { color: var(--text-subtle); padding: 30px 0; }
-
-.skeleton { background: var(--surface-2); border-radius: var(--radius-lg); animation: pulse 1.4s ease-in-out infinite; }
-.skeleton--card { aspect-ratio: .8; }
-.cat.skeleton { height: 120px; }
-@keyframes pulse { 50% { opacity: .5; } }
-
-@media (max-width: 1024px) { .cats { grid-template-columns: repeat(3,1fr); } .prods { grid-template-columns: repeat(3,1fr); } }
-@media (max-width: 720px) { .svc { grid-template-columns: repeat(2,1fr); } .promos { grid-template-columns: 1fr; } .cats,.prods { grid-template-columns: repeat(2,1fr); } .hero__art { display: none; } .hero h1 { font-size: 36px; } }
+@media (max-width: 900px) {
+  .hero { grid-template-columns: 1fr; gap: 2.5rem; }
+  .grid { grid-template-columns: repeat(2, 1fr); }
+  .coll { grid-template-columns: 1fr; }
+  .tile { aspect-ratio: 16/9; }
+}
+@media (max-width: 560px) { .grid { grid-template-columns: 1fr; } }
 </style>

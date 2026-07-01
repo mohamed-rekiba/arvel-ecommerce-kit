@@ -75,10 +75,9 @@
   --shadow-3:0 12px 32px rgba(0,0,0,.6); --shadow-pop:0 8px 28px rgba(0,0,0,.65);
 }
 
-/* registers */
-.shop    { --bg:var(--white); }
+/* registers — .shop follows the theme --bg (warm greige in light, Blue Noir in dark);
+   the console sits on the greige/near-black canvas. */
 .console { --bg:var(--canvas); }
-[data-theme="dark"] .console { --bg:var(--canvas); }
 
 /* ── compatibility shim ───────────────────────────────────────────────────────
    Legacy --color-* names used by views ported from the pre-consolidation apps map
