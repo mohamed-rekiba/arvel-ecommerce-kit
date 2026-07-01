@@ -49,6 +49,7 @@ async function addToBag() {
         sizes="(max-width: 560px) 100vw, (max-width: 1024px) 50vw, 33vw"
         :alt="name"
         loading="lazy"
+        :style="{ viewTransitionName: `product-${product.id}` }"
       />
       <div v-else class="media__ph" aria-hidden="true" />
       <button

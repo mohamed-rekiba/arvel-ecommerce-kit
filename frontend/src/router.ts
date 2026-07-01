@@ -1,4 +1,5 @@
 import { createRouter, createWebHistory } from "vue-router";
+import { installViewTransitions } from "./lib/transitions";
 import ShopLayout from "./shop/ShopLayout.vue";
 import HomeView from "./shop/views/HomeView.vue";
 import CatalogView from "./shop/views/CatalogView.vue";
@@ -64,5 +65,7 @@ router.beforeEach((to) => {
   }
   return true;
 });
+
+installViewTransitions(router); // cross-fade + shared-element morphs between routes
 
 export default router;
