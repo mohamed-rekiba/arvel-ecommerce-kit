@@ -6,7 +6,6 @@ import ProductCard from "../components/ProductCard.vue";
 const categories = ref<Category[]>([]);
 const products = ref<Product[]>([]);
 const loading = ref(true);
-const catColors = ["--cat-violet", "--cat-blue", "--cat-orange", "--cat-teal", "--cat-rose", "--cat-indigo"];
 
 onMounted(async () => {
   try {
@@ -43,9 +42,9 @@ onMounted(async () => {
 
     <!-- promo tiles -->
     <section class="promos">
-      <div class="promo" style="background:linear-gradient(135deg,var(--plum-600),var(--plum-400))"><h3>Smartphone Bestsellers</h3><span class="promo__lk">Shop now →</span></div>
-      <div class="promo" style="background:linear-gradient(135deg,#21384A,#3E6B78)"><h3>30% off Trending Cameras</h3><span class="promo__lk">Shop now →</span></div>
-      <div class="promo" style="background:linear-gradient(135deg,#283D3B,#5E6E63)"><h3>Top Fresh Accessories</h3><span class="promo__lk">Shop now →</span></div>
+      <div class="promo" style="background:#283D3B"><h3>Smartphone Bestsellers</h3><span class="promo__lk">Shop now →</span></div>
+      <div class="promo" style="background:#795663"><h3>30% off Trending Cameras</h3><span class="promo__lk">Shop now →</span></div>
+      <div class="promo" style="background:#12324A"><h3>Top Fresh Accessories</h3><span class="promo__lk">Shop now →</span></div>
     </section>
 
     <!-- top categories (live) -->
@@ -53,8 +52,8 @@ onMounted(async () => {
       <div class="sec__hd"><h2>Top Categories <b>of the Month</b></h2><RouterLink class="sec__all" to="/">Browse all →</RouterLink></div>
       <div v-if="loading" class="cats"><div v-for="i in 6" :key="i" class="cat skeleton" /></div>
       <div v-else class="cats">
-        <RouterLink v-for="(c, i) in categories.slice(0, 6)" :key="c.id" class="cat" :to="{ name: 'catalog', query: { category: c.slug } }">
-          <span class="cat__thumb" :style="{ background: `color-mix(in srgb, var(${catColors[i % 6]}) 18%, transparent)` }" />
+        <RouterLink v-for="c in categories.slice(0, 6)" :key="c.id" class="cat" :to="{ name: 'catalog', query: { category: c.slug } }">
+          <span class="cat__thumb" />
           <b>{{ c.translation.name }}</b><span>Shop now</span>
         </RouterLink>
       </div>
@@ -76,11 +75,11 @@ onMounted(async () => {
 .home { display: flex; flex-direction: column; gap: 34px; }
 .btn-amber { display: inline-flex; align-items: center; height: 44px; padding: 0 22px; border-radius: var(--radius-md); background: var(--accent); color: var(--on-accent); font-weight: 700; text-decoration: none; }
 
-.hero { position: relative; border-radius: var(--radius-lg); overflow: hidden; background: linear-gradient(120deg,#011627,#283D3B 65%,#3a5450); color: #fff; min-height: 320px; display: flex; align-items: center; padding: 44px; box-shadow: var(--shadow-2); }
+.hero { position: relative; border-radius: var(--radius-lg); overflow: hidden; background: linear-gradient(135deg,#011627,#283D3B); color: #fff; min-height: 320px; display: flex; align-items: center; padding: 44px; box-shadow: var(--shadow-2); }
 .hero__ey { font-size: 12px; letter-spacing: .14em; text-transform: uppercase; opacity: .85; font-weight: 700; }
 .hero h1 { font-size: 48px; line-height: 1.02; margin: 12px 0; font-weight: 800; }
 .hero p { opacity: .9; max-width: 360px; margin-bottom: 22px; }
-.hero__art { position: absolute; right: 44px; top: 50%; transform: translateY(-50%); width: 210px; height: 250px; border-radius: 26px; background: linear-gradient(160deg,#011627,#795663); box-shadow: 0 20px 50px rgba(0,0,0,.35); border: 6px solid rgba(217,188,175,.14); }
+.hero__art { position: absolute; right: 44px; top: 50%; transform: translateY(-50%); width: 210px; height: 250px; border-radius: 26px; background: linear-gradient(160deg,#0A2033,#283D3B); box-shadow: 0 20px 50px rgba(0,0,0,.35); border: 6px solid rgba(217,188,175,.12); }
 
 .svc { display: grid; grid-template-columns: repeat(5,1fr); gap: 10px; background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-lg); padding: 16px; box-shadow: var(--shadow-1); }
 .svc__it { padding-left: 16px; border-left: 1px solid var(--border); }
@@ -89,7 +88,7 @@ onMounted(async () => {
 .svc__it span { font-size: 11.5px; color: var(--text-subtle); }
 
 .promos { display: grid; grid-template-columns: repeat(3,1fr); gap: 16px; }
-.promo { border-radius: var(--radius-lg); padding: 24px; color: #fff; min-height: 140px; display: flex; flex-direction: column; justify-content: center; box-shadow: var(--shadow-2); }
+.promo { border-radius: var(--radius-lg); padding: 24px; color: #fff; min-height: 140px; display: flex; flex-direction: column; justify-content: center; box-shadow: var(--shadow-2); border: 1px solid rgba(255,255,255,.06); }
 .promo h3 { font-size: 21px; font-weight: 800; line-height: 1.15; }
 .promo__lk { font-size: 12px; font-weight: 700; margin-top: 12px; }
 
@@ -101,7 +100,7 @@ onMounted(async () => {
 .cats { display: grid; grid-template-columns: repeat(6,1fr); gap: 12px; }
 .cat { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-lg); padding: 16px; text-align: center; box-shadow: var(--shadow-1); text-decoration: none; color: var(--text); }
 .cat:hover { box-shadow: var(--shadow-2); }
-.cat__thumb { width: 64px; height: 64px; border-radius: var(--radius-md); margin: 0 auto 10px; display: block; }
+.cat__thumb { width: 64px; height: 64px; border-radius: var(--radius-md); margin: 0 auto 10px; display: block; background: color-mix(in srgb, var(--accent) 10%, var(--surface-2)); }
 .cat b { font-size: 13px; display: block; }
 .cat span { font-size: 11px; color: var(--text-subtle); }
 
