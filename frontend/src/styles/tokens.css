@@ -1,0 +1,93 @@
+/* arvel-ecommerce-kit — design tokens (v3 "Commerce"). Single source of truth; mirrors
+   projects/arvel-ecommerce-kit/design/DESIGN.md. One file, two registers (.shop / .console),
+   full light + dark theme ([data-theme]). Never hardcode color/space/radius/type in a component. */
+
+:root {
+  /* brand */
+  --amber-400:#FFC24B; --amber-500:#F5A623; --amber-600:#E08A00;
+  --ink-900:#101627; --ink-800:#1C2540; --ink-700:#2B3557;
+
+  /* neutrals (light) */
+  --white:#FFFFFF; --bg:#FFFFFF; --canvas:#F4F5F7; --surface:#FFFFFF; --surface-2:#F7F8FA;
+  --border:#E5E7EB; --border-2:#D5D9E0;
+  --text:#111827; --text-muted:#4B5563; --text-subtle:#6B7280; --text-inverse:#FFFFFF;
+
+  /* semantic */
+  --accent:var(--amber-500); --accent-hover:var(--amber-400); --accent-press:var(--amber-600);
+  --on-accent:var(--ink-900);
+  --success:#16A34A; --success-bg:#DCFCE7; --success-fg:#166534;
+  --danger:#DC2626;  --danger-bg:#FEE2E2;  --danger-fg:#991B1B;
+  --warn:#D97706;    --warn-bg:#FEF3C7;    --warn-fg:#92400E;
+  --info:#2563EB;    --info-bg:#DBEAFE;    --info-fg:#1E40AF;
+  --sale:#DC2626;    --focus:#2563EB;
+
+  /* category tiles (decorative; ≥24px bold text) */
+  --cat-violet:#7C3AED; --cat-blue:#2563EB; --cat-orange:#EA580C;
+  --cat-teal:#0F766E; --cat-rose:#E11D48; --cat-indigo:#4F46E5;
+
+  /* admin sidebar (navy, both themes) */
+  --side-bg:var(--ink-900); --side-bg-2:#161E33; --side-active:rgba(245,166,35,.14);
+  --side-text:#C3CAD9; --side-text-hi:#FFFFFF; --side-border:#232C46;
+
+  /* type */
+  --font-display:"Sora","Inter",ui-sans-serif,system-ui,sans-serif;
+  --font-text:"Inter",ui-sans-serif,system-ui,sans-serif;
+  --font-mono:ui-monospace,"SF Mono",Menlo,monospace;
+  --text-2xs:.6875rem; --text-xs:.75rem; --text-sm:.875rem; --text-base:1rem;
+  --text-lg:1.125rem; --text-xl:1.375rem; --text-2xl:1.75rem; --text-3xl:2.25rem; --text-4xl:3rem; --text-5xl:3.5rem;
+  --leading-tight:1.2; --leading-snug:1.4; --leading-normal:1.6;
+  --weight-regular:400; --weight-medium:500; --weight-semibold:600; --weight-bold:700;
+  --tracking-tight:-0.02em;
+
+  /* space (4px) */
+  --space-1:.25rem; --space-2:.5rem; --space-3:.75rem; --space-4:1rem; --space-5:1.25rem;
+  --space-6:1.5rem; --space-8:2rem; --space-10:2.5rem; --space-12:3rem; --space-16:4rem; --space-20:5rem; --space-24:6rem;
+
+  /* radius / elevation / motion */
+  --radius-sm:6px; --radius-md:10px; --radius-lg:14px; --radius-xl:20px; --radius-full:999px;
+  --shadow-1:0 1px 2px rgba(16,22,39,.06),0 1px 1px rgba(16,22,39,.04);
+  --shadow-2:0 4px 12px rgba(16,22,39,.08);
+  --shadow-3:0 12px 32px rgba(16,22,39,.12);
+  --shadow-pop:0 8px 28px rgba(16,22,39,.16);
+  --motion-fast:120ms; --motion-base:180ms; --motion-slow:280ms;
+  --ease:cubic-bezier(.2,0,0,1); --ease-out:cubic-bezier(.22,1,.36,1);
+
+  /* layout */
+  --container-max:1320px; --container-pad:clamp(1rem,4vw,2.5rem);
+  --side-w:248px; --header-h:64px; --topbar-h:62px;
+  --z-header:100; --z-side:110; --z-dropdown:200; --z-overlay:300; --z-modal:310; --z-toast:400;
+}
+
+[data-theme="dark"] {
+  --bg:#0E1116; --canvas:#0A0D12; --surface:#161B22; --surface-2:#1C222C;
+  --border:#262D38; --border-2:#333B48;
+  --text:#E6EAF0; --text-muted:#A6B0BF; --text-subtle:#7E8899; --text-inverse:#0E1116;
+  --amber-400:#FFD37A; --amber-500:#F5B03C; --amber-600:#FFC24B; --on-accent:#101627;
+  --success-bg:#0C2A18; --success-fg:#4ADE80; --danger-bg:#2A1213; --danger-fg:#FCA5A5;
+  --warn-bg:#2A1E08; --warn-fg:#FCD34D; --info-bg:#0E1E3A; --info-fg:#93C5FD; --focus:#60A5FA;
+  --side-bg:#0A0D12; --side-bg-2:#141A24; --side-active:rgba(245,176,60,.16);
+  --side-text:#AEB7C6; --side-border:#20293A;
+  --shadow-1:0 1px 2px rgba(0,0,0,.5); --shadow-2:0 4px 12px rgba(0,0,0,.5);
+  --shadow-3:0 12px 32px rgba(0,0,0,.6); --shadow-pop:0 8px 28px rgba(0,0,0,.65);
+}
+
+/* registers */
+.shop    { --bg:var(--white); }
+.console { --bg:var(--canvas); }
+[data-theme="dark"] .console { --bg:var(--canvas); }
+
+/* ── compatibility shim ───────────────────────────────────────────────────────
+   Legacy --color-* names used by views ported from the pre-consolidation apps map
+   to v3 tokens, so those views adopt the new palette + dark theme unchanged. New
+   code should use the v3 names above; migrate a view off these when it's redesigned. */
+:root {
+  --color-bg:var(--bg); --color-surface:var(--surface); --color-surface-2:var(--surface-2);
+  --color-border:var(--border); --color-border-strong:var(--border-2);
+  --color-text:var(--text); --color-text-muted:var(--text-muted); --color-text-faint:var(--text-subtle);
+  --color-text-inverse:var(--on-accent);          /* text sits on the amber accent → ink */
+  --color-accent:var(--accent); --color-accent-hover:var(--accent-hover);
+  --color-accent-text:var(--on-accent);
+  --color-accent-soft:color-mix(in srgb, var(--accent) 14%, transparent);
+  --color-danger:var(--danger); --color-danger-soft:var(--danger-bg);
+  --color-success:var(--success); --color-focus:var(--focus);
+}

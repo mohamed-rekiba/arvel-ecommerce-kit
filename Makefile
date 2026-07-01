@@ -1,6 +1,6 @@
 # arvel-ecommerce-kit — common tasks. `make help` lists them.
 .DEFAULT_GOAL := help
-.PHONY: help install env up down setup migrate fresh seed serve storefront admin worker schedule test typecheck lint check
+.PHONY: help install env up down setup migrate fresh seed serve front front-build worker schedule test typecheck lint check
 
 help: ## Show this help
 	@grep -hE '^[a-zA-Z_-]+:.*?## ' $(MAKEFILE_LIST) | awk 'BEGIN{FS=":.*?## "}{printf "  \033[36m%-12s\033[0m %s\n", $$1, $$2}'
@@ -36,11 +36,11 @@ seed: ## Seed demo data (downloads product images via the Http client)
 serve: ## Run the API dev server (http://127.0.0.1:8000)
 	uv run arvel serve --reload
 
-storefront: ## Run the customer storefront SPA (http://localhost:5173 — needs `make serve`)
-	cd storefront && npm install && npm run dev
+front: ## Run the consolidated storefront + admin SPA (http://localhost:5173 — needs `make serve`)
+	cd frontend && npm install && npm run dev
 
-admin: ## Run the admin SPA (http://localhost:5174 — needs `make serve`)
-	cd admin && npm install && npm run dev -- --port 5174
+front-build: ## Type-check + production-build the frontend (vue-tsc + vite)
+	cd frontend && npm install && npm run build
 
 worker: ## Run a queue worker
 	uv run arvel queue:work
