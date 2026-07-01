@@ -21,6 +21,7 @@ from app.controllers import catalog_controller as catalog
 from app.controllers import checkout_controller as checkout
 from app.controllers import media_controller as media
 from app.controllers import notification_controller as notifications
+from app.controllers import wishlist_controller as wishlist
 from app.controllers import payment_controller as payment
 from app.models.user import User
 from app.schemas import CredentialsIn, TokenOut, UserOut
@@ -164,6 +165,14 @@ Route.get(
 ).middleware(Authenticate).secure("bearer")
 Route.post(
     "/notifications/read", notifications.mark_read, name="api.notifications.read"
+).status(200).middleware(Authenticate).secure("bearer")
+
+# --- Customer wishlist (saved products) ---------------------------------------
+Route.get("/wishlist", wishlist.index, name="api.wishlist.index").middleware(
+    Authenticate
+).secure("bearer")
+Route.post(
+    "/wishlist/{product_id:int}", wishlist.toggle, name="api.wishlist.toggle"
 ).status(200).middleware(Authenticate).secure("bearer")
 Route.get(
     "/admin/orders", checkout.admin_orders_index, name="api.admin.orders.index"

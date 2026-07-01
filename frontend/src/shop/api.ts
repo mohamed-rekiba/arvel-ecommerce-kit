@@ -193,6 +193,12 @@ export const api = {
   markNotificationsRead() {
     return request<{ message: string }>("POST", `/notifications/read`);
   },
+  wishlist() {
+    return get<Product[]>(`/wishlist`);
+  },
+  toggleWishlist(productId: number) {
+    return request<{ saved: boolean }>("POST", `/wishlist/${productId}`);
+  },
   async logout() {
     try {
       await request("POST", `/logout`);

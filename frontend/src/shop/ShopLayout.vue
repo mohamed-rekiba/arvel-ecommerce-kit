@@ -2,15 +2,18 @@
 import { onMounted, ref } from "vue";
 import { useRoute, useRouter } from "vue-router";
 import { useCart } from "./cart";
+import { useWishlist } from "./wishlist";
 import { theme, toggleTheme } from "../lib/theme";
 
 const { count, refresh } = useCart();
+const wishlist = useWishlist();
 const router = useRouter();
 const route = useRoute();
 const scrolled = ref(false);
 
 onMounted(() => {
   refresh();
+  wishlist.refresh();
   const onScroll = () => (scrolled.value = window.scrollY > 8);
   window.addEventListener("scroll", onScroll, { passive: true });
   onScroll();

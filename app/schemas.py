@@ -136,6 +136,10 @@ class MessageOut(Schema):
     message: str
 
 
+class WishlistToggleOut(Schema):
+    saved: bool
+
+
 class NotificationOut(Schema):
     id: str
     type: str

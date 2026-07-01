@@ -2,8 +2,11 @@
 import { computed, onMounted, ref } from "vue";
 import { type Notification, type Order, ApiError, api, formatPrice } from "../api";
 import { useAuth } from "../auth";
+import { useWishlist } from "../wishlist";
+import ProductCard from "../components/ProductCard.vue";
 
 const { state, restore, login, register, logout } = useAuth();
+const wishlist = useWishlist();
 
 const mode = ref<"login" | "register">("login");
 const name = ref("");
@@ -47,7 +50,7 @@ async function submit() {
   try {
     if (mode.value === "login") await login(email.value, password.value);
     else await register(name.value, email.value, password.value);
-    await Promise.all([loadOrders(), loadNotifications()]);
+    await Promise.all([loadOrders(), loadNotifications(), wishlist.refresh()]);
   } catch (e) {
     error.value =
       e instanceof ApiError && e.status === 401
@@ -68,7 +71,7 @@ async function signOut() {
 
 onMounted(async () => {
   await restore();
-  if (state.customer) await Promise.all([loadOrders(), loadNotifications()]);
+  if (state.customer) await Promise.all([loadOrders(), loadNotifications(), wishlist.refresh()]);
 });
 </script>
 
@@ -98,6 +101,13 @@ onMounted(async () => {
             <span class="note__msg">{{ n.message }}</span>
           </li>
         </ul>
+      </section>
+
+      <section v-if="wishlist.state.products.length" class="wish">
+        <h2 class="orders__title">Wishlist</h2>
+        <div class="wish__grid">
+          <ProductCard v-for="p in wishlist.state.products" :key="p.id" :product="p" />
+        </div>
       </section>
 
       <section class="orders">
@@ -171,6 +181,8 @@ onMounted(async () => {
 .switch { margin-top: var(--space-6); color: var(--color-text-muted); font-size: var(--text-sm); }
 .link { border: none; background: none; padding: 0; color: var(--color-accent); font: inherit; cursor: pointer; text-decoration: underline; text-underline-offset: 2px; }
 .orders__title { font-size: var(--text-xl); margin-bottom: var(--space-5); }
+.wish { margin-bottom: var(--space-10); }
+.wish__grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: var(--space-4); }
 .notes { margin-bottom: var(--space-10); }
 .notes__head { display: flex; align-items: center; justify-content: space-between; margin-bottom: var(--space-4); }
 .notes__head .orders__title { margin-bottom: 0; display: inline-flex; align-items: center; gap: var(--space-3); }
