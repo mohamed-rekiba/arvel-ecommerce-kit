@@ -8,11 +8,15 @@ layer (not the controller/seeder) per the convention.
 
 from arvel import Http
 from arvel.media import Image
+from arvel.support.facades import Config
 
 from app.models.product import IMAGES, Product
 
-# the kit's configured default disk (config/filesystems.py); RustFS/S3 = "s3"
-_DISK = "local"
+
+def _disk() -> str:
+    """The configured default storage disk (config/filesystems.py → FILESYSTEM_DISK): `local` in
+    dev/tests, `s3` for RustFS. Resolved at call time so it honours the running config, not a hardcode."""
+    return Config.get("filesystems.default", "local")
 
 
 class ProductImageService:
@@ -30,7 +34,7 @@ class ProductImageService:
         )  # decode-validate — reject a non-image / corrupt upload before storing
         await product.add_media(
             raw, file_name=file_name, mime_type=mime_type
-        ).to_media_collection(IMAGES, disk=_DISK)
+        ).to_media_collection(IMAGES, disk=_disk())
 
     async def download_and_attach(
         self, product: Product, url: str, *, file_name: str
@@ -46,7 +50,7 @@ class ProductImageService:
                 response.content,
                 file_name=file_name,
                 mime_type=response.headers.get("content-type"),
-            ).to_media_collection(IMAGES, disk=_DISK)
+            ).to_media_collection(IMAGES, disk=_disk())
         except Exception:  # noqa: BLE001 — offline / bad image → seed without it, don't crash
             return False
         return True

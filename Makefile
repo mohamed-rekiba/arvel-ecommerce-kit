@@ -15,7 +15,7 @@ up: ## Start all infrastructure (Postgres, Valkey, RabbitMQ, Meilisearch, RustFS
 	docker compose up -d
 
 down: ## Stop all infrastructure
-	docker compose down
+	docker compose down --remove-orphans --volumes
 
 setup: install env up ## One-shot: deps + .env + infra + key + migrate + seed
 	@echo "waiting for Postgres..." && until docker compose exec -T db pg_isready -U arvel -d arvel_ecommerce_kit >/dev/null 2>&1; do sleep 1; done

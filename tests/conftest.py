@@ -10,6 +10,7 @@ os.environ.setdefault("CACHE_STORE", "array")
 os.environ.setdefault("QUEUE_CONNECTION", "memory")
 os.environ.setdefault("MAIL_MAILER", "log")
 os.environ.setdefault("SEARCH_DRIVER", "array")
+os.environ.setdefault("FILESYSTEM_DISK", "local")
 
 import pytest
 

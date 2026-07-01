@@ -53,7 +53,7 @@ services:
   # S3-compatible object storage (RustFS). S3 API on :9000.
   rustfs:
     image: rustfs/rustfs:latest
-    ports: ["9000:9000"]
+    ports: ["9000:9000", "9001:9001"]
     environment:
       RUSTFS_ACCESS_KEY: arvel
       RUSTFS_SECRET_KEY: arvelsecret
