@@ -59,9 +59,9 @@ async function addToCart() {
 .card__body { padding: 14px; display: flex; flex-direction: column; gap: 5px; }
 .card__kicker { font-size: 11px; color: var(--text-subtle); font-weight: 600; }
 .card__name { font-size: 13.5px; font-weight: 600; color: var(--text); text-decoration: none; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; min-height: 38px; }
-.card__name:hover { color: var(--amber-600); }
+.card__name:hover { color: var(--accent); }
 .card__price { font-family: var(--font-display); font-weight: 800; font-size: 17px; margin: 2px 0 0; }
-.card__add { margin-top: 8px; height: 38px; border-radius: var(--radius-full); border: 1px solid var(--amber-500); background: transparent; color: var(--amber-600); font-weight: 700; font-size: 13px; cursor: pointer; transition: background var(--motion-base) var(--ease), color var(--motion-base) var(--ease); }
-.card__add:hover:not(:disabled) { background: var(--amber-500); color: var(--on-accent); }
+.card__add { margin-top: 8px; height: 38px; border-radius: var(--radius-full); border: 1px solid var(--accent); background: transparent; color: var(--accent); font-weight: 700; font-size: 13px; cursor: pointer; transition: background var(--motion-base) var(--ease), color var(--motion-base) var(--ease); }
+.card__add:hover:not(:disabled) { background: var(--accent); color: var(--on-accent); }
 .card__add:disabled { opacity: .5; cursor: not-allowed; }
 </style>
