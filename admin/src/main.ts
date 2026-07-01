@@ -4,6 +4,7 @@ import "./tokens.css";
 import App from "./App.vue";
 import { token } from "./api";
 import AuditView from "./views/AuditView.vue";
+import DashboardView from "./views/DashboardView.vue";
 import LoginView from "./views/LoginView.vue";
 import ProductsView from "./views/ProductsView.vue";
 import RolesView from "./views/RolesView.vue";
@@ -12,7 +13,8 @@ const router = createRouter({
   history: createWebHistory(),
   routes: [
     { path: "/login", name: "login", component: LoginView, meta: { public: true } },
-    { path: "/", redirect: "/products" },
+    { path: "/", redirect: "/dashboard" },
+    { path: "/dashboard", name: "dashboard", component: DashboardView },
     { path: "/products", name: "products", component: ProductsView },
     { path: "/roles", name: "roles", component: RolesView },
     { path: "/audit", name: "audit", component: AuditView },
