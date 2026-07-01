@@ -9,6 +9,8 @@ from typing import Any, ClassVar, TypedDict
 from arvel import Model
 from arvel.localization import current_locale
 from arvel.media import HasMedia, MediaConversion
+
+from app.models.product_media import ProductMedia
 from arvel.search import Searchable
 
 from app.casts.translations import TranslationCast, TranslationsCast
@@ -41,6 +43,7 @@ class SearchableProduct(TypedDict):
 
 class Product(HasMedia, Searchable, Model):
     __table_name__ = "products"
+    __media_model__ = ProductMedia  # gallery items expose url/thumb/preview (media.md → extending Media)
     __fields__: ClassVar[dict[str, type]] = {
         "category_id": int,
         "vendor_id": int,

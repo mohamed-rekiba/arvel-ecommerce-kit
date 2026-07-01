@@ -59,13 +59,24 @@ def category_out(c: Category) -> CategoryOut:
 
 
 def gallery_image_out(media: Media) -> GalleryImageOut:
-    """A media-library item → its kit serving URLs (original + thumb/preview conversions)."""
+    """A media-library item → its serving URLs (original + thumb/preview conversions).
+
+    Product images are **public**: ``media.get_url(conversion)`` returns the disk's configured public
+    ``url`` base + the path (config/filesystems → s3 ``url``), so the browser loads straight from the
+    public RustFS/S3 bucket — no signing, no app round-trip. The ``local`` disk has no ``url`` base
+    (``get_url`` yields a bare path), so we fall back to the app-streamed ``/api/media`` route there."""
     mid = media.id
+
+    def _url(conversion: str | None) -> str:
+        url = media.get_url(conversion)
+        if url and url.startswith(("http://", "https://")):
+            return url  # public bucket / CDN URL
+        return f"/api/media/{mid}" + (
+            f"/{conversion}" if conversion else ""
+        )  # local-disk fallback
+
     return GalleryImageOut(
-        id=mid,
-        url=f"/api/media/{mid}",
-        thumb_url=f"/api/media/{mid}/thumb",
-        preview_url=f"/api/media/{mid}/preview",
+        id=mid, url=_url(None), thumb_url=_url("thumb"), preview_url=_url("preview")
     )
 
 
