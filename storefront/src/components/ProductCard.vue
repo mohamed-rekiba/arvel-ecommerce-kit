@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { computed } from "vue";
-import { type Product, api, formatPrice } from "../api";
+import { type Product, formatPrice } from "../api";
 
 const props = defineProps<{ product: Product }>();
 
@@ -8,9 +8,8 @@ const soldOut = computed(
   () => (props.product.variants ?? []).every((v) => v.stock <= 0) &&
     (props.product.variants ?? []).length > 0,
 );
-const image = computed(() =>
-  props.product.image_path ? api.productImageUrl(props.product.slug) : null,
-);
+const image = computed(() => props.product.gallery[0]?.thumb_url ?? null);
+const name = computed(() => props.product.translation.name);
 </script>
 
 <template>
@@ -21,11 +20,11 @@ const image = computed(() =>
     :aria-disabled="soldOut"
   >
     <div class="card__media">
-      <img v-if="image" :src="image" :alt="product.name" loading="lazy" />
+      <img v-if="image" :src="image" :alt="name" loading="lazy" />
       <div v-else class="card__placeholder" aria-hidden="true" />
       <span v-if="soldOut" class="card__chip">Sold out</span>
     </div>
-    <h3 class="card__name">{{ product.name }}</h3>
+    <h3 class="card__name">{{ name }}</h3>
     <p class="card__price">{{ formatPrice(product.price_cents, product.currency) }}</p>
   </a>
 </template>

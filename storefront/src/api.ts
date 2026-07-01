@@ -8,17 +8,36 @@ export interface Variant {
   stock: number;
 }
 
+// The active-locale name/description (the API projects one locale per Accept-Language).
+export interface Translation {
+  name: string;
+  description: string | null;
+  locale: string;
+}
+
+export interface GalleryImage {
+  id: number;
+  url: string;
+  thumb_url: string;
+  preview_url: string;
+}
+
+export interface Category {
+  id: number;
+  slug: string;
+  translation: Translation;
+}
+
 export interface Product {
   id: number;
-  name: string;
   slug: string;
-  description: string | null;
+  translation: Translation;
   price_cents: number;
   currency: string;
   status: string;
-  image_path: string | null;
-  category?: { id: number; name: string; slug: string };
-  variants?: Variant[];
+  gallery: GalleryImage[];
+  category?: Category | null;
+  variants?: Variant[] | null;
 }
 
 // arvel's LengthAwarePaginator JSON shape (DR-0022).
@@ -48,8 +67,8 @@ export const api = {
   product(slug: string) {
     return get<Product>(`/products/${slug}`);
   },
-  productImageUrl(slug: string) {
-    return `/api/products/${slug}/image`;
+  categories() {
+    return get<Category[]>(`/categories`);
   },
 };
 
