@@ -85,7 +85,7 @@ function search() {
 .ic { width: 22px; height: 22px; stroke: currentColor; fill: none; stroke-width: 1.8; }
 .ic--sm { width: 18px; height: 18px; }
 .logo { font-family: var(--font-display); font-weight: 800; font-size: 26px; letter-spacing: -.03em; color: var(--text); text-decoration: none; }
-.logo span { color: var(--amber-500); }
+.logo span { color: var(--accent); }
 
 .util { background: var(--side-bg); color: var(--side-text); font-size: 12.5px; }
 .util__in { display: flex; align-items: center; justify-content: space-between; height: 38px; }
@@ -99,11 +99,11 @@ function search() {
 .search { flex: 1; display: flex; align-items: center; background: var(--surface-2); border: 1px solid var(--border-2); border-radius: var(--radius-md); height: 46px; overflow: hidden; }
 .search__cat { padding: 0 14px; border-right: 1px solid var(--border-2); color: var(--text-muted); font-size: 13px; font-weight: 600; white-space: nowrap; }
 .search input { flex: 1; border: 0; background: transparent; padding: 0 14px; font: inherit; color: var(--text); outline: none; }
-.search__go { height: 46px; padding: 0 22px; background: var(--amber-500); color: var(--on-accent); border: 0; font-weight: 700; cursor: pointer; }
+.search__go { height: 46px; padding: 0 22px; background: var(--accent); color: var(--on-accent); border: 0; font-weight: 700; cursor: pointer; }
 .hicons { display: flex; align-items: center; gap: 20px; }
 .hic { display: flex; flex-direction: column; align-items: center; gap: 3px; font-size: 11px; color: var(--text-muted); text-decoration: none; position: relative; }
 .hic:hover { color: var(--text); }
-.hic .n { position: absolute; top: -6px; right: 6px; background: var(--amber-500); color: var(--on-accent); font-size: 10px; font-weight: 700; border-radius: 999px; min-width: 16px; height: 16px; display: grid; place-items: center; padding: 0 4px; }
+.hic .n { position: absolute; top: -6px; right: 6px; background: var(--accent); color: var(--on-accent); font-size: 10px; font-weight: 700; border-radius: 999px; min-width: 16px; height: 16px; display: grid; place-items: center; padding: 0 4px; }
 
 .deptbar { background: var(--surface); border-bottom: 1px solid var(--border); }
 .deptbar__in { display: flex; align-items: center; gap: 6px; height: 48px; font-size: 13.5px; font-weight: 600; }

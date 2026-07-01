@@ -43,9 +43,9 @@ onMounted(async () => {
 
     <!-- promo tiles -->
     <section class="promos">
-      <div class="promo" style="background:linear-gradient(135deg,var(--cat-violet),#a855f7)"><h3>Smartphone Bestsellers</h3><span class="promo__lk">Shop now →</span></div>
-      <div class="promo" style="background:linear-gradient(135deg,var(--cat-blue),#38bdf8)"><h3>30% off Trending Cameras</h3><span class="promo__lk">Shop now →</span></div>
-      <div class="promo" style="background:linear-gradient(135deg,var(--cat-orange),#f59e0b)"><h3>Top Fresh Accessories</h3><span class="promo__lk">Shop now →</span></div>
+      <div class="promo" style="background:linear-gradient(135deg,var(--plum-600),var(--plum-400))"><h3>Smartphone Bestsellers</h3><span class="promo__lk">Shop now →</span></div>
+      <div class="promo" style="background:linear-gradient(135deg,#21384A,#3E6B78)"><h3>30% off Trending Cameras</h3><span class="promo__lk">Shop now →</span></div>
+      <div class="promo" style="background:linear-gradient(135deg,#283D3B,#5E6E63)"><h3>Top Fresh Accessories</h3><span class="promo__lk">Shop now →</span></div>
     </section>
 
     <!-- top categories (live) -->
@@ -74,13 +74,13 @@ onMounted(async () => {
 
 <style scoped>
 .home { display: flex; flex-direction: column; gap: 34px; }
-.btn-amber { display: inline-flex; align-items: center; height: 44px; padding: 0 22px; border-radius: var(--radius-md); background: var(--amber-500); color: var(--on-accent); font-weight: 700; text-decoration: none; }
+.btn-amber { display: inline-flex; align-items: center; height: 44px; padding: 0 22px; border-radius: var(--radius-md); background: var(--accent); color: var(--on-accent); font-weight: 700; text-decoration: none; }
 
-.hero { position: relative; border-radius: var(--radius-lg); overflow: hidden; background: linear-gradient(120deg,#123c3a,#1c5a54 60%,#2a7a70); color: #fff; min-height: 320px; display: flex; align-items: center; padding: 44px; box-shadow: var(--shadow-2); }
+.hero { position: relative; border-radius: var(--radius-lg); overflow: hidden; background: linear-gradient(120deg,#011627,#283D3B 65%,#3a5450); color: #fff; min-height: 320px; display: flex; align-items: center; padding: 44px; box-shadow: var(--shadow-2); }
 .hero__ey { font-size: 12px; letter-spacing: .14em; text-transform: uppercase; opacity: .85; font-weight: 700; }
 .hero h1 { font-size: 48px; line-height: 1.02; margin: 12px 0; font-weight: 800; }
 .hero p { opacity: .9; max-width: 360px; margin-bottom: 22px; }
-.hero__art { position: absolute; right: 44px; top: 50%; transform: translateY(-50%); width: 210px; height: 250px; border-radius: 26px; background: linear-gradient(160deg,#0e2e2b,#39938a); box-shadow: 0 20px 50px rgba(0,0,0,.35); border: 6px solid rgba(255,255,255,.08); }
+.hero__art { position: absolute; right: 44px; top: 50%; transform: translateY(-50%); width: 210px; height: 250px; border-radius: 26px; background: linear-gradient(160deg,#011627,#795663); box-shadow: 0 20px 50px rgba(0,0,0,.35); border: 6px solid rgba(217,188,175,.14); }
 
 .svc { display: grid; grid-template-columns: repeat(5,1fr); gap: 10px; background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-lg); padding: 16px; box-shadow: var(--shadow-1); }
 .svc__it { padding-left: 16px; border-left: 1px solid var(--border); }
@@ -95,8 +95,8 @@ onMounted(async () => {
 
 .sec__hd { display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px; }
 .sec__hd h2 { font-size: 22px; font-weight: 700; }
-.sec__hd h2 b { color: var(--amber-600); }
-.sec__all { font-size: 12.5px; font-weight: 700; color: var(--amber-600); text-decoration: none; }
+.sec__hd h2 b { color: var(--accent); }
+.sec__all { font-size: 12.5px; font-weight: 700; color: var(--accent); text-decoration: none; }
 
 .cats { display: grid; grid-template-columns: repeat(6,1fr); gap: 12px; }
 .cat { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-lg); padding: 16px; text-align: center; box-shadow: var(--shadow-1); text-decoration: none; color: var(--text); }
