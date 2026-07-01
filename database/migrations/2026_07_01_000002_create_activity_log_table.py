@@ -15,7 +15,7 @@ class CreateActivityLogTable(Migration):
             t.string("causer_type").nullable()
             t.integer("causer_id").nullable().index()
             t.string("event").nullable()
-            t.json("properties").nullable()
+            t.text("properties").nullable()  # "json"-cast field ⇒ text column (DR-0031)
             t.string("batch_uuid").nullable()
             t.timestamps()
 
