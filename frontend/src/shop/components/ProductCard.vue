@@ -11,8 +11,13 @@ const busy = ref(false);
 
 const variants = computed(() => props.product.variants ?? []);
 const soldOut = computed(() => variants.value.length > 0 && variants.value.every((v) => v.stock <= 0));
-// cards are large — use the 600×750 `preview` conversion, not the 256×320 thumb (which upscales/softens)
-const image = computed(() => props.product.gallery[0]?.preview_url ?? props.product.gallery[0]?.url ?? null);
+// serve all three conversions via srcset so the browser picks the suitable one per viewport/DPR:
+// thumb 256w (small/2-up on phones), preview 600w (cards), original 900w (retina). `src` = preview fallback.
+const g = computed(() => props.product.gallery[0] ?? null);
+const image = computed(() => g.value?.preview_url ?? g.value?.url ?? null);
+const srcset = computed(() =>
+  g.value ? `${g.value.thumb_url} 256w, ${g.value.preview_url} 600w, ${g.value.url} 900w` : undefined,
+);
 const name = computed(() => props.product.translation.name);
 
 async function addToBag() {
@@ -29,7 +34,14 @@ async function addToBag() {
 <template>
   <article class="card" :class="{ 'card--out': soldOut }">
     <RouterLink class="media" :to="`/products/${product.slug}`" :aria-label="name">
-      <img v-if="image" :src="image" :alt="name" loading="lazy" />
+      <img
+        v-if="image"
+        :src="image"
+        :srcset="srcset"
+        sizes="(max-width: 560px) 100vw, (max-width: 1024px) 50vw, 33vw"
+        :alt="name"
+        loading="lazy"
+      />
       <div v-else class="media__ph" aria-hidden="true" />
       <span v-if="soldOut" class="media__out">Sold out</span>
       <button v-else class="add" :disabled="busy" @click.prevent.stop="addToBag">

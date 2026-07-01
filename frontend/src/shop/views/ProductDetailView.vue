@@ -14,7 +14,10 @@ const selectedVariantId = ref<number | null>(null);
 const adding = ref(false);
 const added = ref(false);
 
-const image = computed(() => product.value?.gallery[0]?.preview_url ?? null);
+// the PDP is the product's showcase — lead with the sharp `original` (900×1125), preview as 1x fallback
+const g = computed(() => product.value?.gallery[0] ?? null);
+const image = computed(() => g.value?.url ?? g.value?.preview_url ?? null);
+const srcset = computed(() => (g.value ? `${g.value.preview_url} 600w, ${g.value.url} 900w` : undefined));
 const variants = computed<Variant[]>(() => product.value?.variants ?? []);
 const selectedVariant = computed(() =>
   variants.value.find((v) => v.id === selectedVariantId.value) ?? null,
@@ -63,7 +66,13 @@ watch(() => route.params.slug, load);
 
     <div v-else-if="product" class="pdp__grid">
       <div class="pdp__media">
-        <img v-if="image" :src="image" :alt="product.translation.name" />
+        <img
+          v-if="image"
+          :src="image"
+          :srcset="srcset"
+          sizes="(max-width: 900px) 100vw, 44vw"
+          :alt="product.translation.name"
+        />
         <div v-else class="pdp__placeholder" aria-hidden="true" />
       </div>
       <div class="pdp__info">
