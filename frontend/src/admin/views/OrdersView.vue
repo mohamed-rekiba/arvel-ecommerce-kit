@@ -1,4 +1,8 @@
 <script setup lang="ts">
+import Button from "primevue/button";
+import Column from "primevue/column";
+import DataTable from "primevue/datatable";
+import Tag from "primevue/tag";
 import { onMounted, ref } from "vue";
 import { type Order, ApiError, ORDER_TRANSITIONS, api, formatPrice } from "../api";
 
@@ -7,12 +11,12 @@ const status = ref<"loading" | "error" | "ready">("loading");
 const notice = ref<string | null>(null);
 const busyId = ref<number | null>(null);
 
-const badgeClass: Record<string, string> = {
-  pending: "badge--warn",
-  paid: "badge--ok",
-  shipped: "badge--ok",
-  delivered: "badge--ok",
-  cancelled: "badge--muted",
+const severity: Record<string, string> = {
+  pending: "secondary",
+  paid: "info",
+  shipped: "warn",
+  delivered: "success",
+  cancelled: "danger",
 };
 
 async function load() {
@@ -22,7 +26,8 @@ async function load() {
     status.value = "ready";
   } catch (e) {
     status.value = "error";
-    notice.value = e instanceof ApiError && e.status === 403 ? "You need the orders.view permission." : "Failed to load orders.";
+    notice.value =
+      e instanceof ApiError && e.status === 403 ? "You need the orders.view permission." : "Failed to load orders.";
   }
 }
 
@@ -33,7 +38,8 @@ async function transition(order: Order, next: string) {
     const updated = await api.updateOrderStatus(order.id, next);
     order.status = updated.status;
   } catch (e) {
-    notice.value = e instanceof ApiError && e.status === 403 ? "Your role can't change order status." : "Transition failed.";
+    notice.value =
+      e instanceof ApiError && e.status === 403 ? "Your role can't change order status." : "Transition failed.";
   } finally {
     busyId.value = null;
   }
@@ -46,64 +52,63 @@ onMounted(load);
 </script>
 
 <template>
-  <section>
-    <header class="page">
+  <section class="page">
+    <header class="head">
+      <p class="eyebrow">Fulfillment</p>
       <h1>Orders</h1>
-      <p class="page__sub">Every order, with state-machine transitions (order-manager or super-admin).</p>
+      <p class="sub">Every order, with state-machine transitions (order-manager or super-admin).</p>
     </header>
 
     <p v-if="notice" class="notice" role="alert">{{ notice }}</p>
 
-    <div v-if="status === 'loading'" class="muted">Loading…</div>
-    <div v-else-if="status === 'ready' && orders.length === 0" class="card card--pad muted">No orders yet.</div>
-    <div v-else-if="status === 'ready'" class="card">
-      <table class="tbl">
-        <thead>
-          <tr><th>Order</th><th>Items</th><th>Total</th><th>Status</th><th class="tbl__r">Advance</th></tr>
-        </thead>
-        <tbody>
-          <tr v-for="o in orders" :key="o.id">
-            <td class="mono">#{{ o.id }}</td>
-            <td class="muted">{{ itemCount(o) }} item{{ itemCount(o) === 1 ? "" : "s" }}</td>
-            <td>{{ formatPrice(o.total_cents) }}</td>
-            <td><span :class="['badge', badgeClass[o.status] ?? 'badge--muted']"><span class="badge__dot" />{{ o.status }}</span></td>
-            <td class="tbl__r">
-              <div v-if="(ORDER_TRANSITIONS[o.status] ?? []).length" class="actions">
-                <button
-                  v-for="next in ORDER_TRANSITIONS[o.status]"
-                  :key="next"
-                  class="btn btn--sm"
-                  :disabled="busyId === o.id"
-                  @click="transition(o, next)"
-                >
-                  {{ next }}
-                </button>
-              </div>
-              <span v-else class="muted">—</span>
-            </td>
-          </tr>
-        </tbody>
-      </table>
+    <div class="panel">
+      <DataTable :value="orders" :loading="status === 'loading'" paginator :rows="10" data-key="id" size="small" striped-rows>
+        <template #empty><p class="empty">No orders yet.</p></template>
+        <Column header="Order">
+          <template #body="{ data }"><span class="mono">#{{ data.id }}</span></template>
+        </Column>
+        <Column header="Items">
+          <template #body="{ data }">{{ itemCount(data) }}</template>
+        </Column>
+        <Column header="Total">
+          <template #body="{ data }"><span class="mono">{{ formatPrice(data.total_cents) }}</span></template>
+        </Column>
+        <Column header="Status">
+          <template #body="{ data }">
+            <Tag :value="data.status" :severity="severity[data.status] ?? 'secondary'" />
+          </template>
+        </Column>
+        <Column header="Advance">
+          <template #body="{ data }">
+            <div v-if="(ORDER_TRANSITIONS[data.status] ?? []).length" class="actions">
+              <Button
+                v-for="next in ORDER_TRANSITIONS[data.status]"
+                :key="next"
+                :label="next"
+                size="small"
+                :severity="next === 'cancelled' ? 'danger' : 'secondary'"
+                outlined
+                :loading="busyId === data.id"
+                @click="transition(data, next)"
+              />
+            </div>
+            <span v-else class="muted">—</span>
+          </template>
+        </Column>
+      </DataTable>
     </div>
   </section>
 </template>
 
 <style scoped>
-.page { margin-bottom: var(--space-6); }
-.page h1 { font-size: var(--text-2xl); }
-.page__sub { color: var(--color-text-muted); margin: var(--space-1) 0 0; }
-.notice { background: var(--color-danger-soft); color: var(--color-danger); padding: var(--space-3) var(--space-4); border-radius: var(--radius-md); font-size: var(--text-sm); margin-bottom: var(--space-4); }
-.card { background: var(--color-bg); border: 1px solid var(--color-border); border-radius: var(--radius-lg); box-shadow: var(--shadow-1); overflow: hidden; }
-.card--pad { padding: var(--space-6); }
-.tbl { width: 100%; border-collapse: collapse; }
-.tbl th { text-align: left; font-size: var(--text-xs); text-transform: uppercase; letter-spacing: 0.04em; color: var(--color-text-faint); font-weight: var(--weight-semibold); padding: var(--space-3) var(--space-5); background: var(--color-surface); border-bottom: 1px solid var(--color-border); }
-.tbl td { padding: var(--space-4) var(--space-5); border-bottom: 1px solid var(--color-surface); font-size: var(--text-sm); vertical-align: middle; }
-.tbl tbody tr:last-child td { border-bottom: none; }
-.tbl tbody tr:hover { background: var(--color-surface); }
-.tbl__r { text-align: right; }
-.mono { font-family: ui-monospace, monospace; font-weight: var(--weight-medium); }
-.badge { text-transform: capitalize; }
-.actions { display: inline-flex; gap: var(--space-2); justify-content: flex-end; }
-.btn--sm { padding: 3px var(--space-3); font-size: var(--text-xs); text-transform: capitalize; }
-.muted { color: var(--color-text-muted); }
+.eyebrow { font-size: 11px; text-transform: uppercase; letter-spacing: .16em; color: var(--accent); font-weight: 600; }
+.head { margin-bottom: 20px; }
+.head h1 { font-family: var(--font-display); font-size: 26px; font-weight: 700; letter-spacing: -.02em; margin: 6px 0 2px; }
+.sub { color: var(--text-muted); font-size: 13px; margin: 0; }
+.notice { background: var(--danger-bg); color: var(--danger-fg); padding: 10px 14px; border-radius: var(--radius-md); font-size: 13px; margin-bottom: 16px; }
+.panel { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-lg); box-shadow: var(--shadow-1); overflow: hidden; }
+.mono { font-family: var(--font-mono); font-size: 12.5px; }
+.actions { display: inline-flex; gap: 6px; }
+.muted { color: var(--text-subtle); }
+.empty { text-align: center; color: var(--text-subtle); padding: 24px 0; }
 </style>
