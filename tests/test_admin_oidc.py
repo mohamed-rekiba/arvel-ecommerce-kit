@@ -73,3 +73,18 @@ def test_non_admin_role_is_forbidden(client) -> None:
 def test_missing_or_invalid_token_is_unauthorized(client) -> None:
     assert client.get("/api/admin/me").status_code == 401
     assert client.get("/api/admin/me", headers=_bearer("garbage")).status_code == 401
+
+
+def test_claim_map_maps_keycloak_realm_roles_to_arvel_roles() -> None:
+    """The Keycloak realm-role claim → arvel RBAC role names (safe-by-default: unmapped → nothing)."""
+    from arvel.auth.claim_map import roles_for_claims
+
+    from app.auth.admin_oidc import ROLE_CLAIM_MAP
+
+    claims = {"realm_access": {"roles": ["catalog-manager", "admin", "offline_access"]}}
+    mapped = roles_for_claims(
+        claims, ROLE_CLAIM_MAP, claim_paths=("realm_access.roles",)
+    )
+    assert mapped == {
+        "catalog-manager"
+    }  # "admin"/"offline_access" aren't RBAC roles → dropped

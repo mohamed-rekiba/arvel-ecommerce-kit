@@ -15,6 +15,7 @@ from app.enums import ProductStatus, UserRole
 from app.models.category import Category
 from app.models.product import Product
 from app.models.user import User
+from tests.rbac_helpers import seed_rbac
 
 # a real 1x1 transparent PNG
 _PNG = base64.b64decode(
@@ -26,20 +27,41 @@ _PNG = base64.b64decode(
 def client(tmp_path, monkeypatch):
     url = f"sqlite+aiosqlite:///{tmp_path / 'media.sqlite'}"
     monkeypatch.setenv("DATABASE_URL", url)
-    monkeypatch.setenv("FILESYSTEM_LOCAL_ROOT", str(tmp_path / "disk"))  # uploads → temp disk
+    monkeypatch.setenv(
+        "FILESYSTEM_LOCAL_ROOT", str(tmp_path / "disk")
+    )  # uploads → temp disk
 
     async def seed() -> None:
         db = ConnectionResolver({"default": {"url": url}})
         await Migrator(db).run(discover_migrations(["database/migrations"]))
         for model in (User, Category, Product):
             model.set_connection(db)
-        await User.create(name="Admin", email="admin@example.com", password="secret-admin",
-                          role=UserRole.ADMIN)
-        await User.create(name="Cara", email="cara@example.com", password="secret-cara",
-                          role=UserRole.CUSTOMER)
-        cat = await Category.create(translations={"en": {"name": "Shirts"}}, slug="shirts", published=True)
-        await Product.create(category_id=cat.id, translations={"en": {"name": "Tee"}}, slug="tee", price_cents=2000,
-                             currency="USD", status=ProductStatus.ACTIVE, published=True)
+        await seed_rbac(db)
+        admin = await User.create(
+            name="Admin",
+            email="admin@example.com",
+            password="secret-admin",
+            role=UserRole.ADMIN,
+        )
+        await admin.assign_role("super-admin")  # catalog.update authority (bypasses)
+        await User.create(
+            name="Cara",
+            email="cara@example.com",
+            password="secret-cara",
+            role=UserRole.CUSTOMER,
+        )
+        cat = await Category.create(
+            translations={"en": {"name": "Shirts"}}, slug="shirts", published=True
+        )
+        await Product.create(
+            category_id=cat.id,
+            translations={"en": {"name": "Tee"}},
+            slug="tee",
+            price_cents=2000,
+            currency="USD",
+            status=ProductStatus.ACTIVE,
+            published=True,
+        )
         for model in (User, Category, Product):
             model.set_connection(None)
         await db.dispose()
@@ -53,7 +75,9 @@ def client(tmp_path, monkeypatch):
 
 
 def _auth(client, email, password) -> dict:
-    token = client.post("/api/login", json={"email": email, "password": password}).json()["token"]
+    token = client.post(
+        "/api/login", json={"email": email, "password": password}
+    ).json()["token"]
     return {"Authorization": f"Bearer {token}"}
 
 

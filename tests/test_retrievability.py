@@ -27,25 +27,50 @@ def client(tmp_path, monkeypatch):  # type: ignore[no-untyped-def]
             model.set_connection(db)
         acme = await Vendor.create(name="Acme", slug="acme", published=True)
         shady = await Vendor.create(name="Shady", slug="shady", published=False)
-        root = await Category.create(translations={"en": {"name": "Root"}}, slug="root", published=True)
-        phones = await Category.create(translations={"en": {"name": "Phones"}}, slug="phones", parent_id=root.id, published=True)
-        await Category.create(translations={"en": {"name": "Empty"}}, slug="empty", parent_id=root.id, published=True)
-        hidden_root = await Category.create(translations={"en": {"name": "HiddenRoot"}}, slug="hroot", published=False)
+        root = await Category.create(
+            translations={"en": {"name": "Root"}}, slug="root", published=True
+        )
+        phones = await Category.create(
+            translations={"en": {"name": "Phones"}},
+            slug="phones",
+            parent_id=root.id,
+            published=True,
+        )
+        await Category.create(
+            translations={"en": {"name": "Empty"}},
+            slug="empty",
+            parent_id=root.id,
+            published=True,
+        )
+        hidden_root = await Category.create(
+            translations={"en": {"name": "HiddenRoot"}}, slug="hroot", published=False
+        )
         hidden_child = await Category.create(
-            translations={"en": {"name": "HiddenChild"}}, slug="hchild", parent_id=hidden_root.id, published=True
+            translations={"en": {"name": "HiddenChild"}},
+            slug="hchild",
+            parent_id=hidden_root.id,
+            published=True,
         )
 
         async def product(slug, category_id, vendor_id, published) -> None:  # type: ignore[no-untyped-def]
             await Product.create(
                 translations={"en": {"name": slug, "description": "d"}},
-                slug=slug, category_id=category_id, vendor_id=vendor_id,
-                price_cents=1000, currency="USD",
-                status="active" if published else "draft", published=published,
+                slug=slug,
+                category_id=category_id,
+                vendor_id=vendor_id,
+                price_cents=1000,
+                currency="USD",
+                status="active" if published else "draft",
+                published=published,
             )
 
         await product("good", phones.id, acme.id, True)  # retrievable
-        await product("under-hidden-ancestor", hidden_child.id, acme.id, True)  # hidden: ancestor unpublished
-        await product("shady-vendor", phones.id, shady.id, True)  # hidden: vendor unpublished
+        await product(
+            "under-hidden-ancestor", hidden_child.id, acme.id, True
+        )  # hidden: ancestor unpublished
+        await product(
+            "shady-vendor", phones.id, shady.id, True
+        )  # hidden: vendor unpublished
         await product("draft", phones.id, acme.id, False)  # hidden: unpublished
         for model in (Vendor, Category, Product):
             model.set_connection(None)

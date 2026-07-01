@@ -15,6 +15,7 @@ from app.models.category import Category
 from app.models.product import Product
 from app.models.product_variant import ProductVariant
 from app.models.user import User
+from tests.rbac_helpers import seed_rbac
 
 
 @pytest.fixture
@@ -27,15 +28,34 @@ def client(tmp_path, monkeypatch):
         await Migrator(db).run(discover_migrations(["database/migrations"]))
         for model in (User, Category, Product, ProductVariant):
             model.set_connection(db)
-        await User.create(name="Cara", email="cara@example.com", password="secret-cara",
-                          role=UserRole.CUSTOMER)
-        await User.create(name="Admin", email="admin@example.com", password="secret-admin",
-                          role=UserRole.ADMIN)
-        cat = await Category.create(translations={"en": {"name": "Shirts"}}, slug="shirts")
-        p = await Product.create(category_id=cat.id, translations={"en": {"name": "Tee"}}, slug="tee",
-                                 price_cents=2000, currency="USD", status=ProductStatus.ACTIVE)
-        await ProductVariant.create(product_id=p.id, sku="TEE-S", name="S",
-                                    price_adjustment_cents=0, stock=100)
+        await seed_rbac(db)
+        await User.create(
+            name="Cara",
+            email="cara@example.com",
+            password="secret-cara",
+            role=UserRole.CUSTOMER,
+        )
+        admin = await User.create(
+            name="Admin",
+            email="admin@example.com",
+            password="secret-admin",
+            role=UserRole.ADMIN,
+        )
+        await admin.assign_role("super-admin")  # orders.update authority (bypasses)
+        cat = await Category.create(
+            translations={"en": {"name": "Shirts"}}, slug="shirts"
+        )
+        p = await Product.create(
+            category_id=cat.id,
+            translations={"en": {"name": "Tee"}},
+            slug="tee",
+            price_cents=2000,
+            currency="USD",
+            status=ProductStatus.ACTIVE,
+        )
+        await ProductVariant.create(
+            product_id=p.id, sku="TEE-S", name="S", price_adjustment_cents=0, stock=100
+        )
         for model in (User, Category, Product, ProductVariant):
             model.set_connection(None)
         await db.dispose()
@@ -49,7 +69,9 @@ def client(tmp_path, monkeypatch):
 
 
 def _login(client, email, password) -> dict:
-    token = client.post("/api/login", json={"email": email, "password": password}).json()["token"]
+    token = client.post(
+        "/api/login", json={"email": email, "password": password}
+    ).json()["token"]
     return {"Authorization": f"Bearer {token}"}
 
 
@@ -57,7 +79,11 @@ def test_checkout_creates_order_clears_cart_and_fires_event(client) -> None:
     headers = _login(client, "cara@example.com", "secret-cara")
     assert client.get("/api/metrics/orders-placed").json()["orders_placed"] == 0
 
-    client.post("/api/cart/items", json={"product_variant_id": 1, "quantity": 3}, headers=headers)
+    client.post(
+        "/api/cart/items",
+        json={"product_variant_id": 1, "quantity": 3},
+        headers=headers,
+    )
 
     placed = client.post("/api/checkout", headers=headers)
     assert placed.status_code == 201
@@ -83,18 +109,32 @@ def test_checkout_empty_cart_is_422(client) -> None:
 def test_order_state_machine(client) -> None:
     customer = _login(client, "cara@example.com", "secret-cara")
     admin = _login(client, "admin@example.com", "secret-admin")
-    client.post("/api/cart/items", json={"product_variant_id": 1, "quantity": 1}, headers=customer)
+    client.post(
+        "/api/cart/items",
+        json={"product_variant_id": 1, "quantity": 1},
+        headers=customer,
+    )
     order_id = client.post("/api/checkout", headers=customer).json()["id"]
 
     # a customer cannot change status (admin-only)
-    assert client.post(
-        f"/api/admin/orders/{order_id}/status", json={"status": "paid"}, headers=customer
-    ).status_code == 403
+    assert (
+        client.post(
+            f"/api/admin/orders/{order_id}/status",
+            json={"status": "paid"},
+            headers=customer,
+        ).status_code
+        == 403
+    )
 
     # illegal transition pending -> delivered is rejected
-    assert client.post(
-        f"/api/admin/orders/{order_id}/status", json={"status": "delivered"}, headers=admin
-    ).status_code == 422
+    assert (
+        client.post(
+            f"/api/admin/orders/{order_id}/status",
+            json={"status": "delivered"},
+            headers=admin,
+        ).status_code
+        == 422
+    )
 
     # legal path: pending -> paid -> shipped -> delivered
     for nxt in ("paid", "shipped", "delivered"):
@@ -105,11 +145,21 @@ def test_order_state_machine(client) -> None:
         assert resp.json()["status"] == nxt
 
     # delivered is terminal — no further transition
-    assert client.post(
-        f"/api/admin/orders/{order_id}/status", json={"status": "cancelled"}, headers=admin
-    ).status_code == 422
+    assert (
+        client.post(
+            f"/api/admin/orders/{order_id}/status",
+            json={"status": "cancelled"},
+            headers=admin,
+        ).status_code
+        == 422
+    )
 
     # an unknown status is 422
-    assert client.post(
-        f"/api/admin/orders/{order_id}/status", json={"status": "bogus"}, headers=admin
-    ).status_code == 422
+    assert (
+        client.post(
+            f"/api/admin/orders/{order_id}/status",
+            json={"status": "bogus"},
+            headers=admin,
+        ).status_code
+        == 422
+    )

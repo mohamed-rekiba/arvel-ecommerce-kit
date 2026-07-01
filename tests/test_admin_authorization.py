@@ -14,6 +14,7 @@ from app.enums import UserRole
 from app.models.category import Category
 from app.models.product import Product
 from app.models.user import User
+from tests.rbac_helpers import seed_rbac
 
 
 @pytest.fixture
@@ -26,13 +27,33 @@ def client(tmp_path, monkeypatch):
         await Migrator(db).run(discover_migrations(["database/migrations"]))
         for model in (User, Category, Product):
             model.set_connection(db)
-        await User.create(name="Admin", email="admin@example.com", password="secret-admin",
-                          role=UserRole.ADMIN)
-        await User.create(name="Cara", email="cara@example.com", password="secret-cara",
-                          role=UserRole.CUSTOMER)
-        cat = await Category.create(translations={"en": {"name": "Shirts"}}, slug="shirts")
-        await Product.create(category_id=cat.id, translations={"en": {"name": "Existing"}}, slug="existing",
-                             price_cents=1000, currency="USD", status="active")
+        await seed_rbac(db)
+        admin = await User.create(
+            name="Admin",
+            email="admin@example.com",
+            password="secret-admin",
+            role=UserRole.ADMIN,
+        )
+        await admin.assign_role(
+            "super-admin"
+        )  # RBAC: catalog authority (bypasses via Gate.before)
+        await User.create(
+            name="Cara",
+            email="cara@example.com",
+            password="secret-cara",
+            role=UserRole.CUSTOMER,
+        )
+        cat = await Category.create(
+            translations={"en": {"name": "Shirts"}}, slug="shirts"
+        )
+        await Product.create(
+            category_id=cat.id,
+            translations={"en": {"name": "Existing"}},
+            slug="existing",
+            price_cents=1000,
+            currency="USD",
+            status="active",
+        )
         for model in (User, Category, Product):
             model.set_connection(None)
         await db.dispose()
@@ -46,7 +67,9 @@ def client(tmp_path, monkeypatch):
 
 
 def _token(client, email, password):
-    return client.post("/api/login", json={"email": email, "password": password}).json()["token"]
+    return client.post(
+        "/api/login", json={"email": email, "password": password}
+    ).json()["token"]
 
 
 def _auth(token):
@@ -72,8 +95,15 @@ def test_customer_cannot_mutate_catalog(client) -> None:
     )
     assert create.status_code == 403  # policy.create → deny() → 403
     # update/delete deny AS 404 (deny_as_not_found) — existence not leaked
-    assert client.put("/api/admin/products/1", json={"name": "x"}, headers=_auth(token)).status_code == 404
-    assert client.delete("/api/admin/products/1", headers=_auth(token)).status_code == 404
+    assert (
+        client.put(
+            "/api/admin/products/1", json={"name": "x"}, headers=_auth(token)
+        ).status_code
+        == 404
+    )
+    assert (
+        client.delete("/api/admin/products/1", headers=_auth(token)).status_code == 404
+    )
 
 
 def test_admin_can_mutate_catalog(client) -> None:
@@ -95,7 +125,10 @@ def test_admin_can_mutate_catalog(client) -> None:
     assert upd.json()["translations"][0]["name"] == "Admin Tee v2"
     assert upd.json()["status"] == "active"
 
-    assert client.delete(f"/api/admin/products/{new_id}", headers=_auth(token)).status_code == 200
+    assert (
+        client.delete(f"/api/admin/products/{new_id}", headers=_auth(token)).status_code
+        == 200
+    )
 
 
 def test_admin_create_validates(client) -> None:
@@ -111,7 +144,9 @@ def test_admin_create_validates(client) -> None:
 def test_admin_lists_all_products_with_is_visible(client) -> None:
     token = _token(client, "admin@example.com", "secret-admin")
     body = client.get("/api/admin/products", headers=_auth(token)).json()
-    assert body["total"] == 1  # admin sees the product even though it's hidden from the storefront
+    assert (
+        body["total"] == 1
+    )  # admin sees the product even though it's hidden from the storefront
     product = body["data"][0]
     assert product["slug"] == "existing"
     assert product["is_visible"] is False  # not published → not retrievable

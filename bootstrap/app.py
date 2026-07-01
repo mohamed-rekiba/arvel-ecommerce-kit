@@ -20,8 +20,12 @@ def create_app() -> Application:
         .with_providers(BASE_PATH / "bootstrap" / "providers.py")
         .with_middlewares(BASE_PATH / "bootstrap" / "middlewares.py")
         .with_routing(
-            web=BASE_PATH / "routes" / "web.py",  # stateful browser routes (the "web" group)
-            api=BASE_PATH / "routes" / "api.py",  # stateless JSON routes ("api" group, /api prefix)
+            web=BASE_PATH
+            / "routes"
+            / "web.py",  # stateful browser routes (the "web" group)
+            api=BASE_PATH
+            / "routes"
+            / "api.py",  # stateless JSON routes ("api" group, /api prefix)
             console=BASE_PATH / "routes" / "console.py",  # CLI command definitions
         )
         .create()

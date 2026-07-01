@@ -17,15 +17,24 @@ _DISK = "local"
 
 class ProductImageService:
     async def attach_uploaded(
-        self, product: Product, raw: bytes, *, file_name: str = "image.png", mime_type: str | None = None
+        self,
+        product: Product,
+        raw: bytes,
+        *,
+        file_name: str = "image.png",
+        mime_type: str | None = None,
     ) -> None:
         """Attach an admin-uploaded image to the product gallery (conversions auto-generated)."""
-        Image.open(raw)  # decode-validate — reject a non-image / corrupt upload before storing
-        await product.add_media(raw, file_name=file_name, mime_type=mime_type).to_media_collection(
-            IMAGES, disk=_DISK
-        )
+        Image.open(
+            raw
+        )  # decode-validate — reject a non-image / corrupt upload before storing
+        await product.add_media(
+            raw, file_name=file_name, mime_type=mime_type
+        ).to_media_collection(IMAGES, disk=_DISK)
 
-    async def download_and_attach(self, product: Product, url: str, *, file_name: str) -> bool:
+    async def download_and_attach(
+        self, product: Product, url: str, *, file_name: str
+    ) -> bool:
         """Download an image from ``url`` (arvel Http client) and attach it to the gallery. Returns
         False (a no-op) if the fetch fails — so seeding never crashes when offline."""
         try:

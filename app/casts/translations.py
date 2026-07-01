@@ -34,7 +34,9 @@ def _translate(locale: str, fields: dict[str, Any]) -> Translate:
 class TranslationsCast:
     """jsonb `{locale: {name, description}}` ↔ `list[Translate]`."""
 
-    def get(self, model: Any, key: str, value: Any, attributes: dict[str, Any]) -> list[Translate]:
+    def get(
+        self, model: Any, key: str, value: Any, attributes: dict[str, Any]
+    ) -> list[Translate]:
         return [_translate(locale, fields) for locale, fields in _load(value).items()]
 
     def set(self, model: Any, key: str, value: Any, attributes: dict[str, Any]) -> Any:
@@ -43,13 +45,17 @@ class TranslationsCast:
                 t.locale: {"name": t.name, "description": t.description}
                 for t in cast("list[Translate]", value)
             }
-        return value  # a locale-major dict → stored as-is (the jsonb column serializes it)
+        return (
+            value  # a locale-major dict → stored as-is (the jsonb column serializes it)
+        )
 
 
 class TranslationCast:
     """A single locale's object `{name, description}` (a `translations->'<loc>'` projection) → `Translate`."""
 
-    def get(self, model: Any, key: str, value: Any, attributes: dict[str, Any]) -> Translate:
+    def get(
+        self, model: Any, key: str, value: Any, attributes: dict[str, Any]
+    ) -> Translate:
         return _translate("", _load(value))
 
     def set(self, model: Any, key: str, value: Any, attributes: dict[str, Any]) -> Any:

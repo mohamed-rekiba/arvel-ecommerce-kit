@@ -26,7 +26,9 @@ def client(tmp_path, monkeypatch):
         await Migrator(seed_db).run(discover_migrations(["database/migrations"]))
         User.set_connection(seed_db)
         await User.create(name="Test User", email="test@example.com", password="secret")
-        User.set_connection(None)  # routes use the served app's own connection (same sqlite file)
+        User.set_connection(
+            None
+        )  # routes use the served app's own connection (same sqlite file)
         await seed_db.dispose()
 
     asyncio.run(migrate_and_seed())
@@ -40,12 +42,16 @@ def client(tmp_path, monkeypatch):
 
 
 def test_wrong_password_is_rejected(client) -> None:
-    resp = client.post("/api/login", json={"email": "test@example.com", "password": "wrong"})
+    resp = client.post(
+        "/api/login", json={"email": "test@example.com", "password": "wrong"}
+    )
     assert resp.status_code == 401
 
 
 def test_login_issues_a_token_that_unlocks_the_protected_route(client) -> None:
-    resp = client.post("/api/login", json={"email": "test@example.com", "password": "secret"})
+    resp = client.post(
+        "/api/login", json={"email": "test@example.com", "password": "secret"}
+    )
     assert resp.status_code == 200
     token = resp.json()["token"]
 

@@ -13,7 +13,7 @@ from arvel.telemetry import span
 from arvel.validation import ValidationException
 
 from app.controllers.cart_controller import resolve_cart
-from app.enums import OrderStatus, can_transition
+from app.enums import OrderStatus, Permission, can_transition
 from app.events.order_placed import OrderPlaced
 from app.jobs.fulfill_order import ORDERS_FULFILLED_KEY
 from app.listeners.record_order_metrics import ORDERS_PLACED_KEY
@@ -75,7 +75,11 @@ async def checkout(request: Request) -> OrderOut:
                 if variant.stock < item.quantity:
                     # rolls the whole transaction back — no stock taken, no order created
                     raise ValidationException(
-                        {"product_variant_id": [f"Insufficient stock for {item.product_variant_id}."]},
+                        {
+                            "product_variant_id": [
+                                f"Insufficient stock for {item.product_variant_id}."
+                            ]
+                        },
                         status=409,
                     )
                 variant.stock = variant.stock - item.quantity
@@ -102,7 +106,9 @@ async def checkout(request: Request) -> OrderOut:
     # the listener (record_order_metrics) reacts — the controller doesn't know about it
     await Event.dispatch(
         "order.placed",
-        OrderPlaced(order_id=order.id, user_id=order.user_id, total_cents=order.total_cents),
+        OrderPlaced(
+            order_id=order.id, user_id=order.user_id, total_cents=order.total_cents
+        ),
     )
     return _order_out(order, order_items)
 
@@ -125,16 +131,22 @@ async def my_orders(request: Request) -> list[OrderOut]:
 
 
 async def update_status(request: Request, data: OrderStatusIn) -> OrderOut:
-    """Transition an order, enforcing the state machine. Admin-only (guests already 401'd)."""
+    """Transition an order, enforcing the state machine. Requires orders.update (guests already 401'd)."""
     user = current_user.get()
-    if user is None or not user.is_admin():
-        abort(403, "Only admins may change order status.")
+    if user is None or not await user.can(Permission.ORDERS_UPDATE.value):
+        abort(403, "You may not change order status.")
     order = await Order.find_or_fail(int(request.path_param("id")))
     try:
         target = OrderStatus(data.status)
     except ValueError:
-        raise ValidationException({"status": [f"Unknown status '{data.status}'."]}) from None
-    current = order.status if isinstance(order.status, OrderStatus) else OrderStatus(order.status)
+        raise ValidationException(
+            {"status": [f"Unknown status '{data.status}'."]}
+        ) from None
+    current = (
+        order.status
+        if isinstance(order.status, OrderStatus)
+        else OrderStatus(order.status)
+    )
     if not can_transition(current, target):
         raise ValidationException(
             {"status": [f"Cannot transition from {current.value} to {target.value}."]}

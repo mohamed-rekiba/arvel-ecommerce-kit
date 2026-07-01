@@ -12,7 +12,9 @@ from app.models.cart_item import CartItem
 ABANDONED_AFTER_HOURS = 72
 
 
-async def sweep_abandoned_carts(*, older_than_hours: int = ABANDONED_AFTER_HOURS) -> int:
+async def sweep_abandoned_carts(
+    *, older_than_hours: int = ABANDONED_AFTER_HOURS
+) -> int:
     cutoff = Date.now().subtract(hours=older_than_hours)
     stale = (
         await Cart.where("user_id", None)  # guest carts only

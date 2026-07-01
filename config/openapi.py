@@ -15,7 +15,10 @@ config = {
     "ui": "swagger",  # swagger | redoc | scalar | rapidoc | stoplight
     "use_handler_docstrings": True,
     "security": {
-        "bearer": {"format": "JWT", "description": "Customer token from POST /api/login"},
+        "bearer": {
+            "format": "JWT",
+            "description": "Customer token from POST /api/login",
+        },
         "oidc": {
             "openIdConnectUrl": env("OIDC_ISSUER", "http://localhost:8080/realms/arvel")
             + "/.well-known/openid-configuration",

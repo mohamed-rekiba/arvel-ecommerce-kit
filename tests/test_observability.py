@@ -22,11 +22,15 @@ from app.models.user import User
 def spans():
     from opentelemetry import trace
     from opentelemetry.sdk.trace.export import SimpleSpanProcessor
-    from opentelemetry.sdk.trace.export.in_memory_span_exporter import InMemorySpanExporter
+    from opentelemetry.sdk.trace.export.in_memory_span_exporter import (
+        InMemorySpanExporter,
+    )
 
     from arvel.telemetry import configure
 
-    configure(exporter=InMemorySpanExporter())  # enable tracing + a real provider (once per process)
+    configure(
+        exporter=InMemorySpanExporter()
+    )  # enable tracing + a real provider (once per process)
     exporter = InMemorySpanExporter()
     trace.get_tracer_provider().add_span_processor(SimpleSpanProcessor(exporter))
     return exporter
@@ -42,13 +46,26 @@ def client(tmp_path, monkeypatch):
         await Migrator(db).run(discover_migrations(["database/migrations"]))
         for model in (User, Category, Product, ProductVariant):
             model.set_connection(db)
-        await User.create(name="Cara", email="cara@example.com", password="secret-cara",
-                          role=UserRole.CUSTOMER)
-        cat = await Category.create(translations={"en": {"name": "Shirts"}}, slug="shirts")
-        p = await Product.create(category_id=cat.id, translations={"en": {"name": "Tee"}}, slug="tee", price_cents=2000,
-                                 currency="USD", status=ProductStatus.ACTIVE)
-        await ProductVariant.create(product_id=p.id, sku="TEE-S", name="S",
-                                    price_adjustment_cents=0, stock=100)
+        await User.create(
+            name="Cara",
+            email="cara@example.com",
+            password="secret-cara",
+            role=UserRole.CUSTOMER,
+        )
+        cat = await Category.create(
+            translations={"en": {"name": "Shirts"}}, slug="shirts"
+        )
+        p = await Product.create(
+            category_id=cat.id,
+            translations={"en": {"name": "Tee"}},
+            slug="tee",
+            price_cents=2000,
+            currency="USD",
+            status=ProductStatus.ACTIVE,
+        )
+        await ProductVariant.create(
+            product_id=p.id, sku="TEE-S", name="S", price_adjustment_cents=0, stock=100
+        )
         for model in (User, Category, Product, ProductVariant):
             model.set_connection(None)
         await db.dispose()
@@ -66,7 +83,11 @@ def test_checkout_emits_a_business_span_with_db_children(client, spans) -> None:
         "/api/login", json={"email": "cara@example.com", "password": "secret-cara"}
     ).json()["token"]
     headers = {"Authorization": f"Bearer {token}"}
-    client.post("/api/cart/items", json={"product_variant_id": 1, "quantity": 2}, headers=headers)
+    client.post(
+        "/api/cart/items",
+        json={"product_variant_id": 1, "quantity": 2},
+        headers=headers,
+    )
     assert client.post("/api/checkout", headers=headers).status_code == 201
 
     finished = spans.get_finished_spans()

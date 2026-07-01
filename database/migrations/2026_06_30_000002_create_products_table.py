@@ -15,8 +15,12 @@ class CreateProductsTable(Migration):
             t.integer("price_cents")
             t.string("currency", length=3).default(value="USD")
             t.string("status").default(value="draft").index()
-            t.boolean("published").default(value=False).index()  # retrievability: published ∧ vendor ∧ category-chain
-            t.btree_index("translations->'en'->>'name'")  # fast filter/sort on the English name (i18n)
+            t.boolean("published").default(
+                value=False
+            ).index()  # retrievability: published ∧ vendor ∧ category-chain
+            t.btree_index(
+                "translations->'en'->>'name'"
+            )  # fast filter/sort on the English name (i18n)
             t.timestamps()
             # product images live in the media library (HasMedia / media table), not a column
 

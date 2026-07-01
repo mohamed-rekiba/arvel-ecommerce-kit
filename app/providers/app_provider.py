@@ -50,7 +50,37 @@ class AppServiceProvider(ServiceProvider):
         from app.policies.product_policy import ProductPolicy
 
         if self.app.bound("gate"):
-            self.app.make("gate").policy(Product, ProductPolicy())
+            gate = self.app.make("gate")
+            gate.policy(Product, ProductPolicy())
+
+            # super-admin bypasses every ability (Laravel Gate::before → super-admin auto-grant).
+            from app.enums import Permission, RoleName
+
+            async def _super_admin_first(user: Any, _ability: str) -> bool | None:
+                if user is not None and await user.has_role(RoleName.SUPER_ADMIN.value):
+                    return True
+                return None
+
+            gate.before(_super_admin_first)
+
+            # Standalone (non-model) abilities → the matching RBAC permission (orders.*, roles.manage,
+            # audit.view, catalog.view). A model policy handles catalog.create/update/delete on Product.
+            def _define(permission: Permission) -> None:
+                async def _check(user: Any, *_: Any) -> bool:
+                    return user is not None and await user.has_permission_to(
+                        permission.value
+                    )
+
+                gate.define(permission.value, _check)
+
+            for permission in (
+                Permission.CATALOG_VIEW,
+                Permission.ORDERS_VIEW,
+                Permission.ORDERS_UPDATE,
+                Permission.ROLES_MANAGE,
+                Permission.AUDIT_VIEW,
+            ):
+                _define(permission)
 
         # Catalog visibility: a publish change on a product/category/vendor flags the views dirty;
         # the scheduled refresh_if_dirty (routes/console.py) debounces + recomputes (Laravel observers).

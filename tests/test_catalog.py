@@ -26,13 +26,22 @@ def client(tmp_path, monkeypatch):
         await Migrator(db).run(discover_migrations(["database/migrations"]))
         for model in (Category, Product, ProductVariant):
             model.set_connection(db)
-        shirts = await Category.create(translations={"en": {"name": "Shirts"}}, slug="shirts", published=True)
-        await Category.create(translations={"en": {"name": "Shoes"}}, slug="shoes", published=True)  # empty → still hidden
+        shirts = await Category.create(
+            translations={"en": {"name": "Shirts"}}, slug="shirts", published=True
+        )
+        await Category.create(
+            translations={"en": {"name": "Shoes"}}, slug="shoes", published=True
+        )  # empty → still hidden
         # 25 active "Aero" products (to test pagination) + 1 draft (to test the status filter)
         for i in range(25):
             p = await Product.create(
                 category_id=shirts.id,
-                translations={"en": {"name": f"Aero Shirt {i:02d}", "description": "A breathable shirt."}},
+                translations={
+                    "en": {
+                        "name": f"Aero Shirt {i:02d}",
+                        "description": "A breathable shirt.",
+                    }
+                },
                 slug=f"aero-shirt-{i:02d}",
                 price_cents=1999 + i,
                 currency="USD",
@@ -44,7 +53,9 @@ def client(tmp_path, monkeypatch):
             )
         await Product.create(
             category_id=shirts.id,
-            translations={"en": {"name": "Secret Draft Shirt", "description": "not public yet"}},
+            translations={
+                "en": {"name": "Secret Draft Shirt", "description": "not public yet"}
+            },
             slug="secret-draft",
             price_cents=5000,
             currency="USD",
@@ -82,7 +93,9 @@ def test_products_index_paginates_active_only(client) -> None:
     # eager-loaded relations are present on each row
     first = body["data"][0]
     assert first["category"]["slug"] == "shirts"
-    assert isinstance(first["variants"], list) and first["variants"][0]["sku"].startswith("AERO-")
+    assert isinstance(first["variants"], list) and first["variants"][0][
+        "sku"
+    ].startswith("AERO-")
 
 
 def test_products_index_second_page(client) -> None:

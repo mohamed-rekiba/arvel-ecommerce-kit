@@ -20,7 +20,7 @@ down: ## Stop all infrastructure
 setup: install env up ## One-shot: deps + .env + infra + key + migrate + seed
 	@echo "waiting for Postgres..." && until docker compose exec -T db pg_isready -U arvel -d arvel_ecommerce_kit >/dev/null 2>&1; do sleep 1; done
 	uv run arvel key:generate
-	uv run arvel migrate
+	uv run arvel migrate:fresh
 	uv run arvel db:seed
 	@echo "\nReady. 'make serve' → http://127.0.0.1:8000 (API docs at /docs)"
 

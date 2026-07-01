@@ -20,7 +20,9 @@ from app.models.user import User
 
 def _gateway_handler(request: httpx.Request) -> httpx.Response:
     if request.url.path == "/charges":
-        return httpx.Response(200, json={"id": "ch_test_123", "client_secret": "cs_test_abc"})
+        return httpx.Response(
+            200, json={"id": "ch_test_123", "client_secret": "cs_test_abc"}
+        )
     return httpx.Response(404, json={"error": "not found"})
 
 
@@ -34,13 +36,26 @@ def client(tmp_path, monkeypatch):
         await Migrator(db).run(discover_migrations(["database/migrations"]))
         for model in (User, Category, Product, ProductVariant):
             model.set_connection(db)
-        await User.create(name="Cara", email="cara@example.com", password="secret-cara",
-                          role=UserRole.CUSTOMER)
-        cat = await Category.create(translations={"en": {"name": "Shirts"}}, slug="shirts")
-        p = await Product.create(category_id=cat.id, translations={"en": {"name": "Tee"}}, slug="tee",
-                                 price_cents=2000, currency="USD", status=ProductStatus.ACTIVE)
-        await ProductVariant.create(product_id=p.id, sku="TEE-S", name="S",
-                                    price_adjustment_cents=0, stock=100)
+        await User.create(
+            name="Cara",
+            email="cara@example.com",
+            password="secret-cara",
+            role=UserRole.CUSTOMER,
+        )
+        cat = await Category.create(
+            translations={"en": {"name": "Shirts"}}, slug="shirts"
+        )
+        p = await Product.create(
+            category_id=cat.id,
+            translations={"en": {"name": "Tee"}},
+            slug="tee",
+            price_cents=2000,
+            currency="USD",
+            status=ProductStatus.ACTIVE,
+        )
+        await ProductVariant.create(
+            product_id=p.id, sku="TEE-S", name="S", price_adjustment_cents=0, stock=100
+        )
         for model in (User, Category, Product, ProductVariant):
             model.set_connection(None)
         await db.dispose()
@@ -64,7 +79,11 @@ def _auth(client) -> dict:
 
 
 def _place_order(client, headers) -> int:
-    client.post("/api/cart/items", json={"product_variant_id": 1, "quantity": 2}, headers=headers)
+    client.post(
+        "/api/cart/items",
+        json={"product_variant_id": 1, "quantity": 2},
+        headers=headers,
+    )
     return client.post("/api/checkout", headers=headers).json()["id"]
 
 

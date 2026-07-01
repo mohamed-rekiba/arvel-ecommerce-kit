@@ -17,7 +17,9 @@ class CreatePaymentsTable(Migration):
 
         def webhook_events(t: Blueprint) -> None:
             t.id()
-            t.string("event_id").unique()  # the idempotency key — unique across redeliveries
+            t.string(
+                "event_id"
+            ).unique()  # the idempotency key — unique across redeliveries
             t.string("type")
             t.timestamps()
 

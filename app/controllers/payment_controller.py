@@ -29,9 +29,15 @@ async def pay(request: Request) -> PaymentOut:
     order = await Order.find_or_fail(int(request.path_param("id")))
     if order.user_id != user.id:
         abort(404, "Order not found")  # don't leak another customer's order
-    status = order.status if isinstance(order.status, OrderStatus) else OrderStatus(order.status)
+    status = (
+        order.status
+        if isinstance(order.status, OrderStatus)
+        else OrderStatus(order.status)
+    )
     if status is not OrderStatus.PENDING:
-        raise ValidationException({"order": [f"Order is already {status.value}."]}, status=409)
+        raise ValidationException(
+            {"order": [f"Order is already {status.value}."]}, status=409
+        )
 
     gateway = Config.get("services.payment_gateway.url")
     secret = Config.get("services.payment_gateway.secret")

@@ -19,21 +19,30 @@ class Category(Model):
         "parent_id": int,
         "published": bool,
     }
-    __fillable__: ClassVar[list[str]] = ["slug", "translations", "parent_id", "published"]
+    __fillable__: ClassVar[list[str]] = [
+        "slug",
+        "translations",
+        "parent_id",
+        "published",
+    ]
     __casts__: ClassVar[dict[str, Any]] = {
         "published": bool,
         "translations": TranslationsCast(),  # full column → list[Translate] (admin)
         "translation": TranslationCast(),  # the scope_in_locale projection → Translate (storefront)
     }
 
-    _VISIBLE = "EXISTS(SELECT 1 FROM retrievable_categories rc WHERE rc.id = categories.id)"
+    _VISIBLE = (
+        "EXISTS(SELECT 1 FROM retrievable_categories rc WHERE rc.id = categories.id)"
+    )
     _LOCALE_COLUMNS = "id, slug, parent_id, published, created_at, updated_at"
 
     def scope_with_visibility(self, query: Any, only_visible: bool = False) -> Any:
         """``is_visible`` flag (admin) and/or keep only visible categories (storefront)."""
         if only_visible:
             return query.where_raw(Category._VISIBLE)
-        return query.select_raw("categories.*").select_raw(f"{Category._VISIBLE} AS is_visible")
+        return query.select_raw("categories.*").select_raw(
+            f"{Category._VISIBLE} AS is_visible"
+        )
 
     def scope_in_locale(self, query: Any, locale: str | None = None) -> Any:
         """Project only the active locale's object as `translation` (not the whole translations map)."""

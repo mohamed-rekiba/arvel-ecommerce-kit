@@ -4,12 +4,12 @@ from datetime import datetime
 from typing import Any, ClassVar
 
 from arvel import Model
-from arvel.auth import Authenticatable
+from arvel.auth import Authenticatable, HasRoles
 
 from app.enums import UserRole
 
 
-class User(Authenticatable, Model):
+class User(Authenticatable, HasRoles, Model):
     __table_name__ = "users"
     __fields__: ClassVar[dict[str, type]] = {
         "name": str,

@@ -35,13 +35,26 @@ def client(db_url):
         await Migrator(db).run(discover_migrations(["database/migrations"]))
         for model in (User, Category, Product, ProductVariant):
             model.set_connection(db)
-        await User.create(name="Cara", email="cara@example.com", password="secret-cara",
-                          role=UserRole.CUSTOMER)
-        cat = await Category.create(translations={"en": {"name": "Shirts"}}, slug="shirts")
-        p = await Product.create(category_id=cat.id, translations={"en": {"name": "Tee"}}, slug="tee", price_cents=2000,
-                                 currency="USD", status=ProductStatus.ACTIVE)
-        await ProductVariant.create(product_id=p.id, sku="TEE-S", name="S",
-                                    price_adjustment_cents=0, stock=100)
+        await User.create(
+            name="Cara",
+            email="cara@example.com",
+            password="secret-cara",
+            role=UserRole.CUSTOMER,
+        )
+        cat = await Category.create(
+            translations={"en": {"name": "Shirts"}}, slug="shirts"
+        )
+        p = await Product.create(
+            category_id=cat.id,
+            translations={"en": {"name": "Tee"}},
+            slug="tee",
+            price_cents=2000,
+            currency="USD",
+            status=ProductStatus.ACTIVE,
+        )
+        await ProductVariant.create(
+            product_id=p.id, sku="TEE-S", name="S", price_adjustment_cents=0, stock=100
+        )
         for model in (User, Category, Product, ProductVariant):
             model.set_connection(None)
         await db.dispose()
@@ -60,7 +73,11 @@ def test_checkout_queues_and_runs_the_fulfillment_job(client) -> None:
     ).json()["token"]
     headers = {"Authorization": f"Bearer {token}"}
     assert client.get("/api/metrics/orders-placed").json()["orders_fulfilled"] == 0
-    client.post("/api/cart/items", json={"product_variant_id": 1, "quantity": 1}, headers=headers)
+    client.post(
+        "/api/cart/items",
+        json={"product_variant_id": 1, "quantity": 1},
+        headers=headers,
+    )
     assert client.post("/api/checkout", headers=headers).status_code == 201
     # the FulfillOrderJob was dispatched and ran on the memory broker (inline)
     assert client.get("/api/metrics/orders-placed").json()["orders_fulfilled"] == 1
@@ -75,8 +92,9 @@ async def test_abandoned_cart_sweep_deletes_stale_guest_carts(db_url) -> None:
         # a fresh guest cart and a stale one (updated 100h ago)
         fresh = await Cart.create(token="fresh")
         stale = await Cart.create(token="stale")
-        await CartItem.create(cart_id=stale.id, product_variant_id=1, quantity=1,
-                              unit_price_cents=1000)
+        await CartItem.create(
+            cart_id=stale.id, product_variant_id=1, quantity=1, unit_price_cents=1000
+        )
         old = Date.now().subtract(hours=100)
         # backdate updated_at directly (the model auto-manages it on save) via the query builder
         await Cart.where("id", stale.id).update({"updated_at": old})
@@ -87,9 +105,9 @@ async def test_abandoned_cart_sweep_deletes_stale_guest_carts(db_url) -> None:
         swept = await sweep_abandoned_carts(older_than_hours=72)
 
         assert swept == 1
-        assert await Cart.find(stale.id) is None              # stale guest cart gone
-        assert await Cart.find(fresh.id) is not None          # fresh guest cart kept
-        assert await Cart.find(user_cart.id) is not None      # user cart kept
+        assert await Cart.find(stale.id) is None  # stale guest cart gone
+        assert await Cart.find(fresh.id) is not None  # fresh guest cart kept
+        assert await Cart.find(user_cart.id) is not None  # user cart kept
     finally:
         for model in (Cart, CartItem):
             model.set_connection(None)

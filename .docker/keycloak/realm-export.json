@@ -4,7 +4,11 @@
   "sslRequired": "none",
   "roles": {
     "realm": [
-      { "name": "admin", "description": "Arvel admin panel access" }
+      { "name": "admin", "description": "Arvel admin panel access" },
+      { "name": "super-admin", "description": "Bypasses every permission" },
+      { "name": "catalog-manager", "description": "Manage the catalog" },
+      { "name": "order-manager", "description": "Manage orders" },
+      { "name": "support", "description": "Read-only catalog/orders + audit log" }
     ]
   },
   "users": [
@@ -18,7 +22,31 @@
       "credentials": [
         { "type": "password", "value": "admin", "temporary": false }
       ],
-      "realmRoles": ["admin"]
+      "realmRoles": ["admin", "super-admin"]
+    },
+    {
+      "username": "catalog",
+      "email": "catalog@arvel.test",
+      "emailVerified": true,
+      "enabled": true,
+      "firstName": "Cat",
+      "lastName": "Manager",
+      "credentials": [
+        { "type": "password", "value": "catalog", "temporary": false }
+      ],
+      "realmRoles": ["admin", "catalog-manager"]
+    },
+    {
+      "username": "support",
+      "email": "support@arvel.test",
+      "emailVerified": true,
+      "enabled": true,
+      "firstName": "Sam",
+      "lastName": "Support",
+      "credentials": [
+        { "type": "password", "value": "support", "temporary": false }
+      ],
+      "realmRoles": ["admin", "support"]
     }
   ],
   "clients": [

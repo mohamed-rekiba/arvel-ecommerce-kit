@@ -136,6 +136,40 @@ class MessageOut(Schema):
     message: str
 
 
+# --- RBAC / audit (admin) -----------------------------------------------------
+
+
+class RoleOut(Schema):
+    id: int
+    name: str
+    permissions: list[str]
+
+
+class PermissionOut(Schema):
+    id: int
+    name: str
+
+
+class AssignRoleIn(Schema):
+    role: str
+
+
+class UserRolesOut(Schema):
+    user_id: int
+    roles: list[str]
+
+
+class ActivityOut(Schema):
+    id: int
+    description: str
+    event: str | None
+    causer_id: int | None
+    subject_type: str | None
+    subject_id: int | None
+    properties: dict[str, Any]
+    created_at: str | None
+
+
 class ForgotPasswordIn(Schema):
     email: str
 
@@ -191,8 +225,6 @@ class UpdateProductIn(Schema):
     name: str | None = None
     price_cents: int | None = None
     status: str | None = None
-
-
 
 
 # --- checkout / orders / payments ---------------------------------------------

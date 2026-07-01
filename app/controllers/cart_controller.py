@@ -22,7 +22,9 @@ def _cart_total_key(cart_id: int) -> str:
     return f"cart:{cart_id}:total_cents"
 
 
-async def resolve_cart(request: Request, *, create: bool) -> tuple[Cart | None, str | None]:
+async def resolve_cart(
+    request: Request, *, create: bool
+) -> tuple[Cart | None, str | None]:
     """Return (cart, new_token). For an authenticated user the cart follows the user; for a guest it
     is found by the `X-Cart-Token` header. `create` makes one when absent (returning its token for a
     guest so the client can send it next time)."""
@@ -90,7 +92,9 @@ async def add_item(request: Request, data: AddItemIn) -> CartOut:
 
     cart, new_token = await resolve_cart(request, create=True)
     assert cart is not None  # create=True always yields a cart
-    existing = await cart.items().where("product_variant_id", data.product_variant_id).first()
+    existing = (
+        await cart.items().where("product_variant_id", data.product_variant_id).first()
+    )
     if existing is not None:
         existing.quantity = existing.quantity + data.quantity
         await existing.save()

@@ -19,6 +19,7 @@ from app.models.product import IMAGES, Product
 from app.models.product_variant import ProductVariant
 from app.models.user import User
 
+
 def _png() -> bytes:
     """A real, valid PNG (generated with PIL) returned by the faked image provider."""
     buf = BytesIO()

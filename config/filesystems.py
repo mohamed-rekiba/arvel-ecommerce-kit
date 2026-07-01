@@ -10,13 +10,18 @@ from arvel import env
 config = {
     "default": env("FILESYSTEM_DISK", "local"),
     "disks": {
-        "local": {"driver": "local", "root": env("FILESYSTEM_LOCAL_ROOT", "storage/app")},
+        "local": {
+            "driver": "local",
+            "root": env("FILESYSTEM_LOCAL_ROOT", "storage/app"),
+        },
         "s3": {
             "driver": "s3",
             "key": env("AWS_ACCESS_KEY_ID", ""),
             "secret": env("AWS_SECRET_ACCESS_KEY", ""),
             "bucket": env("AWS_BUCKET", ""),
-            "endpoint_url": env("AWS_ENDPOINT", ""),  # set for non-AWS S3 (RustFS/MinIO/R2)
+            "endpoint_url": env(
+                "AWS_ENDPOINT", ""
+            ),  # set for non-AWS S3 (RustFS/MinIO/R2)
         },
     },
 }

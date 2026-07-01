@@ -37,7 +37,9 @@ def _register(client, email="ada@example.com", password="supersecret"):
 
 def test_register_validates_and_issues_a_token(client) -> None:
     # invalid: short password + bad email
-    bad = client.post("/api/register", json={"name": "x", "email": "nope", "password": "short"})
+    bad = client.post(
+        "/api/register", json={"name": "x", "email": "nope", "password": "short"}
+    )
     assert bad.status_code == 422
 
     ok = _register(client)
@@ -57,16 +59,30 @@ def test_duplicate_email_is_rejected(client) -> None:
 
 def test_login_then_logout_revokes_only_the_current_token(client) -> None:
     _register(client)
-    a = client.post("/api/login", json={"email": "ada@example.com", "password": "supersecret"})
-    b = client.post("/api/login", json={"email": "ada@example.com", "password": "supersecret"})
+    a = client.post(
+        "/api/login", json={"email": "ada@example.com", "password": "supersecret"}
+    )
+    b = client.post(
+        "/api/login", json={"email": "ada@example.com", "password": "supersecret"}
+    )
     token_a, token_b = a.json()["token"], b.json()["token"]
 
     # logout with token A revokes only A
     out = client.post("/api/logout", headers={"Authorization": f"Bearer {token_a}"})
     assert out.status_code == 200
-    assert client.get("/api/user", headers={"Authorization": f"Bearer {token_a}"}).status_code == 401
+    assert (
+        client.get(
+            "/api/user", headers={"Authorization": f"Bearer {token_a}"}
+        ).status_code
+        == 401
+    )
     # token B still works (Sanctum: currentAccessToken()->delete() revokes just one)
-    assert client.get("/api/user", headers={"Authorization": f"Bearer {token_b}"}).status_code == 200
+    assert (
+        client.get(
+            "/api/user", headers={"Authorization": f"Bearer {token_b}"}
+        ).status_code
+        == 200
+    )
 
 
 def test_password_reset_flow(client) -> None:

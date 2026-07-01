@@ -35,7 +35,9 @@ class CatalogVisibilityService:
         it refreshed. Driven by a scheduled task (every ~30s) and as the reconcile safety net."""
         if not await Cache.get(_DIRTY):
             return False
-        await Cache.forget(_DIRTY)  # clear before refreshing → a change mid-refresh re-dirties
+        await Cache.forget(
+            _DIRTY
+        )  # clear before refreshing → a change mid-refresh re-dirties
         await cls().refresh()
         return True
 
@@ -47,4 +49,6 @@ class CatalogVisibilityService:
             return
         async with Cache.lock(_LOCK, ttl=120):
             for view in _VIEWS:
-                await DB.execute(sa.text(f"REFRESH MATERIALIZED VIEW CONCURRENTLY {view}"))  # noqa: S608 # nosec B608
+                await DB.execute(
+                    sa.text(f"REFRESH MATERIALIZED VIEW CONCURRENTLY {view}")
+                )  # noqa: S608 # nosec B608

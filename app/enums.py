@@ -22,6 +22,45 @@ class UserRole(str, Enum):
     ADMIN = "admin"
 
 
+class Permission(str, Enum):
+    """The catalog/back-office permission set (Spatie-style dotted names; roles are grants of these)."""
+
+    CATALOG_VIEW = "catalog.view"
+    CATALOG_CREATE = "catalog.create"
+    CATALOG_UPDATE = "catalog.update"
+    CATALOG_DELETE = "catalog.delete"
+    ORDERS_VIEW = "orders.view"
+    ORDERS_UPDATE = "orders.update"
+    ROLES_MANAGE = "roles.manage"
+    AUDIT_VIEW = "audit.view"
+
+
+class RoleName(str, Enum):
+    """The back-office roles. super-admin is an unconditional bypass (Gate.before)."""
+
+    SUPER_ADMIN = "super-admin"
+    CATALOG_MANAGER = "catalog-manager"
+    ORDER_MANAGER = "order-manager"
+    SUPPORT = "support"
+
+
+# Which permissions each role grants (super-admin bypasses via Gate.before, so it needs no explicit grants).
+ROLE_PERMISSIONS: dict[RoleName, list[Permission]] = {
+    RoleName.CATALOG_MANAGER: [
+        Permission.CATALOG_VIEW,
+        Permission.CATALOG_CREATE,
+        Permission.CATALOG_UPDATE,
+        Permission.CATALOG_DELETE,
+    ],
+    RoleName.ORDER_MANAGER: [Permission.ORDERS_VIEW, Permission.ORDERS_UPDATE],
+    RoleName.SUPPORT: [
+        Permission.CATALOG_VIEW,
+        Permission.ORDERS_VIEW,
+        Permission.AUDIT_VIEW,
+    ],
+}
+
+
 class OrderStatus(str, Enum):
     """An order's lifecycle state."""
 

@@ -25,10 +25,15 @@ def client(tmp_path, monkeypatch):  # type: ignore[no-untyped-def]
             model.set_connection(db)
         vendor = await Vendor.create(name="Acme", slug="acme", published=True)
         cat = await Category.create(
-            translations={"en": {"name": "Phones"}, "fr": {"name": "Téléphones"}}, slug="phones", published=True
+            translations={"en": {"name": "Phones"}, "fr": {"name": "Téléphones"}},
+            slug="phones",
+            published=True,
         )
         await Product.create(
-            translations={"en": {"name": "Aurora Phone", "description": "d"}, "fr": {"name": "Téléphone Aurora"}},
+            translations={
+                "en": {"name": "Aurora Phone", "description": "d"},
+                "fr": {"name": "Téléphone Aurora"},
+            },
             slug="aurora",
             category_id=cat.id,
             vendor_id=vendor.id,
@@ -51,7 +56,9 @@ def client(tmp_path, monkeypatch):  # type: ignore[no-untyped-def]
 def test_product_name_follows_accept_language(client) -> None:  # type: ignore[no-untyped-def]
     en = client.get("/api/products").json()["data"][0]
     assert en["translation"]["name"] == "Aurora Phone"
-    fr = client.get("/api/products", headers={"Accept-Language": "fr"}).json()["data"][0]
+    fr = client.get("/api/products", headers={"Accept-Language": "fr"}).json()["data"][
+        0
+    ]
     assert fr["translation"]["name"] == "Téléphone Aurora"
 
 

@@ -65,7 +65,9 @@ def _effective_published() -> Any:
 def _retrievable_products_select() -> Any:
     eff = _effective_published()
     return (
-        sa.select(_products.c.id, _products.c.category_id)  # membership set: id (+ category_id for the category view)
+        sa.select(
+            _products.c.id, _products.c.category_id
+        )  # membership set: id (+ category_id for the category view)
         .select_from(
             _products.outerjoin(_vendors, _vendors.c.id == _products.c.vendor_id).join(
                 eff, eff.c.category_id == _products.c.category_id
@@ -107,13 +109,19 @@ def _retrievable_categories_select() -> Any:
 
 class CreateRetrievableViews(Migration):
     def up(self, schema: Schema) -> None:
-        schema.create_materialized_view("retrievable_products", _retrievable_products_select())
-        schema.create_materialized_view("retrievable_categories", _retrievable_categories_select())
+        schema.create_materialized_view(
+            "retrievable_products", _retrievable_products_select()
+        )
+        schema.create_materialized_view(
+            "retrievable_categories", _retrievable_categories_select()
+        )
         if schema.dialect == "postgresql":
             # a unique index on id makes the EXISTS/visibility lookups index scans AND unlocks
             # REFRESH MATERIALIZED VIEW CONCURRENTLY (no read-lock during the debounced refresh).
             schema.execute(sa.text("CREATE UNIQUE INDEX ON retrievable_products (id)"))
-            schema.execute(sa.text("CREATE UNIQUE INDEX ON retrievable_categories (id)"))
+            schema.execute(
+                sa.text("CREATE UNIQUE INDEX ON retrievable_categories (id)")
+            )
 
     def down(self, schema: Schema) -> None:
         keyword = "MATERIALIZED VIEW" if schema.dialect == "postgresql" else "VIEW"

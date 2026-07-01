@@ -19,7 +19,10 @@ def app(tmp_path: Path):  # type: ignore[no-untyped-def]
     application = Application()
     application.instance("cache", CacheManager(application).create_array_driver())
     application.instance(
-        "db", ConnectionResolver({"default": {"url": f"sqlite+aiosqlite:///{tmp_path / 'v.sqlite'}"}})
+        "db",
+        ConnectionResolver(
+            {"default": {"url": f"sqlite+aiosqlite:///{tmp_path / 'v.sqlite'}"}}
+        ),
     )
     set_application(application)
     yield application
@@ -32,5 +35,7 @@ async def test_refresh_if_dirty_is_debounced(app) -> None:  # type: ignore[no-un
     assert await V.refresh_if_dirty() is False  # nothing changed → no refresh
     await V.mark_dirty()
     await V.mark_dirty()  # a burst coalesces to one dirty flag
-    assert await V.refresh_if_dirty() is True  # dirty → refresh (no-op on sqlite) + clear
+    assert (
+        await V.refresh_if_dirty() is True
+    )  # dirty → refresh (no-op on sqlite) + clear
     assert await V.refresh_if_dirty() is False  # flag cleared → no repeat refresh

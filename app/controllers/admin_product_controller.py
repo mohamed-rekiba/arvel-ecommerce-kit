@@ -10,7 +10,9 @@ from arvel.http import Request
 from arvel.support import Str, current_user
 from arvel.validation import ValidationException, Validator
 
-from app.enums import ProductStatus
+from arvel.activitylog import activity
+
+from app.enums import Permission, ProductStatus
 from app.models.category import Category
 from app.models.product import Product
 from app.models.user import User
@@ -35,13 +37,16 @@ def _current_user() -> User:
 
 
 async def _require_admin() -> User:
+    """Reading the admin catalog needs catalog.view (mutations check catalog.create/update/delete)."""
     user = _current_user()
-    if not await user.can("create", Product):  # the catalog-write gate == admin-only
-        abort(403, "Admins only.")
+    if not await user.can(Permission.CATALOG_VIEW.value):
+        abort(403, "You lack catalog access.")
     return user
 
 
-async def products_index(request: Request, per_page: int = 20, page: int = 1) -> AdminProductPage:
+async def products_index(
+    request: Request, per_page: int = 20, page: int = 1
+) -> AdminProductPage:
     """List **all** products (admin) — including hidden ones — each annotated with `is_visible`
     (the with_visibility scope adds the inline EXISTS column; one query for the page)."""
     await _require_admin()
@@ -65,7 +70,9 @@ async def products_index(request: Request, per_page: int = 20, page: int = 1) ->
     )
 
 
-async def categories_index(request: Request, per_page: int = 50, page: int = 1) -> AdminCategoryPage:
+async def categories_index(
+    request: Request, per_page: int = 50, page: int = 1
+) -> AdminCategoryPage:
     """List **all** categories (admin) with `is_visible` (inline EXISTS column)."""
     await _require_admin()
     result = await Category.with_visibility().order_by("id").paginate(per_page, page)
@@ -105,7 +112,11 @@ async def store(request: Request, data: ProductIn) -> AdminProductOut:
     if not await user.can("create", Product):
         abort(403, "Only admins may create products.")
     validator = Validator(
-        {"category_id": data.category_id, "name": data.name, "price_cents": data.price_cents},
+        {
+            "category_id": data.category_id,
+            "name": data.name,
+            "price_cents": data.price_cents,
+        },
         {
             "category_id": "required|integer",
             "name": "required|string",
@@ -122,6 +133,13 @@ async def store(request: Request, data: ProductIn) -> AdminProductOut:
         currency="USD",
         status=ProductStatus.DRAFT,
     )
+    await (
+        activity()
+        .caused_by(user)
+        .performed_on(product)
+        .with_properties({"name": data.name, "slug": product.slug})
+        .log("created product")
+    )
     return _admin_product_out(product, is_visible=False)  # a new draft is never visible
 
 
@@ -133,16 +151,38 @@ async def update(request: Request, data: UpdateProductIn) -> AdminProductOut:
         abort(404, "Product not found")
     if data.name is not None:  # update the en translation, preserving other locales
         existing: list[Translate] = product.translations
-        current = {t.locale: {"name": t.name, "description": t.description} for t in existing}
-        current["en"] = {"name": data.name, "description": current.get("en", {}).get("description")}
+        current = {
+            t.locale: {"name": t.name, "description": t.description} for t in existing
+        }
+        current["en"] = {
+            "name": data.name,
+            "description": current.get("en", {}).get("description"),
+        }
         product.translations = current
     if data.price_cents is not None:
         product.price_cents = data.price_cents
     if data.status is not None:
         product.status = ProductStatus(data.status)
     await product.save()
+    await (
+        activity()
+        .caused_by(user)
+        .performed_on(product)
+        .with_properties(
+            {
+                "changed": [
+                    k
+                    for k in ("name", "price_cents", "status")
+                    if getattr(data, k) is not None
+                ]
+            }
+        )
+        .log("updated product")
+    )
     refreshed = await Product.with_visibility().where("id", product.id).first_or_fail()
-    return _admin_product_out(refreshed, is_visible=bool(getattr(refreshed, "is_visible", False)))
+    return _admin_product_out(
+        refreshed, is_visible=bool(getattr(refreshed, "is_visible", False))
+    )
 
 
 async def destroy(request: Request) -> MessageOut:
@@ -151,5 +191,12 @@ async def destroy(request: Request) -> MessageOut:
     product = await Product.find_or_fail(int(request.path_param("id")))
     if not await user.can("delete", product):
         abort(404, "Product not found")
+    await (
+        activity()
+        .caused_by(user)
+        .performed_on(product)
+        .with_properties({"slug": product.slug})
+        .log("deleted product")
+    )
     await product.delete()
     return MessageOut(message="Deleted.")

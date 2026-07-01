@@ -14,8 +14,11 @@ from arvel.http import Request
 from arvel.kernel import app
 from arvel.support.facades import Config
 
-from app.enums import UserRole
+from app.enums import RoleName, UserRole
 from app.models.user import User
+
+# Keycloak realm role → arvel RBAC role. Safe-by-default: a Keycloak role absent here grants nothing.
+ROLE_CLAIM_MAP: dict[str, str] = {r.value: r.value for r in RoleName}
 
 
 def build_admin_oidc_guard() -> Any:
@@ -66,4 +69,14 @@ async def resolve_admin(request: Request) -> User:
     elif user.role is not UserRole.ADMIN:
         user.role = UserRole.ADMIN  # promote: Keycloak says they're an admin
         await user.save()
+
+    # Map the Keycloak realm roles → arvel RBAC roles (claim_map) and carry them as ephemeral,
+    # request-scoped grants (DR-0011): the admin's permissions follow their Keycloak roles without
+    # writing membership. e.g. realm role "catalog-manager" → arvel role "catalog-manager".
+    from arvel.auth.claim_map import roles_for_claims
+
+    idp_roles = roles_for_claims(
+        claims, ROLE_CLAIM_MAP, claim_paths=("realm_access.roles",)
+    )
+    user.set_idp_roles(idp_roles)
     return user

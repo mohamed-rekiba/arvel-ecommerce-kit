@@ -16,7 +16,10 @@ from app.enums import ProductStatus
 from app.schemas import Translate
 
 IMAGES = "images"  # the product image gallery collection
-SUPPORTED_LOCALES = {"en", "fr"}  # storefront locales; whitelisted → no SQL injection via Accept-Language
+SUPPORTED_LOCALES = {
+    "en",
+    "fr",
+}  # storefront locales; whitelisted → no SQL injection via Accept-Language
 DEFAULT_LOCALE = "en"
 
 
@@ -31,7 +34,9 @@ class SearchableProduct(TypedDict):
 
     id: int
     slug: str
-    translations: list[TranslationDoc]  # Meilisearch searches the nested per-locale name/description
+    translations: list[
+        TranslationDoc
+    ]  # Meilisearch searches the nested per-locale name/description
 
 
 class Product(HasMedia, Searchable, Model):
@@ -124,4 +129,6 @@ class Product(HasMedia, Searchable, Model):
         (``only_visible=True``, storefront). Same EXISTS predicate for both."""
         if only_visible:
             return query.where_raw(Product._VISIBLE)
-        return query.select_raw("products.*").select_raw(f"{Product._VISIBLE} AS is_visible")
+        return query.select_raw("products.*").select_raw(
+            f"{Product._VISIBLE} AS is_visible"
+        )

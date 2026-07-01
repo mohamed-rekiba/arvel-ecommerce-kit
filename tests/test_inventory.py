@@ -28,14 +28,27 @@ def client(tmp_path, monkeypatch):
         await Migrator(db).run(discover_migrations(["database/migrations"]))
         for model in (User, Category, Product, ProductVariant):
             model.set_connection(db)
-        await User.create(name="Cara", email="cara@example.com", password="secret-cara",
-                          role=UserRole.CUSTOMER)
-        cat = await Category.create(translations={"en": {"name": "Shirts"}}, slug="shirts", published=True)
-        p = await Product.create(category_id=cat.id, translations={"en": {"name": "Tee"}}, slug="tee",
-                                 price_cents=1000, currency="USD", status=ProductStatus.ACTIVE,
-                                 published=True)
-        await ProductVariant.create(product_id=p.id, sku="TEE-S", name="S",
-                                    price_adjustment_cents=0, stock=5)  # only 5 in stock
+        await User.create(
+            name="Cara",
+            email="cara@example.com",
+            password="secret-cara",
+            role=UserRole.CUSTOMER,
+        )
+        cat = await Category.create(
+            translations={"en": {"name": "Shirts"}}, slug="shirts", published=True
+        )
+        p = await Product.create(
+            category_id=cat.id,
+            translations={"en": {"name": "Tee"}},
+            slug="tee",
+            price_cents=1000,
+            currency="USD",
+            status=ProductStatus.ACTIVE,
+            published=True,
+        )
+        await ProductVariant.create(
+            product_id=p.id, sku="TEE-S", name="S", price_adjustment_cents=0, stock=5
+        )  # only 5 in stock
         for model in (User, Category, Product, ProductVariant):
             model.set_connection(None)
         await db.dispose()
@@ -62,14 +75,22 @@ def _variant_stock(client) -> int:
 def test_checkout_decrements_stock(client) -> None:
     headers = _login(client)
     assert _variant_stock(client) == 5
-    client.post("/api/cart/items", json={"product_variant_id": 1, "quantity": 3}, headers=headers)
+    client.post(
+        "/api/cart/items",
+        json={"product_variant_id": 1, "quantity": 3},
+        headers=headers,
+    )
     assert client.post("/api/checkout", headers=headers).status_code == 201
     assert _variant_stock(client) == 2  # 5 - 3
 
 
 def test_oversell_is_rejected_and_rolls_back(client) -> None:
     headers = _login(client)
-    client.post("/api/cart/items", json={"product_variant_id": 1, "quantity": 9}, headers=headers)
+    client.post(
+        "/api/cart/items",
+        json={"product_variant_id": 1, "quantity": 9},
+        headers=headers,
+    )
     resp = client.post("/api/checkout", headers=headers)
     assert resp.status_code == 409  # insufficient stock
     # rolled back: stock untouched, no order placed, cart intact

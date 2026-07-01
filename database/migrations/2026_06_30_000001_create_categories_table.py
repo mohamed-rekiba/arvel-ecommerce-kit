@@ -10,7 +10,9 @@ class CreateCategoriesTable(Migration):
             t.string("slug").unique()
             t.jsonb("translations")  # locale-major {"en": {"name"}, "fr": {...}}
             t.foreign_id("parent_id").nullable().constrained("categories")
-            t.boolean("published").default(value=True)  # admin intent; retrievability also needs ancestors published
+            t.boolean("published").default(
+                value=True
+            )  # admin intent; retrievability also needs ancestors published
             t.btree_index("translations->'en'->>'name'")
             t.timestamps()
 

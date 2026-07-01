@@ -1,13 +1,14 @@
-"""Authorization policy for Product — only admins may mutate the catalog (Laravel Policy parity).
-
-The ability name maps to the method name exactly (arvel does no snake/camel conversion). Anyone may
-view; create/update/delete require an admin. ``deny_as_not_found`` hides existence on update/delete
-so a non-admin can't probe which product ids exist.
+"""Authorization policy for Product — catalog mutation is gated on the RBAC catalog.* permissions
+(Spatie-style), not a single admin flag. Anyone may view; create/update/delete require the matching
+permission. ``deny_as_not_found`` hides existence on update/delete so a caller without the permission
+can't probe which product ids exist. super-admin bypasses every check via the Gate.before hook.
 """
 
 from typing import Any
 
 from arvel.auth.gate import GateResponse
+
+from app.enums import Permission
 
 
 class ProductPolicy:
@@ -17,17 +18,23 @@ class ProductPolicy:
     def view(self, user: Any, *_: Any) -> bool:
         return True
 
-    def create(self, user: Any, *_: Any) -> GateResponse:
-        if user is not None and user.is_admin():
+    async def create(self, user: Any, *_: Any) -> GateResponse:
+        if user is not None and await user.has_permission_to(
+            Permission.CATALOG_CREATE.value
+        ):
             return GateResponse.allow()
-        return GateResponse.deny("Only admins may create products.")
+        return GateResponse.deny("You may not create products.")
 
-    def update(self, user: Any, *_: Any) -> GateResponse:
-        if user is not None and user.is_admin():
+    async def update(self, user: Any, *_: Any) -> GateResponse:
+        if user is not None and await user.has_permission_to(
+            Permission.CATALOG_UPDATE.value
+        ):
             return GateResponse.allow()
         return GateResponse.deny_as_not_found()
 
-    def delete(self, user: Any, *_: Any) -> GateResponse:
-        if user is not None and user.is_admin():
+    async def delete(self, user: Any, *_: Any) -> GateResponse:
+        if user is not None and await user.has_permission_to(
+            Permission.CATALOG_DELETE.value
+        ):
             return GateResponse.allow()
         return GateResponse.deny_as_not_found()
