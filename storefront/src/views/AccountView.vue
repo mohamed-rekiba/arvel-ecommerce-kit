@@ -5,18 +5,18 @@
 
 <template>
   <main class="account">
-    <h1>Account</h1>
+    <p class="eyebrow">Your account</p>
+    <h1>Guest checkout</h1>
     <p class="account__note">
-      You're shopping as a guest — your cart travels with you via a secure token. Sign-in and order
-      history are available through the API (register / login) and land here next.
+      You're shopping as a guest — your cart travels with you via a secure token, so nothing is lost
+      between visits. Sign-in and order history are served by the API (register / login) and arrive here next.
     </p>
-    <RouterLink class="btn" to="/">Back to shop</RouterLink>
+    <RouterLink class="btn btn--primary" to="/">Back to the collection</RouterLink>
   </main>
 </template>
 
 <style scoped>
-.account { max-width: 560px; margin: 0 auto; padding: var(--space-8) var(--container-pad); }
-.account h1 { font-size: var(--text-2xl); margin-bottom: var(--space-4); }
-.account__note { color: var(--color-text-muted); line-height: 1.6; margin-bottom: var(--space-6); }
-.btn { display: inline-block; padding: var(--space-3) var(--space-5); border: 1px solid var(--color-border); border-radius: var(--radius-md); background: var(--color-bg); text-decoration: none; color: var(--color-text); }
+.account { max-width: 560px; margin: 0 auto; padding: var(--space-20) var(--container-pad) 0; }
+.account h1 { font-size: var(--text-3xl); margin: var(--space-2) 0 var(--space-5); }
+.account__note { color: var(--color-text-muted); line-height: var(--leading-normal); margin-bottom: var(--space-8); max-width: 52ch; }
 </style>

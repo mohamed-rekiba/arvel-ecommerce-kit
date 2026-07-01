@@ -67,7 +67,8 @@ watch(() => route.params.slug, load);
         <div v-else class="pdp__placeholder" aria-hidden="true" />
       </div>
       <div class="pdp__info">
-        <RouterLink class="pdp__back" to="/">← Shop</RouterLink>
+        <RouterLink class="pdp__back" to="/">← Back to shop</RouterLink>
+        <p class="eyebrow" v-if="product.category">{{ product.category.translation.name }}</p>
         <h1>{{ product.translation.name }}</h1>
         <p class="pdp__price">{{ formatPrice(product.price_cents, product.currency) }}</p>
         <p v-if="product.translation.description" class="pdp__desc">
@@ -75,7 +76,7 @@ watch(() => route.params.slug, load);
         </p>
 
         <label v-if="variants.length" class="pdp__field">
-          <span>Variant</span>
+          <span class="pdp__label">Variant</span>
           <select v-model="selectedVariantId">
             <option v-for="v in variants" :key="v.id" :value="v.id" :disabled="v.stock <= 0">
               {{ v.name }} — {{ v.stock > 0 ? `${v.stock} in stock` : "sold out" }}
@@ -83,34 +84,38 @@ watch(() => route.params.slug, load);
           </select>
         </label>
 
-        <button class="btn btn--primary" :disabled="!canAdd || adding" @click="addToCart">
-          {{ added ? "Added ✓" : adding ? "Adding…" : canAdd ? "Add to cart" : "Sold out" }}
+        <button class="btn btn--primary pdp__add" :disabled="!canAdd || adding" @click="addToCart">
+          {{ added ? "Added to cart ✓" : adding ? "Adding…" : canAdd ? "Add to cart" : "Sold out" }}
         </button>
+        <ul class="pdp__meta">
+          <li>Free returns within 30 days</li>
+          <li>Ships in 2–4 business days</li>
+        </ul>
       </div>
     </div>
   </main>
 </template>
 
 <style scoped>
-.pdp { max-width: var(--container-max); margin: 0 auto; padding: var(--space-8) var(--container-pad); }
-.pdp__grid { display: grid; grid-template-columns: 1fr 1fr; gap: var(--space-8); }
-@media (max-width: 720px) { .pdp__grid { grid-template-columns: 1fr; } }
-.pdp__media { aspect-ratio: 4 / 5; border: 1px solid var(--color-border); border-radius: var(--radius-md); overflow: hidden; background: var(--color-surface); }
+.pdp { max-width: var(--container-max); margin: 0 auto; padding: var(--space-12) var(--container-pad) 0; }
+.pdp__grid, .pdp__skeleton { display: grid; grid-template-columns: 1fr 1fr; gap: var(--space-16); align-items: start; }
+@media (max-width: 820px) { .pdp__grid, .pdp__skeleton { grid-template-columns: 1fr; gap: var(--space-8); } }
+.pdp__media { aspect-ratio: 3 / 4; border-radius: var(--radius-lg); overflow: hidden; background: var(--color-surface); }
 .pdp__media img { width: 100%; height: 100%; object-fit: cover; }
-.pdp__placeholder { width: 100%; height: 100%; background: var(--color-surface); }
-.pdp__back { color: var(--color-text-muted); text-decoration: none; font-size: var(--text-sm); }
-.pdp__info h1 { margin: var(--space-2) 0; font-size: var(--text-2xl); }
-.pdp__price { font-size: var(--text-xl); color: var(--color-text); margin: 0 0 var(--space-4); }
-.pdp__desc { color: var(--color-text-muted); line-height: 1.6; }
-.pdp__field { display: block; margin: var(--space-4) 0; }
-.pdp__field span { display: block; font-size: var(--text-sm); color: var(--color-text-muted); margin-bottom: var(--space-1); }
-.pdp__field select { width: 100%; padding: var(--space-2) var(--space-3); border: 1px solid var(--color-border); border-radius: var(--radius-md); background: var(--color-bg); }
-.btn { padding: var(--space-3) var(--space-5); border: 1px solid var(--color-border); border-radius: var(--radius-md); background: var(--color-bg); cursor: pointer; font: inherit; }
-.btn--primary { background: var(--color-accent); color: var(--color-text-inverse); border-color: var(--color-accent); }
-.btn--primary:disabled { opacity: 0.5; cursor: not-allowed; }
-.skeleton { background: var(--color-surface); border-radius: var(--radius-md); animation: pulse 1.2s ease-in-out infinite; }
-.skeleton--media { aspect-ratio: 4 / 5; }
-.skeleton--text { height: 2rem; margin-top: var(--space-4); }
-.pdp__skeleton { display: grid; grid-template-columns: 1fr 1fr; gap: var(--space-8); }
-@keyframes pulse { 50% { opacity: 0.5; } }
+.pdp__placeholder { width: 100%; height: 100%; background: var(--color-surface-2); }
+.pdp__info { padding-top: var(--space-4); }
+.pdp__back { display: inline-block; color: var(--color-text-muted); text-decoration: none; font-size: var(--text-sm); margin-bottom: var(--space-8); transition: color var(--motion-base) var(--ease); }
+.pdp__back:hover { color: var(--color-text); }
+.pdp__info h1 { font-size: var(--text-3xl); margin: var(--space-2) 0 var(--space-4); }
+.pdp__price { font-size: var(--text-xl); color: var(--color-text); margin: 0 0 var(--space-6); }
+.pdp__desc { color: var(--color-text-muted); line-height: var(--leading-normal); max-width: 48ch; }
+.pdp__field { display: block; margin: var(--space-8) 0 var(--space-6); max-width: 22rem; }
+.pdp__label { display: block; font-size: var(--text-sm); font-weight: var(--weight-medium); margin-bottom: var(--space-2); }
+.pdp__field select { width: 100%; padding: var(--space-3) var(--space-4); border: 1px solid var(--color-border-strong); border-radius: var(--radius-md); background: var(--color-bg); font: inherit; }
+.pdp__add { width: 100%; max-width: 22rem; padding: var(--space-4); }
+.pdp__meta { list-style: none; margin: var(--space-6) 0 0; padding: var(--space-6) 0 0; border-top: 1px solid var(--color-border); display: flex; flex-direction: column; gap: var(--space-2); color: var(--color-text-muted); font-size: var(--text-sm); }
+.skeleton { background: var(--color-surface); border-radius: var(--radius-md); animation: pulse 1.4s var(--ease) infinite; }
+.skeleton--media { aspect-ratio: 3 / 4; border-radius: var(--radius-lg); }
+.skeleton--text { height: 2.5rem; margin-top: var(--space-8); }
+@keyframes pulse { 50% { opacity: 0.55; } }
 </style>
