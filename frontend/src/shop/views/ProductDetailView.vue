@@ -15,10 +15,13 @@ const selectedVariantId = ref<number | null>(null);
 const adding = ref(false);
 const added = ref(false);
 
-// the PDP is the product's showcase — lead with the sharp `original` (900×1125), preview as 1x fallback
-const g = computed(() => product.value?.gallery[0] ?? null);
+// gallery with a selected image (lead with the sharp `original` 900×1125, preview as the 1x fallback)
+const selected = ref(0);
+const gallery = computed(() => product.value?.gallery ?? []);
+const g = computed(() => gallery.value[selected.value] ?? null);
 const image = computed(() => g.value?.url ?? g.value?.preview_url ?? null);
 const srcset = computed(() => (g.value ? `${g.value.preview_url} 600w, ${g.value.url} 900w` : undefined));
+watch(product, () => (selected.value = 0));
 const variants = computed<Variant[]>(() => product.value?.variants ?? []);
 const selectedVariant = computed(() =>
   variants.value.find((v) => v.id === selectedVariantId.value) ?? null,
@@ -67,14 +70,28 @@ watch(() => route.params.slug, load);
 
     <div v-else-if="product" class="pdp__grid">
       <div class="pdp__media">
-        <img
-          v-if="image"
-          :src="image"
-          :srcset="srcset"
-          sizes="(max-width: 900px) 100vw, 44vw"
-          :alt="product.translation.name"
-        />
-        <div v-else class="pdp__placeholder" aria-hidden="true" />
+        <div class="pdp__main">
+          <img
+            v-if="image"
+            :src="image"
+            :srcset="srcset"
+            sizes="(max-width: 900px) 100vw, 44vw"
+            :alt="product.translation.name"
+          />
+          <div v-else class="pdp__placeholder" aria-hidden="true" />
+        </div>
+        <div v-if="gallery.length > 1" class="pdp__thumbs">
+          <button
+            v-for="(img, i) in gallery"
+            :key="img.id"
+            class="pdp__thumb"
+            :class="{ on: i === selected }"
+            :aria-label="`View image ${i + 1}`"
+            @click="selected = i"
+          >
+            <img :src="img.thumb_url" alt="" />
+          </button>
+        </div>
       </div>
       <div class="pdp__info">
         <RouterLink class="pdp__back" to="/">← Back to shop</RouterLink>
@@ -114,9 +131,14 @@ watch(() => route.params.slug, load);
 .pdp { max-width: var(--container-max); margin: 0 auto; padding: var(--space-12) var(--container-pad) 0; }
 .pdp__grid, .pdp__skeleton { display: grid; grid-template-columns: 1fr 1fr; gap: var(--space-16); align-items: start; }
 @media (max-width: 820px) { .pdp__grid, .pdp__skeleton { grid-template-columns: 1fr; gap: var(--space-8); } }
-.pdp__media { aspect-ratio: 3 / 4; border-radius: var(--radius-lg); overflow: hidden; background: var(--color-surface); }
-.pdp__media img { width: 100%; height: 100%; object-fit: cover; }
-.pdp__placeholder { width: 100%; height: 100%; background: var(--color-surface-2); }
+.pdp__media { display: flex; flex-direction: column; gap: 12px; }
+.pdp__main { aspect-ratio: 3 / 4; border-radius: var(--radius-lg); overflow: hidden; background: var(--surface-2); }
+.pdp__main img { width: 100%; height: 100%; object-fit: cover; }
+.pdp__placeholder { width: 100%; height: 100%; background: var(--surface-2); }
+.pdp__thumbs { display: flex; gap: 10px; flex-wrap: wrap; }
+.pdp__thumb { width: 64px; height: 80px; border-radius: var(--radius-md); overflow: hidden; border: 2px solid transparent; padding: 0; cursor: pointer; background: var(--surface-2); transition: border-color var(--motion-base); }
+.pdp__thumb.on { border-color: var(--accent); }
+.pdp__thumb img { width: 100%; height: 100%; object-fit: cover; }
 .pdp__info { padding-top: var(--space-4); }
 .pdp__back { display: inline-block; color: var(--color-text-muted); text-decoration: none; font-size: var(--text-sm); margin-bottom: var(--space-8); transition: color var(--motion-base) var(--ease); }
 .pdp__back:hover { color: var(--color-text); }
