@@ -63,11 +63,12 @@ async def forgot_password(
             message="If that email exists, a reset link has been sent."
         )
     secret = Config.get("app.key", "")
+    token = password_reset_token(user.id, secret)
+    # A real app emails this. Returning it in the response is a dev-only convenience — exposing it in
+    # production would be a trivial account-takeover, so it's gated behind app.debug.
     return ForgotPasswordOut(
         message="If that email exists, a reset link has been sent.",
-        reset_token=password_reset_token(
-            user.id, secret
-        ),  # dev only — normally emailed
+        reset_token=token if Config.get("app.debug", False) else None,
     )
 
 

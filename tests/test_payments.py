@@ -3,6 +3,9 @@ processing, through the real served path. A redelivered webhook is processed exa
 """
 
 import asyncio
+import hashlib
+import hmac
+import json
 
 import httpx
 import pytest
@@ -16,6 +19,17 @@ from app.models.category import Category
 from app.models.product import Product
 from app.models.product_variant import ProductVariant
 from app.models.user import User
+
+_WEBHOOK_SECRET = "test-secret"  # config/services.py default (PAYMENT_GATEWAY_SECRET)
+
+
+def _post_webhook(client, event: dict, *, sign: bool = True):
+    """POST a gateway webhook, signing the exact raw body with the gateway HMAC secret by default."""
+    body = json.dumps(event).encode()
+    headers = {"Content-Type": "application/json"}
+    if sign:
+        headers["X-Signature"] = hmac.new(_WEBHOOK_SECRET.encode(), body, hashlib.sha256).hexdigest()
+    return client.post("/api/webhooks/payment", content=body, headers=headers)
 
 
 def _gateway_handler(request: httpx.Request) -> httpx.Response:
@@ -109,13 +123,13 @@ def test_webhook_is_idempotent(client) -> None:
         "data": {"charge_id": "ch_test_123"},
     }
     # first delivery → processed; order transitions to paid
-    first = client.post("/api/webhooks/payment", json=event)
+    first = _post_webhook(client, event)
     assert first.status_code == 201
     assert first.json()["status"] == "processed"
     assert client.get("/api/orders", headers=headers).json()[0]["status"] == "paid"
 
     # redelivery of the SAME event id → acknowledged but not reprocessed
-    second = client.post("/api/webhooks/payment", json=event)
+    second = _post_webhook(client, event)
     assert second.status_code == 201
     assert second.json()["status"] == "already_processed"
     # still paid (and only one webhook_event recorded — idempotent)
@@ -123,4 +137,29 @@ def test_webhook_is_idempotent(client) -> None:
 
 
 def test_webhook_malformed_is_400(client) -> None:
-    assert client.post("/api/webhooks/payment", json={"id": "x"}).status_code == 400
+    assert _post_webhook(client, {"id": "x"}).status_code == 400
+
+
+def test_webhook_without_valid_signature_is_rejected(client) -> None:
+    """An unsigned or forged webhook can't transition an order — the core anti-fraud check."""
+    headers = _auth(client)
+    order_id = _place_order(client, headers)
+    client.post(f"/api/orders/{order_id}/pay", headers=headers)
+    event = {
+        "id": "evt_forged",
+        "type": "charge.succeeded",
+        "data": {"charge_id": "ch_test_123"},
+    }
+
+    # no signature → 401
+    assert _post_webhook(client, event, sign=False).status_code == 401
+    # wrong signature → 401
+    body = json.dumps(event).encode()
+    forged = client.post(
+        "/api/webhooks/payment",
+        content=body,
+        headers={"Content-Type": "application/json", "X-Signature": "deadbeef"},
+    )
+    assert forged.status_code == 401
+    # the order was NOT marked paid by the forgery attempts
+    assert client.get("/api/orders", headers=headers).json()[0]["status"] == "pending"

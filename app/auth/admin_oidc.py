@@ -83,9 +83,15 @@ async def resolve_admin(request: Request, *, persist_roles: bool = False) -> Use
     )
     if persist_roles:
         # DR-0030: write the mapping to RBAC membership so an issued bearer PAT carries the roles.
+        # Reconcile to the *exact* claim set (assign missing AND revoke removed) so a Keycloak
+        # demotion actually deprovisions — Keycloak stays the source of truth. Only the claim-mappable
+        # roles are managed here; any other RBAC role a user holds is left untouched.
+        managed = {role_name.value for role_name in RoleName}
         existing = {role.name for role in await user.roles()}
         for role_name in idp_roles - existing:
             await user.assign_role(role_name)
+        for role_name in (existing & managed) - idp_roles:
+            await user.remove_role(role_name)
     else:
         # DR-0011: carry them as ephemeral, request-scoped grants (no membership written).
         user.set_idp_roles(idp_roles)

@@ -15,6 +15,9 @@ from arvel.database import ConnectionResolver, Migrator, discover_migrations
 def client(tmp_path, monkeypatch):
     url = f"sqlite+aiosqlite:///{tmp_path / 'auth.sqlite'}"
     monkeypatch.setenv("DATABASE_URL", url)
+    monkeypatch.setenv(
+        "APP_DEBUG", "true"
+    )  # exposes the reset token in the response (dev-only path)
 
     async def migrate() -> None:
         db = ConnectionResolver({"default": {"url": url}})

@@ -6,6 +6,8 @@ idempotency: a webhook redelivered with the same event id is processed exactly o
 idempotency-ledger row dedupes it).
 """
 
+import hashlib
+import hmac
 from typing import Any
 
 from arvel import DB, Http, abort
@@ -19,6 +21,18 @@ from app.models.order import Order
 from app.models.payment import Payment
 from app.models.webhook_event import WebhookEvent
 from app.schemas import PaymentOut, WebhookIn, WebhookOut
+
+SIGNATURE_HEADER = "X-Signature"
+
+
+async def _verify_signature(request: Request) -> None:
+    """Reject the webhook unless it carries a valid gateway HMAC-SHA256 signature over the raw body.
+    Without this, anyone could POST a `charge.succeeded` and mark an order PAID for free."""
+    secret = Config.get("services.payment_gateway.secret") or ""
+    provided = request.header(SIGNATURE_HEADER, "") or ""
+    expected = hmac.new(secret.encode(), await request.raw.body(), hashlib.sha256).hexdigest()
+    if not secret or not hmac.compare_digest(provided, expected):
+        abort(401, "Invalid webhook signature.")
 
 
 async def pay(request: Request) -> PaymentOut:
@@ -65,7 +79,9 @@ async def pay(request: Request) -> PaymentOut:
 
 
 async def webhook(request: Request, data: WebhookIn) -> WebhookOut:
-    """Idempotently process a gateway webhook — a redelivery of the same event id is a no-op."""
+    """Idempotently process a gateway webhook — a redelivery of the same event id is a no-op. The
+    request must carry a valid gateway signature (authenticity) before any side effects run."""
+    await _verify_signature(request)
     if not data.id or not data.type:
         abort(400, "Malformed webhook.")
 
