@@ -108,11 +108,12 @@ def test_admin_uploads_to_gallery_and_media_is_served(client) -> None:
     original = client.get(item["url"])
     assert original.status_code == 200 and original.content == _PNG
 
-    # the auto-generated thumb + preview conversions are valid, decodable PNGs
+    # the auto-generated thumb + preview conversions are valid, decodable WebP images, served with
+    # the matching content-type (derived from the stored extension)
     for conv_url in (item["thumb_url"], item["preview_url"]):
         conv = client.get(conv_url)
-        assert conv.status_code == 200 and conv.headers["content-type"] == "image/png"
-        PILImage.open(BytesIO(conv.content)).verify()
+        assert conv.status_code == 200 and conv.headers["content-type"] == "image/webp"
+        assert PILImage.open(BytesIO(conv.content)).format == "WEBP"
 
 
 def test_non_admin_cannot_upload(client) -> None:
