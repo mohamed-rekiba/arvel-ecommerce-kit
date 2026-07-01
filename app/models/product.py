@@ -88,10 +88,11 @@ class Product(HasMedia, Searchable, Model):
         )
 
     def register_media_conversions(self) -> list[MediaConversion]:
-        """Derived versions generated for every gallery image (Spatie conversions)."""
+        """Derived versions generated for every gallery image (Spatie conversions). JPEG, not PNG —
+        product photos are photographic, so JPEG is ~5–8× smaller with no visible loss."""
         return [
-            MediaConversion("thumb", width=256, height=320, fmt="PNG"),
-            MediaConversion("preview", width=600, height=750, fmt="PNG"),
+            MediaConversion("thumb", width=256, height=320, fmt="JPEG"),
+            MediaConversion("preview", width=600, height=750, fmt="JPEG"),
         ]
 
     def to_searchable_array(self) -> dict[str, Any]:
