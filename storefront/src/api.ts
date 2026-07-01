@@ -49,10 +49,63 @@ export interface Paginated<T> {
   total: number;
 }
 
-async function get<T>(path: string): Promise<T> {
-  const res = await fetch(`/api${path}`, { headers: { Accept: "application/json" } });
-  if (!res.ok) throw new Error(`API ${res.status} for ${path}`);
+// --- cart / checkout ----------------------------------------------------------
+export interface CartLine {
+  id: number;
+  product_variant_id: number;
+  quantity: number;
+  unit_price_cents: number;
+  line_total_cents: number;
+}
+
+export interface Cart {
+  id: number | null;
+  items: CartLine[];
+  total_cents: number;
+  cart_token?: string | null;
+}
+
+export interface OrderLine {
+  product_variant_id: number;
+  quantity: number;
+  unit_price_cents: number;
+}
+
+export interface Order {
+  id: number;
+  status: string;
+  total_cents: number;
+  items: OrderLine[];
+}
+
+// The guest cart is keyed by an X-Cart-Token the server issues on first write; we persist it.
+const CART_TOKEN_KEY = "arvel_cart_token";
+const cartToken = {
+  get: () => localStorage.getItem(CART_TOKEN_KEY),
+  set: (t: string | null | undefined) => {
+    if (t) localStorage.setItem(CART_TOKEN_KEY, t);
+  },
+};
+
+async function request<T>(method: string, path: string, body?: unknown): Promise<T> {
+  const headers: Record<string, string> = { Accept: "application/json" };
+  const token = cartToken.get();
+  if (token) headers["X-Cart-Token"] = token;
+  if (body !== undefined) headers["Content-Type"] = "application/json";
+  const res = await fetch(`/api${path}`, {
+    method,
+    headers,
+    body: body !== undefined ? JSON.stringify(body) : undefined,
+  });
+  if (!res.ok) throw new Error(`API ${res.status} for ${method} ${path}`);
   return (await res.json()) as T;
+}
+
+const get = <T>(path: string) => request<T>("GET", path);
+
+function withCartToken(cart: Cart): Cart {
+  cartToken.set(cart.cart_token);
+  return cart;
 }
 
 export const api = {
@@ -69,6 +122,23 @@ export const api = {
   },
   categories() {
     return get<Category[]>(`/categories`);
+  },
+  async cart() {
+    return withCartToken(await get<Cart>(`/cart`));
+  },
+  async addToCart(product_variant_id: number, quantity = 1) {
+    return withCartToken(await request<Cart>("POST", `/cart/items`, { product_variant_id, quantity }));
+  },
+  async updateCartItem(id: number, quantity: number) {
+    return withCartToken(await request<Cart>("PATCH", `/cart/items/${id}`, { quantity }));
+  },
+  async removeCartItem(id: number) {
+    return withCartToken(await request<Cart>("DELETE", `/cart/items/${id}`));
+  },
+  async checkout() {
+    const order = await request<Order>("POST", `/checkout`);
+    localStorage.removeItem(CART_TOKEN_KEY); // the cart was consumed
+    return order;
   },
 };
 

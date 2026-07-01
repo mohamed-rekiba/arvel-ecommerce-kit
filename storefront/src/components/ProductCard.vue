@@ -13,10 +13,10 @@ const name = computed(() => props.product.translation.name);
 </script>
 
 <template>
-  <a
+  <RouterLink
     class="card"
     :class="{ 'card--soldout': soldOut }"
-    :href="soldOut ? undefined : `/products/${product.slug}`"
+    :to="`/products/${product.slug}`"
     :aria-disabled="soldOut"
   >
     <div class="card__media">
@@ -26,7 +26,7 @@ const name = computed(() => props.product.translation.name);
     </div>
     <h3 class="card__name">{{ name }}</h3>
     <p class="card__price">{{ formatPrice(product.price_cents, product.currency) }}</p>
-  </a>
+  </RouterLink>
 </template>
 
 <style scoped>
