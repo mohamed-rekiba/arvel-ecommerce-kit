@@ -56,8 +56,14 @@ async def serve_media(request: Request) -> Response:
     if not await disk.exists(path):
         abort(404, "Media not found")
     data = await disk.get(path)
-    # conversions are PNG; the original keeps its stored mime type
-    content_type = (
-        "image/png" if conversion else (media.mime_type or "application/octet-stream")
-    )
+    # a conversion's type follows its stored extension (webp/jpeg/png); the original keeps its mime
+    if conversion:
+        ext = path.rsplit(".", 1)[-1].lower()
+        content_type = {
+            "webp": "image/webp",
+            "jpeg": "image/jpeg",
+            "jpg": "image/jpeg",
+        }.get(ext, "image/png")
+    else:
+        content_type = media.mime_type or "application/octet-stream"
     return Response(content=data, status=200, headers={"content-type": content_type})
