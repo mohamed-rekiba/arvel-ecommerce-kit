@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import Button from "primevue/button";
 import { computed, onMounted, ref, watch } from "vue";
 import { useRoute, useRouter } from "vue-router";
 import { type Product, type Variant, api, formatPrice } from "../api";
@@ -93,9 +94,13 @@ watch(() => route.params.slug, load);
           </select>
         </label>
 
-        <button class="btn btn--primary pdp__add" :disabled="!canAdd || adding" @click="addToCart">
-          {{ added ? "Added to cart ✓" : adding ? "Adding…" : canAdd ? "Add to cart" : "Sold out" }}
-        </button>
+        <Button
+          class="pdp__add"
+          :label="added ? 'Added to cart ✓' : adding ? 'Adding…' : canAdd ? 'Add to cart' : 'Sold out'"
+          :disabled="!canAdd || adding"
+          :loading="adding"
+          @click="addToCart"
+        />
         <ul class="pdp__meta">
           <li>Free returns within 30 days</li>
           <li>Ships in 2–4 business days</li>
