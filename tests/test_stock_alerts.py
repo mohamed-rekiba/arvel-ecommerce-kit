@@ -74,6 +74,19 @@ def client(tmp_path, monkeypatch):
         yield test_client
 
 
+def _wait_for(check, attempts=40, delay=0.05):
+    """The memory broker schedules queued jobs on the running loop — a POST can return before the
+    fan-out job has run. Poll briefly instead of asserting instantly (the integration tier does the
+    same with a real worker via `_run_worker(until=...)`)."""
+    import time
+
+    for _ in range(attempts):
+        if check():
+            return True
+        time.sleep(delay)
+    return check()
+
+
 def _auth(client, email, password):
     token = client.post(
         "/api/login", json={"email": email, "password": password}
@@ -101,8 +114,13 @@ def test_restock_edge_notifies_subscribers_exactly_once(client) -> None:
         headers=admin,
     )
     for headers in (cara, noah):
+        assert _wait_for(
+            lambda h=headers: (
+                [n["type"] for n in client.get("/api/notifications", headers=h).json()]
+                == ["BackInStockNotification"]
+            )
+        )
         notes = client.get("/api/notifications", headers=headers).json()
-        assert [n["type"] for n in notes] == ["BackInStockNotification"]
         assert "back in stock" in notes[0]["message"]
 
     # a second adjustment while already >0 does NOT re-notify (edge-triggered + one-shot)
@@ -112,6 +130,11 @@ def test_restock_edge_notifies_subscribers_exactly_once(client) -> None:
     # even a fresh 0→positive cycle is quiet — the subscriptions were consumed
     client.post("/api/admin/variants/1/stock", json={"set": 0}, headers=admin)
     client.post("/api/admin/variants/1/stock", json={"set": 5}, headers=admin)
+    import time
+
+    time.sleep(
+        0.3
+    )  # give any (wrongly) queued job the chance to land before asserting silence
     assert len(client.get("/api/notifications", headers=cara).json()) == 1
     assert len(client.get("/api/notifications", headers=noah).json()) == 1
 
@@ -122,4 +145,7 @@ def test_unsubscribe_prevents_the_alert(client) -> None:
     client.post("/api/variants/1/stock-alert", headers=cara)
     client.delete("/api/variants/1/stock-alert", headers=cara)
     client.post("/api/admin/variants/1/stock", json={"set": 3}, headers=admin)
+    import time
+
+    time.sleep(0.3)
     assert client.get("/api/notifications", headers=cara).json() == []

@@ -77,7 +77,7 @@ def test_archive_drops_from_search_and_restore_returns(
         with client.portal() as portal:
             portal.call(_archive)
 
-            # the index still holds the doc, but the retrievable intersection filters it out
+            # archive fires the deleted hook -> unsearchable() removes the doc; either way the API hides it
             assert [
                 p["slug"] for p in client.get("/api/products?q=Aurora").json()["data"]
             ] == []
@@ -100,6 +100,6 @@ def test_archive_drops_from_search_and_restore_returns(
 
             portal.call(_restore)
             assert client.get("/api/products/aurora-lamp").status_code == 200
-            assert [
-                p["slug"] for p in client.get("/api/products?q=Aurora").json()["data"]
-            ] == ["aurora-lamp"]
+            # restore fires the saved hook -> searchable(); Meilisearch indexes the doc
+            # ASYNCHRONOUSLY, so poll like the initial-index search above does
+            assert _search("Aurora") == ["aurora-lamp"]

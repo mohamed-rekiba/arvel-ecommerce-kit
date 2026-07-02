@@ -46,6 +46,25 @@ curl -s -G localhost:8000/api/products --data-urlencode 'q=أورورا' -H 'Acc
 
 Evidence: `i18n-ar-catalog-rtl.png`, `i18n-ar-pdp-rtl.png`.
 
+## 1b — v6 storefront: deals, banners, announcement (2026-07-03)
+
+The home page is now the BestShop layout: hero **carousel** (admin-managed banners with
+per-locale copy + media-library images), trust strip, **popular categories** (tiles derive their
+image from a product in the subtree), **Deals of the Day** (timed flash sales with countdowns and
+sell-through bars), a promo grid, and the **featured** rail. The orange **announcement bar**
+surfaces the newest live coupon flagged `announce` (dismissable, per-code).
+
+```bash
+curl -s localhost:8000/api/deals | jq '.[] | {slug: .product.slug, pct: .percent_off, price: .deal_price_cents}'
+curl -s localhost:8000/api/banners | jq '.[].title'
+curl -s localhost:8000/api/announcement | jq .
+```
+
+**Deal prices are real**: add a deal product to the cart and the line snapshots the discounted
+price; checkout re-prices every line to the price current at order time (an expired deal never
+leaks into an order). Try it: open a `/deals` product, note the struck price + countdown, buy it,
+and check the order subtotal. Evidence: `docs/screenshots/v6-*.png`.
+
 ## 2 — Guest cart → register → the cart follows
 
 Add to cart as a guest (the cart rides the `X-Cart-Token` header), then create an account on
