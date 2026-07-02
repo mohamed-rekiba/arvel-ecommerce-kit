@@ -69,7 +69,9 @@ onMounted(load);
       <DataTable :value="orders" :loading="status === 'loading'" paginator :rows="10" data-key="id" size="small" striped-rows>
         <template #empty><p class="empty">No orders yet.</p></template>
         <Column header="Order">
-          <template #body="{ data }"><span class="mono">#{{ data.id }}</span></template>
+          <template #body="{ data }">
+            <RouterLink class="olink mono" :to="`/admin/orders/${data.id}`">#{{ data.id }}</RouterLink>
+          </template>
         </Column>
         <Column header="Items">
           <template #body="{ data }">{{ itemCount(data) }}</template>
@@ -115,4 +117,6 @@ onMounted(load);
 .actions { display: inline-flex; gap: 6px; }
 .muted { color: var(--text-subtle); }
 .empty { text-align: center; color: var(--text-subtle); padding: 24px 0; }
+.olink { color: inherit; }
+.olink:hover { text-decoration: underline; }
 </style>

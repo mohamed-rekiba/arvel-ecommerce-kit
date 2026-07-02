@@ -280,6 +280,9 @@ Route.post(
 Route.get(
     "/admin/orders", checkout.admin_orders_index, name="api.admin.orders.index"
 ).middleware(Authenticate).secure("bearer")
+Route.get(
+    "/admin/orders/{id:int}", checkout.admin_order_show, name="api.admin.orders.show"
+).middleware(Authenticate).secure("bearer")
 Route.post(
     "/admin/orders/{id:int}/status",
     checkout.update_status,

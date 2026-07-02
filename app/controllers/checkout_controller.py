@@ -34,6 +34,7 @@ from app.models.product import Product
 from app.models.product_variant import ProductVariant
 from app.schemas import (
     AddressOut,
+    AdminOrderDetailOut,
     CheckoutIn,
     MetricsOut,
     OrderLineOut,
@@ -334,6 +335,92 @@ async def admin_orders_index(request: Request) -> list[OrderOut]:
     return [_order_out(o, await o.items().get()) for o in orders]
 
 
+async def admin_order_show(request: Request) -> AdminOrderDetailOut:
+    """Everything a staff member needs on one order: lines (purchase snapshots), breakdown,
+    address + contact, the customer link (or guest label), payment + webhook-backed states, and
+    the transition history from the activity trail. Requires orders.view."""
+    from arvel.activitylog import Activity
+
+    from app.enums import PaymentStatus as _PS
+    from app.models.payment import Payment
+    from app.schemas import (
+        AdminOrderCustomerOut,
+        AdminOrderDetailOut,
+        AdminOrderEventOut,
+        AdminOrderPaymentOut,
+    )
+
+    user = current_user.get()
+    if user is None or not await user.can(Permission.ORDERS_VIEW.value):
+        abort(403, "You may not view orders.")
+    order = await Order.find_or_fail(int(request.path_param("id")))
+    items = await order.items().get()
+
+    customer = None
+    if order.user_id is not None:
+        owner = await User.find(order.user_id)
+        if owner is not None:
+            customer = AdminOrderCustomerOut(
+                id=owner.id, name=owner.name, email=owner.email
+            )
+
+    payments = await Payment.where("order_id", order.id).order_by("id").get()
+    events = (
+        await Activity.where("subject_type", "Order")
+        .where("subject_id", order.id)
+        .order_by("id")
+        .get()
+    )
+
+    def _iso(value: object) -> str | None:
+        return None if value is None else str(value)
+
+    return AdminOrderDetailOut(
+        id=order.id,
+        status=_status_value(order),
+        contact_email=order.contact_email,
+        address=_address_out(order),
+        subtotal_cents=order.subtotal_cents,
+        shipping_cents=order.shipping_cents,
+        tax_cents=order.tax_cents,
+        total_cents=order.total_cents,
+        currency=_currency_value(order),
+        customer=customer,
+        items=[
+            OrderLineOut(
+                product_variant_id=i.product_variant_id,
+                product_name=i.product_name,
+                variant_name=i.variant_name,
+                quantity=i.quantity,
+                unit_price_cents=i.unit_price_cents,
+            )
+            for i in items
+        ],
+        payments=[
+            AdminOrderPaymentOut(
+                id=p.id,
+                charge_id=p.gateway_charge_id,
+                amount_cents=p.amount_cents,
+                status=p.status if isinstance(p.status, _PS) else _PS(p.status),
+                created_at=_iso(p.created_at),
+            )
+            for p in payments
+        ],
+        history=[
+            AdminOrderEventOut(
+                description=e.description,
+                causer_id=e.causer_id,
+                properties={
+                    str(k): str(v)
+                    for k, v in dict(e.properties or {}).items()  # type: ignore[arg-type]
+                },
+                created_at=_iso(e.created_at),
+            )
+            for e in events
+        ],
+    )
+
+
 async def update_status(request: Request, data: OrderStatusIn) -> OrderOut:
     """Transition an order, enforcing the state machine. Requires orders.update (guests already 401'd)."""
     user = current_user.get()
@@ -357,6 +444,15 @@ async def update_status(request: Request, data: OrderStatusIn) -> OrderOut:
         )
     order.status = target
     await order.save()
+    from arvel.activitylog import activity
+
+    await (
+        activity()
+        .caused_by(user)
+        .performed_on(order)
+        .with_properties({"from": current.value, "to": target.value})
+        .log("order status changed")
+    )
     # Notify the customer when their order ships — QUEUED (database + mail channels), so the
     # committed transition never waits on (or 500s from) SMTP.
     if target is OrderStatus.SHIPPED and order.user_id is not None:

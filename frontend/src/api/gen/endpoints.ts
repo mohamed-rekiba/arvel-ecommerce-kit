@@ -11,6 +11,7 @@ import type {
   AdminCategoryOut,
   AdminCategoryPage,
   AdminMeOut,
+  AdminOrderDetailOut,
   AdminProductDetailOut,
   AdminProductOut,
   AdminProductPage,
@@ -22,6 +23,7 @@ import type {
   ApiAdminCategoriesIndexParams,
   ApiAdminCategoriesStore400,
   ApiAdminCategoriesUpdate400,
+  ApiAdminOrdersShow400,
   ApiAdminOrdersStatus400,
   ApiAdminProductsDestroy400,
   ApiAdminProductsImage400,
@@ -2709,6 +2711,52 @@ export const getApiAdminOrdersIndexUrl = () => {
 export const apiAdminOrdersIndex = async ( options?: RequestInit): Promise<apiAdminOrdersIndexResponse> => {
 
   return apiFetch<apiAdminOrdersIndexResponse>(getApiAdminOrdersIndexUrl(),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+export type apiAdminOrdersShowResponse200 = {
+  data: AdminOrderDetailOut
+  status: 200
+}
+
+export type apiAdminOrdersShowResponse400 = {
+  data: ApiAdminOrdersShow400
+  status: 400
+}
+
+export type apiAdminOrdersShowResponseSuccess = (apiAdminOrdersShowResponse200) & {
+  headers: Headers;
+};
+export type apiAdminOrdersShowResponseError = (apiAdminOrdersShowResponse400) & {
+  headers: Headers;
+};
+
+export type apiAdminOrdersShowResponse = (apiAdminOrdersShowResponseSuccess | apiAdminOrdersShowResponseError)
+
+export const getApiAdminOrdersShowUrl = (id: number,) => {
+
+
+
+
+  return `/api/admin/orders/${id}`
+}
+
+/**
+ * Everything a staff member needs on one order: lines (purchase snapshots), breakdown,
+ * address + contact, the customer link (or guest label), payment + webhook-backed states, and
+ * the transition history from the activity trail. Requires orders.view.
+ * @summary ApiAdminOrdersShow
+ */
+export const apiAdminOrdersShow = async (id: number, options?: RequestInit): Promise<apiAdminOrdersShowResponse> => {
+
+  return apiFetch<apiAdminOrdersShowResponse>(getApiAdminOrdersShowUrl(id),
   {
     ...options,
     method: 'GET'
