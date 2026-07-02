@@ -67,6 +67,8 @@ export interface Cart {
 
 export interface OrderLine {
   product_variant_id: number;
+  product_name: string;
+  variant_name: string;
   quantity: number;
   unit_price_cents: number;
 }
@@ -140,6 +142,27 @@ const cartToken = {
   get: () => localStorage.getItem(CART_TOKEN_KEY),
   set: (t: string | null | undefined) => {
     if (t) localStorage.setItem(CART_TOKEN_KEY, t);
+  },
+};
+
+// Guest order receipts: order id → access token, kept so a guest can revisit/pay/cancel their
+// own orders (the server issues the token once, at checkout).
+const ORDER_TOKENS_KEY = "arvel_order_tokens";
+export const orderTokens = {
+  all(): Record<string, string> {
+    try {
+      return JSON.parse(localStorage.getItem(ORDER_TOKENS_KEY) ?? "{}") as Record<string, string>;
+    } catch {
+      return {};
+    }
+  },
+  get(id: number): string | undefined {
+    return orderTokens.all()[String(id)];
+  },
+  set(id: number, token: string) {
+    const all = orderTokens.all();
+    all[String(id)] = token;
+    localStorage.setItem(ORDER_TOKENS_KEY, JSON.stringify(all));
   },
 };
 
@@ -234,9 +257,13 @@ export const api = {
   async pay(id: number, orderToken?: string) {
     return request<Payment>("POST", `/orders/${id}/pay`, undefined, orderToken ? { "X-Order-Token": orderToken } : undefined);
   },
+  async cancelOrder(id: number, orderToken?: string) {
+    return request<Order>("POST", `/orders/${id}/cancel`, undefined, orderToken ? { "X-Order-Token": orderToken } : undefined);
+  },
   async checkout(payload: CheckoutPayload) {
     const order = await request<Order>("POST", `/checkout`, payload);
     localStorage.removeItem(CART_TOKEN_KEY); // the cart was consumed
+    orderTokens.set(order.id, order.token); // the receipt — lets a guest revisit/pay/cancel
     return order;
   },
   async register(name: string, email: string, password: string) {

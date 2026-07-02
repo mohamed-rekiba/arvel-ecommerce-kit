@@ -23,6 +23,7 @@ from app.models.order import Order
 from app.models.order_item import OrderItem
 from app.models.user import User
 from app.notifications.order_shipped_notification import OrderShippedNotification
+from app.models.product import Product
 from app.models.product_variant import ProductVariant
 from app.schemas import (
     AddressOut,
@@ -97,6 +98,8 @@ def _order_out(
         items=[
             OrderLineOut(
                 product_variant_id=i.product_variant_id,
+                product_name=i.product_name,
+                variant_name=i.variant_name,
                 quantity=i.quantity,
                 unit_price_cents=i.unit_price_cents,
             )
@@ -207,10 +210,19 @@ async def checkout(request: Request, data: CheckoutIn) -> OrderOut:
             )
             order_items: list[OrderItem] = []
             for item in items:
+                # purchase-time snapshot of what was bought, as the customer saw it
+                variant = await ProductVariant.find_or_fail(item.product_variant_id)
+                product = (
+                    await Product.in_locale().where("id", variant.product_id).first()
+                )
+                if product is None:  # a variant always belongs to a product
+                    abort(404, "Product not found")
                 order_items.append(
                     await OrderItem.create(
                         order_id=order.id,
                         product_variant_id=item.product_variant_id,
+                        product_name=product.translation.name,
+                        variant_name=variant.name,
                         quantity=item.quantity,
                         unit_price_cents=item.unit_price_cents,
                     )
@@ -238,6 +250,44 @@ async def show(request: Request) -> OrderOut:
         order,
         await order.items().get(),
         payment_status=await _latest_payment_status(order),
+    )
+
+
+async def cancel(request: Request) -> OrderOut:
+    """Cancel the order (owner or token holder) while the state machine allows it — restoring the
+    decremented stock atomically. Cancelling a PAID order records the cancellation; refunding the
+    money is out of scope (documented limitation)."""
+    order = await resolve_owned_order(request, int(request.path_param("id")))
+    async with DB.transaction():
+        # re-read under FOR UPDATE: two concurrent cancels serialize here, so exactly one
+        # transitions and restocks — the loser sees CANCELLED and 422s
+        locked = await Order.where("id", order.id).lock_for_update().first()
+        if locked is None:
+            abort(404, "Order not found")
+        current = (
+            locked.status
+            if isinstance(locked.status, OrderStatus)
+            else OrderStatus(locked.status)
+        )
+        if not can_transition(current, OrderStatus.CANCELLED):
+            raise ValidationException(
+                {"order": [f"A {current.value} order can no longer be cancelled."]},
+                status=422,
+            )
+        items = await locked.items().get()
+        for item in items:
+            variant = (
+                await ProductVariant.where("id", item.product_variant_id)
+                .lock_for_update()
+                .first()
+            )
+            if variant is not None:
+                variant.stock = variant.stock + item.quantity
+                await variant.save()
+        locked.status = OrderStatus.CANCELLED
+        await locked.save()
+    return _order_out(
+        locked, items, payment_status=await _latest_payment_status(locked)
     )
 
 

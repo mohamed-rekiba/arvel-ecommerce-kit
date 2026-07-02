@@ -9,12 +9,16 @@ class OrderItem(Model):
     __table_name__ = "order_items"
     __fields__: ClassVar[dict[str, type]] = {
         "order_id": int,
+        "product_name": str,
+        "variant_name": str,
         "product_variant_id": int,
         "quantity": int,
         "unit_price_cents": int,
     }
     __fillable__: ClassVar[list[str]] = [
         "order_id",
+        "product_name",
+        "variant_name",
         "product_variant_id",
         "quantity",
         "unit_price_cents",

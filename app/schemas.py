@@ -244,6 +244,8 @@ class UpdateProductIn(Schema):
 
 class OrderLineOut(Schema):
     product_variant_id: int
+    product_name: str
+    variant_name: str
     quantity: int
     unit_price_cents: int
 

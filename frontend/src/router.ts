@@ -6,6 +6,7 @@ import CatalogView from "./shop/views/CatalogView.vue";
 import ProductDetailView from "./shop/views/ProductDetailView.vue";
 import CartView from "./shop/views/CartView.vue";
 import CheckoutView from "./shop/views/CheckoutView.vue";
+import OrderDetailView from "./shop/views/OrderDetailView.vue";
 import AccountView from "./shop/views/AccountView.vue";
 
 // The admin section is lazy-loaded — a separate chunk (with its Keycloak/OIDC client) that a storefront
@@ -36,6 +37,7 @@ const router = createRouter({
         { path: "products/:slug", name: "product", component: ProductDetailView },
         { path: "cart", name: "cart", component: CartView },
         { path: "checkout", name: "checkout", component: CheckoutView },
+        { path: "orders/:id", name: "order", component: OrderDetailView },
         { path: "account", name: "account", component: AccountView },
       ],
     },

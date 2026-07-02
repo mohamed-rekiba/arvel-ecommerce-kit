@@ -162,6 +162,9 @@ Route.get("/orders", checkout.my_orders, name="api.orders.index").middleware(
 # One order: the signed-in owner (bearer) OR the holder of the order's access token
 # (X-Order-Token, issued at checkout) — controller-level ownership, so guests can use it.
 Route.get("/orders/{id:int}", checkout.show, name="api.orders.show")
+Route.post("/orders/{id:int}/cancel", checkout.cancel, name="api.orders.cancel").status(
+    200
+)  # a transition, not a creation
 # --- Customer notifications (database channel of the notification system) ------
 Route.get(
     "/notifications", notifications.index, name="api.notifications.index"
