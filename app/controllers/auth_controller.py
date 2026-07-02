@@ -4,12 +4,18 @@ validation, and the signed password-reset tokens. Typed end to end.
 """
 
 from arvel import abort
-from arvel.auth.flows import password_reset_token, verify_password_reset_token
+from arvel.auth.flows import (
+    email_verification_token,
+    password_reset_token,
+    verify_password_reset_token,
+)
 from arvel.auth.tokens import TokenGuard, create_token
 from arvel.http import Request
-from arvel.support.facades import Config
+from arvel.support.facades import Config, Mail
 from arvel.validation import ValidationException, Validator
 
+from app.mail.password_reset import PasswordReset
+from app.mail.verify_email import VerifyEmail
 from app.models.user import User
 from app.schemas import (
     ForgotPasswordIn,
@@ -40,6 +46,8 @@ async def register(request: Request, data: RegisterIn) -> TokenOut:
     if await User.where("email", data.email).first() is not None:
         raise ValidationException({"email": ["This email is already registered."]})
     user = await User.create(name=data.name, email=data.email, password=data.password)
+    verification = email_verification_token(user.id, str(Config.get("app.key", "")))
+    await Mail.to(user.email).send(VerifyEmail(user.id, verification))
     token, _ = await create_token(user, name="customer", abilities=[CUSTOMER_ABILITY])
     return TokenOut(token=token)
 
@@ -58,17 +66,12 @@ async def forgot_password(
 ) -> ForgotPasswordOut:
     """Issue a signed password-reset token. Always 200 (non-enumerating); a real app emails it."""
     user = await User.where("email", data.email).first()
-    if user is None:
-        return ForgotPasswordOut(
-            message="If that email exists, a reset link has been sent."
-        )
-    secret = Config.get("app.key", "")
-    token = password_reset_token(user.id, secret)
-    # A real app emails this. Returning it in the response is a dev-only convenience — exposing it in
-    # production would be a trivial account-takeover, so it's gated behind app.debug.
+    if user is not None:
+        token = password_reset_token(user.id, str(Config.get("app.key", "")))
+        await Mail.to(user.email).send(PasswordReset(user.email, token))
+    # identical response either way — the endpoint never reveals whether the email exists
     return ForgotPasswordOut(
-        message="If that email exists, a reset link has been sent.",
-        reset_token=token if Config.get("app.debug", False) else None,
+        message="If that email exists, a reset link has been sent."
     )
 
 

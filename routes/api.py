@@ -12,6 +12,7 @@ from arvel.auth.tokens import TokenGuard, create_token
 from arvel.http import Request
 from arvel.security import Hasher
 
+from app.controllers import account_controller as account
 from app.controllers import admin_controller as admin
 from app.controllers import admin_product_controller as admin_products
 from app.controllers import admin_rbac_controller as rbac
@@ -53,7 +54,13 @@ async def me(request: Request) -> UserOut:
     user = await User.find(user_id)
     if user is None:
         abort(401, "Unauthenticated")
-    return UserOut(id=user.id, name=user.name, email=user.email)
+    return UserOut(
+        id=user.id,
+        name=user.name,
+        email=user.email,
+        phone=user.phone,
+        email_verified=user.email_verified_at is not None,
+    )
 
 
 Route.get("/health", health, name="api.health")
@@ -73,6 +80,21 @@ Route.post("/forgot-password", auth.forgot_password, name="api.password.forgot")
 Route.post("/reset-password", auth.reset_password, name="api.password.reset").status(
     200
 )
+
+# --- Account self-service (profile, password, email verification) --------------
+Route.patch("/user", account.update_profile, name="api.user.update").middleware(
+    Authenticate
+).secure("bearer")
+Route.put("/user/password", account.change_password, name="api.user.password").status(
+    200
+).middleware(Authenticate).secure("bearer")
+Route.post(
+    "/email/verification-notification",
+    account.send_verification,
+    name="api.email.verification.send",
+).status(200).middleware(Authenticate).secure("bearer")
+# the link target is public — the signed token IS the credential
+Route.post("/email/verify", account.verify_email, name="api.email.verify").status(200)
 
 # --- Catalog (public read API) ------------------------------------------------
 Route.get("/categories", catalog.categories_index, name="api.categories.index")

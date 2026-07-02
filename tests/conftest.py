@@ -13,6 +13,9 @@ os.environ.setdefault("SEARCH_DRIVER", "array")
 os.environ.setdefault("FILESYSTEM_DISK", "local")
 os.environ.setdefault("PAYMENT_GATEWAY_URL", "https://payments.example.test")
 os.environ.setdefault("APP_URL", "http://testserver.local")
+os.environ.setdefault(
+    "APP_KEY", "YXJ2ZWwta2l0LXRlc3Qta2V5LTAxMjM0NTY3ODlhYmM="
+)  # a fixed Fernet key for signing/crypto in tests
 
 import pytest
 

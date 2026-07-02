@@ -126,6 +126,8 @@ export interface Customer {
   id: number;
   name: string;
   email: string;
+  phone: string | null;
+  email_verified: boolean;
 }
 
 export interface Notification {
@@ -275,6 +277,24 @@ export const api = {
     const res = await request<{ token: string }>("POST", `/login`, { email, password });
     authToken.set(res.token);
     return res.token;
+  },
+  forgotPassword(email: string) {
+    return request<{ message: string }>("POST", `/forgot-password`, { email });
+  },
+  resetPassword(token: string, password: string) {
+    return request<{ message: string }>("POST", `/reset-password`, { token, password });
+  },
+  verifyEmail(token: string) {
+    return request<{ message: string }>("POST", `/email/verify`, { token });
+  },
+  resendVerification() {
+    return request<{ message: string }>("POST", `/email/verification-notification`);
+  },
+  updateProfile(payload: { name?: string; email?: string; phone?: string }) {
+    return request<Customer>("PATCH", `/user`, payload);
+  },
+  changePassword(current_password: string, password: string) {
+    return request<{ message: string }>("PUT", `/user/password`, { current_password, password });
   },
   me() {
     return get<Customer>(`/user`);

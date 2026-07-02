@@ -13,6 +13,8 @@ class CreateUsersTable(Migration):
                 "email_verified_at"
             ).nullable()  # set when the user verifies their email
             t.string("password")
+            # PII stored via arvel's `encrypted` cast — ciphertext at rest, so text-sized
+            t.text("phone").nullable()
             t.string("role").default(
                 value="customer"
             ).index()  # customer | admin (UserRole)
