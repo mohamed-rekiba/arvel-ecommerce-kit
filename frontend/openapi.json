@@ -623,7 +623,7 @@
     "/api/categories": {
       "get": {
         "summary": "ApiCategoriesIndex",
-        "description": "List **retrievable** categories \u2014 published, fully-published ancestor chain, and at least one\nviewable product in the subtree (the retrievable_categories materialized view).",
+        "description": "List **retrievable** categories \u2014 published, fully-published ancestor chain, and at least one\nviewable product in the subtree (the retrievable_categories materialized view). Each carries a\nderived ``image_url`` (a subtree product's thumb) for the storefront's category tiles.",
         "operationId": "api.categories.index",
         "responses": {
           "200": {
@@ -692,6 +692,60 @@
             "schema": {
               "type": "string",
               "default": "featured"
+            },
+            "required": false,
+            "deprecated": false,
+            "allowEmptyValue": false,
+            "allowReserved": false
+          },
+          {
+            "name": "featured",
+            "in": "query",
+            "schema": {
+              "oneOf": [
+                {
+                  "type": "boolean"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "required": false,
+            "deprecated": false,
+            "allowEmptyValue": false,
+            "allowReserved": false
+          },
+          {
+            "name": "min_price",
+            "in": "query",
+            "schema": {
+              "oneOf": [
+                {
+                  "type": "integer"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "required": false,
+            "deprecated": false,
+            "allowEmptyValue": false,
+            "allowReserved": false
+          },
+          {
+            "name": "max_price",
+            "in": "query",
+            "schema": {
+              "oneOf": [
+                {
+                  "type": "integer"
+                },
+                {
+                  "type": "null"
+                }
+              ]
             },
             "required": false,
             "deprecated": false,
@@ -3890,6 +3944,663 @@
         "deprecated": false
       }
     },
+    "/api/deals": {
+      "get": {
+        "summary": "ApiDealsIndex",
+        "operationId": "api.deals.index",
+        "responses": {
+          "200": {
+            "description": "Request fulfilled, document follows",
+            "headers": {},
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/DealOut"
+                  },
+                  "type": "array"
+                }
+              }
+            }
+          }
+        },
+        "deprecated": false
+      }
+    },
+    "/api/announcement": {
+      "get": {
+        "summary": "ApiAnnouncement",
+        "operationId": "api.announcement",
+        "responses": {
+          "200": {
+            "description": "Request fulfilled, document follows",
+            "headers": {},
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AnnouncementOut"
+                }
+              }
+            }
+          }
+        },
+        "deprecated": false
+      }
+    },
+    "/api/banners": {
+      "get": {
+        "summary": "ApiBannersIndex",
+        "operationId": "api.banners.index",
+        "responses": {
+          "200": {
+            "description": "Request fulfilled, document follows",
+            "headers": {},
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/BannerOut"
+                  },
+                  "type": "array"
+                }
+              }
+            }
+          }
+        },
+        "deprecated": false
+      }
+    },
+    "/api/admin/banners": {
+      "get": {
+        "summary": "ApiAdminBannersIndex",
+        "operationId": "api.admin.banners.index",
+        "responses": {
+          "200": {
+            "description": "Request fulfilled, document follows",
+            "headers": {},
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/AdminBannerOut"
+                  },
+                  "type": "array"
+                }
+              }
+            }
+          }
+        },
+        "deprecated": false,
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ]
+      },
+      "post": {
+        "summary": "ApiAdminBannersStore",
+        "operationId": "api.admin.banners.store",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/BannerIn"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "description": "Document created, URL follows",
+            "headers": {},
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AdminBannerOut"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request syntax or unsupported method",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "status_code": {
+                      "type": "integer"
+                    },
+                    "detail": {
+                      "type": "string"
+                    },
+                    "extra": {
+                      "additionalProperties": {},
+                      "type": [
+                        "null",
+                        "object",
+                        "array"
+                      ]
+                    }
+                  },
+                  "type": "object",
+                  "required": [
+                    "detail",
+                    "status_code"
+                  ],
+                  "description": "Validation Exception",
+                  "examples": [
+                    {
+                      "status_code": 400,
+                      "detail": "Bad Request",
+                      "extra": {}
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        },
+        "deprecated": false,
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ]
+      }
+    },
+    "/api/admin/banners/{id}": {
+      "delete": {
+        "summary": "ApiAdminBannersDestroy",
+        "operationId": "api.admin.banners.destroy",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "schema": {
+              "type": "integer"
+            },
+            "required": true,
+            "deprecated": false
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Request fulfilled, document follows",
+            "headers": {},
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": {
+                    "type": "string"
+                  },
+                  "type": "object"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request syntax or unsupported method",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "status_code": {
+                      "type": "integer"
+                    },
+                    "detail": {
+                      "type": "string"
+                    },
+                    "extra": {
+                      "additionalProperties": {},
+                      "type": [
+                        "null",
+                        "object",
+                        "array"
+                      ]
+                    }
+                  },
+                  "type": "object",
+                  "required": [
+                    "detail",
+                    "status_code"
+                  ],
+                  "description": "Validation Exception",
+                  "examples": [
+                    {
+                      "status_code": 400,
+                      "detail": "Bad Request",
+                      "extra": {}
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        },
+        "deprecated": false,
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ]
+      },
+      "patch": {
+        "summary": "ApiAdminBannersUpdate",
+        "operationId": "api.admin.banners.update",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "schema": {
+              "type": "integer"
+            },
+            "required": true,
+            "deprecated": false
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/BannerUpdateIn"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Request fulfilled, document follows",
+            "headers": {},
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AdminBannerOut"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request syntax or unsupported method",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "status_code": {
+                      "type": "integer"
+                    },
+                    "detail": {
+                      "type": "string"
+                    },
+                    "extra": {
+                      "additionalProperties": {},
+                      "type": [
+                        "null",
+                        "object",
+                        "array"
+                      ]
+                    }
+                  },
+                  "type": "object",
+                  "required": [
+                    "detail",
+                    "status_code"
+                  ],
+                  "description": "Validation Exception",
+                  "examples": [
+                    {
+                      "status_code": 400,
+                      "detail": "Bad Request",
+                      "extra": {}
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        },
+        "deprecated": false,
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ]
+      }
+    },
+    "/api/admin/banners/{id}/image": {
+      "post": {
+        "summary": "ApiAdminBannersImage",
+        "description": "Attach/replace the slide image (the previous one is removed \u2014 a slide has ONE image).",
+        "operationId": "api.admin.banners.image",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "schema": {
+              "type": "integer"
+            },
+            "required": true,
+            "deprecated": false
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "Document created, URL follows",
+            "headers": {},
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AdminBannerOut"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request syntax or unsupported method",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "status_code": {
+                      "type": "integer"
+                    },
+                    "detail": {
+                      "type": "string"
+                    },
+                    "extra": {
+                      "additionalProperties": {},
+                      "type": [
+                        "null",
+                        "object",
+                        "array"
+                      ]
+                    }
+                  },
+                  "type": "object",
+                  "required": [
+                    "detail",
+                    "status_code"
+                  ],
+                  "description": "Validation Exception",
+                  "examples": [
+                    {
+                      "status_code": 400,
+                      "detail": "Bad Request",
+                      "extra": {}
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        },
+        "deprecated": false,
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ]
+      }
+    },
+    "/api/admin/deals": {
+      "get": {
+        "summary": "ApiAdminDealsIndex",
+        "operationId": "api.admin.deals.index",
+        "responses": {
+          "200": {
+            "description": "Request fulfilled, document follows",
+            "headers": {},
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/AdminDealOut"
+                  },
+                  "type": "array"
+                }
+              }
+            }
+          }
+        },
+        "deprecated": false,
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ]
+      },
+      "post": {
+        "summary": "ApiAdminDealsStore",
+        "operationId": "api.admin.deals.store",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/DealIn"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "description": "Document created, URL follows",
+            "headers": {},
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AdminDealOut"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request syntax or unsupported method",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "status_code": {
+                      "type": "integer"
+                    },
+                    "detail": {
+                      "type": "string"
+                    },
+                    "extra": {
+                      "additionalProperties": {},
+                      "type": [
+                        "null",
+                        "object",
+                        "array"
+                      ]
+                    }
+                  },
+                  "type": "object",
+                  "required": [
+                    "detail",
+                    "status_code"
+                  ],
+                  "description": "Validation Exception",
+                  "examples": [
+                    {
+                      "status_code": 400,
+                      "detail": "Bad Request",
+                      "extra": {}
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        },
+        "deprecated": false,
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ]
+      }
+    },
+    "/api/admin/deals/{id}": {
+      "delete": {
+        "summary": "ApiAdminDealsDestroy",
+        "operationId": "api.admin.deals.destroy",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "schema": {
+              "type": "integer"
+            },
+            "required": true,
+            "deprecated": false
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Request fulfilled, document follows",
+            "headers": {},
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": {
+                    "type": "string"
+                  },
+                  "type": "object"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request syntax or unsupported method",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "status_code": {
+                      "type": "integer"
+                    },
+                    "detail": {
+                      "type": "string"
+                    },
+                    "extra": {
+                      "additionalProperties": {},
+                      "type": [
+                        "null",
+                        "object",
+                        "array"
+                      ]
+                    }
+                  },
+                  "type": "object",
+                  "required": [
+                    "detail",
+                    "status_code"
+                  ],
+                  "description": "Validation Exception",
+                  "examples": [
+                    {
+                      "status_code": 400,
+                      "detail": "Bad Request",
+                      "extra": {}
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        },
+        "deprecated": false,
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ]
+      },
+      "patch": {
+        "summary": "ApiAdminDealsUpdate",
+        "operationId": "api.admin.deals.update",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "schema": {
+              "type": "integer"
+            },
+            "required": true,
+            "deprecated": false
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/DealUpdateIn"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Request fulfilled, document follows",
+            "headers": {},
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AdminDealOut"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request syntax or unsupported method",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "status_code": {
+                      "type": "integer"
+                    },
+                    "detail": {
+                      "type": "string"
+                    },
+                    "extra": {
+                      "additionalProperties": {},
+                      "type": [
+                        "null",
+                        "object",
+                        "array"
+                      ]
+                    }
+                  },
+                  "type": "object",
+                  "required": [
+                    "detail",
+                    "status_code"
+                  ],
+                  "description": "Validation Exception",
+                  "examples": [
+                    {
+                      "status_code": 400,
+                      "detail": "Bad Request",
+                      "extra": {}
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        },
+        "deprecated": false,
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ]
+      }
+    },
     "/api/admin/coupons": {
       "get": {
         "summary": "ApiAdminCouponsIndex",
@@ -5090,6 +5801,48 @@
         ],
         "title": "AddressOut"
       },
+      "AdminBannerOut": {
+        "properties": {
+          "id": {
+            "type": "integer"
+          },
+          "translations": {
+            "additionalProperties": {
+              "$ref": "#/components/schemas/BannerTextIn"
+            },
+            "type": "object"
+          },
+          "cta_to": {
+            "type": "string"
+          },
+          "sort": {
+            "type": "integer"
+          },
+          "active": {
+            "type": "boolean"
+          },
+          "image_url": {
+            "oneOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "type": "object",
+        "required": [
+          "active",
+          "cta_to",
+          "id",
+          "image_url",
+          "sort",
+          "translations"
+        ],
+        "title": "AdminBannerOut"
+      },
       "AdminCategoryOut": {
         "properties": {
           "id": {
@@ -5205,6 +5958,9 @@
           "active": {
             "type": "boolean"
           },
+          "announce": {
+            "type": "boolean"
+          },
           "starts_at": {
             "oneOf": [
               {
@@ -5229,6 +5985,7 @@
         "type": "object",
         "required": [
           "active",
+          "announce",
           "code",
           "ends_at",
           "id",
@@ -5241,6 +5998,60 @@
           "value"
         ],
         "title": "AdminCouponOut"
+      },
+      "AdminDealOut": {
+        "properties": {
+          "id": {
+            "type": "integer"
+          },
+          "product_id": {
+            "type": "integer"
+          },
+          "product_name": {
+            "type": "string"
+          },
+          "percent_off": {
+            "type": "integer"
+          },
+          "starts_at": {
+            "oneOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "ends_at": {
+            "oneOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "active": {
+            "type": "boolean"
+          },
+          "live": {
+            "type": "boolean"
+          }
+        },
+        "type": "object",
+        "required": [
+          "active",
+          "ends_at",
+          "id",
+          "live",
+          "percent_off",
+          "product_id",
+          "product_name",
+          "starts_at"
+        ],
+        "title": "AdminDealOut"
       },
       "AdminMeOut": {
         "properties": {
@@ -5473,6 +6284,9 @@
           "published": {
             "type": "boolean"
           },
+          "featured": {
+            "type": "boolean"
+          },
           "is_visible": {
             "type": "boolean"
           },
@@ -5498,6 +6312,7 @@
         "type": "object",
         "required": [
           "category_id",
+          "featured",
           "gallery",
           "id",
           "is_visible",
@@ -5530,12 +6345,16 @@
           "published": {
             "type": "boolean"
           },
+          "featured": {
+            "type": "boolean"
+          },
           "is_visible": {
             "type": "boolean"
           }
         },
         "type": "object",
         "required": [
+          "featured",
           "id",
           "is_visible",
           "published",
@@ -5744,6 +6563,26 @@
         ],
         "title": "AdminVendorOut"
       },
+      "AnnouncementOut": {
+        "properties": {
+          "code": {
+            "type": "string"
+          },
+          "type": {
+            "$ref": "#/components/schemas/CouponType"
+          },
+          "value": {
+            "type": "integer"
+          }
+        },
+        "type": "object",
+        "required": [
+          "code",
+          "type",
+          "value"
+        ],
+        "title": "AnnouncementOut"
+      },
       "ApplyCouponIn": {
         "properties": {
           "code": {
@@ -5767,6 +6606,200 @@
           "role"
         ],
         "title": "AssignRoleIn"
+      },
+      "BannerIn": {
+        "properties": {
+          "translations": {
+            "additionalProperties": {
+              "$ref": "#/components/schemas/BannerTextIn"
+            },
+            "type": "object"
+          },
+          "cta_to": {
+            "type": "string",
+            "default": "/catalog"
+          },
+          "sort": {
+            "type": "integer",
+            "default": 0
+          },
+          "active": {
+            "type": "boolean",
+            "default": true
+          }
+        },
+        "type": "object",
+        "required": [
+          "translations"
+        ],
+        "title": "BannerIn"
+      },
+      "BannerOut": {
+        "properties": {
+          "id": {
+            "type": "integer"
+          },
+          "title": {
+            "type": "string"
+          },
+          "subtitle": {
+            "oneOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "chip": {
+            "oneOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "cta_label": {
+            "oneOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "cta_to": {
+            "type": "string"
+          },
+          "image_url": {
+            "oneOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "mobile_image_url": {
+            "oneOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "type": "object",
+        "required": [
+          "chip",
+          "cta_label",
+          "cta_to",
+          "id",
+          "image_url",
+          "mobile_image_url",
+          "subtitle",
+          "title"
+        ],
+        "title": "BannerOut"
+      },
+      "BannerTextIn": {
+        "properties": {
+          "title": {
+            "type": "string"
+          },
+          "subtitle": {
+            "oneOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "chip": {
+            "oneOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "cta_label": {
+            "oneOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "type": "object",
+        "required": [
+          "title"
+        ],
+        "title": "BannerTextIn"
+      },
+      "BannerUpdateIn": {
+        "properties": {
+          "translations": {
+            "oneOf": [
+              {
+                "additionalProperties": {
+                  "$ref": "#/components/schemas/BannerTextIn"
+                },
+                "type": "object"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "cta_to": {
+            "oneOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "sort": {
+            "oneOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "active": {
+            "oneOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "type": "object",
+        "required": [],
+        "title": "BannerUpdateIn"
       },
       "CartLineOut": {
         "properties": {
@@ -5890,6 +6923,16 @@
           },
           "translation": {
             "$ref": "#/components/schemas/Translate"
+          },
+          "image_url": {
+            "oneOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ]
           }
         },
         "type": "object",
@@ -6030,6 +7073,10 @@
                 "type": "null"
               }
             ]
+          },
+          "announce": {
+            "type": "boolean",
+            "default": false
           }
         },
         "type": "object",
@@ -6090,6 +7137,16 @@
                 "type": "null"
               }
             ]
+          },
+          "announce": {
+            "oneOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "null"
+              }
+            ]
           }
         },
         "type": "object",
@@ -6119,6 +7176,117 @@
         ],
         "title": "Currency",
         "description": "Settlement currencies the shop can charge in (the catalog prices in USD today)."
+      },
+      "DealIn": {
+        "properties": {
+          "product_id": {
+            "type": "integer"
+          },
+          "percent_off": {
+            "type": "integer"
+          },
+          "starts_at": {
+            "type": "string"
+          },
+          "ends_at": {
+            "type": "string"
+          },
+          "active": {
+            "type": "boolean",
+            "default": true
+          }
+        },
+        "type": "object",
+        "required": [
+          "ends_at",
+          "percent_off",
+          "product_id",
+          "starts_at"
+        ],
+        "title": "DealIn"
+      },
+      "DealOut": {
+        "properties": {
+          "id": {
+            "type": "integer"
+          },
+          "percent_off": {
+            "type": "integer"
+          },
+          "deal_price_cents": {
+            "type": "integer"
+          },
+          "ends_at": {
+            "type": "string"
+          },
+          "available": {
+            "type": "integer"
+          },
+          "sold": {
+            "type": "integer"
+          },
+          "product": {
+            "$ref": "#/components/schemas/ProductOut"
+          }
+        },
+        "type": "object",
+        "required": [
+          "available",
+          "deal_price_cents",
+          "ends_at",
+          "id",
+          "percent_off",
+          "product",
+          "sold"
+        ],
+        "title": "DealOut"
+      },
+      "DealUpdateIn": {
+        "properties": {
+          "percent_off": {
+            "oneOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "starts_at": {
+            "oneOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "ends_at": {
+            "oneOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "active": {
+            "oneOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "type": "object",
+        "required": [],
+        "title": "DealUpdateIn"
       },
       "DevChargeIn": {
         "properties": {
@@ -6469,6 +7637,30 @@
         ],
         "title": "PermissionOut"
       },
+      "ProductDealOut": {
+        "properties": {
+          "id": {
+            "type": "integer"
+          },
+          "percent_off": {
+            "type": "integer"
+          },
+          "deal_price_cents": {
+            "type": "integer"
+          },
+          "ends_at": {
+            "type": "string"
+          }
+        },
+        "type": "object",
+        "required": [
+          "deal_price_cents",
+          "ends_at",
+          "id",
+          "percent_off"
+        ],
+        "title": "ProductDealOut"
+      },
       "ProductIn": {
         "properties": {
           "category_id": {
@@ -6525,6 +7717,29 @@
           "status": {
             "type": "string"
           },
+          "featured": {
+            "type": "boolean"
+          },
+          "created_at": {
+            "oneOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "deal": {
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/ProductDealOut"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
           "gallery": {
             "items": {
               "$ref": "#/components/schemas/GalleryImageOut"
@@ -6557,7 +7772,10 @@
         },
         "type": "object",
         "required": [
+          "created_at",
           "currency",
+          "deal",
+          "featured",
           "gallery",
           "id",
           "price_cents",
@@ -6990,6 +8208,16 @@
             ]
           },
           "published": {
+            "oneOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "featured": {
             "oneOf": [
               {
                 "type": "boolean"

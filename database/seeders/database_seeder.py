@@ -11,9 +11,14 @@ import asyncio
 
 from arvel.database import Seeder
 
+from app.enums import CouponType
+from app.models.banner import HERO, Banner
 from app.models.category import Category
+from app.models.coupon import Coupon
+from app.models.deal import Deal
 from app.models.product import Product
 from app.models.vendor import Vendor
+from arvel.dates import Date
 from app.services.catalog_visibility_service import CatalogVisibilityService
 from app.services.product_image_service import ProductImageService
 from database.factories.product_variant_factory import ProductVariantFactory
@@ -196,6 +201,15 @@ class DatabaseSeeder(Seeder):
             "Verge Charging Dock": "قاعدة شحن فيرج",
             "Verge Leather Sleeve": "حافظة جلدية من فيرج",
         }
+        featured_names = {
+            "Aurora Phone",
+            "Eclipse Studio Headphones",
+            "Photon 14 Laptop",
+            "Orbit Smartwatch",
+            "Lumen 27 4K Monitor",
+            "Aperture X100 Camera",
+        }
+        products_by_name: dict[str, Product] = {}
         for category, vendor_slug, price, keyword, name in catalog:
             product = await self._product(
                 name,
@@ -206,6 +220,10 @@ class DatabaseSeeder(Seeder):
                 fr=fr_names.get(name),
                 ar=ar_names.get(name),
             )
+            products_by_name[name] = product
+            if name in featured_names:
+                product.featured = True
+                await product.save()
             for _ in range(2):
                 await ProductVariantFactory().create(product_id=product.id)
             photo_id = _UNSPLASH.get(keyword.split(",")[0])
@@ -219,6 +237,83 @@ class DatabaseSeeder(Seeder):
                     ):
                         break
                     await asyncio.sleep(0.4)
+
+        # --- deals of the day (2 live + 1 expired for realism) ---------------
+        now = Date.now()
+        for name, pct, hours in (
+            ("Aurora Phone", 25, 23),
+            ("Photon 14 Laptop", 20, 10),
+        ):
+            target = products_by_name[name]
+            await Deal.create(
+                product_id=target.id,
+                percent_off=pct,
+                starts_at=now.subtract(hours=2),
+                ends_at=now.add(hours=hours),
+                active=True,
+            )
+        await Deal.create(
+            product_id=products_by_name["Drift Earbuds"].id,
+            percent_off=30,
+            starts_at=now.subtract(days=6),
+            ends_at=now.subtract(days=1),
+            active=True,
+        )
+
+        # --- the announced welcome coupon -------------------------------------
+        await Coupon.create(
+            code="WELCOME10",
+            type=CouponType.PERCENT,
+            value=10,
+            uses=0,
+            active=True,
+            announce=True,
+        )
+
+        # --- hero banners (admin-managed carousel) -----------------------------
+        banners = [
+            (
+                {
+                    "en": {"title": "Premium audio, quietly considered", "subtitle": "Studio headphones and speakers chosen for how they feel.", "chip": "New arrival", "cta_label": "Shop now"},
+                    "fr": {"title": "L'audio haut de gamme, pensé en toute discrétion", "subtitle": "Casques studio et enceintes choisis pour leurs sensations.", "chip": "Nouveauté", "cta_label": "Acheter"},
+                    "ar": {"title": "صوتيات فاخرة بتصميم هادئ", "subtitle": "سماعات استوديو ومكبرات صوت اخترناها لإحساسها.", "chip": "وصل حديثًا", "cta_label": "تسوق الآن"},
+                },
+                "/catalog?category=audio",
+                0,
+                "1505740420928-5e560c06d30e",
+            ),
+            (
+                {
+                    "en": {"title": "Deals of the day", "subtitle": "Timed flash sales on the gear you already wanted.", "chip": "Up to 25% off", "cta_label": "Grab the deal"},
+                    "fr": {"title": "Offres du jour", "subtitle": "Ventes flash chronométrées sur le matériel que vous vouliez déjà.", "chip": "Jusqu'à −25 %", "cta_label": "Profiter de l'offre"},
+                    "ar": {"title": "عروض اليوم", "subtitle": "تخفيضات مؤقتة على الأجهزة التي أردتها دائمًا.", "chip": "خصم حتى 25%", "cta_label": "اغتنم العرض"},
+                },
+                "/deals",
+                1,
+                "1511707171634-5f897ff02aa9",
+            ),
+            (
+                {
+                    "en": {"title": "Work sharp, travel light", "subtitle": "Laptops and monitors for people who notice the difference.", "chip": "Computing", "cta_label": "Explore"},
+                    "fr": {"title": "Travaillez net, voyagez léger", "subtitle": "Ordinateurs et écrans pour ceux qui voient la différence.", "chip": "Informatique", "cta_label": "Explorer"},
+                    "ar": {"title": "اعمل بحدة، وسافر بخفة", "subtitle": "حواسيب وشاشات لمن يلاحظ الفرق.", "chip": "حواسيب", "cta_label": "استكشف"},
+                },
+                "/catalog?category=computing",
+                2,
+                "1496181133206-80ce9b88a853",
+            ),
+        ]
+        for translations, cta_to, sort, photo_id in banners:
+            banner = await Banner.create(
+                translations=translations, cta_to=cta_to, sort=sort, active=True
+            )
+            url = f"https://images.unsplash.com/photo-{photo_id}?w=1600&h=700&fit=crop&q=80"
+            for _attempt in range(3):
+                if await images.download_and_attach(
+                    banner, url, file_name=f"banner-{sort}.jpg", collection=HERO
+                ):
+                    break
+                await asyncio.sleep(0.4)
 
         # --- retrievability edge cases (hidden; no galleries needed) ----------
         await self._cat("Gift Cards", "gift-cards")  # empty published category → hidden

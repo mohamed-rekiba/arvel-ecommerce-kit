@@ -8,9 +8,11 @@
 import type {
   ActivityOut,
   AddItemIn,
+  AdminBannerOut,
   AdminCategoryOut,
   AdminCategoryPage,
   AdminCouponOut,
+  AdminDealOut,
   AdminMeOut,
   AdminOrderDetailOut,
   AdminProductDetailOut,
@@ -20,6 +22,12 @@ import type {
   AdminUserDetailOut,
   AdminUserPage,
   AdminVendorOut,
+  AnnouncementOut,
+  ApiAdminBannersDestroy200,
+  ApiAdminBannersDestroy400,
+  ApiAdminBannersImage400,
+  ApiAdminBannersStore400,
+  ApiAdminBannersUpdate400,
   ApiAdminCategoriesDestroy400,
   ApiAdminCategoriesIndex400,
   ApiAdminCategoriesIndexParams,
@@ -27,6 +35,10 @@ import type {
   ApiAdminCategoriesUpdate400,
   ApiAdminCouponsStore400,
   ApiAdminCouponsUpdate400,
+  ApiAdminDealsDestroy200,
+  ApiAdminDealsDestroy400,
+  ApiAdminDealsStore400,
+  ApiAdminDealsUpdate400,
   ApiAdminOrdersShow400,
   ApiAdminOrdersStatus400,
   ApiAdminProductsDestroy400,
@@ -83,6 +95,9 @@ import type {
   ApiWishlistToggle400,
   ApplyCouponIn,
   AssignRoleIn,
+  BannerIn,
+  BannerOut,
+  BannerUpdateIn,
   CartOut,
   CategoryIn,
   CategoryOut,
@@ -92,6 +107,9 @@ import type {
   CouponIn,
   CouponUpdateIn,
   CredentialsIn,
+  DealIn,
+  DealOut,
+  DealUpdateIn,
   DevChargeIn,
   DevChargeOut,
   ForgotPasswordIn,
@@ -651,7 +669,8 @@ export const getApiCategoriesIndexUrl = () => {
 
 /**
  * List **retrievable** categories — published, fully-published ancestor chain, and at least one
- * viewable product in the subtree (the retrievable_categories materialized view).
+ * viewable product in the subtree (the retrievable_categories materialized view). Each carries a
+ * derived ``image_url`` (a subtree product's thumb) for the storefront's category tiles.
  * @summary ApiCategoriesIndex
  */
 export const apiCategoriesIndex = async ( options?: RequestInit): Promise<apiCategoriesIndexResponse> => {
@@ -2687,6 +2706,490 @@ export const apiCartCouponRemove = async ( options?: RequestInit): Promise<apiCa
     method: 'DELETE'
 
 
+  }
+);}
+
+
+
+export type apiDealsIndexResponse200 = {
+  data: DealOut[]
+  status: 200
+}
+
+export type apiDealsIndexResponseSuccess = (apiDealsIndexResponse200) & {
+  headers: Headers;
+};
+;
+
+export type apiDealsIndexResponse = (apiDealsIndexResponseSuccess)
+
+export const getApiDealsIndexUrl = () => {
+
+
+
+
+  return `/api/deals`
+}
+
+/**
+ * @summary ApiDealsIndex
+ */
+export const apiDealsIndex = async ( options?: RequestInit): Promise<apiDealsIndexResponse> => {
+
+  return apiFetch<apiDealsIndexResponse>(getApiDealsIndexUrl(),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+export type apiAnnouncementResponse200 = {
+  data: AnnouncementOut
+  status: 200
+}
+
+export type apiAnnouncementResponseSuccess = (apiAnnouncementResponse200) & {
+  headers: Headers;
+};
+;
+
+export type apiAnnouncementResponse = (apiAnnouncementResponseSuccess)
+
+export const getApiAnnouncementUrl = () => {
+
+
+
+
+  return `/api/announcement`
+}
+
+/**
+ * @summary ApiAnnouncement
+ */
+export const apiAnnouncement = async ( options?: RequestInit): Promise<apiAnnouncementResponse> => {
+
+  return apiFetch<apiAnnouncementResponse>(getApiAnnouncementUrl(),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+export type apiBannersIndexResponse200 = {
+  data: BannerOut[]
+  status: 200
+}
+
+export type apiBannersIndexResponseSuccess = (apiBannersIndexResponse200) & {
+  headers: Headers;
+};
+;
+
+export type apiBannersIndexResponse = (apiBannersIndexResponseSuccess)
+
+export const getApiBannersIndexUrl = () => {
+
+
+
+
+  return `/api/banners`
+}
+
+/**
+ * @summary ApiBannersIndex
+ */
+export const apiBannersIndex = async ( options?: RequestInit): Promise<apiBannersIndexResponse> => {
+
+  return apiFetch<apiBannersIndexResponse>(getApiBannersIndexUrl(),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+export type apiAdminBannersIndexResponse200 = {
+  data: AdminBannerOut[]
+  status: 200
+}
+
+export type apiAdminBannersIndexResponseSuccess = (apiAdminBannersIndexResponse200) & {
+  headers: Headers;
+};
+;
+
+export type apiAdminBannersIndexResponse = (apiAdminBannersIndexResponseSuccess)
+
+export const getApiAdminBannersIndexUrl = () => {
+
+
+
+
+  return `/api/admin/banners`
+}
+
+/**
+ * @summary ApiAdminBannersIndex
+ */
+export const apiAdminBannersIndex = async ( options?: RequestInit): Promise<apiAdminBannersIndexResponse> => {
+
+  return apiFetch<apiAdminBannersIndexResponse>(getApiAdminBannersIndexUrl(),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+export type apiAdminBannersStoreResponse201 = {
+  data: AdminBannerOut
+  status: 201
+}
+
+export type apiAdminBannersStoreResponse400 = {
+  data: ApiAdminBannersStore400
+  status: 400
+}
+
+export type apiAdminBannersStoreResponseSuccess = (apiAdminBannersStoreResponse201) & {
+  headers: Headers;
+};
+export type apiAdminBannersStoreResponseError = (apiAdminBannersStoreResponse400) & {
+  headers: Headers;
+};
+
+export type apiAdminBannersStoreResponse = (apiAdminBannersStoreResponseSuccess | apiAdminBannersStoreResponseError)
+
+export const getApiAdminBannersStoreUrl = () => {
+
+
+
+
+  return `/api/admin/banners`
+}
+
+/**
+ * @summary ApiAdminBannersStore
+ */
+export const apiAdminBannersStore = async (bannerIn: BannerIn, options?: RequestInit): Promise<apiAdminBannersStoreResponse> => {
+
+  return apiFetch<apiAdminBannersStoreResponse>(getApiAdminBannersStoreUrl(),
+  {
+    ...options,
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...options?.headers },
+    body: JSON.stringify(bannerIn)
+  }
+);}
+
+
+
+export type apiAdminBannersDestroyResponse200 = {
+  data: ApiAdminBannersDestroy200
+  status: 200
+}
+
+export type apiAdminBannersDestroyResponse400 = {
+  data: ApiAdminBannersDestroy400
+  status: 400
+}
+
+export type apiAdminBannersDestroyResponseSuccess = (apiAdminBannersDestroyResponse200) & {
+  headers: Headers;
+};
+export type apiAdminBannersDestroyResponseError = (apiAdminBannersDestroyResponse400) & {
+  headers: Headers;
+};
+
+export type apiAdminBannersDestroyResponse = (apiAdminBannersDestroyResponseSuccess | apiAdminBannersDestroyResponseError)
+
+export const getApiAdminBannersDestroyUrl = (id: number,) => {
+
+
+
+
+  return `/api/admin/banners/${id}`
+}
+
+/**
+ * @summary ApiAdminBannersDestroy
+ */
+export const apiAdminBannersDestroy = async (id: number, options?: RequestInit): Promise<apiAdminBannersDestroyResponse> => {
+
+  return apiFetch<apiAdminBannersDestroyResponse>(getApiAdminBannersDestroyUrl(id),
+  {
+    ...options,
+    method: 'DELETE'
+
+
+  }
+);}
+
+
+
+export type apiAdminBannersUpdateResponse200 = {
+  data: AdminBannerOut
+  status: 200
+}
+
+export type apiAdminBannersUpdateResponse400 = {
+  data: ApiAdminBannersUpdate400
+  status: 400
+}
+
+export type apiAdminBannersUpdateResponseSuccess = (apiAdminBannersUpdateResponse200) & {
+  headers: Headers;
+};
+export type apiAdminBannersUpdateResponseError = (apiAdminBannersUpdateResponse400) & {
+  headers: Headers;
+};
+
+export type apiAdminBannersUpdateResponse = (apiAdminBannersUpdateResponseSuccess | apiAdminBannersUpdateResponseError)
+
+export const getApiAdminBannersUpdateUrl = (id: number,) => {
+
+
+
+
+  return `/api/admin/banners/${id}`
+}
+
+/**
+ * @summary ApiAdminBannersUpdate
+ */
+export const apiAdminBannersUpdate = async (id: number,
+    bannerUpdateIn: BannerUpdateIn, options?: RequestInit): Promise<apiAdminBannersUpdateResponse> => {
+
+  return apiFetch<apiAdminBannersUpdateResponse>(getApiAdminBannersUpdateUrl(id),
+  {
+    ...options,
+    method: 'PATCH',
+    headers: { 'Content-Type': 'application/json', ...options?.headers },
+    body: JSON.stringify(bannerUpdateIn)
+  }
+);}
+
+
+
+export type apiAdminBannersImageResponse201 = {
+  data: AdminBannerOut
+  status: 201
+}
+
+export type apiAdminBannersImageResponse400 = {
+  data: ApiAdminBannersImage400
+  status: 400
+}
+
+export type apiAdminBannersImageResponseSuccess = (apiAdminBannersImageResponse201) & {
+  headers: Headers;
+};
+export type apiAdminBannersImageResponseError = (apiAdminBannersImageResponse400) & {
+  headers: Headers;
+};
+
+export type apiAdminBannersImageResponse = (apiAdminBannersImageResponseSuccess | apiAdminBannersImageResponseError)
+
+export const getApiAdminBannersImageUrl = (id: number,) => {
+
+
+
+
+  return `/api/admin/banners/${id}/image`
+}
+
+/**
+ * Attach/replace the slide image (the previous one is removed — a slide has ONE image).
+ * @summary ApiAdminBannersImage
+ */
+export const apiAdminBannersImage = async (id: number, options?: RequestInit): Promise<apiAdminBannersImageResponse> => {
+
+  return apiFetch<apiAdminBannersImageResponse>(getApiAdminBannersImageUrl(id),
+  {
+    ...options,
+    method: 'POST'
+
+
+  }
+);}
+
+
+
+export type apiAdminDealsIndexResponse200 = {
+  data: AdminDealOut[]
+  status: 200
+}
+
+export type apiAdminDealsIndexResponseSuccess = (apiAdminDealsIndexResponse200) & {
+  headers: Headers;
+};
+;
+
+export type apiAdminDealsIndexResponse = (apiAdminDealsIndexResponseSuccess)
+
+export const getApiAdminDealsIndexUrl = () => {
+
+
+
+
+  return `/api/admin/deals`
+}
+
+/**
+ * @summary ApiAdminDealsIndex
+ */
+export const apiAdminDealsIndex = async ( options?: RequestInit): Promise<apiAdminDealsIndexResponse> => {
+
+  return apiFetch<apiAdminDealsIndexResponse>(getApiAdminDealsIndexUrl(),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+export type apiAdminDealsStoreResponse201 = {
+  data: AdminDealOut
+  status: 201
+}
+
+export type apiAdminDealsStoreResponse400 = {
+  data: ApiAdminDealsStore400
+  status: 400
+}
+
+export type apiAdminDealsStoreResponseSuccess = (apiAdminDealsStoreResponse201) & {
+  headers: Headers;
+};
+export type apiAdminDealsStoreResponseError = (apiAdminDealsStoreResponse400) & {
+  headers: Headers;
+};
+
+export type apiAdminDealsStoreResponse = (apiAdminDealsStoreResponseSuccess | apiAdminDealsStoreResponseError)
+
+export const getApiAdminDealsStoreUrl = () => {
+
+
+
+
+  return `/api/admin/deals`
+}
+
+/**
+ * @summary ApiAdminDealsStore
+ */
+export const apiAdminDealsStore = async (dealIn: DealIn, options?: RequestInit): Promise<apiAdminDealsStoreResponse> => {
+
+  return apiFetch<apiAdminDealsStoreResponse>(getApiAdminDealsStoreUrl(),
+  {
+    ...options,
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...options?.headers },
+    body: JSON.stringify(dealIn)
+  }
+);}
+
+
+
+export type apiAdminDealsDestroyResponse200 = {
+  data: ApiAdminDealsDestroy200
+  status: 200
+}
+
+export type apiAdminDealsDestroyResponse400 = {
+  data: ApiAdminDealsDestroy400
+  status: 400
+}
+
+export type apiAdminDealsDestroyResponseSuccess = (apiAdminDealsDestroyResponse200) & {
+  headers: Headers;
+};
+export type apiAdminDealsDestroyResponseError = (apiAdminDealsDestroyResponse400) & {
+  headers: Headers;
+};
+
+export type apiAdminDealsDestroyResponse = (apiAdminDealsDestroyResponseSuccess | apiAdminDealsDestroyResponseError)
+
+export const getApiAdminDealsDestroyUrl = (id: number,) => {
+
+
+
+
+  return `/api/admin/deals/${id}`
+}
+
+/**
+ * @summary ApiAdminDealsDestroy
+ */
+export const apiAdminDealsDestroy = async (id: number, options?: RequestInit): Promise<apiAdminDealsDestroyResponse> => {
+
+  return apiFetch<apiAdminDealsDestroyResponse>(getApiAdminDealsDestroyUrl(id),
+  {
+    ...options,
+    method: 'DELETE'
+
+
+  }
+);}
+
+
+
+export type apiAdminDealsUpdateResponse200 = {
+  data: AdminDealOut
+  status: 200
+}
+
+export type apiAdminDealsUpdateResponse400 = {
+  data: ApiAdminDealsUpdate400
+  status: 400
+}
+
+export type apiAdminDealsUpdateResponseSuccess = (apiAdminDealsUpdateResponse200) & {
+  headers: Headers;
+};
+export type apiAdminDealsUpdateResponseError = (apiAdminDealsUpdateResponse400) & {
+  headers: Headers;
+};
+
+export type apiAdminDealsUpdateResponse = (apiAdminDealsUpdateResponseSuccess | apiAdminDealsUpdateResponseError)
+
+export const getApiAdminDealsUpdateUrl = (id: number,) => {
+
+
+
+
+  return `/api/admin/deals/${id}`
+}
+
+/**
+ * @summary ApiAdminDealsUpdate
+ */
+export const apiAdminDealsUpdate = async (id: number,
+    dealUpdateIn: DealUpdateIn, options?: RequestInit): Promise<apiAdminDealsUpdateResponse> => {
+
+  return apiFetch<apiAdminDealsUpdateResponse>(getApiAdminDealsUpdateUrl(id),
+  {
+    ...options,
+    method: 'PATCH',
+    headers: { 'Content-Type': 'application/json', ...options?.headers },
+    body: JSON.stringify(dealUpdateIn)
   }
 );}
 

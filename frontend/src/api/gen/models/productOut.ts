@@ -7,6 +7,7 @@
  */
 import type { CategoryOut } from './categoryOut';
 import type { GalleryImageOut } from './galleryImageOut';
+import type { ProductDealOut } from './productDealOut';
 import type { Translate } from './translate';
 import type { VariantOut } from './variantOut';
 
@@ -19,6 +20,9 @@ export interface ProductOut {
   price_cents: number;
   currency: string;
   status: string;
+  featured: boolean;
+  created_at: string | null;
+  deal: ProductDealOut | null;
   gallery: GalleryImageOut[];
   category?: CategoryOut | null;
   variants?: VariantOut[] | null;

@@ -12,5 +12,6 @@ export interface UpdateProductIn {
   price_cents?: number | null;
   status?: string | null;
   published?: boolean | null;
+  featured?: boolean | null;
   translations?: UpdateProductInTranslations;
 }

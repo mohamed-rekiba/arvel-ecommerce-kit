@@ -15,6 +15,7 @@ export interface AdminProductDetailOut {
   translations: Translate[];
   status: string;
   published: boolean;
+  featured: boolean;
   is_visible: boolean;
   price_cents: number;
   category_id: number;
