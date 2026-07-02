@@ -122,9 +122,11 @@ def _order_out(
 
 async def _reprice_lines(items: list[Any]) -> None:
     """Re-derive every cart line's unit price at ORDER time (base + variant adjustment, with the
-    deal live right now applied). The cart snapshot is a quote; the order charges today's price —
-    an expired deal is dropped, a deal that started after carting is honored (deal_service owns
-    the math)."""
+    deal live right now applied), immediately BEFORE the order transaction opens. The cart
+    snapshot is a quote; the order charges today's price — an expired deal is dropped, a deal
+    that started after carting is honored (deal_service owns the math). A deal flipping in the
+    microseconds between this re-price and the commit keeps the just-quoted price; totals are
+    always server-computed."""
     from app.services import deal_service
 
     variants = {
