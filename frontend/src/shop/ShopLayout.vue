@@ -12,6 +12,8 @@ const router = useRouter();
 const route = useRoute();
 const scrolled = ref(false);
 
+import { LOCALES, locale, setLocale, t } from "./locale";
+
 const navOpen = ref(false);
 const navTrigger = ref<HTMLButtonElement | null>(null);
 function closeNav() {
@@ -53,14 +55,26 @@ onMounted(() => {
         </button>
         <RouterLink to="/" class="word" aria-label="Arvel home">ARVEL</RouterLink>
         <nav class="nav" aria-label="Primary">
-          <RouterLink :to="{ name: 'catalog' }" :class="{ on: route.name === 'catalog' }">Shop</RouterLink>
-          <RouterLink to="/">Collections</RouterLink>
-          <RouterLink to="/">About</RouterLink>
+          <RouterLink :to="{ name: 'catalog' }" :class="{ on: route.name === 'catalog' }">{{ t("nav.shop") }}</RouterLink>
+          <RouterLink to="/">{{ t("nav.collections") }}</RouterLink>
+          <RouterLink to="/">{{ t("nav.about") }}</RouterLink>
         </nav>
         <div class="tools">
           <RouterLink :to="{ name: 'catalog' }" class="ic" aria-label="Search">
             <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7" /><path d="M21 21l-4-4" /></svg>
           </RouterLink>
+          <div class="lang" role="group" aria-label="Language">
+            <button
+              v-for="code in LOCALES"
+              :key="code"
+              class="lang__opt"
+              :class="{ on: locale.current === code }"
+              :aria-pressed="locale.current === code"
+              @click="locale.current !== code && setLocale(code)"
+            >
+              {{ code.toUpperCase() }}
+            </button>
+          </div>
           <button class="ic" @click="toggleTheme" :aria-label="`Switch to ${theme === 'dark' ? 'light' : 'dark'} theme`">
             <svg v-if="theme === 'dark'" viewBox="0 0 24 24"><circle cx="12" cy="12" r="4.5" /><path d="M12 2v3M12 19v3M2 12h3M19 12h3M5 5l2 2M17 17l2 2M19 5l-2 2M7 17l-2 2" /></svg>
             <svg v-else viewBox="0 0 24 24"><path d="M20 14.5A8 8 0 1 1 9.5 4a6.5 6.5 0 0 0 10.5 10.5z" /></svg>
@@ -159,4 +173,7 @@ onMounted(() => {
   .ft__top { grid-template-columns: 1.4fr 2fr; }
   .ft__cols { grid-template-columns: repeat(3, 1fr); }
 }
+.lang { display: inline-flex; border: 1px solid var(--color-border); border-radius: var(--radius-full, 999px); overflow: hidden; }
+.lang__opt { background: none; border: 0; font: inherit; font-size: var(--text-xs); font-weight: 600; letter-spacing: 0.04em; padding: var(--space-1) var(--space-2); cursor: pointer; color: var(--color-text-muted); }
+.lang__opt.on { background: var(--color-text); color: var(--color-bg); }
 </style>

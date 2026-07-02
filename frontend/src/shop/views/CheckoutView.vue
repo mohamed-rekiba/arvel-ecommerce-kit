@@ -8,6 +8,7 @@ import {
   api,
   formatPrice,
 } from "../api";
+import { t } from "../locale";
 import { useAuth } from "../auth";
 import { useCart } from "../cart";
 
@@ -162,11 +163,11 @@ onMounted(async () => {
     <template v-else>
       <header class="checkout__head">
         <p class="eyebrow">Almost there</p>
-        <h1>Checkout</h1>
+        <h1>{{ t("checkout.title") }}</h1>
       </header>
 
       <div v-if="!state.cart || state.cart.items.length === 0" class="state">
-        <p>Your cart is empty.</p>
+        <p>{{ t("cart.empty") }}</p>
         <RouterLink class="btn btn--primary" to="/">Browse the collection</RouterLink>
       </div>
 
@@ -177,7 +178,7 @@ onMounted(async () => {
             <span>{{ formatPrice(line.line_total_cents) }}</span>
           </li>
         </ul>
-        <div class="total"><span>Subtotal</span><strong>{{ formatPrice(state.cart.total_cents) }}</strong></div>
+        <div class="total"><span>{{ t("checkout.subtotal") }}</span><strong>{{ formatPrice(state.cart.total_cents) }}</strong></div>
         <p class="fineprint">Shipping and tax are calculated when you place the order.</p>
 
         <fieldset class="fields">
@@ -228,7 +229,7 @@ onMounted(async () => {
 
         <p v-if="error" class="error" role="alert">{{ error }}</p>
         <button class="btn btn--primary place" :disabled="placing" type="submit">
-          {{ placing ? "Placing order…" : "Place order" }}
+          {{ placing ? "…" : t("checkout.place") }}
         </button>
         <p class="fineprint">Payment is collected after your order is placed.</p>
       </form>

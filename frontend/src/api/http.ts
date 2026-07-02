@@ -14,10 +14,13 @@ export class ApiError extends Error {
 
 const CART_TOKEN_KEY = "arvel_cart_token";
 const AUTH_TOKEN_KEY = "arvel_auth_token";
+const LOCALE_KEY = "arvel_locale";
 
 export async function apiFetch<T>(url: string, options: RequestInit): Promise<T> {
   const headers = new Headers(options.headers);
   headers.set("Accept", "application/json");
+  const locale = localStorage.getItem(LOCALE_KEY);
+  if (locale && !headers.has("Accept-Language")) headers.set("Accept-Language", locale);
   const cart = localStorage.getItem(CART_TOKEN_KEY);
   if (cart && !headers.has("X-Cart-Token")) headers.set("X-Cart-Token", cart);
   const auth = localStorage.getItem(AUTH_TOKEN_KEY);
