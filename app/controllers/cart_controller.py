@@ -46,6 +46,49 @@ async def resolve_cart(
     return None, None
 
 
+async def merge_guest_cart(request: Request, user: object) -> None:
+    """Fold the request's guest cart (X-Cart-Token) into ``user``'s cart — login/register call
+    this so the classic build-a-cart-then-sign-in flow never strands items. Same variant in both →
+    quantities sum, capped at available stock; distinct variants union; the guest cart is retired.
+    A token that doesn't resolve to a genuine GUEST cart is ignored (nobody grafts a foreign or
+    user-owned cart onto the authenticating account)."""
+    token = request.header("x-cart-token")
+    if not token:
+        return
+    guest = await Cart.where("token", token).first()
+    if guest is None or guest.user_id is not None:
+        return
+    guest_items = await guest.items().get()
+    cart = await Cart.where("user_id", getattr(user, "id")).first()
+    if cart is None and guest_items:
+        cart = await Cart.create(user_id=getattr(user, "id"))
+    for item in guest_items:
+        assert cart is not None  # created above when there are items
+        existing = (
+            await CartItem.where("cart_id", cart.id)
+            .where("product_variant_id", item.product_variant_id)
+            .first()
+        )
+        if existing is None:
+            await CartItem.create(
+                cart_id=cart.id,
+                product_variant_id=item.product_variant_id,
+                quantity=item.quantity,
+                unit_price_cents=item.unit_price_cents,
+            )
+        else:
+            variant = await ProductVariant.find(item.product_variant_id)
+            total = existing.quantity + item.quantity
+            # cap at available stock (checkout re-verifies under lock either way)
+            existing.quantity = max(min(total, variant.stock) if variant else total, 1)
+            await existing.save()
+    await CartItem.where("cart_id", guest.id).delete()
+    await guest.delete()
+    await Cache.forget(_cart_total_key(guest.id))
+    if cart is not None:
+        await Cache.forget(_cart_total_key(cart.id))
+
+
 async def _serialize(cart: Cart, new_token: str | None = None) -> CartOut:
     items = await cart.items().with_("variant").get()
     total = await Cache.remember(

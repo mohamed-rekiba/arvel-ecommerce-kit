@@ -14,6 +14,7 @@ from arvel.http import Request
 from arvel.support.facades import Config, Mail
 from arvel.validation import ValidationException, Validator
 
+from app.controllers.cart_controller import merge_guest_cart
 from app.mail.password_reset import PasswordReset
 from app.mail.verify_email import VerifyEmail
 from app.models.user import User
@@ -46,6 +47,9 @@ async def register(request: Request, data: RegisterIn) -> TokenOut:
     if await User.where("email", data.email).first() is not None:
         raise ValidationException({"email": ["This email is already registered."]})
     user = await User.create(name=data.name, email=data.email, password=data.password)
+    await merge_guest_cart(
+        request, user
+    )  # a guest's cart follows them into the new account
     verification = email_verification_token(user.id, str(Config.get("app.key", "")))
     await Mail.to(user.email).send(VerifyEmail(user.id, verification))
     token, _ = await create_token(user, name="customer", abilities=[CUSTOMER_ABILITY])
