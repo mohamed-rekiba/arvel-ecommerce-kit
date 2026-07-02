@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { t } from "../locale";
 import { onMounted } from "vue";
 import { useRouter } from "vue-router";
 import { formatPrice } from "../api";
@@ -14,13 +15,13 @@ onMounted(refresh);
   <main class="cart">
     <header class="cart__head">
       <p class="eyebrow">Your bag</p>
-      <h1>Cart</h1>
+      <h1>{{ t("cart.title") }}</h1>
     </header>
 
     <div v-if="state.loading" class="state" aria-busy="true">Loading…</div>
 
     <div v-else-if="!state.cart || state.cart.items.length === 0" class="state">
-      <p>Your cart is empty.</p>
+      <p>{{ t("cart.empty") }}</p>
       <RouterLink class="btn btn--primary" to="/">Browse the collection</RouterLink>
     </div>
 
@@ -44,10 +45,10 @@ onMounted(refresh);
 
       <aside class="summary">
         <h2 class="summary__title">Summary</h2>
-        <div class="summary__row"><span>Subtotal</span><span>{{ formatPrice(state.cart.total_cents) }}</span></div>
+        <div class="summary__row"><span>{{ t("checkout.subtotal") }}</span><span>{{ formatPrice(state.cart.total_cents) }}</span></div>
         <div class="summary__row summary__row--muted"><span>Shipping</span><span>Calculated at checkout</span></div>
         <div class="summary__row summary__row--total"><span>Total</span><strong>{{ formatPrice(state.cart.total_cents) }}</strong></div>
-        <button class="btn btn--primary summary__cta" @click="router.push('/checkout')">Checkout</button>
+        <button class="btn btn--primary summary__cta" @click="router.push('/checkout')">{{ t("cart.checkout") }}</button>
         <RouterLink class="summary__cont" to="/">Continue shopping</RouterLink>
       </aside>
     </div>
