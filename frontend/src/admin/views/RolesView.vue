@@ -2,6 +2,7 @@
 import Tag from "primevue/tag";
 import { onMounted, ref } from "vue";
 import { type Role, ApiError, api } from "../api";
+import { t } from "../locale";
 
 const roles = ref<Role[]>([]);
 const status = ref<"loading" | "error" | "ready">("loading");
@@ -16,8 +17,8 @@ async function load() {
     status.value = "error";
     notice.value =
       e instanceof ApiError && e.status === 403
-        ? "You need the roles.manage permission to view roles."
-        : "Failed to load roles.";
+        ? t("roles.no_view")
+        : t("roles.load_error");
   }
 }
 onMounted(load);
@@ -26,27 +27,27 @@ onMounted(load);
 <template>
   <section class="page">
     <header class="head">
-      <p class="eyebrow">System</p>
-      <h1>Roles &amp; Access</h1>
-      <p class="sub">What each back-office role is allowed to do. super-admin bypasses every check.</p>
+      <p class="eyebrow">{{ t("nav.system") }}</p>
+      <h1>{{ t("nav.roles") }}</h1>
+      <p class="sub">{{ t("roles.sub") }}</p>
     </header>
 
     <p v-if="notice" class="notice" role="alert">{{ notice }}</p>
 
-    <div v-if="status === 'loading'" class="muted">Loading…</div>
+    <div v-if="status === 'loading'" class="muted">{{ t("common.loading") }}</div>
     <div v-else-if="status === 'ready'" class="roles">
       <article v-for="role in roles" :key="role.id" class="role">
         <div class="role__head">
           <h2>{{ role.name }}</h2>
           <Tag
-            :value="role.permissions.length ? `${role.permissions.length} perms` : 'bypass'"
+            :value="role.permissions.length ? t('roles.perms', { n: role.permissions.length }) : t('roles.bypass')"
             :severity="role.permissions.length ? 'secondary' : 'success'"
           />
         </div>
         <ul v-if="role.permissions.length" class="perms">
           <li v-for="p in role.permissions" :key="p"><code>{{ p }}</code></li>
         </ul>
-        <p v-else class="bypass">Grants everything — no permission checks apply.</p>
+        <p v-else class="bypass">{{ t("roles.bypass_note") }}</p>
       </article>
     </div>
   </section>

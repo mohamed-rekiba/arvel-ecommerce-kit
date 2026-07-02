@@ -8,6 +8,7 @@ import Select from "primevue/select";
 import Tag from "primevue/tag";
 import { onMounted, ref } from "vue";
 import { ApiError, type AdminUser, type AdminUserDetail, api, formatPrice } from "../api";
+import { t } from "../locale";
 
 const users = ref<AdminUser[]>([]);
 const loading = ref(true);
@@ -27,7 +28,7 @@ async function load() {
     users.value = (await api.adminUsers(q.value)).data;
   } catch (e) {
     notice.value =
-      e instanceof ApiError && e.status === 403 ? "You may not browse users." : "Failed to load.";
+      e instanceof ApiError && e.status === 403 ? t("users.no_browse") : t("common.load_error");
   } finally {
     loading.value = false;
   }
@@ -46,7 +47,7 @@ async function open(user: AdminUser) {
       }
     }
   } catch {
-    notice.value = "Couldn't load that user.";
+    notice.value = t("users.load_one_error");
   }
 }
 
@@ -60,7 +61,7 @@ async function assign() {
     await load();
   } catch (e) {
     roleError.value =
-      e instanceof ApiError && e.status === 403 ? "Your role can't manage roles." : "Assign failed.";
+      e instanceof ApiError && e.status === 403 ? t("users.no_manage") : t("users.assign_error");
   }
 }
 
@@ -73,7 +74,7 @@ async function revoke(role: string) {
     await load();
   } catch (e) {
     roleError.value =
-      e instanceof ApiError && e.status === 403 ? "Your role can't manage roles." : "Revoke failed.";
+      e instanceof ApiError && e.status === 403 ? t("users.no_manage") : t("users.revoke_error");
   }
 }
 
@@ -84,23 +85,23 @@ onMounted(load);
   <section class="page">
     <header class="head">
       <div>
-        <p class="eyebrow">People</p>
-        <h1>Users</h1>
-        <p class="sub">Customers and staff — search, inspect, and manage roles.</p>
+        <p class="eyebrow">{{ t("users.eyebrow") }}</p>
+        <h1>{{ t("nav.users") }}</h1>
+        <p class="sub">{{ t("users.sub") }}</p>
       </div>
     </header>
 
     <p v-if="notice" class="notice" role="alert">{{ notice }}</p>
 
     <form class="search" @submit.prevent="load">
-      <InputText v-model="q" placeholder="Search name or email…" class="grow" />
-      <Button type="submit" label="Search" severity="secondary" outlined />
+      <InputText v-model="q" :placeholder="t('users.search_ph')" class="grow" />
+      <Button type="submit" :label="t('nav.search')" severity="secondary" outlined />
     </form>
 
     <div class="panel">
       <DataTable :value="users" :loading="loading" data-key="id" size="small" striped-rows>
-        <template #empty><p class="empty">No users match.</p></template>
-        <Column header="User">
+        <template #empty><p class="empty">{{ t("users.none") }}</p></template>
+        <Column :header="t('users.user')">
           <template #body="{ data }">
             <button class="ulink" @click="open(data)">
               <span class="pname">{{ data.name }}</span>
@@ -108,14 +109,14 @@ onMounted(load);
             </button>
           </template>
         </Column>
-        <Column header="Verified">
+        <Column :header="t('users.verified')">
           <template #body="{ data }">
-            <Tag :value="data.email_verified ? 'Verified' : 'Unverified'" :severity="data.email_verified ? 'success' : 'secondary'" />
+            <Tag :value="data.email_verified ? t('users.verified') : t('users.unverified')" :severity="data.email_verified ? 'success' : 'secondary'" />
           </template>
         </Column>
-        <Column header="Roles">
+        <Column :header="t('users.roles')">
           <template #body="{ data }">
-            <span v-if="data.roles.length === 0" class="pslug">customer</span>
+            <span v-if="data.roles.length === 0" class="pslug">{{ t("users.customer") }}</span>
             <Tag v-for="r in data.roles" :key="r" :value="r" class="role-tag" />
           </template>
         </Column>
@@ -124,23 +125,23 @@ onMounted(load);
 
     <Dialog v-model:visible="detailOpen" modal :header="detail?.name ?? ''" :style="{ width: '26rem' }">
       <template v-if="detail">
-        <p class="pslug">{{ detail.email }} · {{ detail.email_verified ? "verified" : "unverified" }}</p>
+        <p class="pslug">{{ detail.email }} · {{ detail.email_verified ? t("users.verified_lc") : t("users.unverified_lc") }}</p>
         <p class="stat">
-          {{ detail.orders_count }} order{{ detail.orders_count === 1 ? "" : "s" }} ·
-          {{ formatPrice(detail.total_spent_cents) }} lifetime
+          {{ detail.orders_count }} {{ detail.orders_count === 1 ? t("users.order_one") : t("users.order_many") }} ·
+          {{ t("users.lifetime", { total: formatPrice(detail.total_spent_cents) }) }}
         </p>
 
-        <h3>Roles</h3>
-        <p v-if="detail.roles.length === 0" class="pslug">No back-office roles.</p>
+        <h3>{{ t("users.roles") }}</h3>
+        <p v-if="detail.roles.length === 0" class="pslug">{{ t("users.no_roles") }}</p>
         <ul class="roles">
           <li v-for="r in detail.roles" :key="r">
             <Tag :value="r" />
-            <Button size="small" text severity="danger" label="Revoke" @click="revoke(r)" />
+            <Button size="small" text severity="danger" :label="t('users.revoke')" @click="revoke(r)" />
           </li>
         </ul>
         <div v-if="roleOptions.length" class="assign">
-          <Select v-model="newRole" :options="roleOptions.filter((r) => !detail!.roles.includes(r))" placeholder="Add a role…" />
-          <Button size="small" label="Assign" :disabled="!newRole" @click="assign" />
+          <Select v-model="newRole" :options="roleOptions.filter((r) => !detail!.roles.includes(r))" :placeholder="t('users.add_role')" />
+          <Button size="small" :label="t('users.assign')" :disabled="!newRole" @click="assign" />
         </div>
         <p v-if="roleError" class="notice" role="alert">{{ roleError }}</p>
       </template>
@@ -154,11 +155,11 @@ onMounted(load);
 .search .grow { flex: 1; }
 .panel { background: var(--color-surface); border: 1px solid var(--color-border); border-radius: var(--radius-lg); }
 .notice { color: var(--color-danger); margin: var(--space-3) 0; }
-.ulink { background: none; border: 0; padding: 0; text-align: left; cursor: pointer; font: inherit; color: inherit; display: block; }
+.ulink { background: none; border: 0; padding: 0; text-align: start; cursor: pointer; font: inherit; color: inherit; display: block; }
 .ulink:hover .pname { text-decoration: underline; }
 .pname { font-weight: 600; display: block; }
 .pslug { font-size: var(--text-xs); color: var(--color-text-muted); }
-.role-tag { margin-right: var(--space-1); }
+.role-tag { margin-inline-end: var(--space-1); }
 .stat { margin: var(--space-2) 0 var(--space-4); }
 .roles { list-style: none; margin: 0 0 var(--space-3); padding: 0; }
 .roles li { display: flex; justify-content: space-between; align-items: center; padding: var(--space-1) 0; }

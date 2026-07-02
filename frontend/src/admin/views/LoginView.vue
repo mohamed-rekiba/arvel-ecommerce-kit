@@ -4,6 +4,7 @@ import { useRouter } from "vue-router";
 import { ApiError } from "../api";
 import { useAuth } from "../auth";
 import { startKeycloakLogin } from "../oidc";
+import { t } from "../locale";
 
 const router = useRouter();
 const { login } = useAuth();
@@ -30,7 +31,7 @@ async function submit() {
     await login(email.value, password.value);
     router.push("/admin/dashboard");
   } catch (e) {
-    error.value = e instanceof ApiError && e.status === 401 ? "Invalid credentials." : "Sign-in failed.";
+    error.value = e instanceof ApiError && e.status === 401 ? t("login.invalid") : t("login.failed");
   } finally {
     busy.value = false;
   }
@@ -38,43 +39,43 @@ async function submit() {
 </script>
 
 <template>
-  <div class="login" dir="ltr">
+  <div class="login">
     <div class="login__card">
       <div class="brand">
         <span class="brand__mark" aria-hidden="true" />
         <span class="brand__name">Arvel <span>Console</span></span>
       </div>
-      <h1 class="login__title">Sign in</h1>
-      <p class="login__sub">Back-office access for the Arvel store.</p>
+      <h1 class="login__title">{{ t("login.title") }}</h1>
+      <p class="login__sub">{{ t("login.sub") }}</p>
 
       <button class="btn sso" :disabled="ssoBusy" @click="signInWithSSO">
         <span class="sso__mark" aria-hidden="true" />
-        {{ ssoBusy ? "Redirecting…" : "Continue with SSO" }}
+        {{ ssoBusy ? t("login.redirecting") : t("login.sso") }}
       </button>
-      <div class="divider"><span>or with email</span></div>
+      <div class="divider"><span>{{ t("login.or_email") }}</span></div>
 
       <form class="form" @submit.prevent="submit">
         <label class="field">
-          <span class="field__label">Email</span>
+          <span class="field__label">{{ t("login.email") }}</span>
           <input v-model="email" class="input" type="email" autocomplete="username" required />
         </label>
         <label class="field">
-          <span class="field__label">Password</span>
+          <span class="field__label">{{ t("login.password") }}</span>
           <input v-model="password" class="input" type="password" autocomplete="current-password" required />
         </label>
         <p v-if="error" class="error" role="alert">{{ error }}</p>
         <button class="btn btn--primary submit" :disabled="busy" type="submit">
-          {{ busy ? "Signing in…" : "Sign in" }}
+          {{ busy ? t("login.signing_in") : t("login.title") }}
         </button>
       </form>
 
       <div class="hint">
-        <p class="hint__title">Seeded roles · password <code>secret-admin</code></p>
+        <p class="hint__title">{{ t("login.seeded") }} <code>secret-admin</code></p>
         <ul>
-          <li><code>super-admin@example.com</code> — everything</li>
-          <li><code>catalog@example.com</code> — catalog</li>
-          <li><code>orders@example.com</code> — orders</li>
-          <li><code>support@example.com</code> — read-only + audit</li>
+          <li><code>super-admin@example.com</code> — {{ t("login.role_all") }}</li>
+          <li><code>catalog@example.com</code> — {{ t("login.role_catalog") }}</li>
+          <li><code>orders@example.com</code> — {{ t("login.role_orders") }}</li>
+          <li><code>support@example.com</code> — {{ t("login.role_support") }}</li>
         </ul>
       </div>
     </div>

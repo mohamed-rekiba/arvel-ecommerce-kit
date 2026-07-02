@@ -10,6 +10,7 @@ import ToggleSwitch from "primevue/toggleswitch";
 import { computed, onMounted, reactive, ref } from "vue";
 import { ApiError, api } from "../api";
 import type { AdminCategory } from "../api";
+import { t } from "../locale";
 
 const categories = ref<AdminCategory[]>([]);
 const loading = ref(true);
@@ -21,12 +22,13 @@ const saving = ref(false);
 const form = reactive({
   en_name: "",
   fr_name: "",
+  ar_name: "",
   parent_id: null as number | null,
   published: true,
 });
 
 const parentOptions = computed(() => [
-  { id: null, label: "— none —" },
+  { id: null, label: t("categories.no_parent") },
   ...categories.value
     .filter((c) => c.id !== editingId.value)
     .map((c) => ({ id: c.id as number | null, label: catName(c) })),
@@ -38,8 +40,8 @@ function catName(category: AdminCategory): string {
   );
 }
 
-function frName(category: AdminCategory): string | null {
-  return category.translations.find((t) => t.locale === "fr")?.name ?? null;
+function localeName(category: AdminCategory, locale: string): string | null {
+  return category.translations.find((tr) => tr.locale === locale)?.name ?? null;
 }
 
 async function load() {
@@ -48,7 +50,7 @@ async function load() {
     categories.value = (await api.adminCategories()).data;
   } catch (e) {
     notice.value =
-      e instanceof ApiError && e.status === 403 ? "You lack catalog access." : "Failed to load.";
+      e instanceof ApiError && e.status === 403 ? t("common.no_catalog") : t("common.load_error");
   } finally {
     loading.value = false;
   }
@@ -56,7 +58,7 @@ async function load() {
 
 function openCreate() {
   editingId.value = null;
-  Object.assign(form, { en_name: "", fr_name: "", parent_id: null, published: true });
+  Object.assign(form, { en_name: "", fr_name: "", ar_name: "", parent_id: null, published: true });
   dialogOpen.value = true;
 }
 
@@ -64,7 +66,8 @@ function openEdit(category: AdminCategory) {
   editingId.value = category.id;
   Object.assign(form, {
     en_name: catName(category),
-    fr_name: frName(category) ?? "",
+    fr_name: localeName(category, "fr") ?? "",
+    ar_name: localeName(category, "ar") ?? "",
     parent_id: category.parent_id,
     published: category.published,
   });
@@ -74,6 +77,7 @@ function openEdit(category: AdminCategory) {
 function translationsPayload() {
   const payload: Record<string, { name: string }> = { en: { name: form.en_name } };
   if (form.fr_name.trim()) payload.fr = { name: form.fr_name };
+  if (form.ar_name.trim()) payload.ar = { name: form.ar_name };
   return payload;
 }
 
@@ -99,15 +103,15 @@ async function save() {
   } catch (e) {
     notice.value =
       e instanceof ApiError
-        ? Object.values(e.errors)[0]?.[0] ?? "Save failed."
-        : "Save failed.";
+        ? Object.values(e.errors)[0]?.[0] ?? t("common.save_error")
+        : t("common.save_error");
   } finally {
     saving.value = false;
   }
 }
 
 async function remove(category: AdminCategory) {
-  if (!window.confirm(`Delete category “${catName(category)}”?`)) return;
+  if (!window.confirm(t("categories.delete_confirm", { name: catName(category) }))) return;
   notice.value = null;
   try {
     await api.deleteCategory(category.id);
@@ -115,8 +119,8 @@ async function remove(category: AdminCategory) {
   } catch (e) {
     notice.value =
       e instanceof ApiError
-        ? Object.values(e.errors)[0]?.[0] ?? "Delete failed."
-        : "Delete failed.";
+        ? Object.values(e.errors)[0]?.[0] ?? t("common.delete_error")
+        : t("common.delete_error");
   }
 }
 
@@ -127,57 +131,58 @@ onMounted(load);
   <section class="page">
     <header class="head">
       <div>
-        <p class="eyebrow">Catalog</p>
-        <h1>Categories</h1>
-        <p class="sub">Per-locale names; visibility flows into the retrievable views.</p>
+        <p class="eyebrow">{{ t("nav.catalog") }}</p>
+        <h1>{{ t("nav.categories") }}</h1>
+        <p class="sub">{{ t("categories.sub") }}</p>
       </div>
-      <Button label="New category" icon="pi pi-plus" @click="openCreate" />
+      <Button :label="t('categories.new')" icon="pi pi-plus" @click="openCreate" />
     </header>
 
     <p v-if="notice" class="notice" role="alert">{{ notice }}</p>
 
     <div class="panel">
       <DataTable :value="categories" :loading="loading" data-key="id" size="small" striped-rows>
-        <template #empty><p class="empty">No categories.</p></template>
-        <Column header="Category">
+        <template #empty><p class="empty">{{ t("categories.none") }}</p></template>
+        <Column :header="t('categories.category')">
           <template #body="{ data }">
             <div class="pname">{{ catName(data) }}</div>
-            <div class="pslug">/{{ data.slug }} <span v-if="frName(data)">· fr: {{ frName(data) }}</span></div>
+            <div class="pslug">/{{ data.slug }} <span v-if="localeName(data, 'fr')">· fr: {{ localeName(data, "fr") }}</span> <span v-if="localeName(data, 'ar')">· ar: {{ localeName(data, "ar") }}</span></div>
           </template>
         </Column>
-        <Column header="Parent">
+        <Column :header="t('categories.parent')">
           <template #body="{ data }">
             {{ data.parent_id ? catName(categories.find((c) => c.id === data.parent_id) ?? data) : "—" }}
           </template>
         </Column>
-        <Column header="Published">
+        <Column :header="t('categories.published')">
           <template #body="{ data }">
-            <Tag :value="data.published ? 'Published' : 'Hidden'" :severity="data.published ? 'success' : 'secondary'" />
+            <Tag :value="data.published ? t('categories.published') : t('products.hidden')" :severity="data.published ? 'success' : 'secondary'" />
           </template>
         </Column>
-        <Column header="Storefront">
+        <Column :header="t('products.storefront')">
           <template #body="{ data }">
-            <Tag :value="data.is_visible ? 'Visible' : 'Hidden'" :severity="data.is_visible ? 'success' : 'secondary'" />
+            <Tag :value="data.is_visible ? t('products.visible') : t('products.hidden')" :severity="data.is_visible ? 'success' : 'secondary'" />
           </template>
         </Column>
         <Column header="" style="width: 8rem">
           <template #body="{ data }">
-            <Button icon="pi pi-pencil" text rounded aria-label="Edit" @click="openEdit(data)" />
-            <Button icon="pi pi-trash" text rounded severity="danger" aria-label="Delete" @click="remove(data)" />
+            <Button icon="pi pi-pencil" text rounded :aria-label="t('common.edit')" @click="openEdit(data)" />
+            <Button icon="pi pi-trash" text rounded severity="danger" :aria-label="t('common.delete')" @click="remove(data)" />
           </template>
         </Column>
       </DataTable>
     </div>
 
-    <Dialog v-model:visible="dialogOpen" modal :header="editingId === null ? 'New category' : 'Edit category'" :style="{ width: '26rem' }">
+    <Dialog v-model:visible="dialogOpen" modal :header="editingId === null ? t('categories.new') : t('categories.edit')" :style="{ width: '26rem' }">
       <form class="form" @submit.prevent="save">
-        <label class="field"><span>Name (en)</span><InputText v-model="form.en_name" required /></label>
-        <label class="field"><span>Name (fr)</span><InputText v-model="form.fr_name" /></label>
-        <label class="field"><span>Parent</span>
+        <label class="field"><span>{{ t("categories.name_en") }}</span><InputText v-model="form.en_name" required /></label>
+        <label class="field"><span>{{ t("categories.name_fr") }}</span><InputText v-model="form.fr_name" /></label>
+        <label class="field"><span>{{ t("categories.name_ar") }}</span><InputText v-model="form.ar_name" dir="rtl" /></label>
+        <label class="field"><span>{{ t("categories.parent") }}</span>
           <Select v-model="form.parent_id" :options="parentOptions" optionLabel="label" optionValue="id" />
         </label>
-        <label class="field field--switch"><span>Published</span><ToggleSwitch v-model="form.published" /></label>
-        <Button type="submit" :label="saving ? 'Saving…' : 'Save'" :disabled="saving || !form.en_name" />
+        <label class="field field--switch"><span>{{ t("categories.published") }}</span><ToggleSwitch v-model="form.published" /></label>
+        <Button type="submit" :label="saving ? t('common.saving') : t('common.save')" :disabled="saving || !form.en_name" />
       </form>
     </Dialog>
   </section>

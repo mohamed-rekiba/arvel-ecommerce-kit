@@ -5,6 +5,7 @@ import DataTable from "primevue/datatable";
 import Tag from "primevue/tag";
 import { onMounted, ref } from "vue";
 import { ApiError, type AdminReview, api } from "../api";
+import { type MessageKey, t } from "../locale";
 
 const reviews = ref<AdminReview[]>([]);
 const loading = ref(true);
@@ -18,7 +19,7 @@ async function load() {
     reviews.value = await api.adminReviews(status.value);
   } catch (e) {
     notice.value =
-      e instanceof ApiError && e.status === 403 ? "You may not moderate reviews." : "Failed to load.";
+      e instanceof ApiError && e.status === 403 ? t("reviews.no_moderate") : t("common.load_error");
   } finally {
     loading.value = false;
   }
@@ -30,7 +31,7 @@ async function decide(review: AdminReview, decision: "approve" | "reject") {
     await api.moderateReview(review.id, decision);
     await load();
   } catch {
-    notice.value = "Moderation failed.";
+    notice.value = t("reviews.moderation_error");
   }
 }
 
@@ -46,15 +47,15 @@ onMounted(load);
   <section class="page">
     <header class="head">
       <div>
-        <p class="eyebrow">Content</p>
-        <h1>Reviews</h1>
-        <p class="sub">Customer reviews go live only after approval.</p>
+        <p class="eyebrow">{{ t("reviews.eyebrow") }}</p>
+        <h1>{{ t("nav.reviews") }}</h1>
+        <p class="sub">{{ t("reviews.sub") }}</p>
       </div>
       <div class="filters">
         <Button
           v-for="s in ['pending', 'approved', 'rejected'] as const"
           :key="s"
-          :label="s"
+          :label="t(`review.${s}` as MessageKey)"
           size="small"
           :severity="status === s ? undefined : 'secondary'"
           :outlined="status !== s"
@@ -67,27 +68,27 @@ onMounted(load);
 
     <div class="panel">
       <DataTable :value="reviews" :loading="loading" data-key="id" size="small" striped-rows>
-        <template #empty><p class="empty">Nothing {{ status }}.</p></template>
-        <Column header="Product">
+        <template #empty><p class="empty">{{ t("reviews.none", { status: t(`review.${status}` as MessageKey) }) }}</p></template>
+        <Column :header="t('products.product')">
           <template #body="{ data }"><span class="pslug">/{{ data.product_slug }}</span></template>
         </Column>
-        <Column header="Review">
+        <Column :header="t('reviews.review')">
           <template #body="{ data }">
             <div class="pname">{{ "★".repeat(data.rating) }} {{ data.title ?? "" }}</div>
             <div class="body">{{ data.body }}</div>
-            <div class="pslug">by {{ data.author }}</div>
+            <div class="pslug">{{ t("reviews.by", { author: data.author }) }}</div>
           </template>
         </Column>
-        <Column header="Status" style="width: 7rem">
+        <Column :header="t('common.status')" style="width: 7rem">
           <template #body="{ data }">
-            <Tag :value="data.status" :severity="data.status === 'approved' ? 'success' : data.status === 'rejected' ? 'danger' : 'warn'" />
+            <Tag :value="t(`review.${data.status}` as MessageKey)" :severity="data.status === 'approved' ? 'success' : data.status === 'rejected' ? 'danger' : 'warn'" />
           </template>
         </Column>
         <Column header="" style="width: 11rem">
           <template #body="{ data }">
             <Button
               v-if="data.status !== 'approved'"
-              label="Approve"
+              :label="t('reviews.approve')"
               size="small"
               severity="success"
               outlined
@@ -95,7 +96,7 @@ onMounted(load);
             />
             <Button
               v-if="data.status !== 'rejected'"
-              label="Reject"
+              :label="t('reviews.reject')"
               size="small"
               severity="danger"
               text
