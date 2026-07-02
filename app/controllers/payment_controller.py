@@ -30,6 +30,10 @@ async def _verify_signature(request: Request) -> None:
     """Reject the webhook unless it carries a valid gateway HMAC-SHA256 signature over the raw body.
     Without this, anyone could POST a `charge.succeeded` and mark an order PAID for free."""
     secret = Config.get("services.payment_gateway.secret") or ""
+    # fail closed outside debug: the shipped "test-secret" default is publicly known, so a deploy
+    # that forgot to set PAYMENT_GATEWAY_SECRET must not verify forged webhooks against it
+    if secret == "test-secret" and not Config.get("app.debug", False):
+        abort(401, "Invalid webhook signature.")
     provided = request.header(SIGNATURE_HEADER, "") or ""
     expected = hmac.new(
         secret.encode(), await request.raw.body(), hashlib.sha256

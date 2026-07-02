@@ -218,9 +218,10 @@ async def moderate(request: Request) -> AdminReviewOut:
             .log("moderated review")
         )
     author = await User.find(review.user_id)
+    product = await Product.find(review.subject_id)
     return AdminReviewOut(
         id=review.id,
-        product_slug="",
+        product_slug=product.slug if product else "?",
         author=author.name if author else "?",
         rating=review.rating,
         title=review.title,

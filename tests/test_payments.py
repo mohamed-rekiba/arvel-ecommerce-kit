@@ -6,6 +6,7 @@ import asyncio
 import hashlib
 import hmac
 import json
+import os
 
 import httpx
 import pytest
@@ -21,7 +22,9 @@ from app.models.product_variant import ProductVariant
 from app.models.user import User
 from tests.checkout_helpers import checkout_body
 
-_WEBHOOK_SECRET = "test-secret"  # config/services.py default (PAYMENT_GATEWAY_SECRET)
+_WEBHOOK_SECRET = os.environ[
+    "PAYMENT_GATEWAY_SECRET"
+]  # set in tests/conftest.py (non-default)
 
 
 def _post_webhook(client, event: dict, *, sign: bool = True):
@@ -182,6 +185,46 @@ def test_webhook_without_valid_signature_is_rejected(client) -> None:
     assert forged.status_code == 401
     # the order was NOT marked paid by the forgery attempts
     assert client.get("/api/orders", headers=headers).json()[0]["status"] == "pending"
+
+
+def test_shipped_default_secret_fails_closed_outside_debug(client) -> None:
+    """A deploy that never set PAYMENT_GATEWAY_SECRET must not verify webhooks against the
+    publicly-known shipped default — even a correctly-signed request is rejected."""
+    from arvel.support.facades import Config
+
+    original = Config.get("services.payment_gateway.secret")
+    Config.set("services.payment_gateway.secret", "test-secret")
+    Config.set("app.debug", False)
+    try:
+        event = {"id": "evt_default", "type": "charge.succeeded", "data": {}}
+        body = json.dumps(event).encode()
+        signed = client.post(
+            "/api/webhooks/payment",
+            content=body,
+            headers={
+                "Content-Type": "application/json",
+                "X-Signature": hmac.new(
+                    b"test-secret", body, hashlib.sha256
+                ).hexdigest(),
+            },
+        )
+        assert signed.status_code == 401
+        # in debug (local dev with the stub gateway) the default still works
+        Config.set("app.debug", True)
+        ok = client.post(
+            "/api/webhooks/payment",
+            content=body,
+            headers={
+                "Content-Type": "application/json",
+                "X-Signature": hmac.new(
+                    b"test-secret", body, hashlib.sha256
+                ).hexdigest(),
+            },
+        )
+        assert ok.status_code == 201
+    finally:
+        Config.set("services.payment_gateway.secret", original)
+        Config.set("app.debug", False)
 
 
 def test_guest_pays_with_the_order_token(client) -> None:

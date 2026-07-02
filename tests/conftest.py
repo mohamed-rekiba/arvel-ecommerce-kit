@@ -12,6 +12,8 @@ os.environ.setdefault("MAIL_MAILER", "log")
 os.environ.setdefault("SEARCH_DRIVER", "array")
 os.environ.setdefault("FILESYSTEM_DISK", "local")
 os.environ.setdefault("PAYMENT_GATEWAY_URL", "https://payments.example.test")
+# a non-default secret: webhook verification fails closed on the shipped default outside debug
+os.environ.setdefault("PAYMENT_GATEWAY_SECRET", "kit-test-webhook-secret")
 os.environ.setdefault("APP_URL", "http://testserver.local")
 os.environ.setdefault(
     "APP_KEY", "YXJ2ZWwta2l0LXRlc3Qta2V5LTAxMjM0NTY3ODlhYmM="
