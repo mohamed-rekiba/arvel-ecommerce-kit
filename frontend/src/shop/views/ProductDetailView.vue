@@ -46,6 +46,14 @@ async function load() {
   }
 }
 
+// "Back to shop" should return to wherever the user actually came from (catalog with its filters, a
+// search, home, …) — not always home. `history.state.back` is null only when there's no in-app entry
+// to return to (a fresh load / direct link), so fall back to the catalog in that case.
+function goBack() {
+  if (window.history.state?.back) router.back();
+  else router.push({ name: "catalog" });
+}
+
 async function addToCart() {
   if (selectedVariantId.value == null) return;
   adding.value = true;
@@ -71,7 +79,7 @@ watch(() => route.params.slug, load);
 
     <div v-else-if="status === 'error'" class="state" role="alert">
       <p>This product could not be found.</p>
-      <button class="btn" @click="router.push('/')">Back to shop</button>
+      <button class="btn" @click="goBack">Back to shop</button>
     </div>
 
     <div v-else-if="product" class="pdp__grid">
@@ -101,7 +109,7 @@ watch(() => route.params.slug, load);
         </div>
       </div>
       <div class="pdp__info">
-        <RouterLink class="pdp__back" to="/">← Back to shop</RouterLink>
+        <button class="pdp__back" @click="goBack">← Back to shop</button>
         <p class="eyebrow" v-if="product.category">{{ product.category.translation.name }}</p>
         <h1>{{ product.translation.name }}</h1>
         <p class="pdp__price">{{ formatPrice(product.price_cents, product.currency) }}</p>
@@ -147,7 +155,7 @@ watch(() => route.params.slug, load);
 .pdp__thumb.on { border-color: var(--accent); }
 .pdp__thumb img { width: 100%; height: 100%; object-fit: cover; }
 .pdp__info { padding-top: var(--space-4); }
-.pdp__back { display: inline-block; color: var(--color-text-muted); text-decoration: none; font-size: var(--text-sm); margin-bottom: var(--space-8); transition: color var(--motion-base) var(--ease); }
+.pdp__back { display: inline-block; border: 0; background: none; padding: 0; cursor: pointer; font: inherit; color: var(--color-text-muted); text-decoration: none; font-size: var(--text-sm); margin-bottom: var(--space-8); transition: color var(--motion-base) var(--ease); }
 .pdp__back:hover { color: var(--color-text); }
 .pdp__info h1 { font-size: var(--text-3xl); margin: var(--space-2) 0 var(--space-4); }
 .pdp__price { font-size: var(--text-xl); color: var(--color-text); margin: 0 0 var(--space-6); }
