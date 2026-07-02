@@ -100,6 +100,8 @@ def _order_out(
         subtotal_cents=order.subtotal_cents,
         shipping_cents=order.shipping_cents,
         tax_cents=order.tax_cents,
+        coupon_code=order.coupon_code,
+        discount_cents=order.discount_cents or 0,
         total_cents=order.total_cents,
         currency=_currency_value(order),
         payment_status=payment_status,
@@ -174,7 +176,9 @@ async def checkout(request: Request, data: CheckoutIn) -> OrderOut:
     subtotal = sum(i.unit_price_cents * i.quantity for i in items)
     shipping = _shipping_cents(subtotal)
     tax = _tax_cents(subtotal)
-    total = subtotal + shipping + tax
+    total = (
+        subtotal + shipping + tax
+    )  # a cart coupon is re-validated + applied inside the tx
 
     # a business span over the whole checkout — the DB queries inside auto-nest under it.
     with span(
@@ -182,6 +186,35 @@ async def checkout(request: Request, data: CheckoutIn) -> OrderOut:
         attributes={"checkout.total_cents": total, "checkout.line_count": len(items)},
     ):
         async with DB.transaction():
+            # Re-validate + redeem the cart's coupon UNDER A ROW LOCK: two checkouts racing for a
+            # code's last use serialize here, so exactly one redeems (usage counted transactionally).
+            discount = 0
+            coupon = None
+            if cart.coupon_code:
+                from app.models.coupon import Coupon
+                from app.services.coupon_service import (
+                    discount_cents,
+                    enforce_per_customer_limit,
+                    validate_window_and_state,
+                )
+
+                coupon = (
+                    await Coupon.where("code", cart.coupon_code)
+                    .lock_for_update()
+                    .first()
+                )
+                validate_window_and_state(coupon, subtotal)
+                assert coupon is not None
+                await enforce_per_customer_limit(
+                    coupon,
+                    user_id=user.id if user is not None else None,
+                    contact_email=contact_email,
+                )
+                discount = discount_cents(coupon, subtotal)
+                coupon.uses = (coupon.uses or 0) + 1
+                await coupon.save()
+                total = subtotal - discount + shipping + tax
+
             # Decrement stock under SELECT ... FOR UPDATE so concurrent checkouts can't oversell.
             for item in items:
                 variant = (
@@ -219,6 +252,8 @@ async def checkout(request: Request, data: CheckoutIn) -> OrderOut:
                 status=OrderStatus.PENDING,
                 token=Str.random(40),
                 contact_email=contact_email,
+                coupon_code=cart.coupon_code,
+                discount_cents=discount,
                 subtotal_cents=subtotal,
                 shipping_cents=shipping,
                 tax_cents=tax,
@@ -226,6 +261,15 @@ async def checkout(request: Request, data: CheckoutIn) -> OrderOut:
                 currency=Currency.USD,
                 **ship_fields,
             )
+            if coupon is not None:
+                from app.models.coupon_redemption import CouponRedemption
+
+                await CouponRedemption.create(
+                    coupon_id=coupon.id,
+                    order_id=order.id,
+                    user_id=user.id if user is not None else None,
+                    contact_email=contact_email,
+                )
             order_items: list[OrderItem] = []
             for item in items:
                 # purchase-time snapshot of what was bought, as the customer saw it

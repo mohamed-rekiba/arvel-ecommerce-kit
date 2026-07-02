@@ -114,6 +114,7 @@ onBeforeUnmount(stopPolling);
           <div><dt>Subtotal</dt><dd>{{ formatPrice(order.subtotal_cents) }}</dd></div>
           <div><dt>Shipping</dt><dd>{{ formatPrice(order.shipping_cents) }}</dd></div>
           <div><dt>Tax</dt><dd>{{ formatPrice(order.tax_cents) }}</dd></div>
+          <div v-if="order.discount_cents > 0"><dt>Discount ({{ order.coupon_code }})</dt><dd>−{{ formatPrice(order.discount_cents) }}</dd></div>
           <div class="breakdown__total"><dt>Total</dt><dd>{{ formatPrice(order.total_cents) }}</dd></div>
         </dl>
       </section>

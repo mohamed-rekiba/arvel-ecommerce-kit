@@ -147,6 +147,12 @@ export const api = {
   async removeCartItem(id: number) {
     return withCartToken(await request<Cart>("DELETE", `/cart/items/${id}`));
   },
+  async applyCoupon(code: string) {
+    return withCartToken(await request<Cart>("POST", `/cart/coupon`, { code }));
+  },
+  async removeCoupon() {
+    return withCartToken(await request<Cart>("DELETE", `/cart/coupon`));
+  },
   async order(id: number, orderToken?: string) {
     return request<Order>("GET", `/orders/${id}`, undefined, orderToken ? { "X-Order-Token": orderToken } : undefined);
   },

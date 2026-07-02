@@ -32,5 +32,13 @@ export function useCart() {
     state.cart = null;
     return order;
   }
-  return { state, count, refresh, add, update, remove, checkout };
+  async function applyCoupon(code: string) {
+    state.cart = await api.applyCoupon(code);
+  }
+
+  async function removeCoupon() {
+    state.cart = await api.removeCoupon();
+  }
+
+  return { state, count, refresh, add, update, remove, checkout, applyCoupon, removeCoupon };
 }

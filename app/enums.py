@@ -108,6 +108,13 @@ def can_transition(current: OrderStatus, target: OrderStatus) -> bool:
     return target in ORDER_TRANSITIONS.get(current, set())
 
 
+class CouponType(str, Enum):
+    """How a coupon discounts the order."""
+
+    PERCENT = "percent"  # value = percent points (1–100) off the subtotal
+    FIXED = "fixed"  # value = cents off (never below zero)
+
+
 class PaymentStatus(str, Enum):
     """A payment's state, mirrored from the gateway."""
 

@@ -924,19 +924,19 @@
         "operationId": "api.media.conversion",
         "parameters": [
           {
-            "name": "conversion",
+            "name": "id",
             "in": "path",
             "schema": {
-              "type": "string"
+              "type": "integer"
             },
             "required": true,
             "deprecated": false
           },
           {
-            "name": "id",
+            "name": "conversion",
             "in": "path",
             "schema": {
-              "type": "integer"
+              "type": "string"
             },
             "required": true,
             "deprecated": false
@@ -1081,7 +1081,7 @@
         "operationId": "api.admin.products.media.destroy",
         "parameters": [
           {
-            "name": "media_id",
+            "name": "id",
             "in": "path",
             "schema": {
               "type": "integer"
@@ -1090,7 +1090,7 @@
             "deprecated": false
           },
           {
-            "name": "id",
+            "name": "media_id",
             "in": "path",
             "schema": {
               "type": "integer"
@@ -3339,6 +3339,277 @@
         "deprecated": false
       }
     },
+    "/api/cart/coupon": {
+      "post": {
+        "summary": "ApiCartCouponApply",
+        "description": "Attach a coupon to the cart with immediate validation (checkout re-validates\nauthoritatively \u2014 a code can expire between apply and place-order).",
+        "operationId": "api.cart.coupon.apply",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ApplyCouponIn"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Request fulfilled, document follows",
+            "headers": {},
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CartOut"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request syntax or unsupported method",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "status_code": {
+                      "type": "integer"
+                    },
+                    "detail": {
+                      "type": "string"
+                    },
+                    "extra": {
+                      "additionalProperties": {},
+                      "type": [
+                        "null",
+                        "object",
+                        "array"
+                      ]
+                    }
+                  },
+                  "type": "object",
+                  "required": [
+                    "detail",
+                    "status_code"
+                  ],
+                  "description": "Validation Exception",
+                  "examples": [
+                    {
+                      "status_code": 400,
+                      "detail": "Bad Request",
+                      "extra": {}
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        },
+        "deprecated": false
+      },
+      "delete": {
+        "summary": "ApiCartCouponRemove",
+        "operationId": "api.cart.coupon.remove",
+        "responses": {
+          "200": {
+            "description": "Request fulfilled, document follows",
+            "headers": {},
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CartOut"
+                }
+              }
+            }
+          }
+        },
+        "deprecated": false
+      }
+    },
+    "/api/admin/coupons": {
+      "get": {
+        "summary": "ApiAdminCouponsIndex",
+        "operationId": "api.admin.coupons.index",
+        "responses": {
+          "200": {
+            "description": "Request fulfilled, document follows",
+            "headers": {},
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/AdminCouponOut"
+                  },
+                  "type": "array"
+                }
+              }
+            }
+          }
+        },
+        "deprecated": false,
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ]
+      },
+      "post": {
+        "summary": "ApiAdminCouponsStore",
+        "operationId": "api.admin.coupons.store",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CouponIn"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "description": "Document created, URL follows",
+            "headers": {},
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AdminCouponOut"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request syntax or unsupported method",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "status_code": {
+                      "type": "integer"
+                    },
+                    "detail": {
+                      "type": "string"
+                    },
+                    "extra": {
+                      "additionalProperties": {},
+                      "type": [
+                        "null",
+                        "object",
+                        "array"
+                      ]
+                    }
+                  },
+                  "type": "object",
+                  "required": [
+                    "detail",
+                    "status_code"
+                  ],
+                  "description": "Validation Exception",
+                  "examples": [
+                    {
+                      "status_code": 400,
+                      "detail": "Bad Request",
+                      "extra": {}
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        },
+        "deprecated": false,
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ]
+      }
+    },
+    "/api/admin/coupons/{id}": {
+      "patch": {
+        "summary": "ApiAdminCouponsUpdate",
+        "description": "Activate/deactivate or adjust limits \u2014 deactivation takes effect immediately (checkout\nre-validates every redemption).",
+        "operationId": "api.admin.coupons.update",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "schema": {
+              "type": "integer"
+            },
+            "required": true,
+            "deprecated": false
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CouponUpdateIn"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Request fulfilled, document follows",
+            "headers": {},
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AdminCouponOut"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request syntax or unsupported method",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "status_code": {
+                      "type": "integer"
+                    },
+                    "detail": {
+                      "type": "string"
+                    },
+                    "extra": {
+                      "additionalProperties": {},
+                      "type": [
+                        "null",
+                        "object",
+                        "array"
+                      ]
+                    }
+                  },
+                  "type": "object",
+                  "required": [
+                    "detail",
+                    "status_code"
+                  ],
+                  "description": "Validation Exception",
+                  "examples": [
+                    {
+                      "status_code": 400,
+                      "detail": "Bad Request",
+                      "extra": {}
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        },
+        "deprecated": false,
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ]
+      }
+    },
     "/api/checkout": {
       "post": {
         "summary": "ApiCheckout",
@@ -4427,6 +4698,86 @@
         ],
         "title": "AdminCategoryPage"
       },
+      "AdminCouponOut": {
+        "properties": {
+          "id": {
+            "type": "integer"
+          },
+          "code": {
+            "type": "string"
+          },
+          "type": {
+            "$ref": "#/components/schemas/CouponType"
+          },
+          "value": {
+            "type": "integer"
+          },
+          "min_subtotal_cents": {
+            "type": "integer"
+          },
+          "usage_limit": {
+            "oneOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "per_customer_limit": {
+            "oneOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "uses": {
+            "type": "integer"
+          },
+          "active": {
+            "type": "boolean"
+          },
+          "starts_at": {
+            "oneOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "ends_at": {
+            "oneOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "type": "object",
+        "required": [
+          "active",
+          "code",
+          "ends_at",
+          "id",
+          "min_subtotal_cents",
+          "per_customer_limit",
+          "starts_at",
+          "type",
+          "usage_limit",
+          "uses",
+          "value"
+        ],
+        "title": "AdminCouponOut"
+      },
       "AdminMeOut": {
         "properties": {
           "id": {
@@ -4871,6 +5222,18 @@
         ],
         "title": "AdminVendorOut"
       },
+      "ApplyCouponIn": {
+        "properties": {
+          "code": {
+            "type": "string"
+          }
+        },
+        "type": "object",
+        "required": [
+          "code"
+        ],
+        "title": "ApplyCouponIn"
+      },
       "AssignRoleIn": {
         "properties": {
           "role": {
@@ -4932,6 +5295,19 @@
           "total_cents": {
             "type": "integer"
           },
+          "coupon_code": {
+            "oneOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "discount_cents": {
+            "type": "integer"
+          },
           "cart_token": {
             "oneOf": [
               {
@@ -4945,6 +5321,8 @@
         },
         "type": "object",
         "required": [
+          "coupon_code",
+          "discount_cents",
           "id",
           "items",
           "total_cents"
@@ -5095,6 +5473,106 @@
         ],
         "title": "CountryCode",
         "description": "Countries the shop ships to (ISO 3166-1 alpha-2) \u2014 a closed, validated set."
+      },
+      "CouponIn": {
+        "properties": {
+          "code": {
+            "type": "string"
+          },
+          "type": {
+            "$ref": "#/components/schemas/CouponType"
+          },
+          "value": {
+            "type": "integer"
+          },
+          "min_subtotal_cents": {
+            "type": "integer",
+            "default": 0
+          },
+          "usage_limit": {
+            "oneOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "per_customer_limit": {
+            "oneOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "type": "object",
+        "required": [
+          "code",
+          "type",
+          "value"
+        ],
+        "title": "CouponIn"
+      },
+      "CouponType": {
+        "type": "string",
+        "enum": [
+          "percent",
+          "fixed"
+        ],
+        "title": "CouponType",
+        "description": "How a coupon discounts the order."
+      },
+      "CouponUpdateIn": {
+        "properties": {
+          "active": {
+            "oneOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "usage_limit": {
+            "oneOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "per_customer_limit": {
+            "oneOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "min_subtotal_cents": {
+            "oneOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "type": "object",
+        "required": [],
+        "title": "CouponUpdateIn"
       },
       "CredentialsIn": {
         "properties": {
@@ -5333,6 +5811,19 @@
           "tax_cents": {
             "type": "integer"
           },
+          "coupon_code": {
+            "oneOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "discount_cents": {
+            "type": "integer"
+          },
           "total_cents": {
             "type": "integer"
           },
@@ -5360,7 +5851,9 @@
         "required": [
           "address",
           "contact_email",
+          "coupon_code",
           "currency",
+          "discount_cents",
           "id",
           "items",
           "payment_status",

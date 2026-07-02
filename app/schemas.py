@@ -12,7 +12,7 @@ from typing import Any
 
 from arvel import Schema
 
-from app.enums import CountryCode, Currency, OrderStatus, PaymentStatus
+from app.enums import CountryCode, CouponType, Currency, OrderStatus, PaymentStatus
 
 # --- shared / catalog ---------------------------------------------------------
 
@@ -238,7 +238,43 @@ class CartOut(Schema, omit_defaults=True):
     id: int | None
     items: list[CartLineOut]
     total_cents: int
+    coupon_code: str | None
+    discount_cents: int
     cart_token: str | None = None
+
+
+class ApplyCouponIn(Schema):
+    code: str
+
+
+class CouponIn(Schema):
+    code: str
+    type: "CouponType"
+    value: int
+    min_subtotal_cents: int = 0
+    usage_limit: int | None = None
+    per_customer_limit: int | None = None
+
+
+class CouponUpdateIn(Schema):
+    active: bool | None = None
+    usage_limit: int | None = None
+    per_customer_limit: int | None = None
+    min_subtotal_cents: int | None = None
+
+
+class AdminCouponOut(Schema):
+    id: int
+    code: str
+    type: "CouponType"
+    value: int
+    min_subtotal_cents: int
+    usage_limit: int | None
+    per_customer_limit: int | None
+    uses: int
+    active: bool
+    starts_at: str | None
+    ends_at: str | None
 
 
 # --- admin products -----------------------------------------------------------
@@ -316,6 +352,8 @@ class OrderOut(Schema):
     subtotal_cents: int
     shipping_cents: int
     tax_cents: int
+    coupon_code: str | None
+    discount_cents: int
     total_cents: int
     currency: Currency
     payment_status: (

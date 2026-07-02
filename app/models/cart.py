@@ -10,8 +10,9 @@ class Cart(Model):
     __fields__: ClassVar[dict[str, type]] = {
         "user_id": int,
         "token": str,
+        "coupon_code": str,
     }
-    __fillable__: ClassVar[list[str]] = ["user_id", "token"]
+    __fillable__: ClassVar[list[str]] = ["user_id", "token", "coupon_code"]
 
     def items(self) -> Any:
         from app.models.cart_item import CartItem
