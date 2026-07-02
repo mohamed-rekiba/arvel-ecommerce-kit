@@ -17,6 +17,7 @@ from app.controllers import admin_controller as admin
 from app.controllers import admin_coupon_controller as admin_coupons
 from app.controllers import admin_deal_controller as admin_deals
 from app.controllers import announcement_controller as announcement
+from app.controllers import banner_controller as banners
 from app.controllers import deal_controller as deals
 from app.controllers import admin_product_controller as admin_products
 from app.controllers import admin_rbac_controller as rbac
@@ -289,12 +290,32 @@ Route.delete("/cart/coupon", cart.remove_coupon, name="api.cart.coupon.remove").
 # --- Deals (flash sales) ----------------------------------------------------------
 Route.get("/deals", deals.index, name="api.deals.index")
 Route.get("/announcement", announcement.show, name="api.announcement")
+
+# --- Hero banners -----------------------------------------------------------------
+Route.get("/banners", banners.index, name="api.banners.index")
 Route.get(
-    "/admin/deals", admin_deals.index, name="api.admin.deals.index"
+    "/admin/banners", banners.admin_index, name="api.admin.banners.index"
+).middleware(Authenticate).secure("bearer")
+Route.post("/admin/banners", banners.store, name="api.admin.banners.store").middleware(
+    Authenticate
+).secure("bearer")
+Route.patch(
+    "/admin/banners/{id:int}", banners.update, name="api.admin.banners.update"
+).middleware(Authenticate).secure("bearer")
+Route.delete(
+    "/admin/banners/{id:int}", banners.destroy, name="api.admin.banners.destroy"
 ).middleware(Authenticate).secure("bearer")
 Route.post(
-    "/admin/deals", admin_deals.store, name="api.admin.deals.store"
+    "/admin/banners/{id:int}/image",
+    banners.upload_image,
+    name="api.admin.banners.image",
 ).middleware(Authenticate).secure("bearer")
+Route.get("/admin/deals", admin_deals.index, name="api.admin.deals.index").middleware(
+    Authenticate
+).secure("bearer")
+Route.post("/admin/deals", admin_deals.store, name="api.admin.deals.store").middleware(
+    Authenticate
+).secure("bearer")
 Route.patch(
     "/admin/deals/{id:int}", admin_deals.update, name="api.admin.deals.update"
 ).middleware(Authenticate).secure("bearer")

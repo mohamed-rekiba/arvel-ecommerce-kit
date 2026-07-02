@@ -167,6 +167,7 @@ async def show(request: Request) -> AdminProductDetailOut:
         translations=product.translations,
         status=ProductStatus(product.status).value,
         published=bool(product.published),
+        featured=bool(getattr(product, "featured", False)),
         is_visible=bool(getattr(product, "is_visible", False)),
         price_cents=product.price_cents,
         category_id=product.category_id,

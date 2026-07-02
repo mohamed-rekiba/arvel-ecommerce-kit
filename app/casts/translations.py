@@ -50,6 +50,20 @@ class TranslationsCast:
         )
 
 
+class LocaleMapCast:
+    """A locale-major jsonb map with FREE per-locale fields (e.g. a banner's
+    {locale: {title, subtitle, chip, cta_label}}) ↔ plain dict — handles the PG-dict /
+    sqlite-string asymmetry without imposing the Translate shape."""
+
+    def get(
+        self, model: Any, key: str, value: Any, attributes: dict[str, Any]
+    ) -> dict[str, Any]:
+        return _load(value)
+
+    def set(self, model: Any, key: str, value: Any, attributes: dict[str, Any]) -> Any:
+        return value  # a dict — the jsonb column serializes it
+
+
 class TranslationCast:
     """A single locale's object `{name, description}` (a `translations->'<loc>'` projection) → `Translate`."""
 

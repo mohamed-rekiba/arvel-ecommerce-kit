@@ -23,6 +23,7 @@ from tests.rbac_helpers import seed_rbac
 def client(tmp_path, monkeypatch):
     url = f"sqlite+aiosqlite:///{tmp_path / 'features.sqlite'}"
     monkeypatch.setenv("DATABASE_URL", url)
+    monkeypatch.setenv("FILESYSTEM_LOCAL_ROOT", str(tmp_path / "media"))
 
     async def seed() -> None:
         db = ConnectionResolver({"default": {"url": url}})
@@ -57,7 +58,11 @@ def client(tmp_path, monkeypatch):
                 featured=featured,
             )
             await ProductVariant.create(
-                product_id=p.id, sku=f"{slug}-1", name="One", price_adjustment_cents=0, stock=5
+                product_id=p.id,
+                sku=f"{slug}-1",
+                name="One",
+                price_adjustment_cents=0,
+                stock=5,
             )
         for model in models:
             model.set_connection(None)
@@ -78,14 +83,18 @@ def _admin(client):
 
 
 def test_featured_filter_and_admin_toggle(client) -> None:
-    slugs = {p["slug"] for p in client.get("/api/products?featured=true").json()["data"]}
+    slugs = {
+        p["slug"] for p in client.get("/api/products?featured=true").json()["data"]
+    }
     assert slugs == {"mid"}
     # the listing payload carries the flag (the storefront rail + admin column need it)
     assert client.get("/api/products/mid").json()["featured"] is True
 
     # the admin flips it off; the rail follows
     admin = _admin(client)
-    updated = client.put("/api/admin/products/2", json={"featured": False}, headers=admin)
+    updated = client.put(
+        "/api/admin/products/2", json={"featured": False}, headers=admin
+    )
     assert updated.status_code == 200, updated.text
     assert updated.json()["featured"] is False
     assert client.get("/api/products?featured=true").json()["data"] == []
@@ -100,7 +109,9 @@ def test_price_range_filters(client) -> None:
     } == {"cheap", "mid"}
     assert {
         p["slug"]
-        for p in client.get("/api/products?min_price=1000&max_price=3000").json()["data"]
+        for p in client.get("/api/products?min_price=1000&max_price=3000").json()[
+            "data"
+        ]
     } == {"mid"}
 
 
@@ -149,3 +160,27 @@ def test_expired_announcement_is_skipped(client) -> None:
     with client.portal() as portal:
         portal.call(_seed_expired)
     assert client.get("/api/announcement").status_code == 404
+
+
+def test_categories_carry_a_derived_tile_image(client) -> None:
+    """The categories index derives image_url from a subtree product's media; None until any
+    product in the subtree has an image."""
+    import io
+
+    from PIL import Image as PILImage
+
+    cats = client.get("/api/categories").json()
+    assert cats and all(c["image_url"] is None for c in cats)
+
+    buf = io.BytesIO()
+    PILImage.new("RGB", (24, 24), (10, 120, 200)).save(buf, format="PNG")
+    admin = _admin(client)
+    up = client.post(
+        "/api/admin/products/1/image",
+        files={"image": ("p.png", buf.getvalue(), "image/png")},
+        headers=admin,
+    )
+    assert up.status_code == 201, up.text
+
+    cats = client.get("/api/categories").json()
+    assert cats[0]["image_url"]  # the gear category now shows a product thumb

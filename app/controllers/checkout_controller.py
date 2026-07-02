@@ -205,7 +205,9 @@ async def checkout(request: Request, data: CheckoutIn) -> OrderOut:
     contact_email, ship_fields = _validate_checkout(
         data, user.email if user is not None else None
     )
-    await _reprice_lines(items)  # current-price-wins: stale deal snapshots never reach an order
+    await _reprice_lines(
+        items
+    )  # current-price-wins: stale deal snapshots never reach an order
     subtotal = sum(i.unit_price_cents * i.quantity for i in items)
     shipping = _shipping_cents(subtotal)
     tax = _tax_cents(subtotal)

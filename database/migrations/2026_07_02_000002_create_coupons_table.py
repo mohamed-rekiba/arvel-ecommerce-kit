@@ -18,7 +18,9 @@ class CreateCouponsTable(Migration):
             t.integer("per_customer_limit").nullable()
             t.integer("uses").default(value=0)
             t.boolean("active").default(value=True)
-            t.boolean("announce").default(value=False)  # surfaced on the storefront announcement bar
+            t.boolean("announce").default(
+                value=False
+            )  # surfaced on the storefront announcement bar
             t.timestamps()
 
         schema.create("coupons", coupons)

@@ -81,7 +81,9 @@ async def store(request: Request, data: DealIn) -> AdminDealOut:
         activity()
         .caused_by(user)
         .performed_on(deal)
-        .with_properties({"percent_off": data.percent_off, "product_id": data.product_id})
+        .with_properties(
+            {"percent_off": data.percent_off, "product_id": data.product_id}
+        )
         .log("created deal")
     )
     return await _out(deal)
@@ -118,10 +120,5 @@ async def destroy(request: Request) -> dict[str, str]:
         abort(403, "You lack catalog access.")
     deal = await Deal.find_or_fail(int(request.path_param("id")))
     await deal.delete()
-    await (
-        activity()
-        .caused_by(user)
-        .performed_on(deal)
-        .log("deleted deal")
-    )
+    await activity().caused_by(user).performed_on(deal).log("deleted deal")
     return {"status": "deleted"}
