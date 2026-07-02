@@ -1,12 +1,15 @@
 <script setup lang="ts">
 import { computed, onMounted, ref } from "vue";
 import { type Category, type Product, api, formatPrice } from "../api";
-import { cacheProducts } from "../product-cache";
+import { cacheCategories, cacheList, cacheProducts, getCachedCategories, getCachedList } from "../product-cache";
 import ProductCard from "../components/ProductCard.vue";
 
-const categories = ref<Category[]>([]);
-const products = ref<Product[]>([]);
-const loading = ref(true);
+// seed synchronously from cache so the cards paint on the first frame after a back-nav — that's the
+// morph target for the reverse (PDP → home) View Transition. Refresh in the background either way.
+const cachedProducts = getCachedList("home");
+const categories = ref<Category[]>(getCachedCategories() ?? []);
+const products = ref<Product[]>(cachedProducts ?? []);
+const loading = ref(cachedProducts === null);
 
 const hero = computed(() => products.value[0] ?? null);
 const heroImage = computed(() => hero.value?.gallery[0]?.url ?? hero.value?.gallery[0]?.preview_url ?? null);
@@ -17,8 +20,10 @@ onMounted(async () => {
   try {
     const [cats, page] = await Promise.all([api.categories(), api.products({ page: 1 })]);
     categories.value = cats;
+    cacheCategories(cats);
     products.value = page.data;
-    cacheProducts(page.data); // lets the PDP paint the image immediately for the shared-element morph
+    cacheProducts(page.data); // lets the PDP paint the image immediately for the forward morph
+    cacheList("home", page.data); // …and lets home repaint its cards synchronously on a back-nav
   } finally {
     loading.value = false;
   }

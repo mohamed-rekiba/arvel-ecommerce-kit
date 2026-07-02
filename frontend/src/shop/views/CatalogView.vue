@@ -3,7 +3,7 @@ import Select from "primevue/select";
 import { computed, onMounted, ref, watch } from "vue";
 import { useRoute, useRouter } from "vue-router";
 import { type Category, type Product, api } from "../api";
-import { cacheProducts } from "../product-cache";
+import { cacheList, cacheProducts, getCachedList } from "../product-cache";
 import ProductCard from "../components/ProductCard.vue";
 
 const route = useRoute();
@@ -32,6 +32,16 @@ const activeName = computed(
   () => categories.value.find((c) => c.slug === activeCategory.value)?.translation.name ?? "All products",
 );
 
+// a cache key for THIS exact query, so a back-nav can repaint the same card set synchronously (the
+// morph target for the reverse PDP → catalog transition) instead of refetching a frame too late.
+const listKey = () =>
+  `catalog:${JSON.stringify({ q: q.value, category: activeCategory.value, sort: sort.value, page: page.value })}`;
+const seeded = getCachedList(listKey());
+if (seeded) {
+  products.value = seeded;
+  status.value = "ready";
+}
+
 function setQuery(patch: Record<string, string | number | undefined>) {
   const query = { ...route.query, ...patch };
   for (const k of Object.keys(query)) if (!query[k]) delete query[k];
@@ -39,7 +49,7 @@ function setQuery(patch: Record<string, string | number | undefined>) {
 }
 
 async function load() {
-  status.value = "loading";
+  if (!products.value.length) status.value = "loading"; // keep seeded cards on screen while refreshing
   try {
     const res = await api.products({
       q: q.value || undefined,
@@ -48,12 +58,13 @@ async function load() {
       page: page.value,
     });
     products.value = res.data;
-    cacheProducts(res.data); // so the PDP can render the image instantly (for the shared-element morph)
+    cacheProducts(res.data); // forward morph: PDP renders the image instantly
+    cacheList(listKey(), res.data); // back morph: catalog repaints these cards synchronously on remount
     total.value = res.total;
     lastPage.value = res.last_page;
     status.value = "ready";
   } catch {
-    status.value = "error";
+    if (!products.value.length) status.value = "error";
   }
 }
 

@@ -56,11 +56,12 @@ onMounted(() => {
 
     <main class="main">
       <RouterView v-slot="{ Component }">
-        <!-- VT API supported: render the view DIRECTLY. A Vue <transition> keeps the leaving view
-             mounted next to the entering one, so both the old card image and the new PDP image would
-             briefly share `view-transition-name: product-N` in the same snapshot — the API forbids
-             duplicate names and aborts the morph. The API (lib/transitions.ts) owns the animation here.
-             Unsupported browsers (Firefox / older Safari) get the Vue cross-fade fallback instead. -->
+        <!-- VT API supported: render the view DIRECTLY. A Vue <transition> co-mounts the leaving +
+             entering views, so both the old card image and the new PDP image would briefly share
+             `view-transition-name: product-N` in one snapshot — the API forbids duplicate names and
+             aborts the morph. The API (lib/transitions.ts) owns the animation here; the Vue fade is
+             only the no-VT fallback. (The morph target on BOTH directions comes from the list/detail
+             views seeding synchronously from product-cache in setup(), not from KeepAlive.) -->
         <component :is="Component" v-if="vtSupported" :key="route.path" />
         <transition v-else name="fade" mode="out-in">
           <component :is="Component" :key="route.path" />
