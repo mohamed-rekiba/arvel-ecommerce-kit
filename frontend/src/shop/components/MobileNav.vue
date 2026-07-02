@@ -42,7 +42,7 @@ watch(
 <style scoped>
 .mnav__backdrop {
   position: fixed; inset: 0; z-index: var(--z-overlay);
-  background: color-mix(in srgb, var(--ink-900) 45%, transparent);
+  background: color-mix(in srgb, var(--ink-950) 45%, transparent);
 }
 .mnav__panel {
   position: fixed; top: 0; inset-inline-start: 0; bottom: 0; z-index: var(--z-modal);

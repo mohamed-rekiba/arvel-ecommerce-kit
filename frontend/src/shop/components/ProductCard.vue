@@ -20,6 +20,10 @@ async function toggleSave() {
 
 const variants = computed(() => props.product.variants ?? []);
 const soldOut = computed(() => variants.value.length > 0 && variants.value.every((v) => v.stock <= 0));
+const starRow = computed(() => {
+  const full = Math.round(props.product.rating_avg ?? 0);
+  return "★".repeat(full) + "☆".repeat(5 - full);
+});
 // serve all three conversions via srcset so the browser picks the suitable one per viewport/DPR:
 // thumb 256w (small/2-up on phones), preview 600w (cards), original 900w (retina). `src` = preview fallback.
 const g = computed(() => props.product.gallery[0] ?? null);
@@ -68,15 +72,20 @@ async function addToBag() {
     </RouterLink>
     <div class="info">
       <RouterLink class="name" :to="`/products/${product.slug}`">{{ name }}</RouterLink>
+      <div v-if="product.rating_count > 0" class="stars" :aria-label="`${product.rating_avg} / 5`">
+        <span class="stars__row" aria-hidden="true">{{ starRow }}</span>
+        <span class="stars__n">{{ product.rating_count }}</span>
+      </div>
       <span class="price tnum">{{ formatPrice(product.price_cents, product.currency) }}</span>
     </div>
   </article>
 </template>
 
 <style scoped>
-.card { display: flex; flex-direction: column; }
+.card { display: flex; flex-direction: column; background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-lg); overflow: hidden; transition: box-shadow var(--motion-base), transform var(--motion-base); }
+.card:hover { box-shadow: var(--shadow-2); }
 .card--out { opacity: .7; }
-.media { position: relative; display: block; aspect-ratio: 4 / 5; border-radius: var(--radius-lg); overflow: hidden; background: var(--surface-2); }
+.media { position: relative; display: block; aspect-ratio: 4 / 5; overflow: hidden; background: var(--surface-2); }
 .media img { width: 100%; height: 100%; object-fit: cover; transition: transform 1s var(--ease-out); }
 .card:hover .media img { transform: scale(1.045); }
 .media__ph { width: 100%; height: 100%; background: linear-gradient(150deg, var(--surface-2), color-mix(in srgb, var(--accent) 8%, var(--surface-2))); }
@@ -90,9 +99,12 @@ async function addToBag() {
 .card:hover .add, .add:focus-visible { opacity: 1; transform: translateY(0); }
 .add:hover { background: var(--accent); color: var(--on-accent); }
 .add:disabled { opacity: .6; cursor: default; }
-.info { display: flex; align-items: baseline; justify-content: space-between; gap: 16px; padding: 16px 2px 0; }
-.name { font-size: 15px; font-weight: 500; color: var(--text); text-decoration: none; line-height: 1.4; }
+.info { display: flex; flex-direction: column; gap: 6px; padding: 14px 16px 16px; }
+.name { font-size: 14px; font-weight: 500; color: var(--text); text-decoration: none; line-height: 1.4; }
 .name:hover { color: var(--accent); }
-.price { font-family: var(--font-display); font-size: 15px; font-weight: 600; color: var(--text-muted); white-space: nowrap; }
+.price { font-family: var(--font-display); font-size: 16px; font-weight: 700; color: var(--text); white-space: nowrap; }
+.stars { display: flex; align-items: center; gap: 6px; }
+.stars__row { color: var(--star); font-size: 12px; letter-spacing: .06em; }
+.stars__n { color: var(--text-subtle); font-size: 11.5px; }
 @media (hover: none) { .add { opacity: 1; transform: none; background: var(--surface); border: 1px solid var(--border); } }
 </style>
