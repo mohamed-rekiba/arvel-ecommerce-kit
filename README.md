@@ -40,6 +40,12 @@ tests): `make test-integration` boots throwaway Postgres/Valkey/RabbitMQ/RustFS/
 Keycloak/Mailpit containers and drives each arvel module through the kit's production boot.
 arvel's own `tests/integration` covers the framework side.
 
+**Queued mail & notifications.** Order mail (confirmation, shipped) and the shipped notification
+are `ShouldQueue`: the request only enqueues; `make worker` (`arvel queue:work`) delivers them off
+RabbitMQ — one job per channel, so an SMTP outage can only fail the mail job. A job that exhausts
+its retries lands in `failed_jobs`: inspect with `uv run arvel queue:failed`, re-dispatch with
+`uv run arvel queue:retry <id|all>`.
+
 ## What it demonstrates (and where)
 
 | Capability | Where |

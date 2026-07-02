@@ -164,9 +164,10 @@ async def update_status(request: Request, data: OrderStatusIn) -> OrderOut:
         )
     order.status = target
     await order.save()
-    # Notify the customer when their order ships (mail + database channels → shown in their account).
+    # Notify the customer when their order ships — QUEUED (database + mail channels), so the
+    # committed transition never waits on (or 500s from) SMTP.
     if target is OrderStatus.SHIPPED and order.user_id is not None:
         customer = await User.find(order.user_id)
         if customer is not None:
-            await customer.notify(OrderShippedNotification(order.id, order.total_cents))
+            await customer.notify(OrderShippedNotification(order.id))
     return _order_out(order, await order.items().get())
