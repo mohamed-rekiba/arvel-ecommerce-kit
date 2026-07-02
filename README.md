@@ -34,8 +34,11 @@ uv run pyright                       # strict type-check (app code)
 ```
 
 The app runs on **PostgreSQL** (`docker compose up -d db`); the test suite points `DATABASE_URL`
-at a throwaway sqlite file so it needs no containers. Integration tests against real services live
-in arvel's own `tests/integration` (testcontainers).
+at a throwaway sqlite file so it needs no containers. The kit's own real-service tier lives in
+`tests/integration` (testcontainers — one smoke test per service, plus per-feature integration
+tests): `make test-integration` boots throwaway Postgres/Valkey/RabbitMQ/RustFS/Meilisearch/
+Keycloak/Mailpit containers and drives each arvel module through the kit's production boot.
+arvel's own `tests/integration` covers the framework side.
 
 ## What it demonstrates (and where)
 

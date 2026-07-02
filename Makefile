@@ -1,6 +1,6 @@
 # arvel-ecommerce-kit — common tasks. `make help` lists them.
 .DEFAULT_GOAL := help
-.PHONY: help install env up down setup migrate fresh seed bucket serve front front-build worker schedule test typecheck lint check
+.PHONY: help install env up down setup migrate fresh seed bucket serve front front-build worker schedule test test-integration typecheck lint check
 
 help: ## Show this help
 	@grep -hE '^[a-zA-Z_-]+:.*?## ' $(MAKEFILE_LIST) | awk 'BEGIN{FS=":.*?## "}{printf "  \033[36m%-12s\033[0m %s\n", $$1, $$2}'
@@ -54,6 +54,9 @@ schedule: ## Run due scheduled tasks
 
 test: ## Run the test suite (in-process sqlite; no infra needed)
 	uv run pytest
+
+test-integration: ## Run the real-service integration tier (testcontainers; needs Docker)
+	uv run pytest tests/integration -m integration
 
 typecheck: ## Strict type-check the app code
 	uv run pyright
