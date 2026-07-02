@@ -190,6 +190,16 @@ async def checkout(request: Request, data: CheckoutIn) -> OrderOut:
                 )
                 if variant is None:
                     abort(404, "Product variant not found")
+                if await Product.find(variant.product_id) is None:
+                    # the product was archived while sitting in the cart — the line is dead
+                    raise ValidationException(
+                        {
+                            "product_variant_id": [
+                                "An item in your cart is no longer available."
+                            ]
+                        },
+                        status=409,
+                    )
                 if variant.stock < item.quantity:
                     # rolls the whole transaction back — no stock taken, no order created
                     raise ValidationException(

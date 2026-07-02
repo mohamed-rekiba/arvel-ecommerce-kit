@@ -38,6 +38,8 @@ export * from './apiAdminProductsIndex400Extra';
 export * from './apiAdminProductsIndexParams';
 export * from './apiAdminProductsMediaDestroy400';
 export * from './apiAdminProductsMediaDestroy400Extra';
+export * from './apiAdminProductsRestore400';
+export * from './apiAdminProductsRestore400Extra';
 export * from './apiAdminProductsShow400';
 export * from './apiAdminProductsShow400Extra';
 export * from './apiAdminProductsStore400';

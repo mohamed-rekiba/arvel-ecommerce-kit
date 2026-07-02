@@ -7,6 +7,7 @@ collection and each upload generates ``thumb`` + ``preview`` conversions automat
 from typing import Any, ClassVar, TypedDict
 
 from arvel import Model
+from arvel.database import SoftDeletes
 from arvel.localization import current_locale
 from arvel.media import HasMedia, MediaConversion
 
@@ -41,7 +42,7 @@ class SearchableProduct(TypedDict):
     ]  # Meilisearch searches the nested per-locale name/description
 
 
-class Product(HasMedia, Searchable, Model):
+class Product(HasMedia, Searchable, Model, SoftDeletes):
     __table_name__ = "products"
     __media_model__ = ProductMedia  # gallery items expose url/thumb/preview (media.md → extending Media)
     __fields__: ClassVar[dict[str, type]] = {

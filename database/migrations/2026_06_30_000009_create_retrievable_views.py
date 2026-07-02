@@ -21,7 +21,11 @@ from arvel.database import Migration, Schema
 # the views only need the columns that drive retrievability + the keys; they're membership sets, so a
 # unique index on id makes them index lookups (EXISTS / refresh CONCURRENTLY).
 _categories = sa.table(
-    "categories", sa.column("id"), sa.column("parent_id"), sa.column("published")
+    "categories",
+    sa.column("id"),
+    sa.column("parent_id"),
+    sa.column("published"),
+    sa.column("deleted_at"),
 )
 _vendors = sa.table("vendors", sa.column("id"), sa.column("published"))
 _products = sa.table(
@@ -30,6 +34,7 @@ _products = sa.table(
     sa.column("category_id"),
     sa.column("vendor_id"),
     sa.column("published"),
+    sa.column("deleted_at"),
 )
 
 
@@ -43,13 +48,16 @@ def _effective_published() -> Any:
     base = sa.select(
         _categories.c.id.label("origin"),
         _categories.c.parent_id.label("parent_id"),
-        _truth(_categories.c.published).label("ok"),
+        # an archived category (or ancestor) breaks the chain exactly like an unpublished one
+        (
+            _truth(_categories.c.published) * _truth(_categories.c.deleted_at.is_(None))
+        ).label("ok"),
     ).cte("eff_chain", recursive=True)
     parent = _categories.alias("ancestor")
     step = sa.select(
         base.c.origin,
         parent.c.parent_id,
-        base.c.ok * _truth(parent.c.published),
+        base.c.ok * _truth(parent.c.published) * _truth(parent.c.deleted_at.is_(None)),
     ).select_from(base.join(parent, parent.c.id == base.c.parent_id))
     chain = base.union_all(step)
     return (
@@ -74,6 +82,9 @@ def _retrievable_products_select() -> Any:
             )
         )
         .where(_products.c.published)
+        .where(
+            _products.c.deleted_at.is_(None)
+        )  # archived products are never retrievable
         # a vendor, if set, must be published; a first-party product (no vendor) is allowed
         .where(sa.or_(_products.c.vendor_id.is_(None), _vendors.c.published))
         .where(eff.c.eff == 1)
@@ -103,6 +114,9 @@ def _retrievable_categories_select() -> Any:
         sa.select(_categories.c.id)  # membership set
         .select_from(_categories.join(eff, eff.c.category_id == _categories.c.id))
         .where(eff.c.eff == 1)
+        .where(
+            _categories.c.deleted_at.is_(None)
+        )  # archived categories are never retrievable
         .where(has_retrievable_product)
     )
 

@@ -3,6 +3,7 @@
 from typing import Any, ClassVar
 
 from arvel import Model
+from arvel.database import SoftDeletes
 from arvel.localization import current_locale
 
 from app.casts.translations import TranslationCast, TranslationsCast
@@ -11,7 +12,7 @@ SUPPORTED_LOCALES = {"en", "fr"}
 DEFAULT_LOCALE = "en"
 
 
-class Category(Model):
+class Category(Model, SoftDeletes):
     __table_name__ = "categories"
     __fields__: ClassVar[dict[str, type]] = {
         "slug": str,

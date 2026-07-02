@@ -26,6 +26,7 @@ import type {
   ApiAdminProductsIndex400,
   ApiAdminProductsIndexParams,
   ApiAdminProductsMediaDestroy400,
+  ApiAdminProductsRestore400,
   ApiAdminProductsShow400,
   ApiAdminProductsStore400,
   ApiAdminProductsUpdate400,
@@ -955,8 +956,8 @@ export const getApiAdminProductsIndexUrl = (params?: ApiAdminProductsIndexParams
 }
 
 /**
- * List **all** products (admin) — including hidden ones — each annotated with `is_visible`
- * (the with_visibility scope adds the inline EXISTS column; one query for the page).
+ * List **all** products (admin) — including hidden ones — each annotated with `is_visible`.
+ * ``archived=true`` lists the soft-deleted (recoverable) rows instead.
  * @summary ApiAdminProductsIndex
  */
 export const apiAdminProductsIndex = async (params?: ApiAdminProductsIndexParams, options?: RequestInit): Promise<apiAdminProductsIndexResponse> => {
@@ -1228,7 +1229,7 @@ export const getApiAdminProductsDestroyUrl = (id: number,) => {
 }
 
 /**
- * Delete a product (admins only; 404 to non-admins).
+ * ARCHIVE a product (soft delete — order history intact, restorable; 404 to non-admins).
  * @summary ApiAdminProductsDestroy
  */
 export const apiAdminProductsDestroy = async (id: number, options?: RequestInit): Promise<apiAdminProductsDestroyResponse> => {
@@ -1237,6 +1238,51 @@ export const apiAdminProductsDestroy = async (id: number, options?: RequestInit)
   {
     ...options,
     method: 'DELETE'
+
+
+  }
+);}
+
+
+
+export type apiAdminProductsRestoreResponse200 = {
+  data: AdminProductOut
+  status: 200
+}
+
+export type apiAdminProductsRestoreResponse400 = {
+  data: ApiAdminProductsRestore400
+  status: 400
+}
+
+export type apiAdminProductsRestoreResponseSuccess = (apiAdminProductsRestoreResponse200) & {
+  headers: Headers;
+};
+export type apiAdminProductsRestoreResponseError = (apiAdminProductsRestoreResponse400) & {
+  headers: Headers;
+};
+
+export type apiAdminProductsRestoreResponse = (apiAdminProductsRestoreResponseSuccess | apiAdminProductsRestoreResponseError)
+
+export const getApiAdminProductsRestoreUrl = (id: number,) => {
+
+
+
+
+  return `/api/admin/products/${id}/restore`
+}
+
+/**
+ * Bring an archived product back — visibility flags are untouched, so a hidden product
+ * restores as hidden.
+ * @summary ApiAdminProductsRestore
+ */
+export const apiAdminProductsRestore = async (id: number, options?: RequestInit): Promise<apiAdminProductsRestoreResponse> => {
+
+  return apiFetch<apiAdminProductsRestoreResponse>(getApiAdminProductsRestoreUrl(id),
+  {
+    ...options,
+    method: 'POST'
 
 
   }

@@ -98,7 +98,9 @@ export const api = {
     return res.token;
   },
   me: () => request<User>("GET", "/user"),
-  products: (page = 1) => request<Paginated<AdminProduct>>("GET", `/admin/products?page=${page}`),
+  products: (page = 1, archived = false) =>
+    request<Paginated<AdminProduct>>("GET", `/admin/products?page=${page}&archived=${archived}`),
+  restoreProduct: (id: number) => request<AdminProduct>("POST", `/admin/products/${id}/restore`),
   productDetail: (id: number) => request<AdminProductDetailOut>("GET", `/admin/products/${id}`),
   categories: () =>
     request<Paginated<{ id: number; slug: string; translations: Translate[]; published: boolean }>>(

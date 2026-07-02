@@ -6,8 +6,7 @@
  * OpenAPI spec version: 0.1.0
  */
 
-export type ApiAdminProductsIndexParams = {
-per_page?: number;
-page?: number;
-archived?: boolean;
-};
+/**
+ * @nullable
+ */
+export type ApiAdminProductsRestore400Extra = {[key: string]: unknown} | unknown[] | null;

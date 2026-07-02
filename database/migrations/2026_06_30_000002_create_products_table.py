@@ -21,6 +21,7 @@ class CreateProductsTable(Migration):
             t.btree_index(
                 "translations->'en'->>'name'"
             )  # fast filter/sort on the English name (i18n)
+            t.soft_deletes()
             t.timestamps()
             # product images live in the media library (HasMedia / media table), not a column
 
