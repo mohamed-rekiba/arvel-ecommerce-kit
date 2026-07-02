@@ -348,6 +348,45 @@ class AdminProductDetailOut(Schema):
     gallery: list["GalleryImageOut"]
 
 
+class AdminOrderPaymentOut(Schema):
+    id: int
+    charge_id: str
+    amount_cents: int
+    status: PaymentStatus
+    created_at: str | None
+
+
+class AdminOrderEventOut(Schema):
+    """One line of the order's history (from the activity trail)."""
+
+    description: str
+    causer_id: int | None
+    properties: dict[str, str]
+    created_at: str | None
+
+
+class AdminOrderCustomerOut(Schema):
+    id: int
+    name: str
+    email: str
+
+
+class AdminOrderDetailOut(Schema):
+    id: int
+    status: OrderStatus
+    contact_email: str
+    address: AddressOut
+    subtotal_cents: int
+    shipping_cents: int
+    tax_cents: int
+    total_cents: int
+    currency: Currency
+    customer: AdminOrderCustomerOut | None  # None = a guest order
+    items: list[OrderLineOut]
+    payments: list[AdminOrderPaymentOut]
+    history: list[AdminOrderEventOut]
+
+
 class AdminUserOut(Schema):
     id: int
     name: str

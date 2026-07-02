@@ -924,19 +924,19 @@
         "operationId": "api.media.conversion",
         "parameters": [
           {
-            "name": "id",
+            "name": "conversion",
             "in": "path",
             "schema": {
-              "type": "integer"
+              "type": "string"
             },
             "required": true,
             "deprecated": false
           },
           {
-            "name": "conversion",
+            "name": "id",
             "in": "path",
             "schema": {
-              "type": "string"
+              "type": "integer"
             },
             "required": true,
             "deprecated": false
@@ -1081,7 +1081,7 @@
         "operationId": "api.admin.products.media.destroy",
         "parameters": [
           {
-            "name": "id",
+            "name": "media_id",
             "in": "path",
             "schema": {
               "type": "integer"
@@ -1090,7 +1090,7 @@
             "deprecated": false
           },
           {
-            "name": "media_id",
+            "name": "id",
             "in": "path",
             "schema": {
               "type": "integer"
@@ -2943,19 +2943,19 @@
         "operationId": "api.admin.users.roles.revoke",
         "parameters": [
           {
-            "name": "id",
+            "name": "role",
             "in": "path",
             "schema": {
-              "type": "integer"
+              "type": "string"
             },
             "required": true,
             "deprecated": false
           },
           {
-            "name": "role",
+            "name": "id",
             "in": "path",
             "schema": {
-              "type": "string"
+              "type": "integer"
             },
             "required": true,
             "deprecated": false
@@ -3786,6 +3786,81 @@
         ]
       }
     },
+    "/api/admin/orders/{id}": {
+      "get": {
+        "summary": "ApiAdminOrdersShow",
+        "description": "Everything a staff member needs on one order: lines (purchase snapshots), breakdown,\naddress + contact, the customer link (or guest label), payment + webhook-backed states, and\nthe transition history from the activity trail. Requires orders.view.",
+        "operationId": "api.admin.orders.show",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "schema": {
+              "type": "integer"
+            },
+            "required": true,
+            "deprecated": false
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Request fulfilled, document follows",
+            "headers": {},
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AdminOrderDetailOut"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request syntax or unsupported method",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "status_code": {
+                      "type": "integer"
+                    },
+                    "detail": {
+                      "type": "string"
+                    },
+                    "extra": {
+                      "additionalProperties": {},
+                      "type": [
+                        "null",
+                        "object",
+                        "array"
+                      ]
+                    }
+                  },
+                  "type": "object",
+                  "required": [
+                    "detail",
+                    "status_code"
+                  ],
+                  "description": "Validation Exception",
+                  "examples": [
+                    {
+                      "status_code": 400,
+                      "detail": "Bad Request",
+                      "extra": {}
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        },
+        "deprecated": false,
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ]
+      }
+    },
     "/api/admin/orders/{id}/status": {
       "post": {
         "summary": "ApiAdminOrdersStatus",
@@ -4375,6 +4450,178 @@
           "role"
         ],
         "title": "AdminMeOut"
+      },
+      "AdminOrderCustomerOut": {
+        "properties": {
+          "id": {
+            "type": "integer"
+          },
+          "name": {
+            "type": "string"
+          },
+          "email": {
+            "type": "string"
+          }
+        },
+        "type": "object",
+        "required": [
+          "email",
+          "id",
+          "name"
+        ],
+        "title": "AdminOrderCustomerOut"
+      },
+      "AdminOrderDetailOut": {
+        "properties": {
+          "id": {
+            "type": "integer"
+          },
+          "status": {
+            "$ref": "#/components/schemas/OrderStatus"
+          },
+          "contact_email": {
+            "type": "string"
+          },
+          "address": {
+            "$ref": "#/components/schemas/AddressOut"
+          },
+          "subtotal_cents": {
+            "type": "integer"
+          },
+          "shipping_cents": {
+            "type": "integer"
+          },
+          "tax_cents": {
+            "type": "integer"
+          },
+          "total_cents": {
+            "type": "integer"
+          },
+          "currency": {
+            "$ref": "#/components/schemas/Currency"
+          },
+          "customer": {
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/AdminOrderCustomerOut"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/OrderLineOut"
+            },
+            "type": "array"
+          },
+          "payments": {
+            "items": {
+              "$ref": "#/components/schemas/AdminOrderPaymentOut"
+            },
+            "type": "array"
+          },
+          "history": {
+            "items": {
+              "$ref": "#/components/schemas/AdminOrderEventOut"
+            },
+            "type": "array"
+          }
+        },
+        "type": "object",
+        "required": [
+          "address",
+          "contact_email",
+          "currency",
+          "customer",
+          "history",
+          "id",
+          "items",
+          "payments",
+          "shipping_cents",
+          "status",
+          "subtotal_cents",
+          "tax_cents",
+          "total_cents"
+        ],
+        "title": "AdminOrderDetailOut"
+      },
+      "AdminOrderEventOut": {
+        "properties": {
+          "description": {
+            "type": "string"
+          },
+          "causer_id": {
+            "oneOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "properties": {
+            "additionalProperties": {
+              "type": "string"
+            },
+            "type": "object"
+          },
+          "created_at": {
+            "oneOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "type": "object",
+        "required": [
+          "causer_id",
+          "created_at",
+          "description",
+          "properties"
+        ],
+        "title": "AdminOrderEventOut"
+      },
+      "AdminOrderPaymentOut": {
+        "properties": {
+          "id": {
+            "type": "integer"
+          },
+          "charge_id": {
+            "type": "string"
+          },
+          "amount_cents": {
+            "type": "integer"
+          },
+          "status": {
+            "$ref": "#/components/schemas/PaymentStatus"
+          },
+          "created_at": {
+            "oneOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "type": "object",
+        "required": [
+          "amount_cents",
+          "charge_id",
+          "created_at",
+          "id",
+          "status"
+        ],
+        "title": "AdminOrderPaymentOut"
       },
       "AdminProductDetailOut": {
         "properties": {

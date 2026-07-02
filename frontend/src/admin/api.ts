@@ -14,6 +14,7 @@ export const token = {
 import type {
   ActivityOut,
   AdminCategoryOut,
+  AdminOrderDetailOut,
   AdminUserDetailOut,
   AdminUserOut,
   AdminVendorOut,
@@ -49,6 +50,7 @@ export type Order = OrderOut;
 export type ProductDetail = AdminProductDetailOut;
 export type AdminCategory = AdminCategoryOut;
 export type AdminUser = AdminUserOut;
+export type AdminOrderDetail = AdminOrderDetailOut;
 export type AdminUserDetail = AdminUserDetailOut;
 export type Vendor = AdminVendorOut;
 export type Variant = VariantOut;
@@ -148,6 +150,7 @@ export const api = {
     request<{ user_id: number; roles: string[] }>("POST", `/admin/users/${userId}/roles`, { role }),
   audit: () => request<Activity[]>("GET", "/admin/audit"),
   orders: () => request<Order[]>("GET", "/admin/orders"),
+  adminOrder: (id: number) => request<AdminOrderDetailOut>("GET", `/admin/orders/${id}`),
   updateOrderStatus: (id: number, status: string) =>
     request<Order>("POST", `/admin/orders/${id}/status`, { status }),
 };

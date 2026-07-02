@@ -344,3 +344,53 @@ def test_order_lines_carry_the_purchase_snapshot(client) -> None:
     order = client.post("/api/checkout", json=checkout_body(), headers=customer).json()
     line = order["items"][0]
     assert (line["product_name"], line["variant_name"]) == ("Tee", "S")
+
+
+def test_admin_order_detail_shows_everything(client) -> None:
+    """S14: lines with purchase snapshots, breakdown, contact/address, customer link, payment
+    records, and the transition history — behind orders.view (deny model proven)."""
+    customer = _login(client, "cara@example.com", "secret-cara")
+    admin = _login(client, "admin@example.com", "secret-admin")
+    client.post(
+        "/api/cart/items",
+        json={"product_variant_id": 1, "quantity": 2},
+        headers=customer,
+    )
+    order_id = client.post(
+        "/api/checkout", json=checkout_body(), headers=customer
+    ).json()["id"]
+    client.post(
+        f"/api/admin/orders/{order_id}/status", json={"status": "paid"}, headers=admin
+    )
+
+    detail = client.get(f"/api/admin/orders/{order_id}", headers=admin)
+    assert detail.status_code == 200, detail.text
+    body = detail.json()
+    assert body["customer"]["email"] == "cara@example.com"
+    assert body["items"][0]["product_name"] == "Tee"
+    assert body["address"]["city"] == "Portland"
+    assert body["payments"] == []  # never paid through the gateway in this test
+    # the transition is in the history with its properties
+    changes = [e for e in body["history"] if e["description"] == "order status changed"]
+    assert changes and changes[-1]["properties"] == {"from": "pending", "to": "paid"}
+
+    # a guest order labels the contact and has no customer link
+    guest_cart = client.post(
+        "/api/cart/items", json={"product_variant_id": 1, "quantity": 1}
+    ).json()["cart_token"]
+    guest_order = client.post(
+        "/api/checkout",
+        json=checkout_body(email="guest@example.com"),
+        headers={"X-Cart-Token": guest_cart},
+    ).json()
+    guest_detail = client.get(
+        f"/api/admin/orders/{guest_order['id']}", headers=admin
+    ).json()
+    assert guest_detail["customer"] is None
+    assert guest_detail["contact_email"] == "guest@example.com"
+
+    # deny model: a customer (no orders.view) 403s; a guest 401s
+    assert (
+        client.get(f"/api/admin/orders/{order_id}", headers=customer).status_code == 403
+    )
+    assert client.get(f"/api/admin/orders/{order_id}").status_code == 401
