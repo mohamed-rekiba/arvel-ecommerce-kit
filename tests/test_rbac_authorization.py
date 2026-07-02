@@ -62,7 +62,11 @@ def _auth(client, email):
 def _create_product(client, headers, name):
     return client.post(
         "/api/admin/products",
-        json={"category_id": 1, "name": name, "price_cents": 1500},
+        json={
+            "category_id": 1,
+            "price_cents": 1500,
+            "translations": {"en": {"name": name}},
+        },
         headers=headers,
     )
 

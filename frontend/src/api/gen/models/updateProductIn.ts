@@ -5,9 +5,12 @@
  * The arvel-ecommerce-kit API.
  * OpenAPI spec version: 0.1.0
  */
+import type { UpdateProductInTranslations } from './updateProductInTranslations';
 
 export interface UpdateProductIn {
-  name?: string | null;
+  category_id?: number | null;
   price_cents?: number | null;
   status?: string | null;
+  published?: boolean | null;
+  translations?: UpdateProductInTranslations;
 }

@@ -1074,6 +1074,93 @@
         ]
       }
     },
+    "/api/admin/products/{id}/media/{media_id}": {
+      "delete": {
+        "summary": "ApiAdminProductsMediaDestroy",
+        "description": "Remove ONE gallery image (row + stored files via HasMedia.delete_media); returns the\nupdated gallery. catalog.update authority; a foreign media id can't cross products.",
+        "operationId": "api.admin.products.media.destroy",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "schema": {
+              "type": "integer"
+            },
+            "required": true,
+            "deprecated": false
+          },
+          {
+            "name": "media_id",
+            "in": "path",
+            "schema": {
+              "type": "integer"
+            },
+            "required": true,
+            "deprecated": false
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Request fulfilled, document follows",
+            "headers": {},
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/GalleryImageOut"
+                  },
+                  "type": "array"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request syntax or unsupported method",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "status_code": {
+                      "type": "integer"
+                    },
+                    "detail": {
+                      "type": "string"
+                    },
+                    "extra": {
+                      "additionalProperties": {},
+                      "type": [
+                        "null",
+                        "object",
+                        "array"
+                      ]
+                    }
+                  },
+                  "type": "object",
+                  "required": [
+                    "detail",
+                    "status_code"
+                  ],
+                  "description": "Validation Exception",
+                  "examples": [
+                    {
+                      "status_code": 400,
+                      "detail": "Bad Request",
+                      "extra": {}
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        },
+        "deprecated": false,
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ]
+      }
+    },
     "/api/admin/products": {
       "get": {
         "summary": "ApiAdminProductsIndex",
@@ -1165,7 +1252,7 @@
       },
       "post": {
         "summary": "ApiAdminProductsStore",
-        "description": "Create a product (admins only). The name/description are stored in the default (en) locale.",
+        "description": "Create a product (admins only) with per-locale content (en required).",
         "operationId": "api.admin.products.store",
         "requestBody": {
           "content": {
@@ -1327,9 +1414,82 @@
       }
     },
     "/api/admin/products/{id}": {
+      "get": {
+        "summary": "ApiAdminProductsShow",
+        "description": "One product with variants + gallery \u2014 the editor's read (hidden products included).",
+        "operationId": "api.admin.products.show",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "schema": {
+              "type": "integer"
+            },
+            "required": true,
+            "deprecated": false
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Request fulfilled, document follows",
+            "headers": {},
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AdminProductDetailOut"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request syntax or unsupported method",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "status_code": {
+                      "type": "integer"
+                    },
+                    "detail": {
+                      "type": "string"
+                    },
+                    "extra": {
+                      "additionalProperties": {},
+                      "type": [
+                        "null",
+                        "object",
+                        "array"
+                      ]
+                    }
+                  },
+                  "type": "object",
+                  "required": [
+                    "detail",
+                    "status_code"
+                  ],
+                  "description": "Validation Exception",
+                  "examples": [
+                    {
+                      "status_code": 400,
+                      "detail": "Bad Request",
+                      "extra": {}
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        },
+        "deprecated": false,
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ]
+      },
       "put": {
         "summary": "ApiAdminProductsUpdate",
-        "description": "Update a product (admins only; 404 to non-admins so existence isn't leaked).",
+        "description": "Update a product \u2014 per-locale content, price, category, status, visibility (admins only;\n404 to non-admins so existence isn't leaked).",
         "operationId": "api.admin.products.update",
         "parameters": [
           {
@@ -3541,6 +3701,63 @@
         ],
         "title": "AdminMeOut"
       },
+      "AdminProductDetailOut": {
+        "properties": {
+          "id": {
+            "type": "integer"
+          },
+          "slug": {
+            "type": "string"
+          },
+          "translations": {
+            "items": {
+              "$ref": "#/components/schemas/Translate"
+            },
+            "type": "array"
+          },
+          "status": {
+            "type": "string"
+          },
+          "published": {
+            "type": "boolean"
+          },
+          "is_visible": {
+            "type": "boolean"
+          },
+          "price_cents": {
+            "type": "integer"
+          },
+          "category_id": {
+            "type": "integer"
+          },
+          "variants": {
+            "items": {
+              "$ref": "#/components/schemas/VariantOut"
+            },
+            "type": "array"
+          },
+          "gallery": {
+            "items": {
+              "$ref": "#/components/schemas/GalleryImageOut"
+            },
+            "type": "array"
+          }
+        },
+        "type": "object",
+        "required": [
+          "category_id",
+          "gallery",
+          "id",
+          "is_visible",
+          "price_cents",
+          "published",
+          "slug",
+          "status",
+          "translations",
+          "variants"
+        ],
+        "title": "AdminProductDetailOut"
+      },
       "AdminProductOut": {
         "properties": {
           "id": {
@@ -4126,28 +4343,21 @@
           "category_id": {
             "type": "integer"
           },
-          "name": {
-            "type": "string"
-          },
           "price_cents": {
             "type": "integer"
           },
-          "description": {
-            "oneOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ]
+          "translations": {
+            "additionalProperties": {
+              "$ref": "#/components/schemas/TranslationFieldsIn"
+            },
+            "type": "object"
           }
         },
         "type": "object",
         "required": [
           "category_id",
-          "name",
-          "price_cents"
+          "price_cents",
+          "translations"
         ],
         "title": "ProductIn"
       },
@@ -4433,6 +4643,28 @@
         ],
         "title": "Translate"
       },
+      "TranslationFieldsIn": {
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "description": {
+            "oneOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "type": "object",
+        "required": [
+          "name"
+        ],
+        "title": "TranslationFieldsIn"
+      },
       "UpdateItemIn": {
         "properties": {
           "quantity": {
@@ -4447,10 +4679,10 @@
       },
       "UpdateProductIn": {
         "properties": {
-          "name": {
+          "category_id": {
             "oneOf": [
               {
-                "type": "string"
+                "type": "integer"
               },
               {
                 "type": "null"
@@ -4471,6 +4703,29 @@
             "oneOf": [
               {
                 "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "published": {
+            "oneOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "translations": {
+            "oneOf": [
+              {
+                "additionalProperties": {
+                  "$ref": "#/components/schemas/TranslationFieldsIn"
+                },
+                "type": "object"
               },
               {
                 "type": "null"

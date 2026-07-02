@@ -244,17 +244,27 @@ class CartOut(Schema, omit_defaults=True):
 # --- admin products -----------------------------------------------------------
 
 
-class ProductIn(Schema):
-    category_id: int
+class TranslationFieldsIn(Schema):
+    """One locale's content for a product/category."""
+
     name: str
-    price_cents: int
     description: str | None = None
 
 
+class ProductIn(Schema):
+    category_id: int
+    price_cents: int
+    translations: dict[
+        str, TranslationFieldsIn
+    ]  # locale → content; locales are whitelisted
+
+
 class UpdateProductIn(Schema):
-    name: str | None = None
+    category_id: int | None = None
     price_cents: int | None = None
     status: str | None = None
+    published: bool | None = None
+    translations: dict[str, TranslationFieldsIn] | None = None
 
 
 # --- checkout / orders / payments ---------------------------------------------
@@ -321,6 +331,21 @@ class OrderStatusIn(Schema):
 class MetricsOut(Schema):
     orders_placed: int
     orders_fulfilled: int
+
+
+class AdminProductDetailOut(Schema):
+    """Everything the product editor needs in one read."""
+
+    id: int
+    slug: str
+    translations: list[Translate]
+    status: str
+    published: bool
+    is_visible: bool
+    price_cents: int
+    category_id: int
+    variants: list["VariantOut"]
+    gallery: list["GalleryImageOut"]
 
 
 class VariantIn(Schema):

@@ -2,19 +2,16 @@
 import Button from "primevue/button";
 import Column from "primevue/column";
 import DataTable from "primevue/datatable";
-import InputNumber from "primevue/inputnumber";
-import InputText from "primevue/inputtext";
 import Tag from "primevue/tag";
 import { onMounted, ref } from "vue";
+import { useRouter } from "vue-router";
 import { type AdminProduct, ApiError, api, name } from "../api";
+
+const router = useRouter();
 
 const products = ref<AdminProduct[]>([]);
 const status = ref<"loading" | "error" | "ready">("loading");
 const notice = ref<string | null>(null);
-
-const form = ref({ category_id: 1, name: "", price_cents: 1999, description: "" });
-const creating = ref(false);
-const showForm = ref(false);
 
 async function load() {
   status.value = "loading";
@@ -25,22 +22,6 @@ async function load() {
     status.value = "error";
     notice.value =
       e instanceof ApiError && e.status === 403 ? "You lack catalog access." : "Failed to load products.";
-  }
-}
-
-async function create() {
-  creating.value = true;
-  notice.value = null;
-  try {
-    await api.createProduct({ ...form.value });
-    form.value.name = "";
-    showForm.value = false;
-    await load();
-  } catch (e) {
-    notice.value =
-      e instanceof ApiError && e.status === 403 ? "Your role can't create products." : "Create failed.";
-  } finally {
-    creating.value = false;
   }
 }
 
@@ -65,20 +46,10 @@ onMounted(load);
         <h1>Products</h1>
         <p class="sub">Every catalog item, including those hidden from the storefront.</p>
       </div>
-      <Button
-        :label="showForm ? 'Close' : 'New product'"
-        :icon="showForm ? 'pi pi-times' : 'pi pi-plus'"
-        @click="showForm = !showForm"
-      />
+      <Button label="New product" icon="pi pi-plus" @click="router.push('/admin/products/new')" />
     </header>
 
     <p v-if="notice" class="notice" role="alert">{{ notice }}</p>
-
-    <form v-if="showForm" class="create" @submit.prevent="create">
-      <InputText v-model="form.name" placeholder="Product name" class="grow" />
-      <InputNumber v-model="form.price_cents" :min="0" placeholder="Price (cents)" />
-      <Button type="submit" :label="creating ? 'Adding…' : 'Add'" :loading="creating" :disabled="!form.name" />
-    </form>
 
     <div class="panel">
       <DataTable
@@ -93,8 +64,10 @@ onMounted(load);
         <template #empty><p class="empty">No products.</p></template>
         <Column header="Product">
           <template #body="{ data }">
-            <div class="pname">{{ name(data) }}</div>
-            <div class="pslug">/{{ data.slug }}</div>
+            <RouterLink class="plink" :to="`/admin/products/${data.id}`">
+              <div class="pname">{{ name(data) }}</div>
+              <div class="pslug">/{{ data.slug }}</div>
+            </RouterLink>
           </template>
         </Column>
         <Column header="Status">
@@ -110,8 +83,15 @@ onMounted(load);
             />
           </template>
         </Column>
-        <Column header="" style="width: 5rem">
+        <Column header="" style="width: 8rem">
           <template #body="{ data }">
+            <Button
+              icon="pi pi-pencil"
+              text
+              rounded
+              aria-label="Edit"
+              @click="router.push(`/admin/products/${data.id}`)"
+            />
             <Button icon="pi pi-trash" text rounded severity="danger" aria-label="Delete" @click="remove(data)" />
           </template>
         </Column>
@@ -132,4 +112,6 @@ onMounted(load);
 .pname { font-weight: 600; font-size: 13.5px; }
 .pslug { color: var(--text-subtle); font-size: 11.5px; }
 .empty { text-align: center; color: var(--text-subtle); padding: 24px 0; }
+.plink { text-decoration: none; color: inherit; display: block; }
+.plink:hover .pname { text-decoration: underline; }
 </style>

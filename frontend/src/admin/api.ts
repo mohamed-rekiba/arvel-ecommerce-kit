@@ -13,23 +13,35 @@ export const token = {
 // document). Regenerate after backend changes: make openapi && npm run api:generate.
 import type {
   ActivityOut,
+  AdminProductDetailOut,
   AdminProductOut,
+  GalleryImageOut,
   OrderLineOut,
   OrderOut,
   OrderStatus,
+  ProductIn,
   RoleOut,
+  StockAdjustIn,
   Translate,
+  UpdateProductIn,
   UserOut,
+  VariantIn,
+  VariantOut,
+  VariantUpdateIn,
 } from "../api/gen/models";
 
 export type Translation = Translate;
+export type { Translate };
 export type AdminProduct = AdminProductOut;
 export type Role = RoleOut;
 export type Activity = ActivityOut;
 export type User = UserOut;
 export type OrderLine = OrderLineOut;
 export type Order = OrderOut;
-export type { OrderStatus };
+export type ProductDetail = AdminProductDetailOut;
+export type Variant = VariantOut;
+export type GalleryImage = GalleryImageOut;
+export type { OrderStatus, ProductIn, StockAdjustIn, UpdateProductIn, VariantIn, VariantUpdateIn };
 
 // arvel's LengthAwarePaginator JSON shape (DR-0022), generic over the row type.
 export interface Paginated<T> {
@@ -49,24 +61,26 @@ export const ORDER_TRANSITIONS: Record<OrderStatus, OrderStatus[]> = {
   cancelled: [],
 };
 
-export class ApiError extends Error {
-  constructor(public status: number, message: string) {
-    super(message);
-  }
-}
+export { ApiError } from "../api/http";
+import { apiFetch } from "../api/http";
 
 async function request<T>(method: string, path: string, body?: unknown): Promise<T> {
-  const headers: Record<string, string> = { Accept: "application/json" };
   const t = token.get();
-  if (t) headers["Authorization"] = `Bearer ${t}`;
-  if (body !== undefined) headers["Content-Type"] = "application/json";
-  const res = await fetch(`/api${path}`, {
+  // the ADMIN bearer overrides the storefront token the shared mutator would attach
+  return apiFetch<T>(`/api${path}`, {
     method,
-    headers,
+    headers: t ? { Authorization: `Bearer ${t}` } : undefined,
     body: body !== undefined ? JSON.stringify(body) : undefined,
   });
-  if (!res.ok) throw new ApiError(res.status, `API ${res.status} for ${method} ${path}`);
-  return (await res.json()) as T;
+}
+
+async function upload<T>(path: string, form: FormData): Promise<T> {
+  const t = token.get();
+  return apiFetch<T>(`/api${path}`, {
+    method: "POST",
+    headers: t ? { Authorization: `Bearer ${t}` } : undefined,
+    body: form,
+  });
 }
 
 export const api = {
@@ -77,11 +91,31 @@ export const api = {
   },
   me: () => request<User>("GET", "/user"),
   products: (page = 1) => request<Paginated<AdminProduct>>("GET", `/admin/products?page=${page}`),
-  createProduct: (body: { category_id: number; name: string; price_cents: number; description?: string }) =>
-    request<AdminProduct>("POST", "/admin/products", body),
-  updateProduct: (id: number, body: { name?: string; price_cents?: number; status?: string }) =>
+  productDetail: (id: number) => request<AdminProductDetailOut>("GET", `/admin/products/${id}`),
+  categories: () =>
+    request<Paginated<{ id: number; slug: string; translations: Translate[]; published: boolean }>>(
+      "GET",
+      "/admin/categories?per_page=100",
+    ),
+  createProduct: (body: ProductIn) => request<AdminProduct>("POST", "/admin/products", body),
+  updateProduct: (id: number, body: UpdateProductIn) =>
     request<AdminProduct>("PUT", `/admin/products/${id}`, body),
   deleteProduct: (id: number) => request<{ message: string }>("DELETE", `/admin/products/${id}`),
+  variants: (productId: number) => request<VariantOut[]>("GET", `/admin/products/${productId}/variants`),
+  createVariant: (productId: number, body: VariantIn) =>
+    request<VariantOut>("POST", `/admin/products/${productId}/variants`, body),
+  updateVariant: (id: number, body: VariantUpdateIn) =>
+    request<VariantOut>("PATCH", `/admin/variants/${id}`, body),
+  adjustStock: (id: number, body: StockAdjustIn) =>
+    request<VariantOut>("POST", `/admin/variants/${id}/stock`, body),
+  deleteVariant: (id: number) => request<{ message: string }>("DELETE", `/admin/variants/${id}`),
+  uploadImage: (productId: number, file: File) => {
+    const form = new FormData();
+    form.append("image", file);
+    return upload<GalleryImageOut[]>(`/admin/products/${productId}/image`, form);
+  },
+  deleteImage: (productId: number, mediaId: number) =>
+    request<GalleryImageOut[]>("DELETE", `/admin/products/${productId}/media/${mediaId}`),
   roles: () => request<Role[]>("GET", "/admin/roles"),
   assignRole: (userId: number, role: string) =>
     request<{ user_id: number; roles: string[] }>("POST", `/admin/users/${userId}/roles`, { role }),

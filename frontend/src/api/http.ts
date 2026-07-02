@@ -25,7 +25,8 @@ export async function apiFetch<T>(url: string, options: RequestInit): Promise<T>
   if (cart && !headers.has("X-Cart-Token")) headers.set("X-Cart-Token", cart);
   const auth = localStorage.getItem(AUTH_TOKEN_KEY);
   if (auth && !headers.has("Authorization")) headers.set("Authorization", `Bearer ${auth}`);
-  if (options.body !== undefined && !headers.has("Content-Type")) {
+  // JSON bodies are pre-stringified; FormData/Blob set their own content type (boundary included)
+  if (typeof options.body === "string" && !headers.has("Content-Type")) {
     headers.set("Content-Type", "application/json");
   }
 
