@@ -14,6 +14,8 @@ import type {
   AdminProductDetailOut,
   AdminProductOut,
   AdminProductPage,
+  AdminUserDetailOut,
+  AdminUserPage,
   AdminVendorOut,
   ApiAdminCategoriesDestroy400,
   ApiAdminCategoriesIndex400,
@@ -30,9 +32,12 @@ import type {
   ApiAdminProductsShow400,
   ApiAdminProductsStore400,
   ApiAdminProductsUpdate400,
+  ApiAdminUsersIndex400,
+  ApiAdminUsersIndexParams,
   ApiAdminUsersRoles400,
   ApiAdminUsersRolesAssign400,
   ApiAdminUsersRolesRevoke400,
+  ApiAdminUsersShow400,
   ApiAdminVariantsDestroy400,
   ApiAdminVariantsIndex400,
   ApiAdminVariantsStock400,
@@ -1719,6 +1724,101 @@ export const apiAdminVariantsStock = async (id: number,
     method: 'POST',
     headers: { 'Content-Type': 'application/json', ...options?.headers },
     body: JSON.stringify(stockAdjustIn)
+  }
+);}
+
+
+
+export type apiAdminUsersIndexResponse200 = {
+  data: AdminUserPage
+  status: 200
+}
+
+export type apiAdminUsersIndexResponse400 = {
+  data: ApiAdminUsersIndex400
+  status: 400
+}
+
+export type apiAdminUsersIndexResponseSuccess = (apiAdminUsersIndexResponse200) & {
+  headers: Headers;
+};
+export type apiAdminUsersIndexResponseError = (apiAdminUsersIndexResponse400) & {
+  headers: Headers;
+};
+
+export type apiAdminUsersIndexResponse = (apiAdminUsersIndexResponseSuccess | apiAdminUsersIndexResponseError)
+
+export const getApiAdminUsersIndexUrl = (params?: ApiAdminUsersIndexParams,) => {
+  const normalizedParams = new URLSearchParams();
+
+  Object.entries(params || {}).forEach(([key, value]) => {
+
+    if (value !== undefined) {
+      normalizedParams.append(key, value === null ? 'null' : String(value))
+    }
+  });
+
+  const stringifiedParams = normalizedParams.toString();
+
+  return stringifiedParams.length > 0 ? `/api/admin/users?${stringifiedParams}` : `/api/admin/users`
+}
+
+/**
+ * Search + paginate the user directory (name/email substring).
+ * @summary ApiAdminUsersIndex
+ */
+export const apiAdminUsersIndex = async (params?: ApiAdminUsersIndexParams, options?: RequestInit): Promise<apiAdminUsersIndexResponse> => {
+
+  return apiFetch<apiAdminUsersIndexResponse>(getApiAdminUsersIndexUrl(params),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+export type apiAdminUsersShowResponse200 = {
+  data: AdminUserDetailOut
+  status: 200
+}
+
+export type apiAdminUsersShowResponse400 = {
+  data: ApiAdminUsersShow400
+  status: 400
+}
+
+export type apiAdminUsersShowResponseSuccess = (apiAdminUsersShowResponse200) & {
+  headers: Headers;
+};
+export type apiAdminUsersShowResponseError = (apiAdminUsersShowResponse400) & {
+  headers: Headers;
+};
+
+export type apiAdminUsersShowResponse = (apiAdminUsersShowResponseSuccess | apiAdminUsersShowResponseError)
+
+export const getApiAdminUsersShowUrl = (id: number,) => {
+
+
+
+
+  return `/api/admin/users/${id}`
+}
+
+/**
+ * One user: profile basics, roles, and an order summary.
+ * @summary ApiAdminUsersShow
+ */
+export const apiAdminUsersShow = async (id: number, options?: RequestInit): Promise<apiAdminUsersShowResponse> => {
+
+  return apiFetch<apiAdminUsersShowResponse>(getApiAdminUsersShowUrl(id),
+  {
+    ...options,
+    method: 'GET'
+
+
   }
 );}
 

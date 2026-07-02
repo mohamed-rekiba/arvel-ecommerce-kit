@@ -50,6 +50,7 @@ class Permission(str, Enum):
     ORDERS_UPDATE = "orders.update"
     ROLES_MANAGE = "roles.manage"
     AUDIT_VIEW = "audit.view"
+    USERS_VIEW = "users.view"
 
 
 class RoleName(str, Enum):
@@ -69,11 +70,16 @@ ROLE_PERMISSIONS: dict[RoleName, list[Permission]] = {
         Permission.CATALOG_UPDATE,
         Permission.CATALOG_DELETE,
     ],
-    RoleName.ORDER_MANAGER: [Permission.ORDERS_VIEW, Permission.ORDERS_UPDATE],
+    RoleName.ORDER_MANAGER: [
+        Permission.ORDERS_VIEW,
+        Permission.ORDERS_UPDATE,
+        Permission.USERS_VIEW,  # an order manager can look up the customer behind an order
+    ],
     RoleName.SUPPORT: [
         Permission.CATALOG_VIEW,
         Permission.ORDERS_VIEW,
         Permission.AUDIT_VIEW,
+        Permission.USERS_VIEW,  # customer support's whole job
     ],
 }
 

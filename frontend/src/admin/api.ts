@@ -14,6 +14,8 @@ export const token = {
 import type {
   ActivityOut,
   AdminCategoryOut,
+  AdminUserDetailOut,
+  AdminUserOut,
   AdminVendorOut,
   CategoryIn,
   CategoryUpdateIn,
@@ -46,6 +48,8 @@ export type OrderLine = OrderLineOut;
 export type Order = OrderOut;
 export type ProductDetail = AdminProductDetailOut;
 export type AdminCategory = AdminCategoryOut;
+export type AdminUser = AdminUserOut;
+export type AdminUserDetail = AdminUserDetailOut;
 export type Vendor = AdminVendorOut;
 export type Variant = VariantOut;
 export type GalleryImage = GalleryImageOut;
@@ -136,6 +140,10 @@ export const api = {
   deleteImage: (productId: number, mediaId: number) =>
     request<GalleryImageOut[]>("DELETE", `/admin/products/${productId}/media/${mediaId}`),
   roles: () => request<Role[]>("GET", "/admin/roles"),
+  adminUsers: (q = "") => request<Paginated<AdminUserOut>>("GET", `/admin/users?q=${encodeURIComponent(q)}`),
+  adminUserDetail: (id: number) => request<AdminUserDetailOut>("GET", `/admin/users/${id}`),
+  revokeRole: (userId: number, role: string) =>
+    request<{ user_id: number; roles: string[] }>("DELETE", `/admin/users/${userId}/roles/${role}`),
   assignRole: (userId: number, role: string) =>
     request<{ user_id: number; roles: string[] }>("POST", `/admin/users/${userId}/roles`, { role }),
   audit: () => request<Activity[]>("GET", "/admin/audit"),

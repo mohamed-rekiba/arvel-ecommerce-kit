@@ -348,6 +348,32 @@ class AdminProductDetailOut(Schema):
     gallery: list["GalleryImageOut"]
 
 
+class AdminUserOut(Schema):
+    id: int
+    name: str
+    email: str
+    email_verified: bool
+    roles: list[str]
+
+
+class AdminUserPage(Schema):
+    data: list[AdminUserOut]
+    current_page: int
+    last_page: int
+    per_page: int
+    total: int
+
+
+class AdminUserDetailOut(Schema):
+    id: int
+    name: str
+    email: str
+    email_verified: bool
+    roles: list[str]
+    orders_count: int
+    total_spent_cents: int
+
+
 class CategoryIn(Schema):
     translations: dict[str, TranslationFieldsIn]
     parent_id: int | None = None
