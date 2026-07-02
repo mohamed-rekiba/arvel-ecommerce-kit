@@ -17,6 +17,7 @@ from app.controllers import admin_controller as admin
 from app.controllers import admin_product_controller as admin_products
 from app.controllers import admin_rbac_controller as rbac
 from app.controllers import admin_taxonomy_controller as taxonomy
+from app.controllers import admin_user_controller as admin_users
 from app.controllers import admin_variant_controller as admin_variants
 from app.controllers import auth_controller as auth
 from app.controllers import cart_controller as cart
@@ -201,6 +202,14 @@ Route.delete(
     admin_variants.destroy,
     name="api.admin.variants.destroy",
 ).status(200).middleware(Authenticate).secure("bearer")
+
+# --- Admin user directory (users.view; role mutations stay on roles.manage) --------------------
+Route.get("/admin/users", admin_users.index, name="api.admin.users.index").middleware(
+    Authenticate
+).secure("bearer")
+Route.get(
+    "/admin/users/{id:int}", admin_users.show, name="api.admin.users.show"
+).middleware(Authenticate).secure("bearer")
 
 # --- Admin RBAC + audit (roles.manage / audit.view; super-admin bypasses) -----
 Route.get("/admin/roles", rbac.roles_index, name="api.admin.roles.index").middleware(

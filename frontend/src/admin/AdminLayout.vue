@@ -26,7 +26,7 @@ function signOut() {
       <nav>
         <RouterLink to="/admin/dashboard" class="item"><svg viewBox="0 0 24 24" class="ic"><path d="M4 13h6V4H4zM14 20h6V4h-6zM4 20h6v-5H4z"/></svg>Dashboard</RouterLink>
         <RouterLink to="/admin/orders" class="item"><svg viewBox="0 0 24 24" class="ic"><path d="M6 2l1.5 3h9L18 2M4 7h16l-1.5 12H5.5z"/></svg>Orders</RouterLink>
-        <span class="item item--soon"><svg viewBox="0 0 24 24" class="ic"><circle cx="12" cy="8" r="3.5"/><path d="M5 20a7 7 0 0 1 14 0"/></svg>Customers<i>soon</i></span>
+        <RouterLink to="/admin/users" class="item" active-class="on"><svg viewBox="0 0 24 24" class="ic"><circle cx="12" cy="8" r="3.5"/><path d="M5 20a7 7 0 0 1 14 0"/></svg>Users</RouterLink>
       </nav>
 
       <p class="lbl">Catalog</p>
