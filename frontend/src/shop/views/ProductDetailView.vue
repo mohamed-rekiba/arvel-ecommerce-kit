@@ -147,7 +147,10 @@ watch(() => route.params.slug, load);
 .pdp__grid, .pdp__skeleton { display: grid; grid-template-columns: 1fr 1fr; gap: var(--space-16); align-items: start; }
 @media (max-width: 820px) { .pdp__grid, .pdp__skeleton { grid-template-columns: 1fr; gap: var(--space-8); } }
 .pdp__media { display: flex; flex-direction: column; gap: 12px; }
-.pdp__main { aspect-ratio: 3 / 4; border-radius: var(--radius-lg); overflow: hidden; background: var(--surface-2); }
+/* same 4:5 ratio as the card grid / hero (ProductCard.vue, HomeView.vue) — the View Transition morph
+   animates the box between the old (card) and new (PDP) rects, and a mismatched aspect ratio makes the
+   captured image visibly stretch/squish mid-animation. Matching ratios keeps the morph a clean scale. */
+.pdp__main { aspect-ratio: 4 / 5; border-radius: var(--radius-lg); overflow: hidden; background: var(--surface-2); }
 .pdp__main img { width: 100%; height: 100%; object-fit: cover; }
 .pdp__placeholder { width: 100%; height: 100%; background: var(--surface-2); }
 .pdp__thumbs { display: flex; gap: 10px; flex-wrap: wrap; }
