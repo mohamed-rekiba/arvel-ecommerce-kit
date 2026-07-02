@@ -1,46 +1,47 @@
 // Thin typed client for the arvel REST API (proxied to the arvel server via vite in dev).
-// Mirrors the response shapes from the kit's catalog + cart endpoints (Modules 1 & 4).
+// Every TYPE here is an alias of the GENERATED contract (src/api/gen — orval over the arvel
+// OpenAPI document); nothing shape-like is hand-written. Regenerate after backend changes:
+//   make openapi && npm run api:generate
 
-export interface Variant {
-  id: number;
-  sku: string;
-  name: string;
-  stock: number;
-}
+import { apiFetch } from "../api/http";
+import type {
+  AddressOut,
+  CartLineOut,
+  CartOut,
+  CategoryOut,
+  CheckoutIn,
+  GalleryImageOut,
+  NotificationOut,
+  OrderLineOut,
+  OrderOut,
+  PaymentOut,
+  ProductOut,
+  Translate,
+  UserOut,
+  VariantOut,
+} from "../api/gen/models";
+import type { CountryCode } from "../api/gen/models";
 
-// The active-locale name/description (the API projects one locale per Accept-Language).
-export interface Translation {
-  name: string;
-  description: string | null;
-  locale: string;
-}
+export { ApiError } from "../api/http";
+export type { CountryCode, OrderStatus, PaymentStatus } from "../api/gen/models";
 
-export interface GalleryImage {
-  id: number;
-  url: string;
-  thumb_url: string;
-  preview_url: string;
-}
+export type Variant = VariantOut;
+export type Translation = Translate;
+export type GalleryImage = GalleryImageOut;
+export type Category = CategoryOut;
+export type Product = ProductOut;
+export type CartLine = CartLineOut;
+export type Cart = CartOut;
+export type OrderLine = OrderLineOut;
+export type Address = AddressOut;
+export type CheckoutPayload = CheckoutIn;
+export type Payment = PaymentOut;
+export type Order = OrderOut;
+export type Customer = UserOut;
+export type Notification = NotificationOut;
 
-export interface Category {
-  id: number;
-  slug: string;
-  translation: Translation;
-}
-
-export interface Product {
-  id: number;
-  slug: string;
-  translation: Translation;
-  price_cents: number;
-  currency: string;
-  status: string;
-  gallery: GalleryImage[];
-  category?: Category | null;
-  variants?: Variant[] | null;
-}
-
-// arvel's LengthAwarePaginator JSON shape (DR-0022).
+// arvel's LengthAwarePaginator JSON shape (DR-0022) — generic over the row type (the generated
+// ProductPage is this, fixed to ProductOut).
 export interface Paginated<T> {
   data: T[];
   current_page: number;
@@ -49,32 +50,7 @@ export interface Paginated<T> {
   total: number;
 }
 
-// --- cart / checkout ----------------------------------------------------------
-export interface CartLine {
-  id: number;
-  product_variant_id: number;
-  quantity: number;
-  unit_price_cents: number;
-  line_total_cents: number;
-}
-
-export interface Cart {
-  id: number | null;
-  items: CartLine[];
-  total_cents: number;
-  cart_token?: string | null;
-}
-
-export interface OrderLine {
-  product_variant_id: number;
-  product_name: string;
-  variant_name: string;
-  quantity: number;
-  unit_price_cents: number;
-}
-
-export type CountryCode = "US" | "CA" | "GB" | "DE" | "FR" | "EG";
-
+// Display labels for the contract's closed CountryCode set (labels aren't part of the API).
 export const SHIPPING_COUNTRIES: { code: CountryCode; label: string }[] = [
   { code: "US", label: "United States" },
   { code: "CA", label: "Canada" },
@@ -83,60 +59,6 @@ export const SHIPPING_COUNTRIES: { code: CountryCode; label: string }[] = [
   { code: "FR", label: "France" },
   { code: "EG", label: "Egypt" },
 ];
-
-export interface Address {
-  name: string;
-  line1: string;
-  line2: string | null;
-  city: string;
-  postal_code: string;
-  country: CountryCode;
-}
-
-export interface CheckoutPayload {
-  email?: string;
-  address: Address;
-}
-
-export type PaymentStatus = "pending" | "succeeded" | "failed";
-
-export interface Payment {
-  payment_id: number;
-  charge_id: string;
-  client_secret: string | null;
-  status: string;
-}
-
-export interface Order {
-  id: number;
-  status: string;
-  token: string;
-  payment_status: PaymentStatus | null;
-  contact_email: string;
-  address: Address;
-  subtotal_cents: number;
-  shipping_cents: number;
-  tax_cents: number;
-  total_cents: number;
-  currency: string;
-  items: OrderLine[];
-}
-
-export interface Customer {
-  id: number;
-  name: string;
-  email: string;
-  phone: string | null;
-  email_verified: boolean;
-}
-
-export interface Notification {
-  id: string;
-  type: string;
-  message: string;
-  read: boolean;
-  created_at: string | null;
-}
 
 // The guest cart is keyed by an X-Cart-Token the server issues on first write; we persist it.
 const CART_TOKEN_KEY = "arvel_cart_token";
@@ -176,46 +98,18 @@ export const authToken = {
   clear: () => localStorage.removeItem(AUTH_TOKEN_KEY),
 };
 
-export class ApiError extends Error {
-  constructor(
-    public status: number,
-    message: string,
-    public errors: Record<string, string[]> = {},
-  ) {
-    super(message);
-  }
-}
-
 async function request<T>(
   method: string,
   path: string,
   body?: unknown,
   extraHeaders?: Record<string, string>,
 ): Promise<T> {
-  const headers: Record<string, string> = { Accept: "application/json", ...extraHeaders };
-  const cart = cartToken.get();
-  if (cart) headers["X-Cart-Token"] = cart;
-  const auth = authToken.get();
-  if (auth) headers["Authorization"] = `Bearer ${auth}`;
-  if (body !== undefined) headers["Content-Type"] = "application/json";
-  const res = await fetch(`/api${path}`, {
+  // apiFetch (the orval mutator) owns the bearer/cart-token headers + typed error mapping
+  return apiFetch<T>(`/api${path}`, {
     method,
-    headers,
+    headers: extraHeaders,
     body: body !== undefined ? JSON.stringify(body) : undefined,
   });
-  if (!res.ok) {
-    let message = `API ${res.status} for ${method} ${path}`;
-    let errors: Record<string, string[]> = {};
-    try {
-      const body = (await res.json()) as { message?: string; errors?: Record<string, string[]> };
-      if (body.message) message = body.message;
-      if (body.errors) errors = body.errors;
-    } catch {
-      // non-JSON error body — keep the generic message
-    }
-    throw new ApiError(res.status, message, errors);
-  }
-  return (await res.json()) as T;
 }
 
 const get = <T>(path: string) => request<T>("GET", path);

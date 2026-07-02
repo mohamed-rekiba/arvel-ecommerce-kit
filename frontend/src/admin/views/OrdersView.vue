@@ -4,12 +4,16 @@ import Column from "primevue/column";
 import DataTable from "primevue/datatable";
 import Tag from "primevue/tag";
 import { onMounted, ref } from "vue";
-import { type Order, ApiError, ORDER_TRANSITIONS, api, formatPrice } from "../api";
+import { type Order, type OrderStatus, ApiError, ORDER_TRANSITIONS, api, formatPrice } from "../api";
 
 const orders = ref<Order[]>([]);
 const status = ref<"loading" | "error" | "ready">("loading");
 const notice = ref<string | null>(null);
 const busyId = ref<number | null>(null);
+
+function nextStates(status: OrderStatus): OrderStatus[] {
+  return ORDER_TRANSITIONS[status] ?? [];
+}
 
 const severity: Record<string, string> = {
   pending: "secondary",
@@ -80,9 +84,9 @@ onMounted(load);
         </Column>
         <Column header="Advance">
           <template #body="{ data }">
-            <div v-if="(ORDER_TRANSITIONS[data.status] ?? []).length" class="actions">
+            <div v-if="nextStates(data.status).length" class="actions">
               <Button
-                v-for="next in ORDER_TRANSITIONS[data.status]"
+                v-for="next in nextStates(data.status)"
                 :key="next"
                 :label="next"
                 size="small"

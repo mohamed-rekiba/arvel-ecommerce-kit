@@ -1,6 +1,6 @@
 # arvel-ecommerce-kit — common tasks. `make help` lists them.
 .DEFAULT_GOAL := help
-.PHONY: help install env up down setup migrate fresh seed bucket serve front front-build worker schedule test test-integration typecheck lint check
+.PHONY: help install env up down setup migrate fresh seed bucket serve front front-build worker schedule openapi test test-integration typecheck lint check
 
 help: ## Show this help
 	@grep -hE '^[a-zA-Z_-]+:.*?## ' $(MAKEFILE_LIST) | awk 'BEGIN{FS=":.*?## "}{printf "  \033[36m%-12s\033[0m %s\n", $$1, $$2}'
@@ -51,6 +51,10 @@ worker: ## Run a queue worker
 
 schedule: ## Run due scheduled tasks
 	uv run arvel schedule:run
+
+openapi: ## Export the OpenAPI document + regenerate the typed frontend client (orval)
+	uv run arvel openapi:export frontend/openapi.json
+	cd frontend && npm run api:generate
 
 test: ## Run the test suite (in-process sqlite; no infra needed)
 	uv run pytest
