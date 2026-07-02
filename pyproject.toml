@@ -2,7 +2,7 @@
 name = "arvel-ecommerce-kit"
 version = "0.1.0"
 requires-python = ">=3.14"
-dependencies = ["arvel[standard,oidc,s3,telemetry,search]"]
+dependencies = ["arvel[standard,oidc,s3,telemetry,search,queue-amqp]"]
 
 [project.optional-dependencies]
 # aiosqlite: the suite runs on in-process sqlite (see conftest). uv doesn't reliably install it from
@@ -14,6 +14,8 @@ dev = [
     "pytest>=9.1.1",
     "pytest-asyncio>=1.4.0",
     "ruff>=0.15.20",
+    # the real-service integration tier (tests/integration, `make test-integration`)
+    "testcontainers>=4.14.2",
 ]
 
 [tool.pyright]
@@ -33,6 +35,12 @@ arvel = { path = "../arvel", editable = true }
 
 [tool.pytest.ini_options]
 asyncio_mode = "auto"
+# The default lane stays hermetic + fast (sqlite/array/memory); the Docker-backed integration tier
+# is opt-in: `uv run pytest -m integration` / `make test-integration`.
+addopts = "-m 'not integration'"
+markers = [
+    "integration: real-service tests via testcontainers (needs Docker)",
+]
 
 [tool.hatch.metadata]
 allow-direct-references = true

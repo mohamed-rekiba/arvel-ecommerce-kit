@@ -13,3 +13,4 @@ storage/
 .vite/
 node_modules/
 dist/
+.aios/
