@@ -6,6 +6,7 @@ import Tag from "primevue/tag";
 import { onMounted, ref } from "vue";
 import { useRouter } from "vue-router";
 import { type AdminProduct, ApiError, api, name } from "../api";
+import { type MessageKey, t } from "../locale";
 
 const router = useRouter();
 
@@ -22,19 +23,19 @@ async function load() {
   } catch (e) {
     status.value = "error";
     notice.value =
-      e instanceof ApiError && e.status === 403 ? "You lack catalog access." : "Failed to load products.";
+      e instanceof ApiError && e.status === 403 ? t("common.no_catalog") : t("products.load_error");
   }
 }
 
 async function remove(p: AdminProduct) {
-  if (!window.confirm(`Archive “${name(p)}”? It leaves the storefront but stays restorable.`)) return;
+  if (!window.confirm(t("products.archive_confirm", { name: name(p) }))) return;
   notice.value = null;
   try {
     await api.deleteProduct(p.id);
     await load();
   } catch (e) {
     notice.value =
-      e instanceof ApiError && e.status === 404 ? "Your role can't archive products." : "Archive failed.";
+      e instanceof ApiError && e.status === 404 ? t("products.no_archive") : t("products.archive_error");
   }
 }
 
@@ -44,7 +45,7 @@ async function restore(p: AdminProduct) {
     await api.restoreProduct(p.id);
     await load();
   } catch {
-    notice.value = "Restore failed.";
+    notice.value = t("products.restore_error");
   }
 }
 
@@ -59,18 +60,18 @@ onMounted(load);
   <section class="page">
     <header class="head">
       <div>
-        <p class="eyebrow">Catalog</p>
-        <h1>Products</h1>
-        <p class="sub">Every catalog item, including those hidden from the storefront.</p>
+        <p class="eyebrow">{{ t("nav.catalog") }}</p>
+        <h1>{{ t("nav.products") }}</h1>
+        <p class="sub">{{ t("products.sub") }}</p>
       </div>
       <div class="head__actions">
         <Button
-          :label="showArchived ? 'Active products' : 'Archived'"
+          :label="showArchived ? t('products.active') : t('products.archived')"
           severity="secondary"
           outlined
           @click="toggleArchived"
         />
-        <Button label="New product" icon="pi pi-plus" @click="router.push('/admin/products/new')" />
+        <Button :label="t('products.new')" icon="pi pi-plus" @click="router.push('/admin/products/new')" />
       </div>
     </header>
 
@@ -86,8 +87,8 @@ onMounted(load);
         size="small"
         striped-rows
       >
-        <template #empty><p class="empty">No products.</p></template>
-        <Column header="Product">
+        <template #empty><p class="empty">{{ t("products.none") }}</p></template>
+        <Column :header="t('products.product')">
           <template #body="{ data }">
             <RouterLink class="plink" :to="`/admin/products/${data.id}`">
               <div class="pname">{{ name(data) }}</div>
@@ -95,15 +96,15 @@ onMounted(load);
             </RouterLink>
           </template>
         </Column>
-        <Column header="Status">
+        <Column :header="t('common.status')">
           <template #body="{ data }">
-            <Tag :value="data.status" :severity="data.status === 'active' ? 'success' : 'secondary'" />
+            <Tag :value="t(`pstatus.${data.status}` as MessageKey)" :severity="data.status === 'active' ? 'success' : 'secondary'" />
           </template>
         </Column>
-        <Column header="Storefront">
+        <Column :header="t('products.storefront')">
           <template #body="{ data }">
             <Tag
-              :value="data.is_visible ? 'Visible' : 'Hidden'"
+              :value="data.is_visible ? t('products.visible') : t('products.hidden')"
               :severity="data.is_visible ? 'success' : 'secondary'"
             />
           </template>
@@ -111,17 +112,17 @@ onMounted(load);
         <Column header="" style="width: 9rem">
           <template #body="{ data }">
             <template v-if="showArchived">
-              <Button label="Restore" size="small" outlined @click="restore(data)" />
+              <Button :label="t('products.restore')" size="small" outlined @click="restore(data)" />
             </template>
             <template v-else>
               <Button
                 icon="pi pi-pencil"
                 text
                 rounded
-                aria-label="Edit"
+                :aria-label="t('common.edit')"
                 @click="router.push(`/admin/products/${data.id}`)"
               />
-              <Button icon="pi pi-trash" text rounded severity="danger" aria-label="Archive" @click="remove(data)" />
+              <Button icon="pi pi-trash" text rounded severity="danger" :aria-label="t('products.archive')" @click="remove(data)" />
             </template>
           </template>
         </Column>

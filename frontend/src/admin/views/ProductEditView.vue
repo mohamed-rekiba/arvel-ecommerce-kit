@@ -18,6 +18,7 @@ import {
   api,
   formatPrice,
 } from "../api";
+import { type MessageKey, t } from "../locale";
 
 const route = useRoute();
 const router = useRouter();
@@ -26,7 +27,7 @@ const productId = computed(() =>
 );
 const isCreate = computed(() => productId.value === null);
 
-const LOCALES = ["en", "fr"] as const;
+const LOCALES = ["en", "fr", "ar"] as const;
 type Locale = (typeof LOCALES)[number];
 
 const loading = ref(true);
@@ -44,6 +45,7 @@ const form = reactive({
   translations: {
     en: { name: "", description: "" },
     fr: { name: "", description: "" },
+    ar: { name: "", description: "" },
   } as Record<Locale, { name: string; description: string }>,
 });
 const isVisible = ref(false);
@@ -56,9 +58,9 @@ const newVariant = reactive({ sku: "", name: "", price_adjustment_cents: 0, stoc
 const stockDrafts = reactive<Record<number, number>>({});
 
 const STATUSES = [
-  { value: "draft", label: "Draft" },
-  { value: "active", label: "Active" },
-  { value: "archived", label: "Archived" },
+  { value: "draft", label: t("pstatus.draft") },
+  { value: "active", label: t("pstatus.active") },
+  { value: "archived", label: t("pstatus.archived") },
 ];
 
 function catName(translations: Translate[]): string {
@@ -68,7 +70,7 @@ function catName(translations: Translate[]): string {
 function fail(e: unknown, fallback: string) {
   if (e instanceof ApiError && Object.keys(e.errors).length > 0) {
     fieldErrors.value = e.errors;
-    error.value = "Please check the highlighted fields.";
+    error.value = t("pedit.check_fields");
   } else {
     error.value = fallback;
   }
@@ -93,9 +95,9 @@ async function load() {
       form.category_id = detail.category_id;
       form.status = detail.status;
       form.published = detail.published;
-      for (const t of detail.translations) {
-        if (t.locale === "en" || t.locale === "fr") {
-          form.translations[t.locale] = { name: t.name, description: t.description ?? "" };
+      for (const tr of detail.translations) {
+        if (tr.locale && (LOCALES as readonly string[]).includes(tr.locale)) {
+          form.translations[tr.locale as Locale] = { name: tr.name, description: tr.description ?? "" };
         }
       }
       isVisible.value = detail.is_visible;
@@ -105,7 +107,7 @@ async function load() {
       for (const v of detail.variants) stockDrafts[v.id] = v.stock;
     }
   } catch {
-    error.value = "Couldn't load the product.";
+    error.value = t("pedit.load_error");
   } finally {
     loading.value = false;
   }
@@ -118,11 +120,13 @@ function translationsPayload() {
       description: form.translations.en.description || null,
     },
   };
-  if (form.translations.fr.name.trim()) {
-    payload.fr = {
-      name: form.translations.fr.name,
-      description: form.translations.fr.description || null,
-    };
+  for (const code of ["fr", "ar"] as const) {
+    if (form.translations[code].name.trim()) {
+      payload[code] = {
+        name: form.translations[code].name,
+        description: form.translations[code].description || null,
+      };
+    }
   }
   return payload;
 }
@@ -140,7 +144,7 @@ async function save() {
         translations: translationsPayload(),
       });
       await router.replace(`/admin/products/${created.id}`);
-      notice.value = "Product created.";
+      notice.value = t("pedit.created");
       await load();
     } else {
       await api.updateProduct(productId.value as number, {
@@ -150,11 +154,11 @@ async function save() {
         published: form.published,
         translations: translationsPayload(),
       });
-      notice.value = "Saved.";
+      notice.value = t("pedit.saved");
       await load();
     }
   } catch (e) {
-    fail(e, "Couldn't save the product.");
+    fail(e, t("pedit.save_error"));
   } finally {
     saving.value = false;
   }
@@ -169,7 +173,7 @@ async function addVariant() {
     stockDrafts[created.id] = created.stock;
     Object.assign(newVariant, { sku: "", name: "", price_adjustment_cents: 0, stock: 0 });
   } catch (e) {
-    fail(e, "Couldn't add the variant.");
+    fail(e, t("pedit.variant_error"));
   }
 }
 
@@ -183,18 +187,18 @@ async function setStock(variant: Variant) {
     variants.value = variants.value.map((v) => (v.id === updated.id ? updated : v));
     stockDrafts[updated.id] = updated.stock;
   } catch (e) {
-    fail(e, "Couldn't adjust stock.");
+    fail(e, t("pedit.stock_error"));
   }
 }
 
 async function removeVariant(variant: Variant) {
-  if (!window.confirm(`Delete variant ${variant.sku}?`)) return;
+  if (!window.confirm(t("pedit.variant_delete_confirm", { sku: variant.sku }))) return;
   error.value = null;
   try {
     await api.deleteVariant(variant.id);
     variants.value = variants.value.filter((v) => v.id !== variant.id);
   } catch (e) {
-    fail(e, "This variant has been ordered — it can't be deleted.");
+    fail(e, t("pedit.variant_ordered"));
   }
 }
 
@@ -206,18 +210,18 @@ async function onUpload(event: Event) {
   try {
     gallery.value = await api.uploadImage(productId.value as number, file);
   } catch (e) {
-    fail(e, "That file couldn't be uploaded (images only).");
+    fail(e, t("pedit.upload_error"));
   } finally {
     input.value = "";
   }
 }
 
 async function removeImage(image: GalleryImage) {
-  if (!window.confirm("Remove this image?")) return;
+  if (!window.confirm(t("pedit.image_confirm"))) return;
   try {
     gallery.value = await api.deleteImage(productId.value as number, image.id);
   } catch {
-    error.value = "Couldn't remove the image.";
+    error.value = t("pedit.image_error");
   }
 }
 
@@ -228,25 +232,25 @@ onMounted(load);
   <section class="edit">
     <header class="edit__head">
       <div>
-        <RouterLink class="edit__back" to="/admin/products">← Products</RouterLink>
-        <h1>{{ isCreate ? "New product" : form.translations.en.name || slug }}</h1>
+        <RouterLink class="edit__back" to="/admin/products">{{ t("common.back") }} {{ t("nav.products") }}</RouterLink>
+        <h1>{{ isCreate ? t("products.new") : form.translations.en.name || slug }}</h1>
       </div>
       <div class="edit__badges" v-if="!isCreate">
-        <Tag :value="form.status" :severity="form.status === 'active' ? 'success' : 'secondary'" />
+        <Tag :value="t(`pstatus.${form.status}` as MessageKey)" :severity="form.status === 'active' ? 'success' : 'secondary'" />
         <Tag
-          :value="isVisible ? 'visible on storefront' : 'hidden'"
+          :value="isVisible ? t('pedit.visible') : t('pedit.hidden')"
           :severity="isVisible ? 'success' : 'warn'"
         />
       </div>
     </header>
 
-    <p v-if="loading">Loading…</p>
+    <p v-if="loading">{{ t("common.loading") }}</p>
 
     <template v-else>
       <form class="card" @submit.prevent="save">
-        <h2>Details</h2>
+        <h2>{{ t("pedit.details") }}</h2>
 
-        <div class="locales" role="tablist" aria-label="Content language">
+        <div class="locales" role="tablist" :aria-label="t('pedit.content_lang')">
           <button
             v-for="code in LOCALES"
             :key="code"
@@ -258,53 +262,53 @@ onMounted(load);
             @click="activeLocale = code"
           >
             {{ code.toUpperCase() }}
-            <span v-if="code === 'fr' && !form.translations.fr.name" class="locales__todo">·</span>
+            <span v-if="code !== 'en' && !form.translations[code].name" class="locales__todo">·</span>
           </button>
         </div>
 
         <label class="field">
-          <span>Name ({{ activeLocale }})</span>
-          <InputText v-model="form.translations[activeLocale].name" :invalid="!!firstError('translations')" />
+          <span>{{ t("pedit.name") }} ({{ activeLocale }})</span>
+          <InputText v-model="form.translations[activeLocale].name" :dir="activeLocale === 'ar' ? 'rtl' : 'ltr'" :invalid="!!firstError('translations')" />
         </label>
         <label class="field">
-          <span>Description ({{ activeLocale }})</span>
-          <Textarea v-model="form.translations[activeLocale].description" rows="3" autoResize />
+          <span>{{ t("pedit.description") }} ({{ activeLocale }})</span>
+          <Textarea v-model="form.translations[activeLocale].description" :dir="activeLocale === 'ar' ? 'rtl' : 'ltr'" rows="3" autoResize />
         </label>
         <small v-if="firstError('translations')" class="err" role="alert">{{ firstError("translations") }}</small>
 
         <div class="row">
           <label class="field">
-            <span>Price (cents)</span>
+            <span>{{ t("pedit.price") }}</span>
             <InputNumber v-model="form.price_cents" :useGrouping="false" :min="0" :invalid="!!firstError('price_cents')" />
           </label>
           <label class="field">
-            <span>Category</span>
+            <span>{{ t("categories.category") }}</span>
             <Select v-model="form.category_id" :options="categories" optionLabel="label" optionValue="id" />
           </label>
           <label class="field" v-if="!isCreate">
-            <span>Status</span>
+            <span>{{ t("common.status") }}</span>
             <Select v-model="form.status" :options="STATUSES" optionLabel="label" optionValue="value" />
           </label>
           <label class="field field--switch" v-if="!isCreate">
-            <span>Published</span>
+            <span>{{ t("categories.published") }}</span>
             <ToggleSwitch v-model="form.published" />
           </label>
         </div>
 
         <p v-if="error" class="err" role="alert">{{ error }}</p>
         <p v-if="notice" class="ok" role="status">{{ notice }}</p>
-        <Button type="submit" :label="saving ? 'Saving…' : isCreate ? 'Create product' : 'Save changes'" :disabled="saving" />
+        <Button type="submit" :label="saving ? t('common.saving') : isCreate ? t('pedit.create') : t('pedit.save_changes')" :disabled="saving" />
       </form>
 
       <section v-if="!isCreate" class="card">
-        <h2>Variants &amp; stock</h2>
+        <h2>{{ t("pedit.variants") }}</h2>
         <DataTable :value="variants" dataKey="id" size="small">
-          <Column field="sku" header="SKU" />
-          <Column field="name" header="Name" />
-          <Column header="Price adj.">
+          <Column field="sku" :header="t('pedit.sku')" />
+          <Column field="name" :header="t('pedit.name')" />
+          <Column :header="t('pedit.price_adj')">
             <template #body="{ data }">{{ formatPrice(data.price_adjustment_cents) }}</template>
           </Column>
-          <Column header="Stock">
+          <Column :header="t('pedit.stock')">
             <template #body="{ data }">
               <div class="stock">
                 <InputNumber v-model="stockDrafts[data.id]" :useGrouping="false" :min="0" size="small" />
@@ -312,7 +316,7 @@ onMounted(load);
                   size="small"
                   severity="secondary"
                   outlined
-                  label="Set"
+                  :label="t('pedit.set')"
                   :disabled="stockDrafts[data.id] === data.stock"
                   @click="setStock(data)"
                 />
@@ -321,7 +325,7 @@ onMounted(load);
           </Column>
           <Column header="">
             <template #body="{ data }">
-              <Button size="small" severity="danger" text label="Delete" @click="removeVariant(data)" />
+              <Button size="small" severity="danger" text :label="t('common.delete')" @click="removeVariant(data)" />
             </template>
           </Column>
         </DataTable>
@@ -329,24 +333,24 @@ onMounted(load);
           {{ firstError("sku", "stock", "variant") }}
         </small>
         <form class="variant-add" @submit.prevent="addVariant">
-          <InputText v-model="newVariant.sku" placeholder="SKU" />
-          <InputText v-model="newVariant.name" placeholder="Name" />
-          <InputNumber v-model="newVariant.price_adjustment_cents" :useGrouping="false" placeholder="Adj. ¢" />
-          <InputNumber v-model="newVariant.stock" :useGrouping="false" :min="0" placeholder="Stock" />
-          <Button type="submit" size="small" label="Add variant" :disabled="!newVariant.sku || !newVariant.name" />
+          <InputText v-model="newVariant.sku" :placeholder="t('pedit.sku')" />
+          <InputText v-model="newVariant.name" :placeholder="t('pedit.name')" />
+          <InputNumber v-model="newVariant.price_adjustment_cents" :useGrouping="false" :placeholder="t('pedit.adj_ph')" />
+          <InputNumber v-model="newVariant.stock" :useGrouping="false" :min="0" :placeholder="t('pedit.stock')" />
+          <Button type="submit" size="small" :label="t('pedit.add_variant')" :disabled="!newVariant.sku || !newVariant.name" />
         </form>
       </section>
 
       <section v-if="!isCreate" class="card">
-        <h2>Gallery</h2>
+        <h2>{{ t("pedit.gallery") }}</h2>
         <div class="gallery">
           <figure v-for="image in gallery" :key="image.id" class="gallery__item">
             <img :src="image.thumb_url" alt="" />
-            <Button size="small" severity="danger" text label="Remove" @click="removeImage(image)" />
+            <Button size="small" severity="danger" text :label="t('pedit.remove')" @click="removeImage(image)" />
           </figure>
           <label class="gallery__add">
             <input type="file" accept="image/*" @change="onUpload" />
-            <span>+ Upload image</span>
+            <span>+ {{ t("pedit.upload") }}</span>
           </label>
         </div>
         <small v-if="firstError('image')" class="err" role="alert">{{ firstError("image") }}</small>

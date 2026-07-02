@@ -1,45 +1,8 @@
-// Storefront locale — drives the API's Accept-Language (the server projects catalog content
-// per locale, whitelisted to en/fr/ar), every chrome string below, and the document direction
-// (Arabic renders right-to-left). The choice persists across navigation and reloads.
-import { reactive } from "vue";
+// Storefront message map. The locale itself (selection, persistence, <html dir/lang>) lives in
+// the shared core (lib/i18n.ts) so the admin console shares the same choice.
+import { type Locale as CoreLocale, makeT } from "../lib/i18n";
 
-export const LOCALES = ["en", "fr", "ar"] as const;
-export type Locale = (typeof LOCALES)[number];
-
-const RTL_LOCALES: readonly Locale[] = ["ar"];
-
-const LOCALE_KEY = "arvel_locale";
-
-function stored(): Locale {
-  const value = localStorage.getItem(LOCALE_KEY);
-  return (LOCALES as readonly string[]).includes(value ?? "") ? (value as Locale) : "en";
-}
-
-export const locale = reactive<{ current: Locale }>({ current: stored() });
-
-export function dir(of: Locale = locale.current): "ltr" | "rtl" {
-  return RTL_LOCALES.includes(of) ? "rtl" : "ltr";
-}
-
-/** Reflect the active locale on <html> — lang for a11y/fonts, dir so the whole storefront
- *  mirrors under Arabic (flex/grid/logical properties follow the document direction). */
-export function applyDocumentLocale(): void {
-  document.documentElement.setAttribute("lang", locale.current);
-  document.documentElement.setAttribute("dir", dir());
-}
-
-applyDocumentLocale(); // at module load, before the app mounts — no LTR flash
-
-export function setLocale(next: Locale): void {
-  localStorage.setItem(LOCALE_KEY, next);
-  locale.current = next;
-  // simplest correct refresh: every fetched view re-renders in the new locale, no stale mix
-  window.location.reload();
-}
-
-export function currentLocale(): Locale {
-  return locale.current;
-}
+export { LOCALES, type Locale, locale, dir, applyDocumentLocale, setLocale, currentLocale } from "../lib/i18n";
 
 // --- chrome strings (catalog CONTENT comes translated from the API) ------------------------------
 // `satisfies` forces every locale to carry every key — a missing translation is a type error.
@@ -797,13 +760,9 @@ const MESSAGES = {
     "footer.copyright": "© 2026 أرفل — مبني على إطار عمل arvel.",
     "footer.legal": "الخصوصية · الشروط",
   },
-} as const satisfies Record<Locale, Record<string, string>>;
+} as const satisfies Record<CoreLocale, Record<string, string>>;
 
 export type MessageKey = keyof (typeof MESSAGES)["en"];
 
-/** Translate a chrome string; `{name}` placeholders are filled from `params`. */
-export function t(key: MessageKey, params?: Record<string, string | number>): string {
-  const raw: string = MESSAGES[locale.current][key];
-  if (!params) return raw;
-  return raw.replace(/\{(\w+)\}/g, (m, name: string) => String(params[name] ?? m));
-}
+/** Translate a storefront chrome string; `{name}` placeholders are filled from `params`. */
+export const t = makeT(MESSAGES);

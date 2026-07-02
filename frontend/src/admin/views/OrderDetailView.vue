@@ -11,6 +11,8 @@ import {
   api,
   formatPrice,
 } from "../api";
+import { currentLocale } from "../../lib/i18n";
+import { type MessageKey as MK, t as tr } from "../locale";
 
 const route = useRoute();
 const orderId = Number(route.params.id);
@@ -29,7 +31,7 @@ async function load() {
     order.value = await api.adminOrder(orderId);
   } catch (e) {
     notice.value =
-      e instanceof ApiError && e.status === 403 ? "You may not view orders." : "Couldn't load.";
+      e instanceof ApiError && e.status === 403 ? tr("orders.no_view") : tr("common.load_error");
   } finally {
     loading.value = false;
   }
@@ -44,14 +46,14 @@ async function advance(next: OrderStatus) {
   } catch (e) {
     notice.value =
       e instanceof ApiError
-        ? Object.values(e.errors)[0]?.[0] ?? "That transition isn't allowed."
-        : "Transition failed.";
+        ? Object.values(e.errors)[0]?.[0] ?? tr("orders.transition_denied")
+        : tr("orders.transition_error");
   } finally {
     acting.value = false;
   }
 }
 
-const formatWhen = (iso: string | null) => (iso ? new Date(iso).toLocaleString() : "");
+const formatWhen = (iso: string | null) => (iso ? new Date(iso).toLocaleString(currentLocale()) : "");
 
 const severity = (status: string) =>
   status === "paid" || status === "delivered"
@@ -65,30 +67,30 @@ onMounted(load);
 
 <template>
   <section class="page">
-    <p v-if="loading">Loading…</p>
+    <p v-if="loading">{{ tr("common.loading") }}</p>
     <p v-else-if="!order" class="notice" role="alert">{{ notice }}</p>
 
     <template v-else>
       <header class="head">
         <div>
-          <RouterLink class="back" to="/admin/orders">← Orders</RouterLink>
+          <RouterLink class="back" to="/admin/orders">{{ tr("common.back") }} {{ tr("nav.orders") }}</RouterLink>
           <h1>
-            Order #{{ order.id }}
-            <Tag :value="order.status" :severity="severity(order.status)" />
+            {{ tr("orders.order") }} #{{ order.id }}
+            <Tag :value="tr(`order.${order.status}` as MK)" :severity="severity(order.status)" />
           </h1>
           <p class="sub">
             <template v-if="order.customer">
               <RouterLink :to="`/admin/users`">{{ order.customer.name }}</RouterLink>
               · {{ order.customer.email }}
             </template>
-            <template v-else>Guest order · {{ order.contact_email }}</template>
+            <template v-else>{{ tr("orders.guest") }} · {{ order.contact_email }}</template>
           </p>
         </div>
         <div class="actions">
           <Button
             v-for="next in nextStates"
             :key="next"
-            :label="next"
+            :label="tr(`order.${next}` as MK)"
             :severity="next === 'cancelled' ? 'danger' : 'secondary'"
             outlined
             size="small"
@@ -102,7 +104,7 @@ onMounted(load);
 
       <div class="grid">
         <section class="card">
-          <h2>Items</h2>
+          <h2>{{ tr("orders.items") }}</h2>
           <ul class="lines">
             <li v-for="line in order.items" :key="line.product_variant_id">
               <span>{{ line.quantity }} × {{ line.product_name }} — {{ line.variant_name }}</span>
@@ -110,33 +112,33 @@ onMounted(load);
             </li>
           </ul>
           <dl class="breakdown">
-            <div><dt>Subtotal</dt><dd>{{ formatPrice(order.subtotal_cents) }}</dd></div>
-            <div><dt>Shipping</dt><dd>{{ formatPrice(order.shipping_cents) }}</dd></div>
-            <div><dt>Tax</dt><dd>{{ formatPrice(order.tax_cents) }}</dd></div>
+            <div><dt>{{ tr("orders.subtotal") }}</dt><dd>{{ formatPrice(order.subtotal_cents) }}</dd></div>
+            <div><dt>{{ tr("orders.shipping") }}</dt><dd>{{ formatPrice(order.shipping_cents) }}</dd></div>
+            <div><dt>{{ tr("orders.tax") }}</dt><dd>{{ formatPrice(order.tax_cents) }}</dd></div>
             <div v-if="order.discount_cents > 0" class="breakdown__discount">
-              <dt>Discount{{ order.coupon_code ? ` (${order.coupon_code})` : "" }}</dt>
+              <dt>{{ tr("orders.discount") }}{{ order.coupon_code ? ` (${order.coupon_code})` : "" }}</dt>
               <dd>−{{ formatPrice(order.discount_cents) }}</dd>
             </div>
-            <div class="breakdown__total"><dt>Total</dt><dd>{{ formatPrice(order.total_cents) }}</dd></div>
+            <div class="breakdown__total"><dt>{{ tr("common.total") }}</dt><dd>{{ formatPrice(order.total_cents) }}</dd></div>
           </dl>
         </section>
 
         <section class="card">
-          <h2>Delivery</h2>
+          <h2>{{ tr("orders.delivery") }}</h2>
           <address class="address">
             {{ order.address.name }}<br />
             {{ order.address.line1 }}<span v-if="order.address.line2"><br />{{ order.address.line2 }}</span><br />
             {{ order.address.city }}, {{ order.address.postal_code }} {{ order.address.country }}
           </address>
 
-          <h2>Payments</h2>
-          <p v-if="order.payments.length === 0" class="muted">No payment attempts.</p>
+          <h2>{{ tr("orders.payments") }}</h2>
+          <p v-if="order.payments.length === 0" class="muted">{{ tr("orders.no_payments") }}</p>
           <ul class="lines">
             <li v-for="p in order.payments" :key="p.id">
               <span><code>{{ p.charge_id }}</code></span>
               <span>
                 {{ formatPrice(p.amount_cents) }}
-                <Tag :value="p.status" :severity="p.status === 'succeeded' ? 'success' : p.status === 'failed' ? 'danger' : 'secondary'" />
+                <Tag :value="tr(`payment.${p.status}` as MK)" :severity="p.status === 'succeeded' ? 'success' : p.status === 'failed' ? 'danger' : 'secondary'" />
               </span>
             </li>
           </ul>
@@ -144,13 +146,13 @@ onMounted(load);
       </div>
 
       <section class="card">
-        <h2>History</h2>
-        <p v-if="order.history.length === 0" class="muted">No recorded events.</p>
+        <h2>{{ tr("orders.history") }}</h2>
+        <p v-if="order.history.length === 0" class="muted">{{ tr("orders.no_history") }}</p>
         <ol class="history">
           <li v-for="(event, i) in order.history" :key="i">
             <span class="history__desc">{{ event.description }}</span>
             <span v-if="event.properties.from" class="muted">
-              {{ event.properties.from }} → {{ event.properties.to }}
+              {{ event.properties.from }} {{ tr("common.fwd") }} {{ event.properties.to }}
             </span>
             <span class="muted">{{ formatWhen(event.created_at) }}</span>
           </li>
