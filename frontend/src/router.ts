@@ -23,7 +23,9 @@ const admin = {
 
 const router = createRouter({
   history: createWebHistory(),
-  scrollBehavior: () => ({ top: 0 }),
+  // On browser back/forward, Vue Router passes the position the page was scrolled to when it was left
+  // (savedPosition) — restore that instead of forcing the top, or every back-nav loses your place.
+  scrollBehavior: (_to, _from, savedPosition) => savedPosition ?? { top: 0 },
   routes: [
     {
       path: "/",
