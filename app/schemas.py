@@ -348,6 +348,35 @@ class AdminProductDetailOut(Schema):
     gallery: list["GalleryImageOut"]
 
 
+class CategoryIn(Schema):
+    translations: dict[str, TranslationFieldsIn]
+    parent_id: int | None = None
+    published: bool = True
+
+
+class CategoryUpdateIn(Schema):
+    translations: dict[str, TranslationFieldsIn] | None = None
+    parent_id: int | None = None
+    published: bool | None = None
+
+
+class AdminVendorOut(Schema):
+    id: int
+    name: str
+    slug: str
+    published: bool
+
+
+class VendorIn(Schema):
+    name: str
+    published: bool = True
+
+
+class VendorUpdateIn(Schema):
+    name: str | None = None
+    published: bool | None = None
+
+
 class VariantIn(Schema):
     sku: str
     name: str

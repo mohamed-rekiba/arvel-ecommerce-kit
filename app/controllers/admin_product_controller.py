@@ -108,7 +108,7 @@ def _admin_product_out(product: Product, *, is_visible: bool) -> AdminProductOut
     )
 
 
-def _validated_translations(
+def validated_translations(
     payload: dict[str, "TranslationFieldsIn"] | None,
 ) -> dict[str, dict[str, str | None]] | None:
     """Locale-whitelist + shape-check a translations map; None passes through (no change)."""
@@ -183,7 +183,7 @@ async def store(request: Request, data: ProductIn) -> AdminProductOut:
     )
     if validator.fails():
         raise ValidationException(validator.errors())
-    translations = _validated_translations(data.translations)
+    translations = validated_translations(data.translations)
     assert translations is not None  # ProductIn.translations is required
     product = await Product.create(
         category_id=data.category_id,
@@ -210,7 +210,7 @@ async def update(request: Request, data: UpdateProductIn) -> AdminProductOut:
     product = await Product.find_or_fail(int(request.path_param("id")))
     if not await user.can("update", product):
         abort(404, "Product not found")
-    translations = _validated_translations(data.translations)
+    translations = validated_translations(data.translations)
     if translations is not None:
         product.translations = translations
     if data.category_id is not None:

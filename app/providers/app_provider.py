@@ -63,8 +63,9 @@ class AppServiceProvider(ServiceProvider):
 
             gate.before(_super_admin_first)
 
-            # Standalone (non-model) abilities → the matching RBAC permission (orders.*, roles.manage,
-            # audit.view, catalog.view). A model policy handles catalog.create/update/delete on Product.
+            # Standalone (non-model) abilities → the matching RBAC permission, for EVERY
+            # permission (categories/vendors/variants check catalog.* directly; the ProductPolicy
+            # still governs Product-model checks — gate.define and policies coexist).
             def _define(permission: Permission) -> None:
                 async def _check(user: Any, *_: Any) -> bool:
                     return user is not None and await user.has_permission_to(
@@ -73,13 +74,7 @@ class AppServiceProvider(ServiceProvider):
 
                 gate.define(permission.value, _check)
 
-            for permission in (
-                Permission.CATALOG_VIEW,
-                Permission.ORDERS_VIEW,
-                Permission.ORDERS_UPDATE,
-                Permission.ROLES_MANAGE,
-                Permission.AUDIT_VIEW,
-            ):
+            for permission in Permission:
                 _define(permission)
 
         # Catalog visibility: a publish change on a product/category/vendor flags the views dirty;

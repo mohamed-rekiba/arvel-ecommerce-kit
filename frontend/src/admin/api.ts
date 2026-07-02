@@ -13,6 +13,10 @@ export const token = {
 // document). Regenerate after backend changes: make openapi && npm run api:generate.
 import type {
   ActivityOut,
+  AdminCategoryOut,
+  AdminVendorOut,
+  CategoryIn,
+  CategoryUpdateIn,
   AdminProductDetailOut,
   AdminProductOut,
   GalleryImageOut,
@@ -28,6 +32,8 @@ import type {
   VariantIn,
   VariantOut,
   VariantUpdateIn,
+  VendorIn,
+  VendorUpdateIn,
 } from "../api/gen/models";
 
 export type Translation = Translate;
@@ -39,6 +45,8 @@ export type User = UserOut;
 export type OrderLine = OrderLineOut;
 export type Order = OrderOut;
 export type ProductDetail = AdminProductDetailOut;
+export type AdminCategory = AdminCategoryOut;
+export type Vendor = AdminVendorOut;
 export type Variant = VariantOut;
 export type GalleryImage = GalleryImageOut;
 export type { OrderStatus, ProductIn, StockAdjustIn, UpdateProductIn, VariantIn, VariantUpdateIn };
@@ -97,6 +105,15 @@ export const api = {
       "GET",
       "/admin/categories?per_page=100",
     ),
+  adminCategories: () => request<Paginated<AdminCategoryOut>>("GET", "/admin/categories?per_page=100"),
+  createCategory: (body: CategoryIn) => request<AdminCategoryOut>("POST", "/admin/categories", body),
+  updateCategory: (id: number, body: CategoryUpdateIn) =>
+    request<AdminCategoryOut>("PUT", `/admin/categories/${id}`, body),
+  deleteCategory: (id: number) => request<{ message: string }>("DELETE", `/admin/categories/${id}`),
+  vendors: () => request<AdminVendorOut[]>("GET", "/admin/vendors"),
+  createVendor: (body: VendorIn) => request<AdminVendorOut>("POST", "/admin/vendors", body),
+  updateVendor: (id: number, body: VendorUpdateIn) =>
+    request<AdminVendorOut>("PUT", `/admin/vendors/${id}`, body),
   createProduct: (body: ProductIn) => request<AdminProduct>("POST", "/admin/products", body),
   updateProduct: (id: number, body: UpdateProductIn) =>
     request<AdminProduct>("PUT", `/admin/products/${id}`, body),
