@@ -14,7 +14,14 @@ from arvel.validation import ValidationException, Validator
 
 from app.controllers.cart_controller import resolve_cart
 from app.controllers.order_access import resolve_owned_order
-from app.enums import CountryCode, Currency, OrderStatus, Permission, can_transition
+from app.enums import (
+    CountryCode,
+    Currency,
+    OrderStatus,
+    PaymentStatus,
+    Permission,
+    can_transition,
+)
 from app.events.order_placed import OrderPlaced
 from app.jobs.fulfill_order import ORDERS_FULFILLED_KEY
 from app.listeners.record_order_metrics import ORDERS_PLACED_KEY
@@ -48,9 +55,9 @@ def _tax_cents(subtotal_cents: int) -> int:
     return subtotal_cents * TAX_RATE_PERCENT // 100
 
 
-def _status_value(order: Order) -> str:
+def _status_value(order: Order) -> OrderStatus:
     status = order.status
-    return status.value if isinstance(status, OrderStatus) else str(status)
+    return status if isinstance(status, OrderStatus) else OrderStatus(status)
 
 
 def _address_out(order: Order) -> AddressOut:
@@ -60,16 +67,16 @@ def _address_out(order: Order) -> AddressOut:
         line2=order.ship_line2 or None,
         city=order.ship_city,
         postal_code=order.ship_postal_code,
-        country=order.ship_country,
+        country=CountryCode(order.ship_country),
     )
 
 
-def _currency_value(order: Order) -> str:
+def _currency_value(order: Order) -> Currency:
     currency = order.currency
-    return currency.value if isinstance(currency, Currency) else str(currency)
+    return currency if isinstance(currency, Currency) else Currency(currency)
 
 
-async def _latest_payment_status(order: Order) -> str | None:
+async def _latest_payment_status(order: Order) -> PaymentStatus | None:
     from app.enums import PaymentStatus
     from app.models.payment import Payment
 
@@ -77,11 +84,11 @@ async def _latest_payment_status(order: Order) -> str | None:
     if payment is None:
         return None
     status = payment.status
-    return status.value if isinstance(status, PaymentStatus) else str(status)
+    return status if isinstance(status, PaymentStatus) else PaymentStatus(status)
 
 
 def _order_out(
-    order: Order, items: list[OrderItem], payment_status: str | None = None
+    order: Order, items: list[OrderItem], payment_status: PaymentStatus | None = None
 ) -> OrderOut:
     return OrderOut(
         id=order.id,

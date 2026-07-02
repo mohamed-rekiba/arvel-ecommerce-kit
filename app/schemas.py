@@ -12,6 +12,8 @@ from typing import Any
 
 from arvel import Schema
 
+from app.enums import CountryCode, Currency, OrderStatus, PaymentStatus
+
 # --- shared / catalog ---------------------------------------------------------
 
 
@@ -292,12 +294,12 @@ class AddressOut(Schema):
     line2: str | None
     city: str
     postal_code: str
-    country: str
+    country: CountryCode
 
 
 class OrderOut(Schema):
     id: int
-    status: str
+    status: OrderStatus
     token: str
     contact_email: str
     address: AddressOut
@@ -305,8 +307,8 @@ class OrderOut(Schema):
     shipping_cents: int
     tax_cents: int
     total_cents: int
-    currency: str
-    payment_status: str | None  # latest payment attempt (None = never attempted)
+    currency: Currency
+    payment_status: PaymentStatus | None  # latest payment attempt (None = never attempted)
     items: list[OrderLineOut]
 
 

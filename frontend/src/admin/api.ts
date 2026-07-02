@@ -9,21 +9,29 @@ export const token = {
   clear: () => localStorage.removeItem(TOKEN_KEY),
 };
 
-export interface Translation {
-  name: string;
-  description: string | null;
-  locale: string;
-}
+// Every TYPE is an alias of the GENERATED contract (src/api/gen — orval over the arvel OpenAPI
+// document). Regenerate after backend changes: make openapi && npm run api:generate.
+import type {
+  ActivityOut,
+  AdminProductOut,
+  OrderLineOut,
+  OrderOut,
+  OrderStatus,
+  RoleOut,
+  Translate,
+  UserOut,
+} from "../api/gen/models";
 
-export interface AdminProduct {
-  id: number;
-  slug: string;
-  translations: Translation[];
-  status: string;
-  published: boolean;
-  is_visible: boolean;
-}
+export type Translation = Translate;
+export type AdminProduct = AdminProductOut;
+export type Role = RoleOut;
+export type Activity = ActivityOut;
+export type User = UserOut;
+export type OrderLine = OrderLineOut;
+export type Order = OrderOut;
+export type { OrderStatus };
 
+// arvel's LengthAwarePaginator JSON shape (DR-0022), generic over the row type.
 export interface Paginated<T> {
   data: T[];
   current_page: number;
@@ -32,44 +40,8 @@ export interface Paginated<T> {
   total: number;
 }
 
-export interface Role {
-  id: number;
-  name: string;
-  permissions: string[];
-}
-
-export interface Activity {
-  id: number;
-  description: string;
-  event: string | null;
-  causer_id: number | null;
-  subject_type: string | null;
-  subject_id: number | null;
-  properties: Record<string, unknown>;
-  created_at: string | null;
-}
-
-export interface User {
-  id: number;
-  name: string;
-  email: string;
-}
-
-export interface OrderLine {
-  product_variant_id: number;
-  quantity: number;
-  unit_price_cents: number;
-}
-
-export interface Order {
-  id: number;
-  status: string;
-  total_cents: number;
-  items: OrderLine[];
-}
-
 // The order state machine (mirrors app/enums.py ORDER_TRANSITIONS) — which status a given one can move to.
-export const ORDER_TRANSITIONS: Record<string, string[]> = {
+export const ORDER_TRANSITIONS: Record<OrderStatus, OrderStatus[]> = {
   pending: ["paid", "cancelled"],
   paid: ["shipped", "cancelled"],
   shipped: ["delivered"],
