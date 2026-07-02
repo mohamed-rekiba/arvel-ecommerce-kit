@@ -280,6 +280,7 @@ class AddressOut(Schema):
 class OrderOut(Schema):
     id: int
     status: str
+    token: str
     contact_email: str
     address: AddressOut
     subtotal_cents: int
@@ -287,6 +288,7 @@ class OrderOut(Schema):
     tax_cents: int
     total_cents: int
     currency: str
+    payment_status: str | None  # latest payment attempt (None = never attempted)
     items: list[OrderLineOut]
 
 
@@ -297,6 +299,19 @@ class OrderStatusIn(Schema):
 class MetricsOut(Schema):
     orders_placed: int
     orders_fulfilled: int
+
+
+class DevChargeIn(Schema):
+    """What the shop sends the (dev) gateway when creating a charge."""
+
+    amount: int
+    currency: str
+    order_id: int
+
+
+class DevChargeOut(Schema):
+    id: str
+    client_secret: str
 
 
 class PaymentOut(Schema):

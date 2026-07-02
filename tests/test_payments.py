@@ -101,7 +101,23 @@ def _place_order(client, headers) -> int:
         json={"product_variant_id": 1, "quantity": 2},
         headers=headers,
     )
-    return client.post("/api/checkout", json=checkout_body(), headers=headers).json()["id"]
+    return client.post("/api/checkout", json=checkout_body(), headers=headers).json()[
+        "id"
+    ]
+
+
+def _place_guest_order(client) -> dict:
+    """A guest cart → checkout; returns the order json (incl. the access token)."""
+    cart_token = client.post(
+        "/api/cart/items", json={"product_variant_id": 1, "quantity": 1}
+    ).json()["cart_token"]
+    placed = client.post(
+        "/api/checkout",
+        json=checkout_body(email="guest@example.com"),
+        headers={"X-Cart-Token": cart_token},
+    )
+    assert placed.status_code == 201, placed.text
+    return placed.json()
 
 
 def test_pay_calls_the_gateway_and_records_a_payment(client) -> None:
@@ -166,3 +182,84 @@ def test_webhook_without_valid_signature_is_rejected(client) -> None:
     assert forged.status_code == 401
     # the order was NOT marked paid by the forgery attempts
     assert client.get("/api/orders", headers=headers).json()[0]["status"] == "pending"
+
+
+def test_guest_pays_with_the_order_token(client) -> None:
+    """S4: possession of the order token (the checkout receipt) authorizes a guest to pay —
+    and to read the order; anything else gets the deny model."""
+    order = _place_guest_order(client)
+    order_id, token = order["id"], order["token"]
+
+    # no credentials at all → 401
+    assert client.post(f"/api/orders/{order_id}/pay").status_code == 401
+    # a wrong token → 404 (existence not leaked)
+    assert (
+        client.post(
+            f"/api/orders/{order_id}/pay", headers={"X-Order-Token": "not-the-token"}
+        ).status_code
+        == 404
+    )
+    # another signed-in customer → 404
+    other = _auth(client)
+    assert client.post(f"/api/orders/{order_id}/pay", headers=other).status_code == 404
+    assert client.get(f"/api/orders/{order_id}", headers=other).status_code == 404
+
+    # the token holder pays
+    paid = client.post(f"/api/orders/{order_id}/pay", headers={"X-Order-Token": token})
+    assert paid.status_code == 201
+    assert paid.json()["charge_id"] == "ch_test_123"
+
+    # and reads the order (payment attempt visible, still pending until the webhook)
+    shown = client.get(f"/api/orders/{order_id}", headers={"X-Order-Token": token})
+    assert shown.status_code == 200
+    assert shown.json()["payment_status"] == "pending"
+    assert shown.json()["status"] == "pending"
+
+
+def test_charge_failed_leaves_the_order_payable(client) -> None:
+    """S4 failure path: charge.failed marks the payment failed; the order stays PENDING (retryable)
+    and the read model shows the distinction."""
+    order = _place_guest_order(client)
+    order_id, token = order["id"], order["token"]
+    client.post(f"/api/orders/{order_id}/pay", headers={"X-Order-Token": token})
+
+    failed = _post_webhook(
+        client,
+        {
+            "id": "evt_fail_1",
+            "type": "charge.failed",
+            "data": {"charge_id": "ch_test_123"},
+        },
+    )
+    assert failed.status_code == 201 and failed.json()["status"] == "processed"
+
+    shown = client.get(
+        f"/api/orders/{order_id}", headers={"X-Order-Token": token}
+    ).json()
+    assert shown["status"] == "pending"  # still payable
+    assert shown["payment_status"] == "failed"
+
+    # a retry is allowed (PENDING-only guard doesn't block after a failure)
+    assert (
+        client.post(
+            f"/api/orders/{order_id}/pay", headers={"X-Order-Token": token}
+        ).status_code
+        == 201
+    )
+
+
+def test_paying_a_paid_order_is_409(client) -> None:
+    headers = _auth(client)
+    order_id = _place_order(client, headers)
+    client.post(f"/api/orders/{order_id}/pay", headers=headers)
+    _post_webhook(
+        client,
+        {
+            "id": "evt_paid_1",
+            "type": "charge.succeeded",
+            "data": {"charge_id": "ch_test_123"},
+        },
+    )
+    assert (
+        client.post(f"/api/orders/{order_id}/pay", headers=headers).status_code == 409
+    )

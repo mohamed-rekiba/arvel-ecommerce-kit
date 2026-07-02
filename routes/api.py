@@ -6,7 +6,7 @@ at /schema) AND the request body is validated — a missing or malformed body is
   GET  /api/user   -> protected; requires ``Authorization: Bearer <token>``
 """
 
-from arvel import Route, Schema, abort
+from arvel import Route, Schema, abort, config
 from arvel.auth.middleware import Authenticate
 from arvel.auth.tokens import TokenGuard, create_token
 from arvel.http import Request
@@ -159,6 +159,9 @@ Route.get(
 Route.get("/orders", checkout.my_orders, name="api.orders.index").middleware(
     Authenticate
 ).secure("bearer")
+# One order: the signed-in owner (bearer) OR the holder of the order's access token
+# (X-Order-Token, issued at checkout) — controller-level ownership, so guests can use it.
+Route.get("/orders/{id:int}", checkout.show, name="api.orders.show")
 # --- Customer notifications (database channel of the notification system) ------
 Route.get(
     "/notifications", notifications.index, name="api.notifications.index"
@@ -184,9 +187,21 @@ Route.post(
 ).status(200).middleware(Authenticate).secure("bearer")  # a transition, not a creation
 
 # --- Payments -----------------------------------------------------------------
-Route.post("/orders/{id:int}/pay", payment.pay, name="api.orders.pay").middleware(
-    Authenticate
-).secure("bearer")
+# Pay: signed-in owner OR guest order-token holder (guests must be able to pay) — the ownership
+# check lives in the controller (resolve_owned_order), not a bearer-only middleware.
+Route.post("/orders/{id:int}/pay", payment.pay, name="api.orders.pay")
 Route.post(
     "/webhooks/payment", payment.webhook, name="api.webhooks.payment"
 )  # gateway → us
+
+# --- Dev payment gateway (debug builds only) -----------------------------------
+# A stand-in PSP so the payment loop runs live with no external account: charges succeed and the
+# signed webhook arrives asynchronously via the queue. Never registered when app.debug is off.
+if config("app.debug", False):
+    from app.controllers import dev_gateway_controller as dev_gateway
+
+    Route.post(
+        "/dev-gateway/charges",
+        dev_gateway.create_charge,
+        name="api.dev_gateway.charges",
+    )

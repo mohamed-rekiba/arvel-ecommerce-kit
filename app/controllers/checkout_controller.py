@@ -8,11 +8,12 @@ listener), telemetry (a checkout span), and the typed OrderStatus state machine 
 
 from arvel import DB, Cache, Event, abort
 from arvel.http import Request
-from arvel.support import current_user
+from arvel.support import Str, current_user
 from arvel.telemetry import span
 from arvel.validation import ValidationException, Validator
 
 from app.controllers.cart_controller import resolve_cart
+from app.controllers.order_access import resolve_owned_order
 from app.enums import CountryCode, Currency, OrderStatus, Permission, can_transition
 from app.events.order_placed import OrderPlaced
 from app.jobs.fulfill_order import ORDERS_FULFILLED_KEY
@@ -67,10 +68,24 @@ def _currency_value(order: Order) -> str:
     return currency.value if isinstance(currency, Currency) else str(currency)
 
 
-def _order_out(order: Order, items: list[OrderItem]) -> OrderOut:
+async def _latest_payment_status(order: Order) -> str | None:
+    from app.enums import PaymentStatus
+    from app.models.payment import Payment
+
+    payment = await Payment.where("order_id", order.id).order_by("id", "desc").first()
+    if payment is None:
+        return None
+    status = payment.status
+    return status.value if isinstance(status, PaymentStatus) else str(status)
+
+
+def _order_out(
+    order: Order, items: list[OrderItem], payment_status: str | None = None
+) -> OrderOut:
     return OrderOut(
         id=order.id,
         status=_status_value(order),
+        token=order.token,
         contact_email=order.contact_email,
         address=_address_out(order),
         subtotal_cents=order.subtotal_cents,
@@ -78,6 +93,7 @@ def _order_out(order: Order, items: list[OrderItem]) -> OrderOut:
         tax_cents=order.tax_cents,
         total_cents=order.total_cents,
         currency=_currency_value(order),
+        payment_status=payment_status,
         items=[
             OrderLineOut(
                 product_variant_id=i.product_variant_id,
@@ -180,6 +196,7 @@ async def checkout(request: Request, data: CheckoutIn) -> OrderOut:
             order = await Order.create(
                 user_id=user.id if user is not None else None,
                 status=OrderStatus.PENDING,
+                token=Str.random(40),
                 contact_email=contact_email,
                 subtotal_cents=subtotal,
                 shipping_cents=shipping,
@@ -212,6 +229,16 @@ async def checkout(request: Request, data: CheckoutIn) -> OrderOut:
         ),
     )
     return _order_out(order, order_items)
+
+
+async def show(request: Request) -> OrderOut:
+    """One order, with lines + breakdown — for the signed-in owner or the order-token holder."""
+    order = await resolve_owned_order(request, int(request.path_param("id")))
+    return _order_out(
+        order,
+        await order.items().get(),
+        payment_status=await _latest_payment_status(order),
+    )
 
 
 async def orders_placed_count(request: Request) -> MetricsOut:

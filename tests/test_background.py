@@ -79,7 +79,10 @@ def test_checkout_queues_and_runs_the_fulfillment_job(client) -> None:
         json={"product_variant_id": 1, "quantity": 1},
         headers=headers,
     )
-    assert client.post("/api/checkout", json=checkout_body(), headers=headers).status_code == 201
+    assert (
+        client.post("/api/checkout", json=checkout_body(), headers=headers).status_code
+        == 201
+    )
     # the FulfillOrderJob was dispatched and ran on the memory broker (inline)
     assert client.get("/api/metrics/orders-placed").json()["orders_fulfilled"] == 1
 

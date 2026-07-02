@@ -143,7 +143,10 @@ def test_checkout_validates_address_and_country(client) -> None:
 
 def test_checkout_empty_cart_is_422(client) -> None:
     headers = _login(client, "cara@example.com", "secret-cara")
-    assert client.post("/api/checkout", json=checkout_body(), headers=headers).status_code == 422
+    assert (
+        client.post("/api/checkout", json=checkout_body(), headers=headers).status_code
+        == 422
+    )
 
 
 def test_order_state_machine(client) -> None:
@@ -154,7 +157,9 @@ def test_order_state_machine(client) -> None:
         json={"product_variant_id": 1, "quantity": 1},
         headers=customer,
     )
-    order_id = client.post("/api/checkout", json=checkout_body(), headers=customer).json()["id"]
+    order_id = client.post(
+        "/api/checkout", json=checkout_body(), headers=customer
+    ).json()["id"]
 
     # a customer cannot change status (admin-only)
     assert (
@@ -213,7 +218,9 @@ def test_admin_lists_all_orders(client) -> None:
         json={"product_variant_id": 1, "quantity": 2},
         headers=customer,
     )
-    order_id = client.post("/api/checkout", json=checkout_body(), headers=customer).json()["id"]
+    order_id = client.post(
+        "/api/checkout", json=checkout_body(), headers=customer
+    ).json()["id"]
 
     # the admin (orders.view via super-admin) sees it in the back-office list
     admin = _login(client, "admin@example.com", "secret-admin")
@@ -236,7 +243,9 @@ def test_shipping_an_order_notifies_the_customer(client) -> None:
         json={"product_variant_id": 1, "quantity": 1},
         headers=customer,
     )
-    order_id = client.post("/api/checkout", json=checkout_body(), headers=customer).json()["id"]
+    order_id = client.post(
+        "/api/checkout", json=checkout_body(), headers=customer
+    ).json()["id"]
 
     # no notifications yet
     assert client.get("/api/notifications", headers=customer).json() == []

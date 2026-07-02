@@ -98,7 +98,11 @@ def _place_and_ship(client: Any) -> int:
         json={"product_variant_id": 1, "quantity": 1},
         headers=customer,
     )
-    order_id = int(client.post("/api/checkout", json=checkout_body(), headers=customer).json()["id"])
+    order_id = int(
+        client.post("/api/checkout", json=checkout_body(), headers=customer).json()[
+            "id"
+        ]
+    )
     for nxt in ("paid", "shipped"):
         resp = client.post(
             f"/api/admin/orders/{order_id}/status", json={"status": nxt}, headers=admin

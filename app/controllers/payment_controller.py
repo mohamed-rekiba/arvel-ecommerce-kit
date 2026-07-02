@@ -12,9 +12,10 @@ from typing import Any
 
 from arvel import DB, Http, abort
 from arvel.http import Request
-from arvel.support import current_user
 from arvel.support.facades import Config
 from arvel.validation import ValidationException
+
+from app.controllers.order_access import resolve_owned_order
 
 from app.enums import OrderStatus, PaymentStatus, can_transition
 from app.models.order import Order
@@ -38,13 +39,9 @@ async def _verify_signature(request: Request) -> None:
 
 
 async def pay(request: Request) -> PaymentOut:
-    """Create a charge for the order via the gateway (owner-only, PENDING-only)."""
-    user = current_user.get()
-    if user is None:
-        abort(401, "Unauthenticated")
-    order = await Order.find_or_fail(int(request.path_param("id")))
-    if order.user_id != user.id:
-        abort(404, "Order not found")  # don't leak another customer's order
+    """Create a charge for the order via the gateway — the signed-in owner or the guest holding
+    the order's access token (guests must be able to pay; PENDING-only)."""
+    order = await resolve_owned_order(request, int(request.path_param("id")))
     status = (
         order.status
         if isinstance(order.status, OrderStatus)
@@ -110,4 +107,12 @@ async def webhook(request: Request, data: WebhookIn) -> WebhookOut:
                     if can_transition(current, OrderStatus.PAID):
                         order.status = OrderStatus.PAID
                         await order.save()
+        elif data.type == "charge.failed":
+            # the charge died at the gateway: mark the payment failed; the order stays PENDING
+            # so the customer can retry payment
+            charge_id = data.data.get("charge_id")
+            payment = await Payment.where("gateway_charge_id", charge_id).first()
+            if payment is not None:
+                payment.status = PaymentStatus.FAILED
+                await payment.save()
     return WebhookOut(status="processed")

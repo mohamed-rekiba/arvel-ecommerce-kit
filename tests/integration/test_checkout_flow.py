@@ -56,7 +56,9 @@ def test_guest_checkout_persists_breakdown_and_mails_the_guest(
         order_id = order["id"]
 
     async def _delivered() -> bool:
-        return f"Your order #{order_id} is confirmed" in _mailpit_subjects(mailpit["api"])
+        return f"Your order #{order_id} is confirmed" in _mailpit_subjects(
+            mailpit["api"]
+        )
 
     asyncio.run(_run_worker(30.0, until=_delivered))
     assert f"Your order #{order_id} is confirmed" in _mailpit_subjects(mailpit["api"])

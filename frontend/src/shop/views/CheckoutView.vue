@@ -1,10 +1,11 @@
 <script setup lang="ts">
-import { computed, onMounted, reactive, ref } from "vue";
+import { computed, onBeforeUnmount, onMounted, reactive, ref } from "vue";
 import {
   ApiError,
   type CountryCode,
   type Order,
   SHIPPING_COUNTRIES,
+  api,
   formatPrice,
 } from "../api";
 import { useAuth } from "../auth";
@@ -17,6 +18,52 @@ const placing = ref(false);
 const order = ref<Order | null>(null);
 const error = ref<string | null>(null);
 const fieldErrors = ref<Record<string, string[]>>({});
+
+type PayState = "unpaid" | "processing" | "paid" | "failed";
+const payState = ref<PayState>("unpaid");
+const payError = ref<string | null>(null);
+let pollTimer: ReturnType<typeof setInterval> | null = null;
+
+function stopPolling() {
+  if (pollTimer !== null) clearInterval(pollTimer);
+  pollTimer = null;
+}
+
+async function payNow() {
+  if (!order.value) return;
+  payState.value = "processing";
+  payError.value = null;
+  const { id, token } = order.value;
+  try {
+    await api.pay(id, token);
+  } catch {
+    payState.value = "failed";
+    payError.value = "We couldn't start the payment. Please try again.";
+    return;
+  }
+  // the gateway confirms asynchronously (webhook) — poll the order until it flips
+  let attempts = 0;
+  stopPolling();
+  pollTimer = setInterval(async () => {
+    attempts += 1;
+    const fresh = await api.order(id, token);
+    order.value = fresh;
+    if (fresh.status === "paid") {
+      payState.value = "paid";
+      stopPolling();
+    } else if (fresh.payment_status === "failed") {
+      payState.value = "failed";
+      payError.value = "The payment didn't go through. You can try again.";
+      stopPolling();
+    } else if (attempts >= 20) {
+      payState.value = "failed";
+      payError.value = "Payment is taking longer than expected — check your account shortly.";
+      stopPolling();
+    }
+  }, 1000);
+}
+
+onBeforeUnmount(stopPolling);
 
 const form = reactive({
   email: "",
@@ -92,7 +139,23 @@ onMounted(async () => {
         Shipping to {{ order.address.name }}, {{ order.address.line1 }}, {{ order.address.city }}.
       </p>
       <p class="confirm__note">A confirmation was sent to {{ order.contact_email }}.</p>
-      <RouterLink class="btn btn--primary" to="/">Continue shopping</RouterLink>
+
+      <section class="pay" aria-live="polite">
+        <template v-if="payState === 'paid' || order.status === 'paid'">
+          <p class="pay__done">✓ Paid — thank you!</p>
+        </template>
+        <template v-else-if="payState === 'processing'">
+          <p class="pay__processing">Processing your payment…</p>
+        </template>
+        <template v-else>
+          <p v-if="payError" class="error" role="alert">{{ payError }}</p>
+          <button class="btn btn--primary pay__button" @click="payNow">
+            {{ payState === "failed" ? "Try payment again" : `Pay ${formatPrice(order.total_cents)}` }}
+          </button>
+        </template>
+      </section>
+
+      <RouterLink class="btn" to="/">Continue shopping</RouterLink>
     </div>
 
     <template v-else>
@@ -195,6 +258,10 @@ onMounted(async () => {
 .breakdown dt { color: var(--color-text-muted); }
 .breakdown dd { margin: 0; }
 .error { color: var(--color-danger); font-size: var(--text-sm); margin-top: var(--space-4); }
+.pay { margin: var(--space-6) 0; }
+.pay__button { padding: var(--space-4) var(--space-8); }
+.pay__done { color: var(--color-success, #2e7d32); font-weight: 600; }
+.pay__processing { color: var(--color-text-muted); }
 .place { width: 100%; padding: var(--space-4); margin-top: var(--space-4); }
 .fineprint { font-size: var(--text-xs); color: var(--color-text-muted); text-align: center; margin: var(--space-2) 0 0; }
 </style>

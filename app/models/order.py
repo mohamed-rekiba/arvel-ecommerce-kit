@@ -14,6 +14,7 @@ class Order(Model):
     __fields__: ClassVar[dict[str, type]] = {
         "user_id": int,
         "status": str,
+        "token": str,
         "contact_email": str,
         "ship_name": str,
         "ship_line1": str,
@@ -30,6 +31,7 @@ class Order(Model):
     __fillable__: ClassVar[list[str]] = [
         "user_id",
         "status",
+        "token",
         "contact_email",
         "ship_name",
         "ship_line1",
