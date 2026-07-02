@@ -35,6 +35,7 @@ def _out(coupon: Coupon) -> AdminCouponOut:
         per_customer_limit=coupon.per_customer_limit,
         uses=coupon.uses or 0,
         active=bool(coupon.active),
+        announce=bool(getattr(coupon, "announce", False)),
         starts_at=None if coupon.starts_at is None else str(coupon.starts_at),
         ends_at=None if coupon.ends_at is None else str(coupon.ends_at),
     )
@@ -69,6 +70,7 @@ async def store(request: Request, data: CouponIn) -> AdminCouponOut:
         per_customer_limit=data.per_customer_limit,
         uses=0,
         active=True,
+        announce=data.announce,
     )
     await (
         activity()
@@ -95,6 +97,8 @@ async def update(request: Request, data: CouponUpdateIn) -> AdminCouponOut:
         coupon.per_customer_limit = data.per_customer_limit
     if data.min_subtotal_cents is not None:
         coupon.min_subtotal_cents = data.min_subtotal_cents
+    if data.announce is not None:
+        coupon.announce = data.announce
     await coupon.save()
     await (
         activity()
