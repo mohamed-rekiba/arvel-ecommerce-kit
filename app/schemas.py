@@ -130,6 +130,23 @@ class UserOut(Schema):
     id: int
     name: str
     email: str
+    phone: str | None
+    email_verified: bool
+
+
+class ProfileIn(Schema):
+    name: str | None = None
+    email: str | None = None
+    phone: str | None = None
+
+
+class ChangePasswordIn(Schema):
+    current_password: str
+    password: str
+
+
+class VerifyEmailIn(Schema):
+    token: str
 
 
 class MessageOut(Schema):
@@ -186,9 +203,8 @@ class ForgotPasswordIn(Schema):
     email: str
 
 
-class ForgotPasswordOut(Schema, omit_defaults=True):
-    message: str
-    reset_token: str | None = None  # dev convenience; normally emailed
+class ForgotPasswordOut(Schema):
+    message: str  # always the same non-enumerating line; the link itself is emailed
 
 
 class ResetPasswordIn(Schema):

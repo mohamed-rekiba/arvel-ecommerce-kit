@@ -7,6 +7,9 @@ import ProductDetailView from "./shop/views/ProductDetailView.vue";
 import CartView from "./shop/views/CartView.vue";
 import CheckoutView from "./shop/views/CheckoutView.vue";
 import OrderDetailView from "./shop/views/OrderDetailView.vue";
+import ForgotPasswordView from "./shop/views/ForgotPasswordView.vue";
+import ResetPasswordView from "./shop/views/ResetPasswordView.vue";
+import VerifyEmailView from "./shop/views/VerifyEmailView.vue";
 import AccountView from "./shop/views/AccountView.vue";
 
 // The admin section is lazy-loaded — a separate chunk (with its Keycloak/OIDC client) that a storefront
@@ -39,6 +42,9 @@ const router = createRouter({
         { path: "checkout", name: "checkout", component: CheckoutView },
         { path: "orders/:id", name: "order", component: OrderDetailView },
         { path: "account", name: "account", component: AccountView },
+        { path: "forgot-password", name: "forgot-password", component: ForgotPasswordView },
+        { path: "reset-password", name: "reset-password", component: ResetPasswordView },
+        { path: "verify-email", name: "verify-email", component: VerifyEmailView },
       ],
     },
     // pre-auth admin routes live outside the AdminLayout shell

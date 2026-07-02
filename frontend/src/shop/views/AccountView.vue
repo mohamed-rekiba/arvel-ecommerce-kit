@@ -63,6 +63,67 @@ async function submit() {
   }
 }
 
+// --- profile self-service (S6) -------------------------------------------------
+const profile = ref({ name: "", email: "", phone: "" });
+const profileMsg = ref<string | null>(null);
+const profileErr = ref<string | null>(null);
+const currentPassword = ref("");
+const newPassword = ref("");
+const passwordMsg = ref<string | null>(null);
+const passwordErr = ref<string | null>(null);
+const resent = ref(false);
+
+function syncProfileForm() {
+  if (!state.customer) return;
+  profile.value = {
+    name: state.customer.name,
+    email: state.customer.email,
+    phone: state.customer.phone ?? "",
+  };
+}
+
+async function saveProfile() {
+  profileMsg.value = null;
+  profileErr.value = null;
+  try {
+    state.customer = await api.updateProfile({
+      name: profile.value.name,
+      email: profile.value.email,
+      phone: profile.value.phone,
+    });
+    syncProfileForm();
+    profileMsg.value = state.customer.email_verified
+      ? "Profile saved."
+      : "Profile saved — check your inbox to verify the new email.";
+  } catch (e) {
+    profileErr.value =
+      e instanceof ApiError && e.status === 422
+        ? Object.values(e.errors)[0]?.[0] ?? "Please check your details."
+        : "Couldn't save your profile.";
+  }
+}
+
+async function savePassword() {
+  passwordMsg.value = null;
+  passwordErr.value = null;
+  try {
+    await api.changePassword(currentPassword.value, newPassword.value);
+    currentPassword.value = "";
+    newPassword.value = "";
+    passwordMsg.value = "Password updated.";
+  } catch (e) {
+    passwordErr.value =
+      e instanceof ApiError && e.status === 422
+        ? Object.values(e.errors)[0]?.[0] ?? "Please check the passwords."
+        : "Couldn't update the password.";
+  }
+}
+
+async function resendVerification() {
+  await api.resendVerification();
+  resent.value = true;
+}
+
 async function signOut() {
   await logout();
   orders.value = [];
@@ -71,7 +132,10 @@ async function signOut() {
 
 onMounted(async () => {
   await restore();
-  if (state.customer) await Promise.all([loadOrders(), loadNotifications(), wishlist.refresh()]);
+  if (state.customer) {
+    syncProfileForm();
+    await Promise.all([loadOrders(), loadNotifications(), wishlist.refresh()]);
+  }
 });
 </script>
 
@@ -85,7 +149,54 @@ onMounted(async () => {
         <h1>Hello, {{ state.customer.name }}</h1>
         <button class="btn" @click="signOut">Sign out</button>
       </div>
-      <p class="account__email">{{ state.customer.email }}</p>
+      <p class="account__email">
+        {{ state.customer.email }}
+        <span v-if="state.customer.email_verified" class="verified">✓ verified</span>
+      </p>
+
+      <p v-if="!state.customer.email_verified" class="verify-note" role="status">
+        Your email isn't verified yet.
+        <button v-if="!resent" class="linklike" @click="resendVerification">Resend the link</button>
+        <span v-else>Verification email sent — check your inbox.</span>
+      </p>
+
+      <section class="panel">
+        <h2 class="orders__title">Profile</h2>
+        <form class="form form--grid" @submit.prevent="saveProfile">
+          <label class="field">
+            <span>Name</span>
+            <input v-model.trim="profile.name" type="text" autocomplete="name" required />
+          </label>
+          <label class="field">
+            <span>Email</span>
+            <input v-model.trim="profile.email" type="email" autocomplete="email" required />
+          </label>
+          <label class="field">
+            <span>Phone <em>(private — stored encrypted)</em></span>
+            <input v-model.trim="profile.phone" type="tel" autocomplete="tel" />
+          </label>
+          <p v-if="profileErr" class="error" role="alert">{{ profileErr }}</p>
+          <p v-if="profileMsg" class="ok" role="status">{{ profileMsg }}</p>
+          <button class="btn btn--primary" type="submit">Save profile</button>
+        </form>
+      </section>
+
+      <section class="panel">
+        <h2 class="orders__title">Change password</h2>
+        <form class="form form--grid" @submit.prevent="savePassword">
+          <label class="field">
+            <span>Current password</span>
+            <input v-model="currentPassword" type="password" autocomplete="current-password" required />
+          </label>
+          <label class="field">
+            <span>New password</span>
+            <input v-model="newPassword" type="password" autocomplete="new-password" minlength="8" required />
+          </label>
+          <p v-if="passwordErr" class="error" role="alert">{{ passwordErr }}</p>
+          <p v-if="passwordMsg" class="ok" role="status">{{ passwordMsg }}</p>
+          <button class="btn" type="submit">Update password</button>
+        </form>
+      </section>
 
       <section v-if="notifications.length" class="notes">
         <div class="notes__head">
@@ -148,6 +259,9 @@ onMounted(async () => {
           <span>Password</span>
           <input v-model="password" type="password" :autocomplete="mode === 'login' ? 'current-password' : 'new-password'" required />
         </label>
+        <p v-if="mode === 'login'" class="forgot">
+          <RouterLink to="/forgot-password">Forgot your password?</RouterLink>
+        </p>
         <p v-if="error" class="error" role="alert">{{ error }}</p>
         <button class="btn btn--primary submit" :disabled="busy" type="submit">
           {{ busy ? "Please wait…" : mode === "login" ? "Sign in" : "Create account" }}
@@ -206,4 +320,12 @@ onMounted(async () => {
 .order__status { padding: 2px var(--space-3); background: var(--color-accent-soft); color: var(--color-accent); border-radius: var(--radius-full); font-size: var(--text-xs); text-transform: capitalize; }
 .order__total { font-weight: var(--weight-medium); min-width: 4rem; text-align: right; }
 .muted { color: var(--color-text-muted); }
+.verified { color: var(--color-success, #2e7d32); font-size: var(--text-xs); font-weight: 600; margin-left: var(--space-2); }
+.verify-note { background: var(--color-surface); border: 1px solid var(--color-border); border-radius: var(--radius-md); padding: var(--space-3) var(--space-4); font-size: var(--text-sm); margin: var(--space-4) 0; }
+.linklike { background: none; border: none; padding: 0; color: inherit; text-decoration: underline; cursor: pointer; font: inherit; }
+.panel { background: var(--color-surface); border-radius: var(--radius-lg); padding: var(--space-6); margin: var(--space-6) 0; }
+.form--grid .field { margin-bottom: var(--space-4); }
+.form--grid .field em { color: var(--color-text-muted); font-style: normal; font-size: var(--text-xs); }
+.ok { color: var(--color-success, #2e7d32); font-size: var(--text-sm); }
+.forgot { font-size: var(--text-sm); margin: calc(var(--space-2) * -1) 0 var(--space-3); }
 </style>

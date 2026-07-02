@@ -10,14 +10,14 @@ from litestar.testing import TestClient
 
 from arvel.database import ConnectionResolver, Migrator, discover_migrations
 
+from app.mail.password_reset import PasswordReset
+
 
 @pytest.fixture
 def client(tmp_path, monkeypatch):
     url = f"sqlite+aiosqlite:///{tmp_path / 'auth.sqlite'}"
     monkeypatch.setenv("DATABASE_URL", url)
-    monkeypatch.setenv(
-        "APP_DEBUG", "true"
-    )  # exposes the reset token in the response (dev-only path)
+    monkeypatch.setenv("APP_DEBUG", "true")
 
     async def migrate() -> None:
         db = ConnectionResolver({"default": {"url": url}})
@@ -30,6 +30,16 @@ def client(tmp_path, monkeypatch):
 
     with TestClient(app=create_app().as_asgi()) as test_client:
         yield test_client
+
+
+@pytest.fixture
+def faked_mail():
+    from arvel.support.facades import Mail
+    from arvel.testing import fake, reset_fakes
+
+    mailer = fake(Mail)
+    yield mailer
+    reset_fakes()
 
 
 def _register(client, email="ada@example.com", password="supersecret"):
@@ -88,12 +98,15 @@ def test_login_then_logout_revokes_only_the_current_token(client) -> None:
     )
 
 
-def test_password_reset_flow(client) -> None:
+def test_password_reset_flow(client, faked_mail) -> None:
     _register(client)
-    # request a reset token (dev returns it; prod emails it)
+    # request a reset — the LINK is emailed (never echoed in the response)
     forgot = client.post("/api/forgot-password", json={"email": "ada@example.com"})
     assert forgot.status_code == 200
-    reset_token = forgot.json()["reset_token"]
+    assert "reset_token" not in forgot.json()
+    faked_mail.assert_sent(PasswordReset)
+    assert faked_mail.recipients[-1] == ["ada@example.com"]
+    reset_token = faked_mail.sent[-1].token
 
     # reset to a new password
     reset = client.post(
