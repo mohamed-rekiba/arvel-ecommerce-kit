@@ -31,6 +31,10 @@ export async function apiFetch<T>(url: string, options: RequestInit): Promise<T>
   }
 
   const res = await fetch(url, { ...options, headers });
+  if (res.status === 503) {
+    // maintenance mode (arvel down) — let the shell swap in the designed screen
+    window.dispatchEvent(new CustomEvent("arvel:maintenance"));
+  }
   if (!res.ok) {
     let message = `API ${res.status} for ${options.method ?? "GET"} ${url}`;
     let errors: Record<string, string[]> = {};

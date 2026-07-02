@@ -11,5 +11,7 @@ config = {
     "url": env("APP_URL", "http://localhost:8000"),
     "frontend_url": env("FRONTEND_URL", "http://localhost:5173"),
     "debug": env("APP_DEBUG", False),
+    # paths that answer even in maintenance mode (arvel down): the liveness probe
+    "maintenance_except": ["/api/health"],
     "timezone": "UTC",
 }
