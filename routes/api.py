@@ -16,6 +16,7 @@ from app.controllers import account_controller as account
 from app.controllers import admin_controller as admin
 from app.controllers import admin_product_controller as admin_products
 from app.controllers import admin_rbac_controller as rbac
+from app.controllers import admin_variant_controller as admin_variants
 from app.controllers import auth_controller as auth
 from app.controllers import cart_controller as cart
 from app.controllers import catalog_controller as catalog
@@ -137,6 +138,31 @@ Route.delete(
     admin_products.destroy,
     name="api.admin.products.destroy",
 ).middleware(Authenticate).secure("bearer")
+
+# --- Admin variants + stock (nested under the product; catalog.update authority) ---------------
+Route.get(
+    "/admin/products/{id:int}/variants",
+    admin_variants.index,
+    name="api.admin.variants.index",
+).middleware(Authenticate).secure("bearer")
+Route.post(
+    "/admin/products/{id:int}/variants",
+    admin_variants.store,
+    name="api.admin.variants.store",
+).middleware(Authenticate).secure("bearer")
+Route.patch(
+    "/admin/variants/{id:int}", admin_variants.update, name="api.admin.variants.update"
+).middleware(Authenticate).secure("bearer")
+Route.post(
+    "/admin/variants/{id:int}/stock",
+    admin_variants.adjust_stock,
+    name="api.admin.variants.stock",
+).status(200).middleware(Authenticate).secure("bearer")
+Route.delete(
+    "/admin/variants/{id:int}",
+    admin_variants.destroy,
+    name="api.admin.variants.destroy",
+).status(200).middleware(Authenticate).secure("bearer")
 
 # --- Admin RBAC + audit (roles.manage / audit.view; super-admin bypasses) -----
 Route.get("/admin/roles", rbac.roles_index, name="api.admin.roles.index").middleware(

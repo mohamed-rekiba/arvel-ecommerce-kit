@@ -308,7 +308,9 @@ class OrderOut(Schema):
     tax_cents: int
     total_cents: int
     currency: Currency
-    payment_status: PaymentStatus | None  # latest payment attempt (None = never attempted)
+    payment_status: (
+        PaymentStatus | None
+    )  # latest payment attempt (None = never attempted)
     items: list[OrderLineOut]
 
 
@@ -319,6 +321,27 @@ class OrderStatusIn(Schema):
 class MetricsOut(Schema):
     orders_placed: int
     orders_fulfilled: int
+
+
+class VariantIn(Schema):
+    sku: str
+    name: str
+    price_adjustment_cents: int = 0
+    stock: int = 0
+
+
+class VariantUpdateIn(Schema):
+    sku: str | None = None
+    name: str | None = None
+    price_adjustment_cents: int | None = None
+
+
+class StockAdjustIn(Schema):
+    """Exactly one of ``set`` (absolute) or ``delta`` (shift); ``reason`` lands in the audit log."""
+
+    set: int | None = None
+    delta: int | None = None
+    reason: str | None = None
 
 
 class DevChargeIn(Schema):
