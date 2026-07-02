@@ -116,12 +116,14 @@ onMounted(async () => {
         <p v-else-if="orders.length === 0" class="muted">You haven't placed any orders yet.</p>
         <ul v-else class="orders__list">
           <li v-for="o in orders" :key="o.id" class="order">
-            <div>
-              <span class="order__id">Order #{{ o.id }}</span>
-              <span class="order__items">{{ o.items.length }} item{{ o.items.length === 1 ? "" : "s" }}</span>
-            </div>
-            <span class="order__status">{{ o.status }}</span>
-            <span class="order__total">{{ formatPrice(o.total_cents) }}</span>
+            <RouterLink class="order__link" :to="`/orders/${o.id}`">
+              <div>
+                <span class="order__id">Order #{{ o.id }}</span>
+                <span class="order__items">{{ o.items.length }} item{{ o.items.length === 1 ? "" : "s" }}</span>
+              </div>
+              <span class="order__status">{{ o.status }}</span>
+              <span class="order__total">{{ formatPrice(o.total_cents) }}</span>
+            </RouterLink>
           </li>
         </ul>
       </section>

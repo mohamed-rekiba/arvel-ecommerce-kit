@@ -44,7 +44,7 @@ def client(tmp_path, monkeypatch):
         )
         await admin.assign_role("super-admin")  # orders.update authority (bypasses)
         cat = await Category.create(
-            translations={"en": {"name": "Shirts"}}, slug="shirts"
+            translations={"en": {"name": "Shirts"}}, slug="shirts", published=True
         )
         p = await Product.create(
             category_id=cat.id,
@@ -53,6 +53,7 @@ def client(tmp_path, monkeypatch):
             price_cents=2000,
             currency="USD",
             status=ProductStatus.ACTIVE,
+            published=True,  # retrievable → the PDP read-back in the cancel test works
         )
         await ProductVariant.create(
             product_id=p.id, sku="TEE-S", name="S", price_adjustment_cents=0, stock=100
@@ -275,3 +276,71 @@ def test_shipping_an_order_notifies_the_customer(client) -> None:
     # a different customer sees none of it (scoped by notifiable)
     other = _login(client, "admin@example.com", "secret-admin")
     assert client.get("/api/notifications", headers=other).json() == []
+
+
+def test_customer_cancels_a_pending_order_and_stock_returns(client) -> None:
+    """S5: the owner cancels while the state machine allows it; the decremented stock returns."""
+    customer = _login(client, "cara@example.com", "secret-cara")
+    client.post(
+        "/api/cart/items",
+        json={"product_variant_id": 1, "quantity": 3},
+        headers=customer,
+    )
+    order = client.post("/api/checkout", json=checkout_body(), headers=customer).json()
+
+    cancelled = client.post(f"/api/orders/{order['id']}/cancel", headers=customer)
+    assert cancelled.status_code == 200
+    assert cancelled.json()["status"] == "cancelled"
+
+    # stock restored: the PDP variant shows the pre-checkout quantity again
+    product = client.get("/api/products/tee").json()
+    assert product["variants"][0]["stock"] == 100
+
+    # a cancelled order is terminal — cancelling again is a state-machine 422
+    again = client.post(f"/api/orders/{order['id']}/cancel", headers=customer)
+    assert again.status_code == 422
+
+
+def test_cancel_denies_non_owners_and_shipped_orders(client) -> None:
+    """S5 failure paths: deny model for strangers; shipped orders can't be cancelled."""
+    customer = _login(client, "cara@example.com", "secret-cara")
+    admin = _login(client, "admin@example.com", "secret-admin")
+    client.post(
+        "/api/cart/items",
+        json={"product_variant_id": 1, "quantity": 1},
+        headers=customer,
+    )
+    order_id = client.post(
+        "/api/checkout", json=checkout_body(), headers=customer
+    ).json()["id"]
+
+    # no credentials → 401; a wrong order token → 404
+    assert client.post(f"/api/orders/{order_id}/cancel").status_code == 401
+    assert (
+        client.post(
+            f"/api/orders/{order_id}/cancel", headers={"X-Order-Token": "wrong"}
+        ).status_code
+        == 404
+    )
+
+    # ship it (admin) — now the customer can no longer cancel
+    for nxt in ("paid", "shipped"):
+        client.post(
+            f"/api/admin/orders/{order_id}/status", json={"status": nxt}, headers=admin
+        )
+    resp = client.post(f"/api/orders/{order_id}/cancel", headers=customer)
+    assert resp.status_code == 422
+    assert "no longer" in resp.json()["errors"]["order"][0]
+
+
+def test_order_lines_carry_the_purchase_snapshot(client) -> None:
+    """S5: order lines snapshot the product + variant names at purchase time."""
+    customer = _login(client, "cara@example.com", "secret-cara")
+    client.post(
+        "/api/cart/items",
+        json={"product_variant_id": 1, "quantity": 1},
+        headers=customer,
+    )
+    order = client.post("/api/checkout", json=checkout_body(), headers=customer).json()
+    line = order["items"][0]
+    assert (line["product_name"], line["variant_name"]) == ("Tee", "S")

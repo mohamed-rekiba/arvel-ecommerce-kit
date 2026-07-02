@@ -34,6 +34,10 @@ class CreateOrdersTable(Migration):
             t.id()
             t.foreign_id("order_id").constrained("orders").index()
             t.foreign_id("product_variant_id").constrained("product_variants").index()
+            # purchase-time snapshot: what the customer bought, as they saw it — order history
+            # stays intact through renames, archival, or deletion of the catalog rows
+            t.string("product_name")
+            t.string("variant_name")
             t.integer("quantity")
             t.integer("unit_price_cents")
             t.timestamps()

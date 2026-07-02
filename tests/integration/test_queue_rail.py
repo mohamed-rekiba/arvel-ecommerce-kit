@@ -76,6 +76,20 @@ async def _seed_shop(url: str) -> None:
             price_adjustment_cents=0,
             stock=100,
         )
+        # on PG the retrievable_* views are MATERIALIZED — recompute so the storefront read
+        # paths (PDP, catalog) see the seeded rows
+        import sqlalchemy as sa
+        from sqlalchemy.ext.asyncio import create_async_engine
+
+        engine = create_async_engine(url)
+        async with engine.begin() as conn:
+            await conn.execute(
+                sa.text("REFRESH MATERIALIZED VIEW retrievable_products")
+            )
+            await conn.execute(
+                sa.text("REFRESH MATERIALIZED VIEW retrievable_categories")
+            )
+        await engine.dispose()
     finally:
         for model in _MODELS:
             model.set_connection(None)

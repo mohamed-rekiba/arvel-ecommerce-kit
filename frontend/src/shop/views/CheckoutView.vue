@@ -155,6 +155,7 @@ onMounted(async () => {
         </template>
       </section>
 
+      <RouterLink class="btn btn--primary" :to="`/orders/${order.id}`">View your order</RouterLink>
       <RouterLink class="btn" to="/">Continue shopping</RouterLink>
     </div>
 
