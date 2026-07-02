@@ -1081,7 +1081,7 @@
         "operationId": "api.admin.products.media.destroy",
         "parameters": [
           {
-            "name": "media_id",
+            "name": "id",
             "in": "path",
             "schema": {
               "type": "integer"
@@ -1090,7 +1090,7 @@
             "deprecated": false
           },
           {
-            "name": "id",
+            "name": "media_id",
             "in": "path",
             "schema": {
               "type": "integer"
@@ -1164,7 +1164,7 @@
     "/api/admin/products": {
       "get": {
         "summary": "ApiAdminProductsIndex",
-        "description": "List **all** products (admin) \u2014 including hidden ones \u2014 each annotated with `is_visible`\n(the with_visibility scope adds the inline EXISTS column; one query for the page).",
+        "description": "List **all** products (admin) \u2014 including hidden ones \u2014 each annotated with `is_visible`.\n``archived=true`` lists the soft-deleted (recoverable) rows instead.",
         "operationId": "api.admin.products.index",
         "parameters": [
           {
@@ -1185,6 +1185,18 @@
             "schema": {
               "type": "integer",
               "default": 1
+            },
+            "required": false,
+            "deprecated": false,
+            "allowEmptyValue": false,
+            "allowReserved": false
+          },
+          {
+            "name": "archived",
+            "in": "query",
+            "schema": {
+              "type": "boolean",
+              "default": false
             },
             "required": false,
             "deprecated": false,
@@ -1643,7 +1655,7 @@
       },
       "delete": {
         "summary": "ApiAdminProductsDestroy",
-        "description": "Delete a product (admins only; 404 to non-admins).",
+        "description": "ARCHIVE a product (soft delete \u2014 order history intact, restorable; 404 to non-admins).",
         "operationId": "api.admin.products.destroy",
         "parameters": [
           {
@@ -1664,6 +1676,81 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/MessageOut"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request syntax or unsupported method",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "status_code": {
+                      "type": "integer"
+                    },
+                    "detail": {
+                      "type": "string"
+                    },
+                    "extra": {
+                      "additionalProperties": {},
+                      "type": [
+                        "null",
+                        "object",
+                        "array"
+                      ]
+                    }
+                  },
+                  "type": "object",
+                  "required": [
+                    "detail",
+                    "status_code"
+                  ],
+                  "description": "Validation Exception",
+                  "examples": [
+                    {
+                      "status_code": 400,
+                      "detail": "Bad Request",
+                      "extra": {}
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        },
+        "deprecated": false,
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ]
+      }
+    },
+    "/api/admin/products/{id}/restore": {
+      "post": {
+        "summary": "ApiAdminProductsRestore",
+        "description": "Bring an archived product back \u2014 visibility flags are untouched, so a hidden product\nrestores as hidden.",
+        "operationId": "api.admin.products.restore",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "schema": {
+              "type": "integer"
+            },
+            "required": true,
+            "deprecated": false
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Request fulfilled, document follows",
+            "headers": {},
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AdminProductOut"
                 }
               }
             }

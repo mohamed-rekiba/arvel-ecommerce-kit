@@ -147,6 +147,11 @@ Route.delete(
     admin_products.destroy,
     name="api.admin.products.destroy",
 ).middleware(Authenticate).secure("bearer")
+Route.post(
+    "/admin/products/{id:int}/restore",
+    admin_products.restore,
+    name="api.admin.products.restore",
+).status(200).middleware(Authenticate).secure("bearer")
 
 # --- Admin categories + vendors (the retrievability dimensions; catalog.* authority) -----------
 Route.post(

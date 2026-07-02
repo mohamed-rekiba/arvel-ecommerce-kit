@@ -47,11 +47,20 @@ async def _require_admin() -> User:
 
 
 async def products_index(
-    request: Request, per_page: int = 20, page: int = 1
+    request: Request, per_page: int = 20, page: int = 1, archived: bool = False
 ) -> AdminProductPage:
-    """List **all** products (admin) — including hidden ones — each annotated with `is_visible`
-    (the with_visibility scope adds the inline EXISTS column; one query for the page)."""
+    """List **all** products (admin) — including hidden ones — each annotated with `is_visible`.
+    ``archived=true`` lists the soft-deleted (recoverable) rows instead."""
     await _require_admin()
+    if archived:
+        result = await Product.only_trashed().order_by("id").paginate(per_page, page)
+        return AdminProductPage(
+            data=[_admin_product_out(p, is_visible=False) for p in result.items()],
+            current_page=result.current_page(),
+            last_page=result.last_page(),
+            per_page=result.per_page(),
+            total=result.total(),
+        )
     result = await Product.with_visibility().order_by("id").paginate(per_page, page)
     return AdminProductPage(
         data=[
@@ -185,10 +194,19 @@ async def store(request: Request, data: ProductIn) -> AdminProductOut:
         raise ValidationException(validator.errors())
     translations = validated_translations(data.translations)
     assert translations is not None  # ProductIn.translations is required
+    slug = Str.slug(translations["en"]["name"] or "")
+    if await Product.with_trashed().where("slug", slug).first() is not None:
+        raise ValidationException(
+            {
+                "slug": [
+                    "This slug is taken (possibly by an archived product — restore it instead)."
+                ]
+            }
+        )
     product = await Product.create(
         category_id=data.category_id,
         translations=translations,
-        slug=Str.slug(translations["en"]["name"] or ""),
+        slug=slug,
         price_cents=data.price_cents,
         currency="USD",
         status=ProductStatus.DRAFT,
@@ -257,8 +275,36 @@ async def update(request: Request, data: UpdateProductIn) -> AdminProductOut:
     )
 
 
+async def restore(request: Request) -> AdminProductOut:
+    """Bring an archived product back — visibility flags are untouched, so a hidden product
+    restores as hidden."""
+    user = _current_user()
+    product = (
+        await Product.only_trashed().where("id", int(request.path_param("id"))).first()
+    )
+    if product is None:
+        abort(404, "Product not found")
+    if not await user.can("update", product):
+        abort(404, "Product not found")
+    await product.restore()
+    from app.services.catalog_visibility_service import CatalogVisibilityService
+
+    await CatalogVisibilityService.mark_dirty()
+    await (
+        activity()
+        .caused_by(user)
+        .performed_on(product)
+        .with_properties({"slug": product.slug})
+        .log("restored product")
+    )
+    refreshed = await Product.with_visibility().where("id", product.id).first_or_fail()
+    return _admin_product_out(
+        refreshed, is_visible=bool(getattr(refreshed, "is_visible", False))
+    )
+
+
 async def destroy(request: Request) -> MessageOut:
-    """Delete a product (admins only; 404 to non-admins)."""
+    """ARCHIVE a product (soft delete — order history intact, restorable; 404 to non-admins)."""
     user = _current_user()
     product = await Product.find_or_fail(int(request.path_param("id")))
     if not await user.can("delete", product):

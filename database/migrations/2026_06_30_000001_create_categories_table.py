@@ -14,6 +14,7 @@ class CreateCategoriesTable(Migration):
                 value=True
             )  # admin intent; retrievability also needs ancestors published
             t.btree_index("translations->'en'->>'name'")
+            t.soft_deletes()
             t.timestamps()
 
         schema.create("categories", define)

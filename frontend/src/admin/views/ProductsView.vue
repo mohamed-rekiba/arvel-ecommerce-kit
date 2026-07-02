@@ -12,11 +12,12 @@ const router = useRouter();
 const products = ref<AdminProduct[]>([]);
 const status = ref<"loading" | "error" | "ready">("loading");
 const notice = ref<string | null>(null);
+const showArchived = ref(false);
 
 async function load() {
   status.value = "loading";
   try {
-    products.value = (await api.products()).data;
+    products.value = (await api.products(1, showArchived.value)).data;
     status.value = "ready";
   } catch (e) {
     status.value = "error";
@@ -26,14 +27,30 @@ async function load() {
 }
 
 async function remove(p: AdminProduct) {
+  if (!window.confirm(`Archive “${name(p)}”? It leaves the storefront but stays restorable.`)) return;
   notice.value = null;
   try {
     await api.deleteProduct(p.id);
     await load();
   } catch (e) {
     notice.value =
-      e instanceof ApiError && e.status === 404 ? "Your role can't delete products." : "Delete failed.";
+      e instanceof ApiError && e.status === 404 ? "Your role can't archive products." : "Archive failed.";
   }
+}
+
+async function restore(p: AdminProduct) {
+  notice.value = null;
+  try {
+    await api.restoreProduct(p.id);
+    await load();
+  } catch {
+    notice.value = "Restore failed.";
+  }
+}
+
+async function toggleArchived() {
+  showArchived.value = !showArchived.value;
+  await load();
 }
 onMounted(load);
 </script>
@@ -46,7 +63,15 @@ onMounted(load);
         <h1>Products</h1>
         <p class="sub">Every catalog item, including those hidden from the storefront.</p>
       </div>
-      <Button label="New product" icon="pi pi-plus" @click="router.push('/admin/products/new')" />
+      <div class="head__actions">
+        <Button
+          :label="showArchived ? 'Active products' : 'Archived'"
+          severity="secondary"
+          outlined
+          @click="toggleArchived"
+        />
+        <Button label="New product" icon="pi pi-plus" @click="router.push('/admin/products/new')" />
+      </div>
     </header>
 
     <p v-if="notice" class="notice" role="alert">{{ notice }}</p>
@@ -83,16 +108,21 @@ onMounted(load);
             />
           </template>
         </Column>
-        <Column header="" style="width: 8rem">
+        <Column header="" style="width: 9rem">
           <template #body="{ data }">
-            <Button
-              icon="pi pi-pencil"
-              text
-              rounded
-              aria-label="Edit"
-              @click="router.push(`/admin/products/${data.id}`)"
-            />
-            <Button icon="pi pi-trash" text rounded severity="danger" aria-label="Delete" @click="remove(data)" />
+            <template v-if="showArchived">
+              <Button label="Restore" size="small" outlined @click="restore(data)" />
+            </template>
+            <template v-else>
+              <Button
+                icon="pi pi-pencil"
+                text
+                rounded
+                aria-label="Edit"
+                @click="router.push(`/admin/products/${data.id}`)"
+              />
+              <Button icon="pi pi-trash" text rounded severity="danger" aria-label="Archive" @click="remove(data)" />
+            </template>
           </template>
         </Column>
       </DataTable>
@@ -114,4 +144,5 @@ onMounted(load);
 .empty { text-align: center; color: var(--text-subtle); padding: 24px 0; }
 .plink { text-decoration: none; color: inherit; display: block; }
 .plink:hover .pname { text-decoration: underline; }
+.head__actions { display: flex; gap: var(--space-2); }
 </style>
