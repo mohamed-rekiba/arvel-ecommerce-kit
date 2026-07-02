@@ -9,6 +9,8 @@ class CreateOrdersTable(Migration):
             t.id()
             t.foreign_id("user_id").nullable().constrained("users").index()
             t.string("status").default(value="pending").index()
+            # the public access token: possession = ownership for guests (pay, order detail)
+            t.string("token", 64).unique()
             # contact + shipping address captured at checkout (guests included — it's how their
             # order mail reaches them); line2 is the only optional part of an address
             t.string("contact_email")

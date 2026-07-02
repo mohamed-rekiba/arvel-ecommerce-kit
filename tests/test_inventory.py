@@ -81,7 +81,10 @@ def test_checkout_decrements_stock(client) -> None:
         json={"product_variant_id": 1, "quantity": 3},
         headers=headers,
     )
-    assert client.post("/api/checkout", json=checkout_body(), headers=headers).status_code == 201
+    assert (
+        client.post("/api/checkout", json=checkout_body(), headers=headers).status_code
+        == 201
+    )
     assert _variant_stock(client) == 2  # 5 - 3
 
 

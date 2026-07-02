@@ -84,7 +84,10 @@ def test_checkout_sends_order_confirmation_email(client, faked_mail) -> None:
         json={"product_variant_id": 1, "quantity": 2},
         headers=headers,
     )
-    assert client.post("/api/checkout", json=checkout_body(), headers=headers).status_code == 201
+    assert (
+        client.post("/api/checkout", json=checkout_body(), headers=headers).status_code
+        == 201
+    )
     # the order.placed listener emailed the confirmation (recorded by the fake, no SMTP)
     faked_mail.assert_sent(OrderConfirmation)
     assert faked_mail.sent[0].order_id is not None

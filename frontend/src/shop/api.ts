@@ -96,9 +96,20 @@ export interface CheckoutPayload {
   address: Address;
 }
 
+export type PaymentStatus = "pending" | "succeeded" | "failed";
+
+export interface Payment {
+  payment_id: number;
+  charge_id: string;
+  client_secret: string | null;
+  status: string;
+}
+
 export interface Order {
   id: number;
   status: string;
+  token: string;
+  payment_status: PaymentStatus | null;
   contact_email: string;
   address: Address;
   subtotal_cents: number;
@@ -150,8 +161,13 @@ export class ApiError extends Error {
   }
 }
 
-async function request<T>(method: string, path: string, body?: unknown): Promise<T> {
-  const headers: Record<string, string> = { Accept: "application/json" };
+async function request<T>(
+  method: string,
+  path: string,
+  body?: unknown,
+  extraHeaders?: Record<string, string>,
+): Promise<T> {
+  const headers: Record<string, string> = { Accept: "application/json", ...extraHeaders };
   const cart = cartToken.get();
   if (cart) headers["X-Cart-Token"] = cart;
   const auth = authToken.get();
@@ -211,6 +227,12 @@ export const api = {
   },
   async removeCartItem(id: number) {
     return withCartToken(await request<Cart>("DELETE", `/cart/items/${id}`));
+  },
+  async order(id: number, orderToken?: string) {
+    return request<Order>("GET", `/orders/${id}`, undefined, orderToken ? { "X-Order-Token": orderToken } : undefined);
+  },
+  async pay(id: number, orderToken?: string) {
+    return request<Payment>("POST", `/orders/${id}/pay`, undefined, orderToken ? { "X-Order-Token": orderToken } : undefined);
   },
   async checkout(payload: CheckoutPayload) {
     const order = await request<Order>("POST", `/checkout`, payload);
