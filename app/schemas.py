@@ -55,6 +55,15 @@ class GalleryImageOut(Schema):
     preview_url: str
 
 
+class ProductDealOut(Schema):
+    """The live flash-sale attached to a product — struck price + countdown material."""
+
+    id: int
+    percent_off: int
+    deal_price_cents: int  # base price with the deal applied (variant adjustments re-derive)
+    ends_at: str  # ISO-8601 — the storefront countdown ticks toward it
+
+
 class ProductOut(Schema, omit_defaults=True):
     id: int
     slug: str
@@ -64,9 +73,50 @@ class ProductOut(Schema, omit_defaults=True):
     price_cents: int
     currency: str
     status: str
+    featured: bool
+    created_at: str | None  # ISO — the storefront derives its NEW badge from recency
+    deal: ProductDealOut | None  # the live deal, if any
     gallery: list[GalleryImageOut]  # always present (possibly empty)
     category: CategoryOut | None = None
     variants: list[VariantOut] | None = None
+
+
+class DealOut(Schema):
+    """A 'Deals of the Day' entry — the deal plus its product card + sell-through stats."""
+
+    id: int
+    percent_off: int
+    deal_price_cents: int
+    ends_at: str
+    available: int  # Σ variant stock
+    sold: int  # Σ order-line quantity on paid/shipped/delivered orders
+    product: ProductOut
+
+
+class DealIn(Schema):
+    product_id: int
+    percent_off: int
+    starts_at: str  # ISO-8601
+    ends_at: str
+    active: bool = True
+
+
+class DealUpdateIn(Schema):
+    percent_off: int | None = None
+    starts_at: str | None = None
+    ends_at: str | None = None
+    active: bool | None = None
+
+
+class AdminDealOut(Schema):
+    id: int
+    product_id: int
+    product_name: str
+    percent_off: int
+    starts_at: str | None
+    ends_at: str | None
+    active: bool
+    live: bool  # active AND inside the window right now
 
 
 class ProductPage(Schema):
