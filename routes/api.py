@@ -15,6 +15,8 @@ from arvel.security import Hasher
 from app.controllers import account_controller as account
 from app.controllers import admin_controller as admin
 from app.controllers import admin_coupon_controller as admin_coupons
+from app.controllers import admin_deal_controller as admin_deals
+from app.controllers import deal_controller as deals
 from app.controllers import admin_product_controller as admin_products
 from app.controllers import admin_rbac_controller as rbac
 from app.controllers import admin_taxonomy_controller as taxonomy
@@ -282,6 +284,21 @@ Route.post("/cart/coupon", cart.apply_coupon, name="api.cart.coupon.apply").stat
 Route.delete("/cart/coupon", cart.remove_coupon, name="api.cart.coupon.remove").status(
     200
 )
+
+# --- Deals (flash sales) ----------------------------------------------------------
+Route.get("/deals", deals.index, name="api.deals.index")
+Route.get(
+    "/admin/deals", admin_deals.index, name="api.admin.deals.index"
+).middleware(Authenticate).secure("bearer")
+Route.post(
+    "/admin/deals", admin_deals.store, name="api.admin.deals.store"
+).middleware(Authenticate).secure("bearer")
+Route.patch(
+    "/admin/deals/{id:int}", admin_deals.update, name="api.admin.deals.update"
+).middleware(Authenticate).secure("bearer")
+Route.delete(
+    "/admin/deals/{id:int}", admin_deals.destroy, name="api.admin.deals.destroy"
+).middleware(Authenticate).secure("bearer")
 
 # --- Admin coupons (catalog authority) ------------------------------------------
 Route.get(

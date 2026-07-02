@@ -50,6 +50,7 @@ class Product(HasMedia, Searchable, Model, SoftDeletes):
         "rating_count": int,
         "currency": str,
         "status": str,
+        "featured": bool,
         "published": bool,
     }
     __fillable__: ClassVar[list[str]] = [
@@ -60,10 +61,12 @@ class Product(HasMedia, Searchable, Model, SoftDeletes):
         "price_cents",
         "currency",
         "status",
+        "featured",
         "published",
     ]
     __casts__: ClassVar[dict[str, Any]] = {
         "status": ProductStatus,
+        "featured": bool,
         "published": bool,
         "translations": TranslationsCast(),  # full column → list[Translate] (admin)
         "translation": TranslationCast(),  # the scope_in_locale projection → Translate (storefront)
@@ -71,7 +74,7 @@ class Product(HasMedia, Searchable, Model, SoftDeletes):
 
     # the scalar columns the storefront fetches (NOT translations — only the active-locale `translation`)
     _LOCALE_COLUMNS = (
-        "id, slug, price_cents, currency, status, category_id, vendor_id, published, "
+        "id, slug, price_cents, currency, status, category_id, vendor_id, published, featured, "
         "rating_sum, rating_count, created_at, updated_at"
     )
 

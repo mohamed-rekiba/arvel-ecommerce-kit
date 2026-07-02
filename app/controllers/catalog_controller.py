@@ -12,16 +12,19 @@ from arvel.http import Request
 from arvel.media import Media
 
 from app.enums import ProductStatus
+from app.controllers.serializers import iso as _iso
 from app.i18n import active_locale
 from app.models.category import Category
 from app.models.product import IMAGES, Product
 from app.schemas import (
     CategoryOut,
     GalleryImageOut,
+    ProductDealOut,
     ProductOut,
     ProductPage,
     VariantOut,
 )
+from app.services import deal_service
 
 
 def _in_locale(query: Any) -> Any:
@@ -78,7 +81,18 @@ def gallery_image_out(media: Media) -> GalleryImageOut:
     )
 
 
-async def product_out(p: Product) -> ProductOut:
+def deal_out(p: Product, deal: Any | None) -> ProductDealOut | None:
+    if deal is None:
+        return None
+    return ProductDealOut(
+        id=deal.id,
+        percent_off=deal.percent_off,
+        deal_price_cents=deal_service.deal_price_cents(p.price_cents, deal),
+        ends_at=_iso(deal.ends_at) or "",
+    )
+
+
+async def product_out(p: Product, deal: Any | None = None) -> ProductOut:
     category = p.relation(
         "category"
     )  # eager-loaded with in_locale → carries .translation
@@ -97,6 +111,9 @@ async def product_out(p: Product) -> ProductOut:
         price_cents=p.price_cents,
         currency=p.currency,
         status=ProductStatus(p.status).value,
+        featured=bool(getattr(p, "featured", False)),
+        created_at=_iso(getattr(p, "created_at", None)),
+        deal=deal_out(p, deal),
         category=category_out(category) if category is not None else None,
         variants=[variant_out(v) for v in variants] if variants is not None else None,
         gallery=[gallery_image_out(m) for m in images],
@@ -149,6 +166,9 @@ async def products_index(
     q: str | None = None,
     category: str | None = None,
     sort: str = "featured",
+    featured: bool | None = None,
+    min_price: int | None = None,
+    max_price: int | None = None,
     per_page: int = 15,
     page: int = 1,
 ) -> ProductPage:
@@ -169,11 +189,18 @@ async def products_index(
         query = query.where_in(
             "category_id", await _category_subtree_ids(category) or [0]
         )
+    if featured:
+        query = query.where("featured", True)
+    if min_price is not None:
+        query = query.where("price_cents", ">=", min_price)
+    if max_price is not None:
+        query = query.where("price_cents", "<=", max_price)
 
     column, direction = _SORTS.get(sort, _SORTS["featured"])
     result = await query.order_by(column, direction).paginate(per_page, page)
+    deals = await deal_service.active_deals_for([p.id for p in result.items()])
     return ProductPage(
-        data=[await product_out(p) for p in result.items()],
+        data=[await product_out(p, deals.get(p.id)) for p in result.items()],
         current_page=result.current_page(),
         last_page=result.last_page(),
         per_page=result.per_page(),
@@ -192,4 +219,4 @@ async def products_show(request: Request) -> ProductOut:
         .in_locale()
         .first_or_fail()
     )
-    return await product_out(product)
+    return await product_out(product, await deal_service.active_deal(product.id))

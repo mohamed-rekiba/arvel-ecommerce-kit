@@ -15,6 +15,7 @@ class CreateProductsTable(Migration):
             t.integer("price_cents")
             t.string("currency", length=3).default(value="USD")
             t.string("status").default(value="draft").index()
+            t.boolean("featured").default(value=False).index()
             t.boolean("published").default(
                 value=False
             ).index()  # retrievability: published ∧ vendor ∧ category-chain

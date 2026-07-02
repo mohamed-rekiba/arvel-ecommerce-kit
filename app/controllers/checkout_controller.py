@@ -6,6 +6,8 @@ atomically; a failure rolls all of it back), events (Event.dispatch('order.place
 listener), telemetry (a checkout span), and the typed OrderStatus state machine (app.enums).
 """
 
+from typing import Any
+
 from arvel import DB, Cache, Event, abort
 from arvel.http import Request
 from arvel.support import Str, current_user
@@ -118,6 +120,36 @@ def _order_out(
     )
 
 
+async def _reprice_lines(items: list[Any]) -> None:
+    """Re-derive every cart line's unit price at ORDER time (base + variant adjustment, with the
+    deal live right now applied). The cart snapshot is a quote; the order charges today's price —
+    an expired deal is dropped, a deal that started after carting is honored (deal_service owns
+    the math)."""
+    from app.services import deal_service
+
+    variants = {
+        v.id: v
+        for v in await ProductVariant.where_in(
+            "id", [i.product_variant_id for i in items]
+        ).get()
+    }
+    product_ids = list({v.product_id for v in variants.values()})
+    products = {p.id: p for p in await Product.where_in("id", product_ids).get()}
+    deals = await deal_service.active_deals_for(product_ids)
+    for item in items:
+        variant = variants.get(item.product_variant_id)
+        if variant is None:
+            continue  # the stock loop below 404s/409s dead lines with better messages
+        product = products.get(variant.product_id)
+        if product is None:
+            continue
+        base = product.price_cents + variant.price_adjustment_cents
+        deal = deals.get(product.id)
+        item.unit_price_cents = (
+            deal_service.deal_price_cents(base, deal) if deal is not None else base
+        )
+
+
 def _validate_checkout(
     data: CheckoutIn, account_email: str | None
 ) -> tuple[str, dict[str, str | None]]:
@@ -173,6 +205,7 @@ async def checkout(request: Request, data: CheckoutIn) -> OrderOut:
     contact_email, ship_fields = _validate_checkout(
         data, user.email if user is not None else None
     )
+    await _reprice_lines(items)  # current-price-wins: stale deal snapshots never reach an order
     subtotal = sum(i.unit_price_cents * i.quantity for i in items)
     shipping = _shipping_cents(subtotal)
     tax = _tax_cents(subtotal)

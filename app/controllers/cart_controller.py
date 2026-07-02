@@ -144,7 +144,11 @@ async def add_item(request: Request, data: AddItemIn) -> CartOut:
     product = await Product.find(variant.product_id)
     if product is None:
         abort(404, "Product not found")
-    unit_price = product.price_cents + variant.price_adjustment_cents
+    from app.services import deal_service
+
+    unit_price = await deal_service.current_unit_price_cents(
+        product.id, product.price_cents + variant.price_adjustment_cents
+    )
 
     cart, new_token = await resolve_cart(request, create=True)
     assert cart is not None  # create=True always yields a cart
