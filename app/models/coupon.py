@@ -21,6 +21,7 @@ class Coupon(Model):
         "per_customer_limit": int,
         "uses": int,
         "active": bool,
+        "announce": bool,
     }
     __fillable__: ClassVar[list[str]] = [
         "code",
@@ -33,10 +34,12 @@ class Coupon(Model):
         "per_customer_limit",
         "uses",
         "active",
+        "announce",
     ]
     __casts__: ClassVar[dict[str, Any]] = {
         "type": CouponType,
         "active": bool,
+        "announce": bool,
         "starts_at": "datetime",
         "ends_at": "datetime",
     }

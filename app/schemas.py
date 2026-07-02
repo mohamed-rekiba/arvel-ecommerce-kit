@@ -141,6 +141,7 @@ class AdminProductOut(Schema):
     translations: list[Translate]
     status: str
     published: bool
+    featured: bool
     is_visible: bool
 
 
@@ -313,6 +314,7 @@ class CouponIn(Schema):
     min_subtotal_cents: int = 0
     usage_limit: int | None = None
     per_customer_limit: int | None = None
+    announce: bool = False
 
 
 class CouponUpdateIn(Schema):
@@ -320,6 +322,7 @@ class CouponUpdateIn(Schema):
     usage_limit: int | None = None
     per_customer_limit: int | None = None
     min_subtotal_cents: int | None = None
+    announce: bool | None = None
 
 
 class AdminCouponOut(Schema):
@@ -332,8 +335,17 @@ class AdminCouponOut(Schema):
     per_customer_limit: int | None
     uses: int
     active: bool
+    announce: bool
     starts_at: str | None
     ends_at: str | None
+
+
+class AnnouncementOut(Schema):
+    """The storefront announcement bar — the newest live coupon flagged for announcement."""
+
+    code: str
+    type: "CouponType"
+    value: int  # percent points or cents, per type
 
 
 # --- admin products -----------------------------------------------------------
@@ -359,6 +371,7 @@ class UpdateProductIn(Schema):
     price_cents: int | None = None
     status: str | None = None
     published: bool | None = None
+    featured: bool | None = None
     translations: dict[str, TranslationFieldsIn] | None = None
 
 
@@ -471,6 +484,7 @@ class AdminProductDetailOut(Schema):
     translations: list[Translate]
     status: str
     published: bool
+    featured: bool
     is_visible: bool
     price_cents: int
     category_id: int

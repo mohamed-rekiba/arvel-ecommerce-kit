@@ -71,6 +71,7 @@ async def products_index(
                 translations=p.translations,
                 status=ProductStatus(p.status).value,
                 published=bool(p.published),
+                featured=bool(getattr(p, "featured", False)),
                 is_visible=bool(getattr(p, "is_visible", False)),
             )
             for p in result.items()
@@ -114,6 +115,7 @@ def _admin_product_out(product: Product, *, is_visible: bool) -> AdminProductOut
         translations=product.translations,
         status=ProductStatus(product.status).value,
         published=bool(product.published),
+        featured=bool(getattr(product, "featured", False)),
         is_visible=is_visible,
     )
 
@@ -243,6 +245,8 @@ async def update(request: Request, data: UpdateProductIn) -> AdminProductOut:
         product.status = ProductStatus(data.status)
     if data.published is not None:
         product.published = data.published
+    if data.featured is not None:
+        product.featured = data.featured
     await product.save()
     if data.published is not None or data.status is not None:
         # visibility inputs changed → flag the retrievable views dirty (debounced refresh)
