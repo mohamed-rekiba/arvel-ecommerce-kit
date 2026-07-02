@@ -36,6 +36,7 @@ class CategoryOut(Schema):
     id: int
     slug: str
     translation: Translate
+    image_url: str | None = None  # derived: a subtree product's thumb (category tiles)
 
 
 class VariantOut(Schema):
@@ -60,7 +61,9 @@ class ProductDealOut(Schema):
 
     id: int
     percent_off: int
-    deal_price_cents: int  # base price with the deal applied (variant adjustments re-derive)
+    deal_price_cents: (
+        int  # base price with the deal applied (variant adjustments re-derive)
+    )
     ends_at: str  # ISO-8601 — the storefront countdown ticks toward it
 
 
@@ -338,6 +341,53 @@ class AdminCouponOut(Schema):
     announce: bool
     starts_at: str | None
     ends_at: str | None
+
+
+class BannerTextIn(Schema):
+    title: str
+    subtitle: str | None = None
+    chip: str | None = None
+    cta_label: str | None = None
+
+
+class BannerIn(Schema):
+    translations: dict[
+        str, BannerTextIn
+    ]  # locale -> copy; locales whitelisted like products
+    cta_to: str = "/catalog"
+    sort: int = 0
+    active: bool = True
+
+
+class BannerUpdateIn(Schema):
+    translations: dict[str, BannerTextIn] | None = None
+    cta_to: str | None = None
+    sort: int | None = None
+    active: bool | None = None
+
+
+class BannerOut(Schema):
+    """One hero slide, already projected to the REQUEST locale (with en fallback)."""
+
+    id: int
+    title: str
+    subtitle: str | None
+    chip: str | None
+    cta_label: str | None
+    cta_to: str
+    image_url: (
+        str | None
+    )  # the `hero` conversion (mobile variant derivable client-side)
+    mobile_image_url: str | None
+
+
+class AdminBannerOut(Schema):
+    id: int
+    translations: dict[str, BannerTextIn]
+    cta_to: str
+    sort: int
+    active: bool
+    image_url: str | None
 
 
 class AnnouncementOut(Schema):

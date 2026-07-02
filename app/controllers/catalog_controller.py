@@ -27,9 +27,12 @@ from app.schemas import (
 from app.services import deal_service
 
 
-def _in_locale(query: Any) -> Any:
+def in_locale_relation(query: Any) -> Any:
     """Constrained eager-load callback — project the relation in the active locale (its `translation`)."""
     return query.in_locale()
+
+
+_in_locale = in_locale_relation  # module-internal alias
 
 
 async def _apply_search(query: Any, q: str) -> Any:
@@ -120,16 +123,63 @@ async def product_out(p: Product, deal: Any | None = None) -> ProductOut:
     )
 
 
+async def _category_tile_images(categories: list[Any]) -> dict[int, str]:
+    """One representative product thumb per category (subtree roll-up) for the category tiles.
+    Two queries total: the retrievable product→category map, then media for the chosen products."""
+    from arvel import DB
+
+    rows = await DB.select(
+        "SELECT id, category_id FROM retrievable_products ORDER BY id"
+    )
+    children: dict[int | None, list[int]] = {}
+    all_cats = await Category.all()
+    for c in all_cats:
+        children.setdefault(c.parent_id, []).append(c.id)
+
+    direct: dict[int, int] = {}
+    for r in rows:
+        direct.setdefault(int(r["category_id"]), int(r["id"]))
+
+    def subtree_first(cat_id: int) -> int | None:
+        stack = [cat_id]
+        while stack:
+            cid = stack.pop(0)
+            if cid in direct:
+                return direct[cid]
+            stack.extend(children.get(cid, []))
+        return None
+
+    chosen = {c.id: pid for c in categories if (pid := subtree_first(c.id)) is not None}
+    if not chosen:
+        return {}
+    products = (
+        await Product.with_("media").where_in("id", list(set(chosen.values()))).get()
+    )
+    thumbs: dict[int, str] = {}
+    for product in products:
+        images = await product.get_media(IMAGES)
+        if images:
+            thumbs[product.id] = gallery_image_out(images[0]).thumb_url
+    return {cat_id: thumbs[pid] for cat_id, pid in chosen.items() if pid in thumbs}
+
+
 async def categories_index(request: Request) -> list[CategoryOut]:
     """List **retrievable** categories — published, fully-published ancestor chain, and at least one
-    viewable product in the subtree (the retrievable_categories materialized view)."""
+    viewable product in the subtree (the retrievable_categories materialized view). Each carries a
+    derived ``image_url`` (a subtree product's thumb) for the storefront's category tiles."""
     rows = (
         await Category.with_visibility(only_visible=True)
         .in_locale()
         .order_by("slug")
         .get()
     )
-    return [category_out(c) for c in rows]
+    images = await _category_tile_images(rows)
+    return [
+        CategoryOut(
+            id=c.id, slug=c.slug, translation=c.translation, image_url=images.get(c.id)
+        )
+        for c in rows
+    ]
 
 
 _SORTS: dict[str, tuple[str, str]] = {

@@ -7,10 +7,10 @@ layer (not the controller/seeder) per the convention.
 """
 
 from arvel import Http
-from arvel.media import Image
+from arvel.media import HasMedia, Image
 from arvel.support.facades import Config
 
-from app.models.product import IMAGES, Product
+from app.models.product import IMAGES
 
 
 def _disk() -> str:
@@ -22,22 +22,24 @@ def _disk() -> str:
 class ProductImageService:
     async def attach_uploaded(
         self,
-        product: Product,
+        model: HasMedia,
         raw: bytes,
         *,
         file_name: str = "image.png",
         mime_type: str | None = None,
+        collection: str = IMAGES,
     ) -> None:
-        """Attach an admin-uploaded image to the product gallery (conversions auto-generated)."""
+        """Attach an admin-uploaded image to a HasMedia model's collection (products, banners —
+        conversions auto-generated per the model's registrations)."""
         Image.open(
             raw
         )  # decode-validate — reject a non-image / corrupt upload before storing
-        await product.add_media(
+        await model.add_media(
             raw, file_name=file_name, mime_type=mime_type
-        ).to_media_collection(IMAGES, disk=_disk())
+        ).to_media_collection(collection, disk=_disk())
 
     async def download_and_attach(
-        self, product: Product, url: str, *, file_name: str
+        self, model: HasMedia, url: str, *, file_name: str, collection: str = IMAGES
     ) -> bool:
         """Download an image from ``url`` (arvel Http client) and attach it to the gallery. Returns
         False (a no-op) if the fetch fails — so seeding never crashes when offline."""
@@ -46,11 +48,11 @@ class ProductImageService:
             response = await Http.timeout(15).get(url, follow_redirects=True)
             if response.status_code >= 400 or not response.content:
                 return False
-            await product.add_media(
+            await model.add_media(
                 response.content,
                 file_name=file_name,
                 mime_type=response.headers.get("content-type"),
-            ).to_media_collection(IMAGES, disk=_disk())
+            ).to_media_collection(collection, disk=_disk())
         except Exception:  # noqa: BLE001 — offline / bad image → seed without it, don't crash
             return False
         return True

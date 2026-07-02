@@ -70,7 +70,11 @@ def client(tmp_path, monkeypatch):
             published=True,
         )
         await ProductVariant.create(
-            product_id=dealp.id, sku="TH-500", name="500ml", price_adjustment_cents=0, stock=18
+            product_id=dealp.id,
+            sku="TH-500",
+            name="500ml",
+            price_adjustment_cents=0,
+            stock=18,
         )
         await ProductVariant.create(
             product_id=dealp.id,
@@ -80,7 +84,11 @@ def client(tmp_path, monkeypatch):
             stock=7,
         )
         await ProductVariant.create(
-            product_id=plain.id, sku="MUG-1", name="One", price_adjustment_cents=0, stock=50
+            product_id=plain.id,
+            sku="MUG-1",
+            name="One",
+            price_adjustment_cents=0,
+            stock=50,
         )
         now = Date.now()
         # the deal zoo: one live, one expired, one future, one inactive
@@ -227,7 +235,9 @@ def test_checkout_reprices_to_the_current_price(client) -> None:
     the CURRENT (base) price. Current-price-wins, both directions."""
     headers = _auth(client)
     client.post(
-        "/api/cart/items", json={"product_variant_id": 1, "quantity": 1}, headers=headers
+        "/api/cart/items",
+        json={"product_variant_id": 1, "quantity": 1},
+        headers=headers,
     )
 
     async def _expire() -> None:
@@ -244,7 +254,9 @@ def test_checkout_reprices_to_the_current_price(client) -> None:
 def test_checkout_honors_a_deal_that_started_after_add(client) -> None:
     headers = _auth(client)
     client.post(
-        "/api/cart/items", json={"product_variant_id": 3, "quantity": 2}, headers=headers
+        "/api/cart/items",
+        json={"product_variant_id": 3, "quantity": 2},
+        headers=headers,
     )  # mug at base 1000
 
     async def _start_deal() -> None:
@@ -275,7 +287,10 @@ def test_admin_crud_and_authz(client) -> None:
         "active": True,
     }
     # customers can't manage deals
-    assert client.post("/api/admin/deals", json=payload, headers=customer).status_code == 403
+    assert (
+        client.post("/api/admin/deals", json=payload, headers=customer).status_code
+        == 403
+    )
     created = client.post("/api/admin/deals", json=payload, headers=admin)
     assert created.status_code == 201, created.text
     deal_id = created.json()["id"]
@@ -298,6 +313,5 @@ def test_admin_crud_and_authz(client) -> None:
     deleted = client.delete(f"/api/admin/deals/{deal_id}", headers=admin)
     assert deleted.status_code in (200, 204)
     assert not any(
-        d["id"] == deal_id
-        for d in client.get("/api/admin/deals", headers=admin).json()
+        d["id"] == deal_id for d in client.get("/api/admin/deals", headers=admin).json()
     )

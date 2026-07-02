@@ -2,10 +2,12 @@
 the discounted price, the countdown target, and sell-through stats (available = Σ variant stock,
 sold = Σ order-line quantity on paid/shipped/delivered orders)."""
 
+from typing import Any
+
 from arvel import DB
 from arvel.http import Request
 
-from app.controllers.catalog_controller import _in_locale, product_out
+from app.controllers.catalog_controller import in_locale_relation, product_out
 from app.controllers.serializers import iso as _iso
 from app.models.deal import Deal
 from app.models.product import Product
@@ -37,7 +39,7 @@ async def index(request: Request) -> list[DealOut]:
     product_ids = [d.product_id for d in live]
     products = {
         p.id: p
-        for p in await Product.with_("variants", "media", category=_in_locale)
+        for p in await Product.with_("variants", "media", category=in_locale_relation)
         .with_visibility(only_visible=True)
         .in_locale()
         .where_in("id", product_ids)
@@ -49,7 +51,7 @@ async def index(request: Request) -> list[DealOut]:
         product = products.get(deal.product_id)
         if product is None:
             continue  # the product left the storefront; its deal goes with it
-        variants = product.relation("variants") or []
+        variants: list[Any] = list(product.relation("variants") or [])
         out.append(
             DealOut(
                 id=deal.id,
@@ -58,7 +60,7 @@ async def index(request: Request) -> list[DealOut]:
                     product.price_cents, deal
                 ),
                 ends_at=_iso(deal.ends_at) or "",
-                available=sum(v.stock for v in variants),
+                available=sum(int(v.stock) for v in variants),
                 sold=sold.get(product.id, 0),
                 product=await product_out(product, deal),
             )
