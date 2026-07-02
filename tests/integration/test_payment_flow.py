@@ -9,6 +9,7 @@ import asyncio
 import hashlib
 import hmac
 import json
+import os
 from typing import Any
 
 import httpx
@@ -22,7 +23,7 @@ from tests.integration.test_queue_rail import _seed_shop
 
 pytestmark = pytest.mark.integration
 
-_SECRET = "test-secret"
+_SECRET = os.environ["PAYMENT_GATEWAY_SECRET"]  # set in tests/conftest.py (non-default)
 
 
 def _gateway(request: httpx.Request) -> httpx.Response:

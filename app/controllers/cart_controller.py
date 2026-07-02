@@ -16,6 +16,7 @@ from app.models.coupon import Coupon
 from app.models.cart_item import CartItem
 from app.models.product import Product
 from app.models.product_variant import ProductVariant
+from app.models.user import User
 from app.schemas import AddItemIn, ApplyCouponIn, CartLineOut, CartOut, UpdateItemIn
 
 
@@ -47,7 +48,7 @@ async def resolve_cart(
     return None, None
 
 
-async def merge_guest_cart(request: Request, user: object) -> None:
+async def merge_guest_cart(request: Request, user: User) -> None:
     """Fold the request's guest cart (X-Cart-Token) into ``user``'s cart — login/register call
     this so the classic build-a-cart-then-sign-in flow never strands items. Same variant in both →
     quantities sum, capped at available stock; distinct variants union; the guest cart is retired.
@@ -60,9 +61,9 @@ async def merge_guest_cart(request: Request, user: object) -> None:
     if guest is None or guest.user_id is not None:
         return
     guest_items = await guest.items().get()
-    cart = await Cart.where("user_id", getattr(user, "id")).first()
+    cart = await Cart.where("user_id", user.id).first()
     if cart is None and guest_items:
-        cart = await Cart.create(user_id=getattr(user, "id"))
+        cart = await Cart.create(user_id=user.id)
     for item in guest_items:
         assert cart is not None  # created above when there are items
         existing = (
