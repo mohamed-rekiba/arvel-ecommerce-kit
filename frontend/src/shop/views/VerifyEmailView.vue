@@ -2,6 +2,7 @@
 import { onMounted, ref } from "vue";
 import { useRoute } from "vue-router";
 import { api } from "../api";
+import { t } from "../locale";
 
 const route = useRoute();
 const state = ref<"working" | "done" | "failed">("working");
@@ -25,18 +26,18 @@ onMounted(async () => {
   <main class="narrow">
     <div class="state" aria-live="polite">
       <template v-if="state === 'working'">
-        <h1>Verifying…</h1>
-        <p class="muted">One moment while we confirm your email.</p>
+        <h1>{{ t("auth.verifying") }}</h1>
+        <p class="muted">{{ t("auth.verifying_sub") }}</p>
       </template>
       <template v-else-if="state === 'done'">
-        <h1>✓ Email verified</h1>
-        <p class="muted">You're all set — thanks for confirming.</p>
-        <RouterLink class="btn btn--primary" to="/account">Go to your account</RouterLink>
+        <h1>✓ {{ t("auth.verified") }}</h1>
+        <p class="muted">{{ t("auth.verified_sub") }}</p>
+        <RouterLink class="btn btn--primary" to="/account">{{ t("auth.go_account") }}</RouterLink>
       </template>
       <template v-else>
-        <h1>This link didn't work</h1>
-        <p class="muted">It may have expired. Sign in and request a fresh verification email.</p>
-        <RouterLink class="btn btn--primary" to="/account">Go to your account</RouterLink>
+        <h1>{{ t("auth.verify_failed") }}</h1>
+        <p class="muted">{{ t("auth.verify_failed_sub") }}</p>
+        <RouterLink class="btn btn--primary" to="/account">{{ t("auth.go_account") }}</RouterLink>
       </template>
     </div>
   </main>

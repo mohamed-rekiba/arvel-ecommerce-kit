@@ -2,6 +2,7 @@
 import { computed, onBeforeUnmount, onMounted, ref } from "vue";
 import { useRoute } from "vue-router";
 import { type Order, api, formatPrice, orderTokens } from "../api";
+import { type MessageKey, t } from "../locale";
 
 const route = useRoute();
 const orderId = Number(route.params.id);
@@ -50,7 +51,7 @@ async function payNow() {
       order.value = fresh;
       if (fresh.status === "paid" || fresh.payment_status === "failed" || attempts >= 20) {
         if (fresh.payment_status === "failed" && fresh.status !== "paid") {
-          actionError.value = "The payment didn't go through. You can try again.";
+          actionError.value = t("checkout.pay_failed");
         }
         acting.value = false;
         stopPolling();
@@ -58,19 +59,19 @@ async function payNow() {
     }, 1000);
   } catch {
     acting.value = false;
-    actionError.value = "We couldn't start the payment. Please try again.";
+    actionError.value = t("checkout.pay_start_error");
   }
 }
 
 async function cancelOrder() {
   if (!order.value) return;
-  if (!window.confirm(`Cancel order #${orderId}? Items return to stock.`)) return;
+  if (!window.confirm(t("order.cancel_confirm", { n: orderId }))) return;
   acting.value = true;
   actionError.value = null;
   try {
     order.value = await api.cancelOrder(orderId, token);
   } catch {
-    actionError.value = "This order can no longer be cancelled.";
+    actionError.value = t("order.cancel_error");
   } finally {
     acting.value = false;
   }
@@ -82,28 +83,28 @@ onBeforeUnmount(stopPolling);
 
 <template>
   <main class="detail">
-    <p v-if="loading" class="muted">Loading…</p>
+    <p v-if="loading" class="muted">{{ t("common.loading") }}</p>
 
     <div v-else-if="failed || !order" class="state">
-      <h1>Order not found</h1>
-      <p class="muted">We couldn't find that order — it may belong to another account.</p>
-      <RouterLink class="btn btn--primary" to="/account">Back to your account</RouterLink>
+      <h1>{{ t("order.not_found") }}</h1>
+      <p class="muted">{{ t("order.not_found_note") }}</p>
+      <RouterLink class="btn btn--primary" to="/account">{{ t("order.back_account") }}</RouterLink>
     </div>
 
     <template v-else>
       <header class="detail__head">
-        <p class="eyebrow">Your order</p>
+        <p class="eyebrow">{{ t("order.eyebrow") }}</p>
         <h1>
-          Order #{{ order.id }}
-          <span class="badge" :class="`badge--${order.status}`">{{ order.status }}</span>
+          {{ t("checkout.order") }} #{{ order.id }}
+          <span class="badge" :class="`badge--${order.status}`">{{ t(`order.${order.status}` as MessageKey) }}</span>
         </h1>
         <p v-if="order.payment_status === 'failed' && order.status === 'pending'" class="muted">
-          Last payment attempt failed — you can try again below.
+          {{ t("order.last_payment_failed") }}
         </p>
       </header>
 
       <section class="panel">
-        <h2>Items</h2>
+        <h2>{{ t("order.items") }}</h2>
         <ul class="lines">
           <li v-for="line in order.items" :key="line.product_variant_id">
             <span>{{ line.quantity }} × {{ line.product_name }} — {{ line.variant_name }}</span>
@@ -111,22 +112,22 @@ onBeforeUnmount(stopPolling);
           </li>
         </ul>
         <dl class="breakdown">
-          <div><dt>Subtotal</dt><dd>{{ formatPrice(order.subtotal_cents) }}</dd></div>
-          <div><dt>Shipping</dt><dd>{{ formatPrice(order.shipping_cents) }}</dd></div>
-          <div><dt>Tax</dt><dd>{{ formatPrice(order.tax_cents) }}</dd></div>
-          <div v-if="order.discount_cents > 0"><dt>Discount ({{ order.coupon_code }})</dt><dd>−{{ formatPrice(order.discount_cents) }}</dd></div>
-          <div class="breakdown__total"><dt>Total</dt><dd>{{ formatPrice(order.total_cents) }}</dd></div>
+          <div><dt>{{ t("checkout.subtotal") }}</dt><dd>{{ formatPrice(order.subtotal_cents) }}</dd></div>
+          <div><dt>{{ t("cart.shipping") }}</dt><dd>{{ formatPrice(order.shipping_cents) }}</dd></div>
+          <div><dt>{{ t("checkout.tax") }}</dt><dd>{{ formatPrice(order.tax_cents) }}</dd></div>
+          <div v-if="order.discount_cents > 0"><dt>{{ t("checkout.discount") }} ({{ order.coupon_code }})</dt><dd>−{{ formatPrice(order.discount_cents) }}</dd></div>
+          <div class="breakdown__total"><dt>{{ t("cart.total") }}</dt><dd>{{ formatPrice(order.total_cents) }}</dd></div>
         </dl>
       </section>
 
       <section class="panel">
-        <h2>Delivery</h2>
+        <h2>{{ t("order.delivery") }}</h2>
         <address class="address">
           {{ order.address.name }}<br />
           {{ order.address.line1 }}<span v-if="order.address.line2"><br />{{ order.address.line2 }}</span><br />
           {{ order.address.city }}, {{ order.address.postal_code }} {{ order.address.country }}
         </address>
-        <p class="muted">Updates go to {{ order.contact_email }}.</p>
+        <p class="muted">{{ t("order.updates_to", { email: order.contact_email }) }}</p>
       </section>
 
       <section class="actions" aria-live="polite">
@@ -137,13 +138,13 @@ onBeforeUnmount(stopPolling);
           :disabled="acting"
           @click="payNow"
         >
-          {{ acting ? "Processing…" : `Pay ${formatPrice(order.total_cents)}` }}
+          {{ acting ? t("checkout.processing_short") : t("checkout.pay_now", { total: formatPrice(order.total_cents) }) }}
         </button>
         <button v-if="cancellable" class="btn btn--danger" :disabled="acting" @click="cancelOrder">
-          Cancel order
+          {{ t("order.cancel") }}
         </button>
         <p v-if="order.status === 'cancelled'" class="muted">
-          This order was cancelled — the items are back in stock.
+          {{ t("order.cancelled_note") }}
         </p>
       </section>
     </template>

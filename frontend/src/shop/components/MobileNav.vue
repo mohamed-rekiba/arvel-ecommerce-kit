@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { nextTick, ref, watch } from "vue";
+import { t } from "../locale";
 
 const props = defineProps<{ open: boolean }>();
 const emit = defineEmits<{ close: [] }>();
@@ -27,12 +28,12 @@ watch(
         class="mnav__panel"
         role="dialog"
         aria-modal="true"
-        aria-label="Primary"
+        :aria-label="t('a11y.primary')"
         @keydown.escape="emit('close')"
       >
-        <RouterLink ref="firstLink" :to="{ name: 'catalog' }" class="mnav__link" @click="emit('close')">Shop</RouterLink>
-        <RouterLink to="/" class="mnav__link" @click="emit('close')">Collections</RouterLink>
-        <RouterLink to="/" class="mnav__link" @click="emit('close')">About</RouterLink>
+        <RouterLink ref="firstLink" :to="{ name: 'catalog' }" class="mnav__link" @click="emit('close')">{{ t("nav.shop") }}</RouterLink>
+        <RouterLink to="/" class="mnav__link" @click="emit('close')">{{ t("nav.collections") }}</RouterLink>
+        <RouterLink to="/" class="mnav__link" @click="emit('close')">{{ t("nav.about") }}</RouterLink>
       </nav>
     </div>
   </Transition>

@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { ref } from "vue";
 import { api } from "../api";
+import { t } from "../locale";
 
 const email = ref("");
 const sent = ref(false);
@@ -21,20 +22,20 @@ async function submit() {
 <template>
   <main class="narrow">
     <div v-if="sent" class="state">
-      <h1>Check your inbox</h1>
-      <p class="muted">If that email exists, a reset link is on its way. It expires in 1 hour.</p>
-      <RouterLink class="btn btn--primary" to="/account">Back to sign in</RouterLink>
+      <h1>{{ t("auth.check_inbox") }}</h1>
+      <p class="muted">{{ t("auth.reset_sent") }}</p>
+      <RouterLink class="btn btn--primary" to="/account">{{ t("auth.back_signin") }}</RouterLink>
     </div>
     <template v-else>
-      <h1>Forgot your password?</h1>
-      <p class="muted">Enter your email and we'll send a reset link.</p>
+      <h1>{{ t("account.forgot") }}</h1>
+      <p class="muted">{{ t("auth.forgot_sub") }}</p>
       <form class="form" @submit.prevent="submit">
         <label class="field">
-          <span>Email</span>
+          <span>{{ t("account.email") }}</span>
           <input v-model.trim="email" type="email" autocomplete="email" required />
         </label>
         <button class="btn btn--primary" type="submit" :disabled="busy">
-          {{ busy ? "Sending…" : "Send reset link" }}
+          {{ busy ? t("pdp.sending") : t("auth.send_reset") }}
         </button>
       </form>
     </template>

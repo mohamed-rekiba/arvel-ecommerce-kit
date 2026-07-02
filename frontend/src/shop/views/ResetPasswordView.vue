@@ -2,6 +2,7 @@
 import { ref } from "vue";
 import { useRoute } from "vue-router";
 import { ApiError, api } from "../api";
+import { t } from "../locale";
 
 const route = useRoute();
 const token = String(route.query.token ?? "");
@@ -19,8 +20,8 @@ async function submit() {
   } catch (e) {
     error.value =
       e instanceof ApiError && e.status === 422
-        ? Object.values(e.errors)[0]?.[0] ?? "This reset link is invalid or has expired."
-        : "Something went wrong. Please try again.";
+        ? Object.values(e.errors)[0]?.[0] ?? t("auth.reset_invalid")
+        : t("common.error_retry");
   } finally {
     busy.value = false;
   }
@@ -30,20 +31,20 @@ async function submit() {
 <template>
   <main class="narrow">
     <div v-if="done" class="state">
-      <h1>Password updated</h1>
-      <p class="muted">You can sign in with your new password now.</p>
-      <RouterLink class="btn btn--primary" to="/account">Sign in</RouterLink>
+      <h1>{{ t("auth.password_updated") }}</h1>
+      <p class="muted">{{ t("auth.signin_now") }}</p>
+      <RouterLink class="btn btn--primary" to="/account">{{ t("account.sign_in") }}</RouterLink>
     </div>
     <div v-else-if="!token" class="state">
-      <h1>Invalid link</h1>
-      <p class="muted">This reset link is missing its token — request a new one.</p>
-      <RouterLink class="btn btn--primary" to="/forgot-password">Request a new link</RouterLink>
+      <h1>{{ t("auth.invalid_link") }}</h1>
+      <p class="muted">{{ t("auth.missing_token") }}</p>
+      <RouterLink class="btn btn--primary" to="/forgot-password">{{ t("auth.request_new") }}</RouterLink>
     </div>
     <template v-else>
-      <h1>Choose a new password</h1>
+      <h1>{{ t("auth.choose_password") }}</h1>
       <form class="form" @submit.prevent="submit">
         <label class="field">
-          <span>New password</span>
+          <span>{{ t("account.new_password") }}</span>
           <input
             v-model="password"
             type="password"
@@ -54,9 +55,9 @@ async function submit() {
         </label>
         <p v-if="error" class="error" role="alert">{{ error }}</p>
         <button class="btn btn--primary" type="submit" :disabled="busy">
-          {{ busy ? "Saving…" : "Set new password" }}
+          {{ busy ? t("common.saving") : t("auth.set_password") }}
         </button>
-        <p class="muted"><RouterLink to="/forgot-password">Link expired? Request a new one.</RouterLink></p>
+        <p class="muted"><RouterLink to="/forgot-password">{{ t("auth.link_expired") }}</RouterLink></p>
       </form>
     </template>
   </main>

@@ -122,20 +122,20 @@ watch(() => route.query, load);
 
       <div v-if="status === 'loading'" class="grid"><div v-for="n in 9" :key="n" class="sk" /></div>
       <div v-else-if="status === 'error'" class="state">
-        <p>We couldn't load the collection.</p>
-        <button class="link" @click="load">Try again</button>
+        <p>{{ t("catalog.load_error") }}</p>
+        <button class="link" @click="load">{{ t("common.retry") }}</button>
       </div>
       <div v-else-if="!products.length" class="state">
-        <p v-if="q">Nothing matches “{{ q }}”.</p>
-        <p v-else>No products in this category yet.</p>
-        <button class="link" @click="setQuery({ q: undefined, category: undefined })">Clear filters</button>
+        <p v-if="q">{{ t("catalog.no_match", { q }) }}</p>
+        <p v-else>{{ t("catalog.empty_category") }}</p>
+        <button class="link" @click="setQuery({ q: undefined, category: undefined })">{{ t("catalog.clear_filters") }}</button>
       </div>
       <template v-else>
         <div class="grid"><ProductCard v-for="p in products" :key="p.id" :product="p" /></div>
-        <nav v-if="lastPage > 1" class="pager" aria-label="Pagination">
-          <button class="link" :disabled="page <= 1" @click="setQuery({ page: page - 1 })">← Prev</button>
-          <span class="pager__n">Page {{ page }} of {{ lastPage }}</span>
-          <button class="link" :disabled="page >= lastPage" @click="setQuery({ page: page + 1 })">Next →</button>
+        <nav v-if="lastPage > 1" class="pager" :aria-label="t('a11y.pagination')">
+          <button class="link" :disabled="page <= 1" @click="setQuery({ page: page - 1 })">{{ t("common.back") }} {{ t("catalog.prev") }}</button>
+          <span class="pager__n">{{ t("catalog.page_of", { page, last: lastPage }) }}</span>
+          <button class="link" :disabled="page >= lastPage" @click="setQuery({ page: page + 1 })">{{ t("catalog.next") }} {{ t("common.fwd") }}</button>
         </nav>
       </template>
     </main>

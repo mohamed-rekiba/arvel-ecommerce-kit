@@ -56,7 +56,7 @@ async function addToBag() {
       <button
         class="heart"
         :class="{ on: saved }"
-        :aria-label="saved ? 'Remove from wishlist' : 'Save to wishlist'"
+        :aria-label="saved ? t('card.unsave') : t('card.save')"
         @click.prevent.stop="toggleSave"
       >
         {{ saved ? "♥" : "♡" }}

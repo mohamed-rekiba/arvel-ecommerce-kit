@@ -152,6 +152,7 @@ class DatabaseSeeder(Seeder):
         ]
         fr_names = {
             "Eclipse Studio Headphones": "Casque Studio Eclipse",
+            "Aurora Over-Ear Headphones": "Casque circum-aural Aurora",
             "Pulse Wireless Earbuds": "Écouteurs sans fil Pulse",
             "Drift Earbuds": "Écouteurs Drift",
             "Resonate Bookshelf Speaker": "Enceinte de bibliothèque Resonate",
@@ -174,6 +175,7 @@ class DatabaseSeeder(Seeder):
         }
         ar_names = {
             "Eclipse Studio Headphones": "سماعات استوديو إكليبس",
+            "Aurora Over-Ear Headphones": "سماعات أورورا فوق الأذن",
             "Pulse Wireless Earbuds": "سماعات بالس اللاسلكية",
             "Drift Earbuds": "سماعات دريفت",
             "Resonate Bookshelf Speaker": "مكبر صوت ريزونيت المكتبي",

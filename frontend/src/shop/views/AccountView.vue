@@ -5,6 +5,7 @@ import { useAuth } from "../auth";
 import { useCart } from "../cart";
 import { useWishlist } from "../wishlist";
 import ProductCard from "../components/ProductCard.vue";
+import { type MessageKey, t } from "../locale";
 
 const { state, restore, login, register, logout } = useAuth();
 const wishlist = useWishlist();
@@ -57,10 +58,10 @@ async function submit() {
   } catch (e) {
     error.value =
       e instanceof ApiError && e.status === 401
-        ? "Those credentials don't match."
+        ? t("account.bad_credentials")
         : e instanceof ApiError && e.status === 422
-          ? "Please check your details and try again."
-          : "Something went wrong. Please try again.";
+          ? t("account.check_details")
+          : t("common.error_retry");
   } finally {
     busy.value = false;
   }
@@ -96,13 +97,13 @@ async function saveProfile() {
     });
     syncProfileForm();
     profileMsg.value = state.customer.email_verified
-      ? "Profile saved."
-      : "Profile saved — check your inbox to verify the new email.";
+      ? t("account.profile_saved")
+      : t("account.profile_saved_verify");
   } catch (e) {
     profileErr.value =
       e instanceof ApiError && e.status === 422
-        ? Object.values(e.errors)[0]?.[0] ?? "Please check your details."
-        : "Couldn't save your profile.";
+        ? Object.values(e.errors)[0]?.[0] ?? t("account.check_details_short")
+        : t("account.profile_error");
   }
 }
 
@@ -113,12 +114,12 @@ async function savePassword() {
     await api.changePassword(currentPassword.value, newPassword.value);
     currentPassword.value = "";
     newPassword.value = "";
-    passwordMsg.value = "Password updated.";
+    passwordMsg.value = t("account.password_updated");
   } catch (e) {
     passwordErr.value =
       e instanceof ApiError && e.status === 422
-        ? Object.values(e.errors)[0]?.[0] ?? "Please check the passwords."
-        : "Couldn't update the password.";
+        ? Object.values(e.errors)[0]?.[0] ?? t("account.check_passwords")
+        : t("account.password_error");
   }
 }
 
@@ -144,70 +145,70 @@ onMounted(async () => {
 
 <template>
   <main class="account">
-    <p class="eyebrow">Your account</p>
+    <p class="eyebrow">{{ t("account.eyebrow") }}</p>
 
     <!-- signed in -->
     <template v-if="state.customer">
       <div class="account__head">
-        <h1>Hello, {{ state.customer.name }}</h1>
-        <button class="btn" @click="signOut">Sign out</button>
+        <h1>{{ t("account.hello", { name: state.customer.name }) }}</h1>
+        <button class="btn" @click="signOut">{{ t("account.sign_out") }}</button>
       </div>
       <p class="account__email">
         {{ state.customer.email }}
-        <span v-if="state.customer.email_verified" class="verified">✓ verified</span>
+        <span v-if="state.customer.email_verified" class="verified">✓ {{ t("account.verified") }}</span>
       </p>
 
       <p v-if="!state.customer.email_verified" class="verify-note" role="status">
-        Your email isn't verified yet.
-        <button v-if="!resent" class="linklike" @click="resendVerification">Resend the link</button>
-        <span v-else>Verification email sent — check your inbox.</span>
+        {{ t("account.not_verified") }}
+        <button v-if="!resent" class="linklike" @click="resendVerification">{{ t("account.resend") }}</button>
+        <span v-else>{{ t("account.verification_sent") }}</span>
       </p>
 
       <section class="panel">
-        <h2 class="orders__title">Profile</h2>
+        <h2 class="orders__title">{{ t("account.profile") }}</h2>
         <form class="form form--grid" @submit.prevent="saveProfile">
           <label class="field">
-            <span>Name</span>
+            <span>{{ t("account.name") }}</span>
             <input v-model.trim="profile.name" type="text" autocomplete="name" required />
           </label>
           <label class="field">
-            <span>Email</span>
+            <span>{{ t("account.email") }}</span>
             <input v-model.trim="profile.email" type="email" autocomplete="email" required />
           </label>
           <label class="field">
-            <span>Phone <em>(private — stored encrypted)</em></span>
+            <span>{{ t("account.phone") }} <em>{{ t("account.phone_hint") }}</em></span>
             <input v-model.trim="profile.phone" type="tel" autocomplete="tel" />
           </label>
           <p v-if="profileErr" class="error" role="alert">{{ profileErr }}</p>
           <p v-if="profileMsg" class="ok" role="status">{{ profileMsg }}</p>
-          <button class="btn btn--primary" type="submit">Save profile</button>
+          <button class="btn btn--primary" type="submit">{{ t("account.save_profile") }}</button>
         </form>
       </section>
 
       <section class="panel">
-        <h2 class="orders__title">Change password</h2>
+        <h2 class="orders__title">{{ t("account.change_password") }}</h2>
         <form class="form form--grid" @submit.prevent="savePassword">
           <label class="field">
-            <span>Current password</span>
+            <span>{{ t("account.current_password") }}</span>
             <input v-model="currentPassword" type="password" autocomplete="current-password" required />
           </label>
           <label class="field">
-            <span>New password</span>
+            <span>{{ t("account.new_password") }}</span>
             <input v-model="newPassword" type="password" autocomplete="new-password" minlength="8" required />
           </label>
           <p v-if="passwordErr" class="error" role="alert">{{ passwordErr }}</p>
           <p v-if="passwordMsg" class="ok" role="status">{{ passwordMsg }}</p>
-          <button class="btn" type="submit">Update password</button>
+          <button class="btn" type="submit">{{ t("account.update_password") }}</button>
         </form>
       </section>
 
       <section v-if="notifications.length" class="notes">
         <div class="notes__head">
           <h2 class="orders__title">
-            Notifications
+            {{ t("account.notifications") }}
             <span v-if="unread" class="notes__badge">{{ unread }}</span>
           </h2>
-          <button v-if="unread" class="notes__mark" @click="markAllRead">Mark all read</button>
+          <button v-if="unread" class="notes__mark" @click="markAllRead">{{ t("account.mark_read") }}</button>
         </div>
         <ul class="notes__list">
           <li v-for="n in notifications" :key="n.id" class="note" :class="{ 'note--unread': !n.read }">
@@ -218,24 +219,24 @@ onMounted(async () => {
       </section>
 
       <section v-if="wishlist.state.products.length" class="wish">
-        <h2 class="orders__title">Wishlist</h2>
+        <h2 class="orders__title">{{ t("account.wishlist") }}</h2>
         <div class="wish__grid">
           <ProductCard v-for="p in wishlist.state.products" :key="p.id" :product="p" />
         </div>
       </section>
 
       <section class="orders">
-        <h2 class="orders__title">Order history</h2>
-        <p v-if="ordersLoading" class="muted">Loading…</p>
-        <p v-else-if="orders.length === 0" class="muted">You haven't placed any orders yet.</p>
+        <h2 class="orders__title">{{ t("account.orders") }}</h2>
+        <p v-if="ordersLoading" class="muted">{{ t("common.loading") }}</p>
+        <p v-else-if="orders.length === 0" class="muted">{{ t("account.no_orders") }}</p>
         <ul v-else class="orders__list">
           <li v-for="o in orders" :key="o.id" class="order">
             <RouterLink class="order__link" :to="`/orders/${o.id}`">
               <div>
-                <span class="order__id">Order #{{ o.id }}</span>
-                <span class="order__items">{{ o.items.length }} item{{ o.items.length === 1 ? "" : "s" }}</span>
+                <span class="order__id">{{ t("checkout.order") }} #{{ o.id }}</span>
+                <span class="order__items">{{ o.items.length }} {{ o.items.length === 1 ? t("account.item_one") : t("account.item_many") }}</span>
               </div>
-              <span class="order__status">{{ o.status }}</span>
+              <span class="order__status">{{ t(`order.${o.status}` as MessageKey) }}</span>
               <span class="order__total">{{ formatPrice(o.total_cents) }}</span>
             </RouterLink>
           </li>
@@ -245,37 +246,37 @@ onMounted(async () => {
 
     <!-- signed out -->
     <template v-else>
-      <h1>{{ mode === "login" ? "Sign in" : "Create an account" }}</h1>
+      <h1>{{ mode === "login" ? t("account.sign_in") : t("account.create") }}</h1>
       <p class="account__sub">
-        {{ mode === "login" ? "Access your orders and check out faster." : "Save your details and track every order." }}
+        {{ mode === "login" ? t("account.login_sub") : t("account.register_sub") }}
       </p>
       <form class="form" @submit.prevent="submit">
         <label v-if="mode === 'register'" class="field">
-          <span>Name</span>
+          <span>{{ t("account.name") }}</span>
           <input v-model="name" type="text" autocomplete="name" required />
         </label>
         <label class="field">
-          <span>Email</span>
+          <span>{{ t("account.email") }}</span>
           <input v-model="email" type="email" autocomplete="email" required />
         </label>
         <label class="field">
-          <span>Password</span>
+          <span>{{ t("account.password") }}</span>
           <input v-model="password" type="password" :autocomplete="mode === 'login' ? 'current-password' : 'new-password'" required />
         </label>
         <p v-if="mode === 'login'" class="forgot">
-          <RouterLink to="/forgot-password">Forgot your password?</RouterLink>
+          <RouterLink to="/forgot-password">{{ t("account.forgot") }}</RouterLink>
         </p>
         <p v-if="error" class="error" role="alert">{{ error }}</p>
         <button class="btn btn--primary submit" :disabled="busy" type="submit">
-          {{ busy ? "Please wait…" : mode === "login" ? "Sign in" : "Create account" }}
+          {{ busy ? t("common.wait") : mode === "login" ? t("account.sign_in") : t("account.create_btn") }}
         </button>
       </form>
       <p class="switch">
         <template v-if="mode === 'login'">
-          New here? <button class="link" @click="mode = 'register'">Create an account</button>
+          {{ t("account.new_here") }} <button class="link" @click="mode = 'register'">{{ t("account.create") }}</button>
         </template>
         <template v-else>
-          Already have an account? <button class="link" @click="mode = 'login'">Sign in</button>
+          {{ t("account.have_account") }} <button class="link" @click="mode = 'login'">{{ t("account.sign_in") }}</button>
         </template>
       </p>
     </template>
