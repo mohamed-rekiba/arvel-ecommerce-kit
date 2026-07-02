@@ -24,6 +24,11 @@ import type {
   ApiAdminUsersRoles400,
   ApiAdminUsersRolesAssign400,
   ApiAdminUsersRolesRevoke400,
+  ApiAdminVariantsDestroy400,
+  ApiAdminVariantsIndex400,
+  ApiAdminVariantsStock400,
+  ApiAdminVariantsStore400,
+  ApiAdminVariantsUpdate400,
   ApiCartItemsAdd400,
   ApiCartItemsRemove400,
   ApiCartItemsUpdate400,
@@ -73,11 +78,15 @@ import type {
   ResetPasswordIn,
   Response,
   RoleOut,
+  StockAdjustIn,
   TokenOut,
   UpdateItemIn,
   UpdateProductIn,
   UserOut,
   UserRolesOut,
+  VariantIn,
+  VariantOut,
+  VariantUpdateIn,
   VerifyEmailIn,
   WebhookIn,
   WebhookOut,
@@ -187,7 +196,8 @@ export const getApiLoginUrl = () => {
 }
 
 /**
- * Verify credentials and issue a personal access token.
+ * Verify credentials and issue a personal access token (merging any guest cart the request
+ * carries — build-a-cart-then-sign-in must never strand items).
  * @summary ApiLogin
  */
 export const apiLogin = async (credentialsIn: CredentialsIn, options?: RequestInit): Promise<apiLoginResponse> => {
@@ -1080,6 +1090,228 @@ export const apiAdminProductsDestroy = async (id: number, options?: RequestInit)
     method: 'DELETE'
 
 
+  }
+);}
+
+
+
+export type apiAdminVariantsIndexResponse200 = {
+  data: VariantOut[]
+  status: 200
+}
+
+export type apiAdminVariantsIndexResponse400 = {
+  data: ApiAdminVariantsIndex400
+  status: 400
+}
+
+export type apiAdminVariantsIndexResponseSuccess = (apiAdminVariantsIndexResponse200) & {
+  headers: Headers;
+};
+export type apiAdminVariantsIndexResponseError = (apiAdminVariantsIndexResponse400) & {
+  headers: Headers;
+};
+
+export type apiAdminVariantsIndexResponse = (apiAdminVariantsIndexResponseSuccess | apiAdminVariantsIndexResponseError)
+
+export const getApiAdminVariantsIndexUrl = (id: number,) => {
+
+
+
+
+  return `/api/admin/products/${id}/variants`
+}
+
+/**
+ * @summary ApiAdminVariantsIndex
+ */
+export const apiAdminVariantsIndex = async (id: number, options?: RequestInit): Promise<apiAdminVariantsIndexResponse> => {
+
+  return apiFetch<apiAdminVariantsIndexResponse>(getApiAdminVariantsIndexUrl(id),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+export type apiAdminVariantsStoreResponse201 = {
+  data: VariantOut
+  status: 201
+}
+
+export type apiAdminVariantsStoreResponse400 = {
+  data: ApiAdminVariantsStore400
+  status: 400
+}
+
+export type apiAdminVariantsStoreResponseSuccess = (apiAdminVariantsStoreResponse201) & {
+  headers: Headers;
+};
+export type apiAdminVariantsStoreResponseError = (apiAdminVariantsStoreResponse400) & {
+  headers: Headers;
+};
+
+export type apiAdminVariantsStoreResponse = (apiAdminVariantsStoreResponseSuccess | apiAdminVariantsStoreResponseError)
+
+export const getApiAdminVariantsStoreUrl = (id: number,) => {
+
+
+
+
+  return `/api/admin/products/${id}/variants`
+}
+
+/**
+ * @summary ApiAdminVariantsStore
+ */
+export const apiAdminVariantsStore = async (id: number,
+    variantIn: VariantIn, options?: RequestInit): Promise<apiAdminVariantsStoreResponse> => {
+
+  return apiFetch<apiAdminVariantsStoreResponse>(getApiAdminVariantsStoreUrl(id),
+  {
+    ...options,
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...options?.headers },
+    body: JSON.stringify(variantIn)
+  }
+);}
+
+
+
+export type apiAdminVariantsDestroyResponse200 = {
+  data: MessageOut
+  status: 200
+}
+
+export type apiAdminVariantsDestroyResponse400 = {
+  data: ApiAdminVariantsDestroy400
+  status: 400
+}
+
+export type apiAdminVariantsDestroyResponseSuccess = (apiAdminVariantsDestroyResponse200) & {
+  headers: Headers;
+};
+export type apiAdminVariantsDestroyResponseError = (apiAdminVariantsDestroyResponse400) & {
+  headers: Headers;
+};
+
+export type apiAdminVariantsDestroyResponse = (apiAdminVariantsDestroyResponseSuccess | apiAdminVariantsDestroyResponseError)
+
+export const getApiAdminVariantsDestroyUrl = (id: number,) => {
+
+
+
+
+  return `/api/admin/variants/${id}`
+}
+
+/**
+ * Delete a variant. Order history can never dangle (422 when order lines reference it);
+ * cart lines holding it are removed — the cart re-renders without the dead line.
+ * @summary ApiAdminVariantsDestroy
+ */
+export const apiAdminVariantsDestroy = async (id: number, options?: RequestInit): Promise<apiAdminVariantsDestroyResponse> => {
+
+  return apiFetch<apiAdminVariantsDestroyResponse>(getApiAdminVariantsDestroyUrl(id),
+  {
+    ...options,
+    method: 'DELETE'
+
+
+  }
+);}
+
+
+
+export type apiAdminVariantsUpdateResponse200 = {
+  data: VariantOut
+  status: 200
+}
+
+export type apiAdminVariantsUpdateResponse400 = {
+  data: ApiAdminVariantsUpdate400
+  status: 400
+}
+
+export type apiAdminVariantsUpdateResponseSuccess = (apiAdminVariantsUpdateResponse200) & {
+  headers: Headers;
+};
+export type apiAdminVariantsUpdateResponseError = (apiAdminVariantsUpdateResponse400) & {
+  headers: Headers;
+};
+
+export type apiAdminVariantsUpdateResponse = (apiAdminVariantsUpdateResponseSuccess | apiAdminVariantsUpdateResponseError)
+
+export const getApiAdminVariantsUpdateUrl = (id: number,) => {
+
+
+
+
+  return `/api/admin/variants/${id}`
+}
+
+/**
+ * @summary ApiAdminVariantsUpdate
+ */
+export const apiAdminVariantsUpdate = async (id: number,
+    variantUpdateIn: VariantUpdateIn, options?: RequestInit): Promise<apiAdminVariantsUpdateResponse> => {
+
+  return apiFetch<apiAdminVariantsUpdateResponse>(getApiAdminVariantsUpdateUrl(id),
+  {
+    ...options,
+    method: 'PATCH',
+    headers: { 'Content-Type': 'application/json', ...options?.headers },
+    body: JSON.stringify(variantUpdateIn)
+  }
+);}
+
+
+
+export type apiAdminVariantsStockResponse200 = {
+  data: VariantOut
+  status: 200
+}
+
+export type apiAdminVariantsStockResponse400 = {
+  data: ApiAdminVariantsStock400
+  status: 400
+}
+
+export type apiAdminVariantsStockResponseSuccess = (apiAdminVariantsStockResponse200) & {
+  headers: Headers;
+};
+export type apiAdminVariantsStockResponseError = (apiAdminVariantsStockResponse400) & {
+  headers: Headers;
+};
+
+export type apiAdminVariantsStockResponse = (apiAdminVariantsStockResponseSuccess | apiAdminVariantsStockResponseError)
+
+export const getApiAdminVariantsStockUrl = (id: number,) => {
+
+
+
+
+  return `/api/admin/variants/${id}/stock`
+}
+
+/**
+ * Set or shift a variant's stock — an explicit, audited operation, serialized under a row
+ * lock so concurrent adjustments are deterministic.
+ * @summary ApiAdminVariantsStock
+ */
+export const apiAdminVariantsStock = async (id: number,
+    stockAdjustIn: StockAdjustIn, options?: RequestInit): Promise<apiAdminVariantsStockResponse> => {
+
+  return apiFetch<apiAdminVariantsStockResponse>(getApiAdminVariantsStockUrl(id),
+  {
+    ...options,
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...options?.headers },
+    body: JSON.stringify(stockAdjustIn)
   }
 );}
 
