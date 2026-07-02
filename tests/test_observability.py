@@ -16,6 +16,7 @@ from app.models.category import Category
 from app.models.product import Product
 from app.models.product_variant import ProductVariant
 from app.models.user import User
+from tests.checkout_helpers import checkout_body
 
 
 @pytest.fixture
@@ -88,14 +89,14 @@ def test_checkout_emits_a_business_span_with_db_children(client, spans) -> None:
         json={"product_variant_id": 1, "quantity": 2},
         headers=headers,
     )
-    assert client.post("/api/checkout", headers=headers).status_code == 201
+    assert client.post("/api/checkout", json=checkout_body(), headers=headers).status_code == 201
 
     finished = spans.get_finished_spans()
     by_name = {s.name: s for s in finished}
     # the custom business span carries its attributes
     assert "checkout.place_order" in by_name
     checkout_span = by_name["checkout.place_order"]
-    assert checkout_span.attributes["checkout.total_cents"] == 4000
+    assert checkout_span.attributes["checkout.total_cents"] == 4900  # 4000 + 500 ship + 400 tax
     assert checkout_span.attributes["checkout.line_count"] == 1
     # arvel auto-instruments DB queries → CLIENT spans were emitted during checkout
     assert any(s.name.startswith("db ") for s in finished)

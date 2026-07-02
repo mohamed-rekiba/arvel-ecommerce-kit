@@ -71,10 +71,41 @@ export interface OrderLine {
   unit_price_cents: number;
 }
 
+export type CountryCode = "US" | "CA" | "GB" | "DE" | "FR" | "EG";
+
+export const SHIPPING_COUNTRIES: { code: CountryCode; label: string }[] = [
+  { code: "US", label: "United States" },
+  { code: "CA", label: "Canada" },
+  { code: "GB", label: "United Kingdom" },
+  { code: "DE", label: "Germany" },
+  { code: "FR", label: "France" },
+  { code: "EG", label: "Egypt" },
+];
+
+export interface Address {
+  name: string;
+  line1: string;
+  line2: string | null;
+  city: string;
+  postal_code: string;
+  country: CountryCode;
+}
+
+export interface CheckoutPayload {
+  email?: string;
+  address: Address;
+}
+
 export interface Order {
   id: number;
   status: string;
+  contact_email: string;
+  address: Address;
+  subtotal_cents: number;
+  shipping_cents: number;
+  tax_cents: number;
   total_cents: number;
+  currency: string;
   items: OrderLine[];
 }
 
@@ -110,7 +141,11 @@ export const authToken = {
 };
 
 export class ApiError extends Error {
-  constructor(public status: number, message: string) {
+  constructor(
+    public status: number,
+    message: string,
+    public errors: Record<string, string[]> = {},
+  ) {
     super(message);
   }
 }
@@ -127,7 +162,18 @@ async function request<T>(method: string, path: string, body?: unknown): Promise
     headers,
     body: body !== undefined ? JSON.stringify(body) : undefined,
   });
-  if (!res.ok) throw new ApiError(res.status, `API ${res.status} for ${method} ${path}`);
+  if (!res.ok) {
+    let message = `API ${res.status} for ${method} ${path}`;
+    let errors: Record<string, string[]> = {};
+    try {
+      const body = (await res.json()) as { message?: string; errors?: Record<string, string[]> };
+      if (body.message) message = body.message;
+      if (body.errors) errors = body.errors;
+    } catch {
+      // non-JSON error body — keep the generic message
+    }
+    throw new ApiError(res.status, message, errors);
+  }
   return (await res.json()) as T;
 }
 
@@ -166,8 +212,8 @@ export const api = {
   async removeCartItem(id: number) {
     return withCartToken(await request<Cart>("DELETE", `/cart/items/${id}`));
   },
-  async checkout() {
-    const order = await request<Order>("POST", `/checkout`);
+  async checkout(payload: CheckoutPayload) {
+    const order = await request<Order>("POST", `/checkout`, payload);
     localStorage.removeItem(CART_TOKEN_KEY); // the cart was consumed
     return order;
   },

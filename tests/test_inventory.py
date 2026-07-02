@@ -16,6 +16,7 @@ from app.models.category import Category
 from app.models.product import Product
 from app.models.product_variant import ProductVariant
 from app.models.user import User
+from tests.checkout_helpers import checkout_body
 
 
 @pytest.fixture
@@ -80,7 +81,7 @@ def test_checkout_decrements_stock(client) -> None:
         json={"product_variant_id": 1, "quantity": 3},
         headers=headers,
     )
-    assert client.post("/api/checkout", headers=headers).status_code == 201
+    assert client.post("/api/checkout", json=checkout_body(), headers=headers).status_code == 201
     assert _variant_stock(client) == 2  # 5 - 3
 
 
@@ -91,7 +92,7 @@ def test_oversell_is_rejected_and_rolls_back(client) -> None:
         json={"product_variant_id": 1, "quantity": 9},
         headers=headers,
     )
-    resp = client.post("/api/checkout", headers=headers)
+    resp = client.post("/api/checkout", json=checkout_body(), headers=headers)
     assert resp.status_code == 409  # insufficient stock
     # rolled back: stock untouched, no order placed, cart intact
     assert _variant_stock(client) == 5
