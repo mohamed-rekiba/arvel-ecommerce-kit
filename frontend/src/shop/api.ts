@@ -22,6 +22,7 @@ import type {
 } from "../api/gen/models";
 import type { CountryCode } from "../api/gen/models";
 import type { ReviewListOut, ReviewOut } from "../api/gen/models";
+import type { AnnouncementOut, BannerOut, DealOut, ProductDealOut } from "../api/gen/models";
 
 export { ApiError } from "../api/http";
 export type { CountryCode, OrderStatus, PaymentStatus } from "../api/gen/models";
@@ -41,6 +42,10 @@ export type Order = OrderOut;
 export type Customer = UserOut;
 export type Notification = NotificationOut;
 export type Review = ReviewOut;
+export type Banner = BannerOut;
+export type Deal = DealOut;
+export type ProductDeal = ProductDealOut;
+export type Announcement = AnnouncementOut;
 export type ReviewList = ReviewListOut;
 
 // arvel's LengthAwarePaginator JSON shape (DR-0022) — generic over the row type (the generated
@@ -116,14 +121,40 @@ function withCartToken(cart: Cart): Cart {
 }
 
 export const api = {
-  products(params: { q?: string; category?: string; sort?: string; page?: number } = {}) {
+  products(
+    params: {
+      q?: string;
+      category?: string;
+      sort?: string;
+      page?: number;
+      featured?: boolean;
+      minPrice?: number;
+      maxPrice?: number;
+    } = {},
+  ) {
     const qs = new URLSearchParams();
     if (params.q) qs.set("q", params.q);
     if (params.category) qs.set("category", params.category);
     if (params.sort) qs.set("sort", params.sort);
     if (params.page) qs.set("page", String(params.page));
+    if (params.featured) qs.set("featured", "true");
+    if (params.minPrice != null) qs.set("min_price", String(params.minPrice));
+    if (params.maxPrice != null) qs.set("max_price", String(params.maxPrice));
     const suffix = qs.toString() ? `?${qs}` : "";
     return get<Paginated<Product>>(`/products${suffix}`);
+  },
+  banners() {
+    return get<Banner[]>(`/banners`);
+  },
+  deals() {
+    return get<Deal[]>(`/deals`);
+  },
+  async announcement(): Promise<Announcement | null> {
+    try {
+      return await get<Announcement>(`/announcement`);
+    } catch {
+      return null; // 404 = nothing announced
+    }
   },
   product(slug: string) {
     return get<Product>(`/products/${slug}`);

@@ -5,6 +5,7 @@ import { useRoute, useRouter } from "vue-router";
 import { ApiError, type Product, type ReviewList, type Variant, api, formatPrice } from "../api";
 import { useCart } from "../cart";
 import { getCachedProduct } from "../product-cache";
+import CountdownTimer from "../components/CountdownTimer.vue";
 import { type MessageKey, t } from "../locale";
 
 const route = useRoute();
@@ -110,11 +111,24 @@ function goBack() {
   else router.push({ name: "catalog" });
 }
 
+const qty = ref(1);
+const deal = computed(() => product.value?.deal ?? null);
+const dealUnitPrice = computed(() => {
+  if (!product.value || !deal.value) return null;
+  const base = product.value.price_cents + (selectedVariant.value?.price_adjustment_cents ?? 0);
+  return Math.floor((base * (100 - deal.value.percent_off)) / 100);
+});
+const baseUnitPrice = computed(() =>
+  product.value
+    ? product.value.price_cents + (selectedVariant.value?.price_adjustment_cents ?? 0)
+    : 0,
+);
+
 async function addToCart() {
   if (selectedVariantId.value == null) return;
   adding.value = true;
   try {
-    await add(selectedVariantId.value, 1);
+    await add(selectedVariantId.value, qty.value);
     added.value = true;
     setTimeout(() => (added.value = false), 1500);
   } finally {
@@ -168,7 +182,18 @@ watch(() => route.params.slug, load);
         <button class="pdp__back" @click="goBack">{{ t("common.back") }} {{ t("pdp.back") }}</button>
         <p class="eyebrow" v-if="product.category">{{ product.category.translation.name }}</p>
         <h1>{{ product.translation.name }}</h1>
-        <p class="pdp__price">{{ formatPrice(product.price_cents, product.currency) }}</p>
+        <div class="pdp__pricing">
+          <template v-if="deal && dealUnitPrice != null">
+            <s class="pdp__old tnum">{{ formatPrice(baseUnitPrice, product.currency) }}</s>
+            <span class="pdp__price pdp__price--sale tnum">{{ formatPrice(dealUnitPrice, product.currency) }}</span>
+            <span class="pdp__dealchip">−{{ deal.percent_off }}%</span>
+          </template>
+          <span v-else class="pdp__price tnum">{{ formatPrice(baseUnitPrice, product.currency) }}</span>
+        </div>
+        <div v-if="deal" class="pdp__deal">
+          <span class="pdp__dealends">{{ t("deal.ends_in") }}</span>
+          <CountdownTimer :ends-at="deal.ends_at" compact />
+        </div>
         <p v-if="product.translation.description" class="pdp__desc">
           {{ product.translation.description }}
         </p>
@@ -182,6 +207,12 @@ watch(() => route.params.slug, load);
           </select>
         </label>
 
+        <div class="pdp__buyrow">
+          <div class="qtysel" role="group" :aria-label="t('cart.quantity')">
+            <button type="button" :aria-label="t('cart.decrease')" :disabled="qty <= 1" @click="qty = Math.max(1, qty - 1)">−</button>
+            <span class="tnum">{{ qty }}</span>
+            <button type="button" :aria-label="t('cart.increase')" :disabled="qty >= (selectedVariant?.stock ?? 1)" @click="qty += 1">+</button>
+          </div>
         <Button
           class="pdp__add"
           :label="added ? t('pdp.added') : adding ? t('card.adding') : canAdd ? t('pdp.add') : t('pdp.sold_out_label')"
@@ -189,6 +220,7 @@ watch(() => route.params.slug, load);
           :loading="adding"
           @click="addToCart"
         />
+        </div>
         <div v-if="selectedVariant && selectedVariant.stock <= 0" class="pdp__alert" aria-live="polite">
           <p v-if="alertState === 'done'" class="pdp__alert-ok">✓ {{ t("pdp.alert_done") }}</p>
           <p v-else-if="alertState === 'auth'" class="pdp__alert-note">
@@ -265,7 +297,19 @@ watch(() => route.params.slug, load);
 .pdp__back { display: inline-block; border: 0; background: none; padding: 0; cursor: pointer; font: inherit; color: var(--color-text-muted); text-decoration: none; font-size: var(--text-sm); margin-bottom: var(--space-8); transition: color var(--motion-base) var(--ease); }
 .pdp__back:hover { color: var(--color-text); }
 .pdp__info h1 { font-size: var(--text-3xl); margin: var(--space-2) 0 var(--space-4); }
-.pdp__price { font-size: var(--text-xl); color: var(--color-text); margin: 0 0 var(--space-6); }
+.pdp__pricing { display: flex; align-items: baseline; gap: 12px; margin: 0 0 var(--space-3); }
+.pdp__old { color: var(--text-subtle); font-size: var(--text-base); }
+.pdp__price { font-family: var(--font-display); font-size: var(--text-2xl); font-weight: 800; color: var(--color-text); }
+.pdp__price--sale { color: var(--sale); }
+.pdp__dealchip { background: var(--accent-bright); color: var(--on-accent-bright); font-size: 12px; font-weight: 800; padding: 3px 10px; border-radius: var(--radius-full); }
+.pdp__deal { display: flex; align-items: center; gap: 12px; margin: 0 0 var(--space-5); }
+.pdp__dealends { font-size: 12.5px; font-weight: 700; color: var(--text-muted); text-transform: uppercase; letter-spacing: .05em; }
+.pdp__buyrow { display: flex; align-items: center; gap: 12px; }
+.pdp__buyrow .pdp__add { flex: 1; }
+.qtysel { display: inline-flex; align-items: center; border: 1px solid var(--border-2); border-radius: var(--radius-full); overflow: hidden; }
+.qtysel button { width: 40px; height: 44px; border: 0; background: var(--surface-2); color: var(--text); font-size: 17px; cursor: pointer; }
+.qtysel button:disabled { opacity: .4; cursor: default; }
+.qtysel span { min-width: 40px; text-align: center; font-weight: 700; }
 .pdp__desc { color: var(--color-text-muted); line-height: var(--leading-normal); max-width: 48ch; }
 .pdp__field { display: block; margin: var(--space-8) 0 var(--space-6); max-width: 22rem; }
 .pdp__label { display: block; font-size: var(--text-sm); font-weight: var(--weight-medium); margin-bottom: var(--space-2); }

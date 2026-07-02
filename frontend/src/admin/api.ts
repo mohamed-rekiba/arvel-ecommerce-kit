@@ -38,6 +38,15 @@ import type {
   VariantUpdateIn,
   VendorIn,
   VendorUpdateIn,
+  AdminBannerOut,
+  AdminDealOut,
+  BannerIn,
+  BannerUpdateIn,
+  DealIn,
+  DealUpdateIn,
+  AdminCouponOut,
+  CouponIn,
+  CouponUpdateIn,
 } from "../api/gen/models";
 
 export type Translation = Translate;
@@ -52,6 +61,8 @@ export type ProductDetail = AdminProductDetailOut;
 export type AdminCategory = AdminCategoryOut;
 export type AdminUser = AdminUserOut;
 export type AdminOrderDetail = AdminOrderDetailOut;
+export type AdminDeal = AdminDealOut;
+export type AdminBanner = AdminBannerOut;
 export type AdminReview = AdminReviewOut;
 export type AdminUserDetail = AdminUserDetailOut;
 export type Vendor = AdminVendorOut;
@@ -143,6 +154,22 @@ export const api = {
   },
   deleteImage: (productId: number, mediaId: number) =>
     request<GalleryImageOut[]>("DELETE", `/admin/products/${productId}/media/${mediaId}`),
+  adminCoupons: () => request<AdminCouponOut[]>("GET", "/admin/coupons"),
+  createCoupon: (body: CouponIn) => request<AdminCouponOut>("POST", "/admin/coupons", body),
+  updateCoupon: (id: number, body: CouponUpdateIn) => request<AdminCouponOut>("PATCH", `/admin/coupons/${id}`, body),
+  adminDeals: () => request<AdminDealOut[]>("GET", "/admin/deals"),
+  createDeal: (body: DealIn) => request<AdminDealOut>("POST", "/admin/deals", body),
+  updateDeal: (id: number, body: DealUpdateIn) => request<AdminDealOut>("PATCH", `/admin/deals/${id}`, body),
+  deleteDeal: (id: number) => request<{ status: string }>("DELETE", `/admin/deals/${id}`),
+  adminBanners: () => request<AdminBannerOut[]>("GET", "/admin/banners"),
+  createBanner: (body: BannerIn) => request<AdminBannerOut>("POST", "/admin/banners", body),
+  updateBanner: (id: number, body: BannerUpdateIn) => request<AdminBannerOut>("PATCH", `/admin/banners/${id}`, body),
+  deleteBanner: (id: number) => request<{ status: string }>("DELETE", `/admin/banners/${id}`),
+  uploadBannerImage: (id: number, file: File) => {
+    const form = new FormData();
+    form.append("image", file);
+    return upload<AdminBannerOut>(`/admin/banners/${id}/image`, form);
+  },
   roles: () => request<Role[]>("GET", "/admin/roles"),
   adminUsers: (q = "") => request<Paginated<AdminUserOut>>("GET", `/admin/users?q=${encodeURIComponent(q)}`),
   adminUserDetail: (id: number) => request<AdminUserDetailOut>("GET", `/admin/users/${id}`),

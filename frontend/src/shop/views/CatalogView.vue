@@ -29,6 +29,17 @@ const activeCategory = computed(() => (route.query.category as string) || "");
 const q = computed(() => (route.query.q as string) || "");
 const sort = computed(() => (route.query.sort as string) || "featured");
 const page = computed(() => Number(route.query.page) || 1);
+const minPrice = computed(() => (route.query.min ? Number(route.query.min) : undefined));
+const maxPrice = computed(() => (route.query.max ? Number(route.query.max) : undefined));
+const priceMinInput = ref(route.query.min ? String(Number(route.query.min) / 100) : "");
+const priceMaxInput = ref(route.query.max ? String(Number(route.query.max) / 100) : "");
+function applyPrice() {
+  setQuery({
+    min: priceMinInput.value ? Math.round(Number(priceMinInput.value) * 100) : undefined,
+    max: priceMaxInput.value ? Math.round(Number(priceMaxInput.value) * 100) : undefined,
+    page: undefined,
+  });
+}
 const activeName = computed(
   () => categories.value.find((c) => c.slug === activeCategory.value)?.translation.name ?? t("catalog.all"),
 );
@@ -36,7 +47,7 @@ const activeName = computed(
 // a cache key for THIS exact query, so a back-nav can repaint the same card set synchronously (the
 // morph target for the reverse PDP → catalog transition) instead of refetching a frame too late.
 const listKey = () =>
-  `catalog:${JSON.stringify({ q: q.value, category: activeCategory.value, sort: sort.value, page: page.value })}`;
+  `catalog:${JSON.stringify({ q: q.value, category: activeCategory.value, sort: sort.value, page: page.value, min: minPrice.value, max: maxPrice.value })}`;
 const seeded = getCachedList(listKey());
 if (seeded) {
   products.value = seeded;
@@ -57,6 +68,8 @@ async function load() {
       category: activeCategory.value || undefined,
       sort: sort.value,
       page: page.value,
+      minPrice: minPrice.value,
+      maxPrice: maxPrice.value,
     });
     products.value = res.data;
     cacheProducts(res.data); // forward morph: PDP renders the image instantly
@@ -97,6 +110,22 @@ watch(() => route.query, load);
             </button>
           </li>
         </ul>
+      </div>
+      <div class="filters__group">
+        <h3 class="filters__h">{{ t("catalog.price") }}</h3>
+        <form class="pricef" @submit.prevent="applyPrice">
+          <input v-model.trim="priceMinInput" class="pricef__in" type="number" min="0" inputmode="decimal" :placeholder="t('catalog.min')" :aria-label="t('catalog.min')" />
+          <span aria-hidden="true">–</span>
+          <input v-model.trim="priceMaxInput" class="pricef__in" type="number" min="0" inputmode="decimal" :placeholder="t('catalog.max')" :aria-label="t('catalog.max')" />
+          <button type="submit" class="pricef__go">{{ t("catalog.apply") }}</button>
+        </form>
+        <button
+          v-if="minPrice != null || maxPrice != null"
+          class="pricef__clear"
+          @click="priceMinInput = ''; priceMaxInput = ''; applyPrice()"
+        >
+          {{ t("catalog.clear_filters") }}
+        </button>
       </div>
     </aside>
 
@@ -173,4 +202,9 @@ watch(() => route.query, load);
   .cats { flex-direction: column; }
   .grid { grid-template-columns: repeat(3, 1fr); }
 }
+.pricef { display: flex; align-items: center; gap: 6px; }
+.pricef__in { width: 74px; padding: 7px 9px; font-size: 13px; }
+.pricef__go { border: 1px solid var(--accent); background: none; color: var(--accent-text); font: inherit; font-size: 12px; font-weight: 700; padding: 7px 12px; border-radius: var(--radius-sm); cursor: pointer; }
+.pricef__go:hover { background: var(--accent); color: var(--on-accent); }
+.pricef__clear { margin-top: 8px; border: 0; background: none; color: var(--text-subtle); font: inherit; font-size: 12px; text-decoration: underline; cursor: pointer; }
 </style>

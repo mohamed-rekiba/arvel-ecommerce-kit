@@ -1,13 +1,15 @@
 <script setup lang="ts">
 import { nextTick, ref, watch } from "vue";
+import type { Category } from "../api";
 import { t } from "../locale";
 
-const props = defineProps<{ open: boolean }>();
+const props = defineProps<{ open: boolean; categories?: Category[] }>();
 const emit = defineEmits<{ close: [] }>();
 
 // a template ref on <RouterLink> yields the component instance, not the DOM node — its root element
 // is reachable via `$el` (a Vue-exposed property on every component instance).
 const firstLink = ref<{ $el: HTMLAnchorElement } | null>(null);
+const showCats = ref(false);
 
 // move focus into the drawer on open — a lightweight a11y baseline (not a full focus trap; returning
 // focus to the trigger button on close is the parent's job, since it owns that button's ref).
@@ -31,8 +33,23 @@ watch(
         :aria-label="t('a11y.primary')"
         @keydown.escape="emit('close')"
       >
-        <RouterLink ref="firstLink" :to="{ name: 'catalog' }" class="mnav__link" @click="emit('close')">{{ t("nav.shop") }}</RouterLink>
-        <RouterLink to="/" class="mnav__link" @click="emit('close')">{{ t("nav.collections") }}</RouterLink>
+        <RouterLink ref="firstLink" to="/" class="mnav__link" @click="emit('close')">{{ t("nav.home") }}</RouterLink>
+        <RouterLink :to="{ name: 'catalog' }" class="mnav__link" @click="emit('close')">{{ t("nav.shop") }}</RouterLink>
+        <button class="mnav__link mnav__acc" :aria-expanded="showCats" @click="showCats = !showCats">
+          {{ t("nav.collections") }} <span aria-hidden="true">{{ showCats ? "▴" : "▾" }}</span>
+        </button>
+        <div v-if="showCats" class="mnav__cats">
+          <RouterLink
+            v-for="c in categories ?? []"
+            :key="c.id"
+            class="mnav__cat"
+            :to="{ name: 'catalog', query: { category: c.slug } }"
+            @click="emit('close')"
+          >
+            {{ c.translation.name }}
+          </RouterLink>
+        </div>
+        <RouterLink to="/deals" class="mnav__link mnav__link--deal" @click="emit('close')">{{ t("nav.deals") }}</RouterLink>
         <RouterLink to="/" class="mnav__link" @click="emit('close')">{{ t("nav.about") }}</RouterLink>
       </nav>
     </div>
@@ -49,27 +66,26 @@ watch(
   width: min(78vw, 320px);
   display: flex; flex-direction: column; gap: 4px;
   padding: calc(var(--space-8) + env(safe-area-inset-top, 0px)) var(--space-6) var(--space-8);
-  background: var(--bg); border-inline-end: 1px solid var(--border);
+  background: var(--surface); border-inline-end: 1px solid var(--border);
   box-shadow: var(--shadow-3);
+  overflow-y: auto;
 }
 .mnav__link {
-  padding: var(--space-3) 0; font-size: 15px; font-weight: 500;
-  letter-spacing: .02em; color: var(--text-muted); text-decoration: none;
+  display: flex; align-items: center; justify-content: space-between;
+  padding: var(--space-3) 0; font-size: 15px; font-weight: 600;
+  letter-spacing: .02em; color: var(--text); text-decoration: none;
+  border: 0; background: none; font-family: inherit; cursor: pointer; text-align: start;
   transition: color var(--motion-base);
 }
-.mnav__link:hover, .mnav__link:focus-visible { color: var(--text); }
+.mnav__link:hover, .mnav__link:focus-visible { color: var(--accent-text); }
+.mnav__link--deal { color: var(--accent-text); }
+.mnav__cats { display: flex; flex-direction: column; padding-inline-start: var(--space-4); }
+.mnav__cat { padding: var(--space-2) 0; font-size: 14px; color: var(--text-muted); text-decoration: none; }
+.mnav__cat:hover { color: var(--accent-text); }
 
-/* plain CSS transition, not the View Transitions API — this is an in-page toggle, not a navigation,
-   and reusing the router-driven VT here would risk colliding with the ::view-transition-group(*) morph
-   if a drawer-close and a route-change VT ever fire in the same tick (e.g. tapping a nav link). This
-   inherits the existing prefers-reduced-motion block in base.css for free (it's a plain transition,
-   not a view-transition-* pseudo-element). */
+.mnav-enter-active, .mnav-leave-active { transition: opacity var(--motion-base) var(--ease); }
 .mnav-enter-active .mnav__panel, .mnav-leave-active .mnav__panel { transition: transform var(--motion-slow) var(--ease-out); }
-.mnav-enter-active .mnav__backdrop, .mnav-leave-active .mnav__backdrop { transition: opacity var(--motion-base) var(--ease-out); }
+.mnav-enter-from, .mnav-leave-to { opacity: 0; }
 .mnav-enter-from .mnav__panel, .mnav-leave-to .mnav__panel { transform: translateX(-100%); }
 [dir="rtl"] .mnav-enter-from .mnav__panel, [dir="rtl"] .mnav-leave-to .mnav__panel { transform: translateX(100%); }
-.mnav-enter-from .mnav__backdrop, .mnav-leave-to .mnav__backdrop { opacity: 0; }
-
-@media (min-width: 640px) { .mnav { display: none; } }
 </style>
-

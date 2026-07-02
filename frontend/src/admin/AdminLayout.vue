@@ -37,6 +37,9 @@ function signOut() {
         <RouterLink to="/admin/categories" class="item" active-class="on"><svg viewBox="0 0 24 24" class="ic"><path d="M4 5h7v7H4zM13 5h7v7h-7zM4 14h7v5H4zM13 14h7v5h-7z"/></svg>{{ t("nav.categories") }}</RouterLink>
         <RouterLink to="/admin/reviews" class="item" active-class="on"><svg viewBox="0 0 24 24" class="ic"><path d="M12 3l2.5 5.5 6 .6-4.5 4 1.3 5.9L12 16l-5.3 3 1.3-5.9-4.5-4 6-.6z"/></svg>{{ t("nav.reviews") }}</RouterLink>
       <RouterLink to="/admin/vendors" class="item" active-class="on"><svg viewBox="0 0 24 24" class="ic"><path d="M4 7l8-4 8 4v10l-8 4-8-4z"/><path d="M4 7l8 4 8-4M12 11v10"/></svg>{{ t("nav.vendors") }}</RouterLink>
+        <RouterLink to="/admin/deals" class="item" active-class="on"><svg viewBox="0 0 24 24" class="ic"><path d="M12 3v18M5 8l7-5 7 5M7 21h10"/></svg>{{ t("nav.deals") }}</RouterLink>
+        <RouterLink to="/admin/coupons" class="item" active-class="on"><svg viewBox="0 0 24 24" class="ic"><path d="M4 8a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v2a2 2 0 0 0 0 4v2a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2v-2a2 2 0 0 0 0-4z"/><path d="M12 6v12"/></svg>{{ t("nav.coupons") }}</RouterLink>
+        <RouterLink to="/admin/banners" class="item" active-class="on"><svg viewBox="0 0 24 24" class="ic"><rect x="3" y="5" width="18" height="12" rx="2"/><path d="M3 20h18"/></svg>{{ t("nav.banners") }}</RouterLink>
         <span class="item item--soon"><svg viewBox="0 0 24 24" class="ic"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M4 18l5-4 4 3 3-2 4 3"/></svg>{{ t("nav.media") }}<i>{{ t("nav.soon") }}</i></span>
       </nav>
 
