@@ -59,6 +59,9 @@ its retries lands in `failed_jobs`: inspect with `uv run arvel queue:failed`, re
 | Mail · Queued jobs · Scheduler | `app/mail/`, `app/jobs/`, `app/console/` |
 | Observability (telemetry spans) · Admin OIDC (Keycloak) | `checkout_controller.py`, `app/auth/admin_oidc.py` |
 
+Walk all of it end to end on the live stack: **[docs/tour.md](docs/tour.md)** (screenshots in
+`docs/screenshots/`). Maintenance mode + scheduling: [docs/operability.md](docs/operability.md).
+
 ## API docs (OpenAPI)
 
 With the server running, interactive docs are at **http://127.0.0.1:8000/docs** (raw document at
