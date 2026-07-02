@@ -19,6 +19,7 @@ from app.models.category import Category
 from app.models.product import Product
 from app.models.product_variant import ProductVariant
 from app.models.user import User
+from tests.checkout_helpers import checkout_body
 
 _WEBHOOK_SECRET = "test-secret"  # config/services.py default (PAYMENT_GATEWAY_SECRET)
 
@@ -100,7 +101,7 @@ def _place_order(client, headers) -> int:
         json={"product_variant_id": 1, "quantity": 2},
         headers=headers,
     )
-    return client.post("/api/checkout", headers=headers).json()["id"]
+    return client.post("/api/checkout", json=checkout_body(), headers=headers).json()["id"]
 
 
 def test_pay_calls_the_gateway_and_records_a_payment(client) -> None:

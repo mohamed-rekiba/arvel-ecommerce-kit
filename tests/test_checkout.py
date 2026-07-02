@@ -16,6 +16,7 @@ from app.models.product import Product
 from app.models.product_variant import ProductVariant
 from app.models.user import User
 from tests.rbac_helpers import seed_rbac
+from tests.checkout_helpers import checkout_body
 
 
 @pytest.fixture
@@ -85,11 +86,19 @@ def test_checkout_creates_order_clears_cart_and_fires_event(client) -> None:
         headers=headers,
     )
 
-    placed = client.post("/api/checkout", headers=headers)
+    placed = client.post("/api/checkout", json=checkout_body(), headers=headers)
     assert placed.status_code == 201
     order = placed.json()
     assert order["status"] == "pending"
-    assert order["total_cents"] == 6000
+    # S3: the money breakdown is server-computed — subtotal + flat shipping + 10% tax = total
+    assert order["subtotal_cents"] == 6000
+    assert order["shipping_cents"] == 500
+    assert order["tax_cents"] == 600
+    assert order["total_cents"] == 7100
+    assert order["currency"] == "USD"
+    # the account email was defaulted as the contact and the address persisted
+    assert order["contact_email"] == "cara@example.com"
+    assert order["address"]["city"] == "Portland"
     assert order["items"][0]["quantity"] == 3
 
     # the cart was cleared atomically with the order's creation
@@ -101,9 +110,40 @@ def test_checkout_creates_order_clears_cart_and_fires_event(client) -> None:
     assert len(orders) == 1 and orders[0]["id"] == order["id"]
 
 
+def test_checkout_validates_address_and_country(client) -> None:
+    """S3 failure paths: missing address fields and unsupported countries are field-level 422s —
+    and nothing is created or decremented."""
+    headers = _login(client, "cara@example.com", "secret-cara")
+    client.post(
+        "/api/cart/items",
+        json={"product_variant_id": 1, "quantity": 1},
+        headers=headers,
+    )
+    # missing city + postal code
+    body = checkout_body()
+    body["address"]["city"] = ""
+    body["address"]["postal_code"] = ""
+    resp = client.post("/api/checkout", json=body, headers=headers)
+    assert resp.status_code == 422
+    assert {"city", "postal_code"} <= set(resp.json()["errors"])
+
+    # a country outside the closed CountryCode set
+    resp = client.post(
+        "/api/checkout",
+        json=checkout_body(address={**checkout_body()["address"], "country": "XX"}),
+        headers=headers,
+    )
+    assert resp.status_code == 422
+    assert "country" in resp.json()["errors"]
+
+    # nothing happened: the cart is intact and no order exists
+    assert len(client.get("/api/cart", headers=headers).json()["items"]) == 1
+    assert client.get("/api/orders", headers=headers).json() == []
+
+
 def test_checkout_empty_cart_is_422(client) -> None:
     headers = _login(client, "cara@example.com", "secret-cara")
-    assert client.post("/api/checkout", headers=headers).status_code == 422
+    assert client.post("/api/checkout", json=checkout_body(), headers=headers).status_code == 422
 
 
 def test_order_state_machine(client) -> None:
@@ -114,7 +154,7 @@ def test_order_state_machine(client) -> None:
         json={"product_variant_id": 1, "quantity": 1},
         headers=customer,
     )
-    order_id = client.post("/api/checkout", headers=customer).json()["id"]
+    order_id = client.post("/api/checkout", json=checkout_body(), headers=customer).json()["id"]
 
     # a customer cannot change status (admin-only)
     assert (
@@ -173,7 +213,7 @@ def test_admin_lists_all_orders(client) -> None:
         json={"product_variant_id": 1, "quantity": 2},
         headers=customer,
     )
-    order_id = client.post("/api/checkout", headers=customer).json()["id"]
+    order_id = client.post("/api/checkout", json=checkout_body(), headers=customer).json()["id"]
 
     # the admin (orders.view via super-admin) sees it in the back-office list
     admin = _login(client, "admin@example.com", "secret-admin")
@@ -196,7 +236,7 @@ def test_shipping_an_order_notifies_the_customer(client) -> None:
         json={"product_variant_id": 1, "quantity": 1},
         headers=customer,
     )
-    order_id = client.post("/api/checkout", headers=customer).json()["id"]
+    order_id = client.post("/api/checkout", json=checkout_body(), headers=customer).json()["id"]
 
     # no notifications yet
     assert client.get("/api/notifications", headers=customer).json() == []

@@ -248,10 +248,45 @@ class OrderLineOut(Schema):
     unit_price_cents: int
 
 
+class AddressIn(Schema):
+    """Shipping address as submitted — every field optional at the parse layer so the Validator
+    can return field-level 422s (not a shapeless 400)."""
+
+    name: str | None = None
+    line1: str | None = None
+    line2: str | None = None
+    city: str | None = None
+    postal_code: str | None = None
+    country: str | None = None
+
+
+class CheckoutIn(Schema):
+    """Checkout submission: contact email (required for guests; defaults to the account email for
+    signed-in customers) + shipping address."""
+
+    email: str | None = None
+    address: AddressIn | None = None
+
+
+class AddressOut(Schema):
+    name: str
+    line1: str
+    line2: str | None
+    city: str
+    postal_code: str
+    country: str
+
+
 class OrderOut(Schema):
     id: int
     status: str
+    contact_email: str
+    address: AddressOut
+    subtotal_cents: int
+    shipping_cents: int
+    tax_cents: int
     total_cents: int
+    currency: str
     items: list[OrderLineOut]
 
 

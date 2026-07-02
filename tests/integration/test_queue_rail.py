@@ -25,6 +25,7 @@ from app.models.product import Product
 from app.models.product_variant import ProductVariant
 from app.models.user import User
 from tests.rbac_helpers import seed_rbac
+from tests.checkout_helpers import checkout_body
 
 pytestmark = pytest.mark.integration
 
@@ -97,7 +98,7 @@ def _place_and_ship(client: Any) -> int:
         json={"product_variant_id": 1, "quantity": 1},
         headers=customer,
     )
-    order_id = int(client.post("/api/checkout", headers=customer).json()["id"])
+    order_id = int(client.post("/api/checkout", json=checkout_body(), headers=customer).json()["id"])
     for nxt in ("paid", "shipped"):
         resp = client.post(
             f"/api/admin/orders/{order_id}/status", json={"status": nxt}, headers=admin

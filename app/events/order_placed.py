@@ -10,3 +10,4 @@ class OrderPlaced:
     order_id: int
     user_id: int | None
     total_cents: int
+    contact_email: str  # captured at checkout — guests get their confirmation too

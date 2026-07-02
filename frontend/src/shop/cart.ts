@@ -1,7 +1,7 @@
 // A tiny shared cart store (reactive singleton) — the header badge and the cart/checkout views all
 // read the same state. The guest cart token is handled inside api.ts (localStorage + X-Cart-Token).
 import { computed, reactive } from "vue";
-import { type Cart, api } from "./api";
+import { type Cart, type CheckoutPayload, api } from "./api";
 
 const state = reactive<{ cart: Cart | null; loading: boolean }>({ cart: null, loading: false });
 
@@ -27,8 +27,8 @@ export function useCart() {
   async function remove(id: number) {
     state.cart = await api.removeCartItem(id);
   }
-  async function checkout() {
-    const order = await api.checkout();
+  async function checkout(payload: CheckoutPayload) {
+    const order = await api.checkout(payload);
     state.cart = null;
     return order;
   }

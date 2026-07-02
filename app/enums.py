@@ -7,6 +7,23 @@ class round-trips value→member on read and member→value on write (see arvel 
 from enum import Enum
 
 
+class Currency(str, Enum):
+    """Settlement currencies the shop can charge in (the catalog prices in USD today)."""
+
+    USD = "USD"
+
+
+class CountryCode(str, Enum):
+    """Countries the shop ships to (ISO 3166-1 alpha-2) — a closed, validated set."""
+
+    US = "US"
+    CA = "CA"
+    GB = "GB"
+    DE = "DE"
+    FR = "FR"
+    EG = "EG"
+
+
 class ProductStatus(str, Enum):
     """Lifecycle of a catalog product."""
 

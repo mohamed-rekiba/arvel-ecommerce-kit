@@ -10,10 +10,10 @@ from arvel import DB, Cache, Event, abort
 from arvel.http import Request
 from arvel.support import current_user
 from arvel.telemetry import span
-from arvel.validation import ValidationException
+from arvel.validation import ValidationException, Validator
 
 from app.controllers.cart_controller import resolve_cart
-from app.enums import OrderStatus, Permission, can_transition
+from app.enums import CountryCode, Currency, OrderStatus, Permission, can_transition
 from app.events.order_placed import OrderPlaced
 from app.jobs.fulfill_order import ORDERS_FULFILLED_KEY
 from app.listeners.record_order_metrics import ORDERS_PLACED_KEY
@@ -23,7 +23,27 @@ from app.models.order_item import OrderItem
 from app.models.user import User
 from app.notifications.order_shipped_notification import OrderShippedNotification
 from app.models.product_variant import ProductVariant
-from app.schemas import MetricsOut, OrderLineOut, OrderOut, OrderStatusIn
+from app.schemas import (
+    AddressOut,
+    CheckoutIn,
+    MetricsOut,
+    OrderLineOut,
+    OrderOut,
+    OrderStatusIn,
+)
+
+# The shop's documented money rules — server-authoritative, never trusted from the client:
+# flat-rate shipping per order, and a flat sales-tax percentage on the goods subtotal.
+SHIPPING_FLAT_CENTS = 500
+TAX_RATE_PERCENT = 10
+
+
+def _shipping_cents(subtotal_cents: int) -> int:
+    return SHIPPING_FLAT_CENTS
+
+
+def _tax_cents(subtotal_cents: int) -> int:
+    return subtotal_cents * TAX_RATE_PERCENT // 100
 
 
 def _status_value(order: Order) -> str:
@@ -31,11 +51,33 @@ def _status_value(order: Order) -> str:
     return status.value if isinstance(status, OrderStatus) else str(status)
 
 
+def _address_out(order: Order) -> AddressOut:
+    return AddressOut(
+        name=order.ship_name,
+        line1=order.ship_line1,
+        line2=order.ship_line2 or None,
+        city=order.ship_city,
+        postal_code=order.ship_postal_code,
+        country=order.ship_country,
+    )
+
+
+def _currency_value(order: Order) -> str:
+    currency = order.currency
+    return currency.value if isinstance(currency, Currency) else str(currency)
+
+
 def _order_out(order: Order, items: list[OrderItem]) -> OrderOut:
     return OrderOut(
         id=order.id,
         status=_status_value(order),
+        contact_email=order.contact_email,
+        address=_address_out(order),
+        subtotal_cents=order.subtotal_cents,
+        shipping_cents=order.shipping_cents,
+        tax_cents=order.tax_cents,
         total_cents=order.total_cents,
+        currency=_currency_value(order),
         items=[
             OrderLineOut(
                 product_variant_id=i.product_variant_id,
@@ -47,8 +89,50 @@ def _order_out(order: Order, items: list[OrderItem]) -> OrderOut:
     )
 
 
-async def checkout(request: Request) -> OrderOut:
-    """Convert the current cart into a PENDING order, atomically (stock locked, cart cleared)."""
+def _validate_checkout(
+    data: CheckoutIn, account_email: str | None
+) -> tuple[str, dict[str, str | None]]:
+    """Validate contact + address; returns (contact_email, address fields). 422 with field-level
+    errors on failure — the amounts are computed server-side and never read from the client."""
+    address = data.address
+    payload = {
+        "email": data.email or account_email or "",
+        "name": (address.name if address else None) or "",
+        "line1": (address.line1 if address else None) or "",
+        "city": (address.city if address else None) or "",
+        "postal_code": (address.postal_code if address else None) or "",
+        "country": (address.country if address else None) or "",
+    }
+    validator = Validator(
+        payload,
+        {
+            "email": "required|email",
+            "name": "required|string",
+            "line1": "required|string",
+            "city": "required|string",
+            "postal_code": "required|string",
+            "country": "required|string",
+        },
+    )
+    errors = dict(validator.errors()) if validator.fails() else {}
+    if payload["country"] and payload["country"] not in {c.value for c in CountryCode}:
+        errors["country"] = [f"We don't ship to '{payload['country']}'."]
+    if errors:
+        raise ValidationException(errors)
+    fields = {
+        "ship_name": payload["name"],
+        "ship_line1": payload["line1"],
+        "ship_line2": (address.line2 if address else None) or None,
+        "ship_city": payload["city"],
+        "ship_postal_code": payload["postal_code"],
+        "ship_country": payload["country"],
+    }
+    return payload["email"], fields
+
+
+async def checkout(request: Request, data: CheckoutIn) -> OrderOut:
+    """Convert the current cart into a PENDING order, atomically (stock locked, cart cleared),
+    capturing the contact email + shipping address and the server-computed money breakdown."""
     cart, _ = await resolve_cart(request, create=False)
     if cart is None:
         abort(422, "Your cart is empty.")
@@ -56,8 +140,14 @@ async def checkout(request: Request) -> OrderOut:
     if not items:
         abort(422, "Your cart is empty.")
 
-    total = sum(i.unit_price_cents * i.quantity for i in items)
     user = current_user.get()
+    contact_email, ship_fields = _validate_checkout(
+        data, user.email if user is not None else None
+    )
+    subtotal = sum(i.unit_price_cents * i.quantity for i in items)
+    shipping = _shipping_cents(subtotal)
+    tax = _tax_cents(subtotal)
+    total = subtotal + shipping + tax
 
     # a business span over the whole checkout — the DB queries inside auto-nest under it.
     with span(
@@ -90,7 +180,13 @@ async def checkout(request: Request) -> OrderOut:
             order = await Order.create(
                 user_id=user.id if user is not None else None,
                 status=OrderStatus.PENDING,
+                contact_email=contact_email,
+                subtotal_cents=subtotal,
+                shipping_cents=shipping,
+                tax_cents=tax,
                 total_cents=total,
+                currency=Currency.USD,
+                **ship_fields,
             )
             order_items: list[OrderItem] = []
             for item in items:
@@ -109,7 +205,10 @@ async def checkout(request: Request) -> OrderOut:
     await Event.dispatch(
         "order.placed",
         OrderPlaced(
-            order_id=order.id, user_id=order.user_id, total_cents=order.total_cents
+            order_id=order.id,
+            user_id=order.user_id,
+            total_cents=order.total_cents,
+            contact_email=order.contact_email,
         ),
     )
     return _order_out(order, order_items)
