@@ -16,19 +16,23 @@ export function installViewTransitions(router: Router): void {
     if (!from.name || to.path === from.path || reducedMotion()) return;
 
     return new Promise<void>((unblock) => {
-      document.startViewTransition(() => {
-        // 1) let this guard resolve so the navigation actually commits…
-        unblock();
-        // 2) …then hold the transition's snapshot until the NEW route has rendered. afterEach fires
-        //    once navigation is committed; nextTick waits for Vue to flush the new view to the DOM.
-        //    (Resolving on a bare nextTick races the router and captures no change → no morph.)
-        return new Promise<void>((rendered) => {
-          const stop = router.afterEach(() => {
-            stop();
-            void nextTick(() => rendered());
+      try {
+        document.startViewTransition(() => {
+          // 1) let this guard resolve so the navigation actually commits…
+          unblock();
+          // 2) …then hold the transition's snapshot until the NEW route has rendered. afterEach fires
+          //    once navigation is committed; nextTick waits for Vue to flush the new view to the DOM.
+          //    (Resolving on a bare nextTick races the router and captures no change → no morph.)
+          return new Promise<void>((rendered) => {
+            const stop = router.afterEach(() => {
+              stop();
+              void nextTick(() => rendered());
+            });
           });
         });
-      });
+      } catch {
+        unblock(); // API threw synchronously → fall through to a plain navigation, never drop it
+      }
     });
   });
 }
