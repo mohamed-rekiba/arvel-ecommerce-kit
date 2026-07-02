@@ -75,7 +75,13 @@ def _login(client) -> str:
 
 def test_guest_cart_round_trips_a_token_and_totals(client) -> None:
     # empty cart for a brand-new guest
-    assert client.get("/api/cart").json() == {"id": None, "items": [], "total_cents": 0}
+    assert client.get("/api/cart").json() == {
+        "id": None,
+        "items": [],
+        "total_cents": 0,
+        "coupon_code": None,
+        "discount_cents": 0,
+    }
 
     # add variant 1 (unit 2000) x2 → a cart token is returned
     add = client.post("/api/cart/items", json={"product_variant_id": 1, "quantity": 2})

@@ -21,6 +21,8 @@ class CreateOrdersTable(Migration):
             t.string("ship_postal_code")
             t.string("ship_country", 2)
             # the server-computed money breakdown: subtotal + shipping + tax = total
+            t.string("coupon_code", 40).nullable()
+            t.integer("discount_cents").default(value=0)
             t.integer("subtotal_cents")
             t.integer("shipping_cents")
             t.integer("tax_cents")

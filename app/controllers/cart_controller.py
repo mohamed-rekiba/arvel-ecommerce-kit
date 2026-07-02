@@ -12,10 +12,11 @@ from arvel.support import Str, current_user
 from arvel.validation import ValidationException
 
 from app.models.cart import Cart
+from app.models.coupon import Coupon
 from app.models.cart_item import CartItem
 from app.models.product import Product
 from app.models.product_variant import ProductVariant
-from app.schemas import AddItemIn, CartLineOut, CartOut, UpdateItemIn
+from app.schemas import AddItemIn, ApplyCouponIn, CartLineOut, CartOut, UpdateItemIn
 
 
 def _cart_total_key(cart_id: int) -> str:
@@ -96,6 +97,13 @@ async def _serialize(cart: Cart, new_token: str | None = None) -> CartOut:
         300,
         lambda: sum(i.unit_price_cents * i.quantity for i in items),
     )
+    discount = 0
+    if cart.coupon_code:
+        from app.services.coupon_service import discount_cents
+
+        coupon = await Coupon.where("code", cart.coupon_code).first()
+        if coupon is not None:
+            discount = discount_cents(coupon, int(total))
     return CartOut(
         id=cart.id,
         items=[
@@ -109,6 +117,8 @@ async def _serialize(cart: Cart, new_token: str | None = None) -> CartOut:
             for i in items
         ],
         total_cents=int(total),
+        coupon_code=cart.coupon_code,
+        discount_cents=discount,
         cart_token=new_token,
     )
 
@@ -117,7 +127,9 @@ async def show(request: Request) -> CartOut:
     """Show the current cart (an empty shell if none exists yet)."""
     cart, _ = await resolve_cart(request, create=False)
     if cart is None:
-        return CartOut(id=None, items=[], total_cents=0)
+        return CartOut(
+            id=None, items=[], total_cents=0, coupon_code=None, discount_cents=0
+        )
     return await _serialize(cart)
 
 
@@ -179,4 +191,32 @@ async def remove_item(request: Request) -> CartOut:
         abort(404, "Item not found")
     await item.delete()
     await Cache.forget(_cart_total_key(cart.id))
+    return await _serialize(cart)
+
+
+async def apply_coupon(request: Request, data: ApplyCouponIn) -> CartOut:
+    """Attach a coupon to the cart with immediate validation (checkout re-validates
+    authoritatively — a code can expire between apply and place-order)."""
+    from app.services.coupon_service import normalize_code, validate_window_and_state
+
+    cart, new_token = await resolve_cart(request, create=True)
+    assert cart is not None
+    items = await cart.items().get()
+    subtotal = sum(i.unit_price_cents * i.quantity for i in items)
+    code = normalize_code(data.code)
+    coupon = await Coupon.where("code", code).first()
+    validate_window_and_state(coupon, subtotal)
+    cart.coupon_code = code
+    await cart.save()
+    return await _serialize(cart, new_token)
+
+
+async def remove_coupon(request: Request) -> CartOut:
+    cart, _ = await resolve_cart(request, create=False)
+    if cart is None:
+        return CartOut(
+            id=None, items=[], total_cents=0, coupon_code=None, discount_cents=0
+        )
+    cart.coupon_code = None
+    await cart.save()
     return await _serialize(cart)

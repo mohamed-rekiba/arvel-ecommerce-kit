@@ -14,6 +14,7 @@ from arvel.security import Hasher
 
 from app.controllers import account_controller as account
 from app.controllers import admin_controller as admin
+from app.controllers import admin_coupon_controller as admin_coupons
 from app.controllers import admin_product_controller as admin_products
 from app.controllers import admin_rbac_controller as rbac
 from app.controllers import admin_taxonomy_controller as taxonomy
@@ -245,6 +246,23 @@ Route.get("/cart", cart.show, name="api.cart.show")
 Route.post("/cart/items", cart.add_item, name="api.cart.items.add")
 Route.patch("/cart/items/{id:int}", cart.update_item, name="api.cart.items.update")
 Route.delete("/cart/items/{id:int}", cart.remove_item, name="api.cart.items.remove")
+
+# --- Cart coupon (guest or signed-in) -------------------------------------------
+Route.post("/cart/coupon", cart.apply_coupon, name="api.cart.coupon.apply").status(200)
+Route.delete("/cart/coupon", cart.remove_coupon, name="api.cart.coupon.remove").status(
+    200
+)
+
+# --- Admin coupons (catalog authority) ------------------------------------------
+Route.get(
+    "/admin/coupons", admin_coupons.index, name="api.admin.coupons.index"
+).middleware(Authenticate).secure("bearer")
+Route.post(
+    "/admin/coupons", admin_coupons.store, name="api.admin.coupons.store"
+).middleware(Authenticate).secure("bearer")
+Route.patch(
+    "/admin/coupons/{id:int}", admin_coupons.update, name="api.admin.coupons.update"
+).middleware(Authenticate).secure("bearer")
 
 # --- Checkout & orders --------------------------------------------------------
 Route.post("/checkout", checkout.checkout, name="api.checkout")

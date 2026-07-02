@@ -1,12 +1,31 @@
 <script setup lang="ts">
 import { t } from "../locale";
-import { onMounted } from "vue";
+import { onMounted, ref } from "vue";
 import { useRouter } from "vue-router";
-import { formatPrice } from "../api";
+import { ApiError, formatPrice } from "../api";
 import { useCart } from "../cart";
 
 const router = useRouter();
-const { state, refresh, update, remove } = useCart();
+const couponCode = ref("");
+const couponError = ref<string | null>(null);
+
+async function submitCoupon() {
+  couponError.value = null;
+  try {
+    await applyCoupon(couponCode.value);
+    couponCode.value = "";
+  } catch (e) {
+    couponError.value =
+      e instanceof ApiError ? Object.values(e.errors)[0]?.[0] ?? "That code didn't work." : "That code didn't work.";
+  }
+}
+
+async function dropCoupon() {
+  couponError.value = null;
+  await removeCoupon();
+}
+
+const { state, refresh, update, remove, applyCoupon, removeCoupon } = useCart();
 
 onMounted(refresh);
 </script>
@@ -46,8 +65,27 @@ onMounted(refresh);
       <aside class="summary">
         <h2 class="summary__title">Summary</h2>
         <div class="summary__row"><span>{{ t("checkout.subtotal") }}</span><span>{{ formatPrice(state.cart.total_cents) }}</span></div>
+
+        <div v-if="state.cart.coupon_code" class="summary__row summary__row--discount">
+          <span>
+            Code <strong>{{ state.cart.coupon_code }}</strong>
+            <button class="coupon__remove" @click="dropCoupon">remove</button>
+          </span>
+          <span>−{{ formatPrice(state.cart.discount_cents) }}</span>
+        </div>
+        <form v-else class="coupon" @submit.prevent="submitCoupon">
+          <input
+            v-model.trim="couponCode"
+            type="text"
+            placeholder="Discount code"
+            aria-label="Discount code"
+          />
+          <button class="btn" type="submit" :disabled="!couponCode">Apply</button>
+        </form>
+        <p v-if="couponError" class="coupon__error" role="alert">{{ couponError }}</p>
+
         <div class="summary__row summary__row--muted"><span>Shipping</span><span>Calculated at checkout</span></div>
-        <div class="summary__row summary__row--total"><span>Total</span><strong>{{ formatPrice(state.cart.total_cents) }}</strong></div>
+        <div class="summary__row summary__row--total"><span>Total</span><strong>{{ formatPrice(state.cart.total_cents - state.cart.discount_cents) }}</strong></div>
         <button class="btn btn--primary summary__cta" @click="router.push('/checkout')">{{ t("cart.checkout") }}</button>
         <RouterLink class="summary__cont" to="/">Continue shopping</RouterLink>
       </aside>
@@ -103,4 +141,9 @@ onMounted(refresh);
 .summary__cont:hover { color: var(--color-text); }
 .state { text-align: center; padding: var(--space-20) 0; color: var(--color-text-muted); }
 .state .btn { margin-top: var(--space-4); }
+.coupon { display: flex; gap: var(--space-2); margin: var(--space-3) 0; }
+.coupon input { flex: 1; padding: var(--space-2) var(--space-3); border: 1px solid var(--color-border); border-radius: var(--radius-md); background: var(--color-bg); color: var(--color-text); font: inherit; }
+.coupon__remove { background: none; border: 0; padding: 0; margin-left: var(--space-2); font-size: var(--text-xs); text-decoration: underline; cursor: pointer; color: var(--color-text-muted); }
+.coupon__error { color: var(--color-danger); font-size: var(--text-xs); margin: 0 0 var(--space-2); }
+.summary__row--discount { color: var(--color-success, #2e7d32); }
 </style>

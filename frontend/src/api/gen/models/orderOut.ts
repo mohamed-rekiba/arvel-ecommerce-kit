@@ -20,6 +20,8 @@ export interface OrderOut {
   subtotal_cents: number;
   shipping_cents: number;
   tax_cents: number;
+  coupon_code: string | null;
+  discount_cents: number;
   total_cents: number;
   currency: Currency;
   payment_status: PaymentStatus | null;

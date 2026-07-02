@@ -9,6 +9,9 @@ class CreateCartsTable(Migration):
             t.id()
             t.foreign_id("user_id").nullable().constrained("users").index()
             t.string("token").nullable().unique()  # guest cart token (when no user)
+            t.string(
+                "coupon_code", 40
+            ).nullable()  # an applied (not yet redeemed) coupon
             t.timestamps()
 
         schema.create("carts", define)

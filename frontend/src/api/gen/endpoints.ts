@@ -10,6 +10,7 @@ import type {
   AddItemIn,
   AdminCategoryOut,
   AdminCategoryPage,
+  AdminCouponOut,
   AdminMeOut,
   AdminOrderDetailOut,
   AdminProductDetailOut,
@@ -23,6 +24,8 @@ import type {
   ApiAdminCategoriesIndexParams,
   ApiAdminCategoriesStore400,
   ApiAdminCategoriesUpdate400,
+  ApiAdminCouponsStore400,
+  ApiAdminCouponsUpdate400,
   ApiAdminOrdersShow400,
   ApiAdminOrdersStatus400,
   ApiAdminProductsDestroy400,
@@ -47,6 +50,7 @@ import type {
   ApiAdminVariantsUpdate400,
   ApiAdminVendorsStore400,
   ApiAdminVendorsUpdate400,
+  ApiCartCouponApply400,
   ApiCartItemsAdd400,
   ApiCartItemsRemove400,
   ApiCartItemsUpdate400,
@@ -69,6 +73,7 @@ import type {
   ApiUserUpdate400,
   ApiWebhooksPayment400,
   ApiWishlistToggle400,
+  ApplyCouponIn,
   AssignRoleIn,
   CartOut,
   CategoryIn,
@@ -76,6 +81,8 @@ import type {
   CategoryUpdateIn,
   ChangePasswordIn,
   CheckoutIn,
+  CouponIn,
+  CouponUpdateIn,
   CredentialsIn,
   DevChargeIn,
   DevChargeOut,
@@ -2315,6 +2322,212 @@ export const apiCartItemsUpdate = async (id: number,
     method: 'PATCH',
     headers: { 'Content-Type': 'application/json', ...options?.headers },
     body: JSON.stringify(updateItemIn)
+  }
+);}
+
+
+
+export type apiCartCouponApplyResponse200 = {
+  data: CartOut
+  status: 200
+}
+
+export type apiCartCouponApplyResponse400 = {
+  data: ApiCartCouponApply400
+  status: 400
+}
+
+export type apiCartCouponApplyResponseSuccess = (apiCartCouponApplyResponse200) & {
+  headers: Headers;
+};
+export type apiCartCouponApplyResponseError = (apiCartCouponApplyResponse400) & {
+  headers: Headers;
+};
+
+export type apiCartCouponApplyResponse = (apiCartCouponApplyResponseSuccess | apiCartCouponApplyResponseError)
+
+export const getApiCartCouponApplyUrl = () => {
+
+
+
+
+  return `/api/cart/coupon`
+}
+
+/**
+ * Attach a coupon to the cart with immediate validation (checkout re-validates
+ * authoritatively — a code can expire between apply and place-order).
+ * @summary ApiCartCouponApply
+ */
+export const apiCartCouponApply = async (applyCouponIn: ApplyCouponIn, options?: RequestInit): Promise<apiCartCouponApplyResponse> => {
+
+  return apiFetch<apiCartCouponApplyResponse>(getApiCartCouponApplyUrl(),
+  {
+    ...options,
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...options?.headers },
+    body: JSON.stringify(applyCouponIn)
+  }
+);}
+
+
+
+export type apiCartCouponRemoveResponse200 = {
+  data: CartOut
+  status: 200
+}
+
+export type apiCartCouponRemoveResponseSuccess = (apiCartCouponRemoveResponse200) & {
+  headers: Headers;
+};
+;
+
+export type apiCartCouponRemoveResponse = (apiCartCouponRemoveResponseSuccess)
+
+export const getApiCartCouponRemoveUrl = () => {
+
+
+
+
+  return `/api/cart/coupon`
+}
+
+/**
+ * @summary ApiCartCouponRemove
+ */
+export const apiCartCouponRemove = async ( options?: RequestInit): Promise<apiCartCouponRemoveResponse> => {
+
+  return apiFetch<apiCartCouponRemoveResponse>(getApiCartCouponRemoveUrl(),
+  {
+    ...options,
+    method: 'DELETE'
+
+
+  }
+);}
+
+
+
+export type apiAdminCouponsIndexResponse200 = {
+  data: AdminCouponOut[]
+  status: 200
+}
+
+export type apiAdminCouponsIndexResponseSuccess = (apiAdminCouponsIndexResponse200) & {
+  headers: Headers;
+};
+;
+
+export type apiAdminCouponsIndexResponse = (apiAdminCouponsIndexResponseSuccess)
+
+export const getApiAdminCouponsIndexUrl = () => {
+
+
+
+
+  return `/api/admin/coupons`
+}
+
+/**
+ * @summary ApiAdminCouponsIndex
+ */
+export const apiAdminCouponsIndex = async ( options?: RequestInit): Promise<apiAdminCouponsIndexResponse> => {
+
+  return apiFetch<apiAdminCouponsIndexResponse>(getApiAdminCouponsIndexUrl(),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+export type apiAdminCouponsStoreResponse201 = {
+  data: AdminCouponOut
+  status: 201
+}
+
+export type apiAdminCouponsStoreResponse400 = {
+  data: ApiAdminCouponsStore400
+  status: 400
+}
+
+export type apiAdminCouponsStoreResponseSuccess = (apiAdminCouponsStoreResponse201) & {
+  headers: Headers;
+};
+export type apiAdminCouponsStoreResponseError = (apiAdminCouponsStoreResponse400) & {
+  headers: Headers;
+};
+
+export type apiAdminCouponsStoreResponse = (apiAdminCouponsStoreResponseSuccess | apiAdminCouponsStoreResponseError)
+
+export const getApiAdminCouponsStoreUrl = () => {
+
+
+
+
+  return `/api/admin/coupons`
+}
+
+/**
+ * @summary ApiAdminCouponsStore
+ */
+export const apiAdminCouponsStore = async (couponIn: CouponIn, options?: RequestInit): Promise<apiAdminCouponsStoreResponse> => {
+
+  return apiFetch<apiAdminCouponsStoreResponse>(getApiAdminCouponsStoreUrl(),
+  {
+    ...options,
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...options?.headers },
+    body: JSON.stringify(couponIn)
+  }
+);}
+
+
+
+export type apiAdminCouponsUpdateResponse200 = {
+  data: AdminCouponOut
+  status: 200
+}
+
+export type apiAdminCouponsUpdateResponse400 = {
+  data: ApiAdminCouponsUpdate400
+  status: 400
+}
+
+export type apiAdminCouponsUpdateResponseSuccess = (apiAdminCouponsUpdateResponse200) & {
+  headers: Headers;
+};
+export type apiAdminCouponsUpdateResponseError = (apiAdminCouponsUpdateResponse400) & {
+  headers: Headers;
+};
+
+export type apiAdminCouponsUpdateResponse = (apiAdminCouponsUpdateResponseSuccess | apiAdminCouponsUpdateResponseError)
+
+export const getApiAdminCouponsUpdateUrl = (id: number,) => {
+
+
+
+
+  return `/api/admin/coupons/${id}`
+}
+
+/**
+ * Activate/deactivate or adjust limits — deactivation takes effect immediately (checkout
+ * re-validates every redemption).
+ * @summary ApiAdminCouponsUpdate
+ */
+export const apiAdminCouponsUpdate = async (id: number,
+    couponUpdateIn: CouponUpdateIn, options?: RequestInit): Promise<apiAdminCouponsUpdateResponse> => {
+
+  return apiFetch<apiAdminCouponsUpdateResponse>(getApiAdminCouponsUpdateUrl(id),
+  {
+    ...options,
+    method: 'PATCH',
+    headers: { 'Content-Type': 'application/json', ...options?.headers },
+    body: JSON.stringify(couponUpdateIn)
   }
 );}
 
