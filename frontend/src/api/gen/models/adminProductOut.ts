@@ -13,5 +13,6 @@ export interface AdminProductOut {
   translations: Translate[];
   status: string;
   published: boolean;
+  featured: boolean;
   is_visible: boolean;
 }

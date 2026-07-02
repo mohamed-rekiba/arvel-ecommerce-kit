@@ -17,6 +17,7 @@ export interface AdminCouponOut {
   per_customer_limit: number | null;
   uses: number;
   active: boolean;
+  announce: boolean;
   starts_at: string | null;
   ends_at: string | null;
 }

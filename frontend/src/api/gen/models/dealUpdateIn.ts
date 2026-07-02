@@ -6,10 +6,9 @@
  * OpenAPI spec version: 0.1.0
  */
 
-export interface CouponUpdateIn {
+export interface DealUpdateIn {
+  percent_off?: number | null;
+  starts_at?: string | null;
+  ends_at?: string | null;
   active?: boolean | null;
-  usage_limit?: number | null;
-  per_customer_limit?: number | null;
-  min_subtotal_cents?: number | null;
-  announce?: boolean | null;
 }

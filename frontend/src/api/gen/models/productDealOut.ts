@@ -5,11 +5,10 @@
  * The arvel-ecommerce-kit API.
  * OpenAPI spec version: 0.1.0
  */
-import type { Translate } from './translate';
 
-export interface CategoryOut {
+export interface ProductDealOut {
   id: number;
-  slug: string;
-  translation: Translate;
-  image_url?: string | null;
+  percent_off: number;
+  deal_price_cents: number;
+  ends_at: string;
 }
