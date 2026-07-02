@@ -3,6 +3,7 @@ import { computed, onMounted, ref } from "vue";
 import { type Category, type Product, api, formatPrice } from "../api";
 import { cacheCategories, cacheList, cacheProducts, getCachedCategories, getCachedList } from "../product-cache";
 import ProductCard from "../components/ProductCard.vue";
+import { t } from "../locale";
 
 // seed synchronously from cache so the cards paint on the first frame after a back-nav — that's the
 // morph target for the reverse (PDP → home) View Transition. Refresh in the background either way.
@@ -35,10 +36,10 @@ onMounted(async () => {
     <!-- hero: product as hero -->
     <section class="hero wrap">
       <div class="hero__copy">
-        <span class="eyebrow">New — 2026 Collection</span>
-        <h1>High-end electronics,<br />quietly considered.</h1>
-        <p>Sound, vision and the objects around them — chosen for how they feel, not how loud they shout.</p>
-        <RouterLink :to="{ name: 'catalog' }" class="link">Explore the collection <span aria-hidden="true">→</span></RouterLink>
+        <span class="eyebrow">{{ t("home.eyebrow") }}</span>
+        <h1>{{ t("home.h1a") }}<br />{{ t("home.h1b") }}</h1>
+        <p>{{ t("home.lede") }}</p>
+        <RouterLink :to="{ name: 'catalog' }" class="link">{{ t("home.explore") }} <span aria-hidden="true">{{ t("common.fwd") }}</span></RouterLink>
       </div>
       <div class="hero__media">
         <div class="hero__glow" aria-hidden="true" />
@@ -57,17 +58,17 @@ onMounted(async () => {
     <!-- featured -->
     <section class="wrap block">
       <div class="head">
-        <div><span class="eyebrow">Featured</span><h2>New this season</h2></div>
-        <RouterLink :to="{ name: 'catalog' }" class="head__link">View all <span aria-hidden="true">→</span></RouterLink>
+        <div><span class="eyebrow">{{ t("home.featured") }}</span><h2>{{ t("home.new_season") }}</h2></div>
+        <RouterLink :to="{ name: 'catalog' }" class="head__link">{{ t("home.view_all") }} <span aria-hidden="true">{{ t("common.fwd") }}</span></RouterLink>
       </div>
       <div v-if="loading" class="grid"><div v-for="i in 3" :key="i" class="sk" /></div>
-      <p v-else-if="!featured.length" class="empty">The collection is being prepared — check back soon.</p>
+      <p v-else-if="!featured.length" class="empty">{{ t("home.preparing") }}</p>
       <div v-else class="grid"><ProductCard v-for="p in featured" :key="p.id" :product="p" /></div>
     </section>
 
     <!-- collections: editorial index -->
     <section class="wrap block">
-      <div class="head"><div><span class="eyebrow">Collections</span><h2>Explore by category</h2></div></div>
+      <div class="head"><div><span class="eyebrow">{{ t("nav.collections") }}</span><h2>{{ t("home.by_category") }}</h2></div></div>
       <div class="coll">
         <RouterLink
           v-for="(c, i) in categories.slice(0, 3)"
@@ -78,7 +79,7 @@ onMounted(async () => {
           <span class="tile__idx">{{ String(i + 1).padStart(2, "0") }}</span>
           <div class="tile__foot">
             <h3>{{ c.translation.name }}</h3>
-            <span class="tile__go">Discover <span aria-hidden="true">→</span></span>
+            <span class="tile__go">{{ t("home.discover") }} <span aria-hidden="true">{{ t("common.fwd") }}</span></span>
           </div>
         </RouterLink>
       </div>
@@ -88,25 +89,25 @@ onMounted(async () => {
     <section class="band wrap">
       <div class="band__inner">
         <div>
-          <span class="eyebrow" style="color: var(--blush-300)">The Arvel promise</span>
-          <h2>Free 30-day returns.<br />Considered, not disposable.</h2>
+          <span class="eyebrow" style="color: var(--blush-300)">{{ t("home.promise_eyebrow") }}</span>
+          <h2>{{ t("home.promise_a") }}<br />{{ t("home.promise_b") }}</h2>
         </div>
-        <RouterLink :to="{ name: 'catalog' }" class="band__cta">Shop the collection →</RouterLink>
+        <RouterLink :to="{ name: 'catalog' }" class="band__cta">{{ t("home.shop_collection") }} {{ t("common.fwd") }}</RouterLink>
       </div>
     </section>
 
     <!-- more to explore -->
     <section v-if="more.length" class="wrap block">
       <div class="head">
-        <div><span class="eyebrow">The rest</span><h2>More to explore</h2></div>
-        <RouterLink :to="{ name: 'catalog' }" class="head__link">Browse all <span aria-hidden="true">→</span></RouterLink>
+        <div><span class="eyebrow">{{ t("home.rest") }}</span><h2>{{ t("home.more") }}</h2></div>
+        <RouterLink :to="{ name: 'catalog' }" class="head__link">{{ t("home.browse_all") }} <span aria-hidden="true">{{ t("common.fwd") }}</span></RouterLink>
       </div>
       <div class="grid"><ProductCard v-for="p in more" :key="p.id" :product="p" /></div>
     </section>
 
     <!-- brand statement -->
     <section class="say">
-      <p>“The best technology is the kind you stop noticing — it simply works, and then gets out of the way.”</p>
+      <p>{{ t("home.quote") }}</p>
     </section>
   </div>
 </template>

@@ -16,7 +16,7 @@ async function submitCoupon() {
     couponCode.value = "";
   } catch (e) {
     couponError.value =
-      e instanceof ApiError ? Object.values(e.errors)[0]?.[0] ?? "That code didn't work." : "That code didn't work.";
+      e instanceof ApiError ? Object.values(e.errors)[0]?.[0] ?? t("cart.coupon_error") : t("cart.coupon_error");
   }
 }
 
@@ -33,15 +33,15 @@ onMounted(refresh);
 <template>
   <main class="cart">
     <header class="cart__head">
-      <p class="eyebrow">Your bag</p>
+      <p class="eyebrow">{{ t("cart.eyebrow") }}</p>
       <h1>{{ t("cart.title") }}</h1>
     </header>
 
-    <div v-if="state.loading" class="state" aria-busy="true">Loading…</div>
+    <div v-if="state.loading" class="state" aria-busy="true">{{ t("common.loading") }}</div>
 
     <div v-else-if="!state.cart || state.cart.items.length === 0" class="state">
       <p>{{ t("cart.empty") }}</p>
-      <RouterLink class="btn btn--primary" to="/">Browse the collection</RouterLink>
+      <RouterLink class="btn btn--primary" to="/">{{ t("cart.browse") }}</RouterLink>
     </div>
 
     <div v-else class="cart__grid">
@@ -49,27 +49,27 @@ onMounted(refresh);
         <li v-for="line in state.cart.items" :key="line.id" class="line">
           <div class="line__thumb" aria-hidden="true" />
           <div class="line__meta">
-            <span class="line__name">Variant #{{ line.product_variant_id }}</span>
-            <span class="line__unit">{{ formatPrice(line.unit_price_cents) }} each</span>
-            <button class="line__remove" @click="remove(line.id)">Remove</button>
+            <span class="line__name">{{ t("cart.variant_n", { n: line.product_variant_id }) }}</span>
+            <span class="line__unit">{{ t("cart.each", { price: formatPrice(line.unit_price_cents) }) }}</span>
+            <button class="line__remove" @click="remove(line.id)">{{ t("cart.remove") }}</button>
           </div>
-          <div class="qty" role="group" aria-label="Quantity">
-            <button aria-label="decrease" @click="update(line.id, Math.max(1, line.quantity - 1))">−</button>
+          <div class="qty" role="group" :aria-label="t('cart.quantity')">
+            <button :aria-label="t('cart.decrease')" @click="update(line.id, Math.max(1, line.quantity - 1))">−</button>
             <span>{{ line.quantity }}</span>
-            <button aria-label="increase" @click="update(line.id, line.quantity + 1)">+</button>
+            <button :aria-label="t('cart.increase')" @click="update(line.id, line.quantity + 1)">+</button>
           </div>
           <span class="line__total">{{ formatPrice(line.line_total_cents) }}</span>
         </li>
       </ul>
 
       <aside class="summary">
-        <h2 class="summary__title">Summary</h2>
+        <h2 class="summary__title">{{ t("cart.summary") }}</h2>
         <div class="summary__row"><span>{{ t("checkout.subtotal") }}</span><span>{{ formatPrice(state.cart.total_cents) }}</span></div>
 
         <div v-if="state.cart.coupon_code" class="summary__row summary__row--discount">
           <span>
-            Code <strong>{{ state.cart.coupon_code }}</strong>
-            <button class="coupon__remove" @click="dropCoupon">remove</button>
+            {{ t("cart.code") }} <strong>{{ state.cart.coupon_code }}</strong>
+            <button class="coupon__remove" @click="dropCoupon">{{ t("cart.remove_lc") }}</button>
           </span>
           <span>−{{ formatPrice(state.cart.discount_cents) }}</span>
         </div>
@@ -77,17 +77,17 @@ onMounted(refresh);
           <input
             v-model.trim="couponCode"
             type="text"
-            placeholder="Discount code"
-            aria-label="Discount code"
+            :placeholder="t('cart.discount_code')"
+            :aria-label="t('cart.discount_code')"
           />
-          <button class="btn" type="submit" :disabled="!couponCode">Apply</button>
+          <button class="btn" type="submit" :disabled="!couponCode">{{ t("cart.apply") }}</button>
         </form>
         <p v-if="couponError" class="coupon__error" role="alert">{{ couponError }}</p>
 
-        <div class="summary__row summary__row--muted"><span>Shipping</span><span>Calculated at checkout</span></div>
-        <div class="summary__row summary__row--total"><span>Total</span><strong>{{ formatPrice(state.cart.total_cents - state.cart.discount_cents) }}</strong></div>
+        <div class="summary__row summary__row--muted"><span>{{ t("cart.shipping") }}</span><span>{{ t("cart.at_checkout") }}</span></div>
+        <div class="summary__row summary__row--total"><span>{{ t("cart.total") }}</span><strong>{{ formatPrice(state.cart.total_cents - state.cart.discount_cents) }}</strong></div>
         <button class="btn btn--primary summary__cta" @click="router.push('/checkout')">{{ t("cart.checkout") }}</button>
-        <RouterLink class="summary__cont" to="/">Continue shopping</RouterLink>
+        <RouterLink class="summary__cont" to="/">{{ t("cart.continue") }}</RouterLink>
       </aside>
     </div>
   </main>

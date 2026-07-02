@@ -4,11 +4,11 @@ import {
   ApiError,
   type CountryCode,
   type Order,
-  SHIPPING_COUNTRIES,
+  SHIPPING_COUNTRY_CODES,
   api,
   formatPrice,
 } from "../api";
-import { t } from "../locale";
+import { type MessageKey, t } from "../locale";
 import { useAuth } from "../auth";
 import { useCart } from "../cart";
 
@@ -39,7 +39,7 @@ async function payNow() {
     await api.pay(id, token);
   } catch {
     payState.value = "failed";
-    payError.value = "We couldn't start the payment. Please try again.";
+    payError.value = t("checkout.pay_start_error");
     return;
   }
   // the gateway confirms asynchronously (webhook) — poll the order until it flips
@@ -54,11 +54,11 @@ async function payNow() {
       stopPolling();
     } else if (fresh.payment_status === "failed") {
       payState.value = "failed";
-      payError.value = "The payment didn't go through. You can try again.";
+      payError.value = t("checkout.pay_failed");
       stopPolling();
     } else if (attempts >= 20) {
       payState.value = "failed";
-      payError.value = "Payment is taking longer than expected — check your account shortly.";
+      payError.value = t("checkout.pay_slow");
       stopPolling();
     }
   }, 1000);
@@ -101,9 +101,9 @@ async function placeOrder() {
   } catch (e) {
     if (e instanceof ApiError && e.status === 422 && Object.keys(e.errors).length > 0) {
       fieldErrors.value = e.errors;
-      error.value = "Please check the highlighted fields.";
+      error.value = t("checkout.check_fields");
     } else {
-      error.value = "We couldn't place your order. Please try again.";
+      error.value = t("checkout.place_error");
     }
   } finally {
     placing.value = false;
@@ -124,105 +124,105 @@ onMounted(async () => {
   <main class="checkout">
     <div v-if="order" class="confirm">
       <div class="confirm__mark" aria-hidden="true">✓</div>
-      <p class="eyebrow">Thank you</p>
-      <h1>Order placed</h1>
+      <p class="eyebrow">{{ t("checkout.thanks") }}</p>
+      <h1>{{ t("checkout.placed") }}</h1>
       <p class="confirm__line">
-        Order <strong>#{{ order.id }}</strong>
-        <span class="confirm__status">{{ order.status }}</span>
+        {{ t("checkout.order") }} <strong>#{{ order.id }}</strong>
+        <span class="confirm__status">{{ t(`order.${order.status}` as MessageKey) }}</span>
       </p>
       <dl class="breakdown">
-        <div><dt>Subtotal</dt><dd>{{ formatPrice(order.subtotal_cents) }}</dd></div>
-        <div><dt>Shipping</dt><dd>{{ formatPrice(order.shipping_cents) }}</dd></div>
-        <div><dt>Tax</dt><dd>{{ formatPrice(order.tax_cents) }}</dd></div>
-        <div v-if="order.discount_cents > 0"><dt>Discount ({{ order.coupon_code }})</dt><dd>−{{ formatPrice(order.discount_cents) }}</dd></div>
-        <div class="breakdown__total"><dt>Total</dt><dd>{{ formatPrice(order.total_cents) }}</dd></div>
+        <div><dt>{{ t("checkout.subtotal") }}</dt><dd>{{ formatPrice(order.subtotal_cents) }}</dd></div>
+        <div><dt>{{ t("cart.shipping") }}</dt><dd>{{ formatPrice(order.shipping_cents) }}</dd></div>
+        <div><dt>{{ t("checkout.tax") }}</dt><dd>{{ formatPrice(order.tax_cents) }}</dd></div>
+        <div v-if="order.discount_cents > 0"><dt>{{ t("checkout.discount") }} ({{ order.coupon_code }})</dt><dd>−{{ formatPrice(order.discount_cents) }}</dd></div>
+        <div class="breakdown__total"><dt>{{ t("cart.total") }}</dt><dd>{{ formatPrice(order.total_cents) }}</dd></div>
       </dl>
       <p class="confirm__note">
-        Shipping to {{ order.address.name }}, {{ order.address.line1 }}, {{ order.address.city }}.
+        {{ t("checkout.shipping_to", { name: order.address.name, line1: order.address.line1, city: order.address.city }) }}
       </p>
-      <p class="confirm__note">A confirmation was sent to {{ order.contact_email }}.</p>
+      <p class="confirm__note">{{ t("checkout.confirmation_sent", { email: order.contact_email }) }}</p>
 
       <section class="pay" aria-live="polite">
         <template v-if="payState === 'paid' || order.status === 'paid'">
-          <p class="pay__done">✓ Paid — thank you!</p>
+          <p class="pay__done">✓ {{ t("checkout.paid") }}</p>
         </template>
         <template v-else-if="payState === 'processing'">
-          <p class="pay__processing">Processing your payment…</p>
+          <p class="pay__processing">{{ t("checkout.processing") }}</p>
         </template>
         <template v-else>
           <p v-if="payError" class="error" role="alert">{{ payError }}</p>
           <button class="btn btn--primary pay__button" @click="payNow">
-            {{ payState === "failed" ? "Try payment again" : `Pay ${formatPrice(order.total_cents)}` }}
+            {{ payState === "failed" ? t("checkout.pay_retry") : t("checkout.pay_now", { total: formatPrice(order.total_cents) }) }}
           </button>
         </template>
       </section>
 
-      <RouterLink class="btn btn--primary" :to="`/orders/${order.id}`">View your order</RouterLink>
-      <RouterLink class="btn" to="/">Continue shopping</RouterLink>
+      <RouterLink class="btn btn--primary" :to="`/orders/${order.id}`">{{ t("checkout.view_order") }}</RouterLink>
+      <RouterLink class="btn" to="/">{{ t("cart.continue") }}</RouterLink>
     </div>
 
     <template v-else>
       <header class="checkout__head">
-        <p class="eyebrow">Almost there</p>
+        <p class="eyebrow">{{ t("checkout.eyebrow") }}</p>
         <h1>{{ t("checkout.title") }}</h1>
       </header>
 
       <div v-if="!state.cart || state.cart.items.length === 0" class="state">
         <p>{{ t("cart.empty") }}</p>
-        <RouterLink class="btn btn--primary" to="/">Browse the collection</RouterLink>
+        <RouterLink class="btn btn--primary" to="/">{{ t("cart.browse") }}</RouterLink>
       </div>
 
       <form v-else class="panel" novalidate @submit.prevent="placeOrder">
         <ul class="lines">
           <li v-for="line in state.cart.items" :key="line.id">
-            <span>{{ line.quantity }} × Variant #{{ line.product_variant_id }}</span>
+            <span>{{ line.quantity }} × {{ t("cart.variant_n", { n: line.product_variant_id }) }}</span>
             <span>{{ formatPrice(line.line_total_cents) }}</span>
           </li>
         </ul>
         <div class="total"><span>{{ t("checkout.subtotal") }}</span><strong>{{ formatPrice(state.cart.total_cents) }}</strong></div>
-        <p class="fineprint">Shipping and tax are calculated when you place the order.</p>
+        <p class="fineprint">{{ t("checkout.fineprint_totals") }}</p>
 
         <fieldset class="fields">
-          <legend>Contact</legend>
+          <legend>{{ t("checkout.contact") }}</legend>
           <label>
-            <span>Email {{ signedIn ? "" : "(for your order updates)" }}</span>
+            <span>{{ t("checkout.email") }} {{ signedIn ? "" : t("checkout.email_hint") }}</span>
             <input v-model.trim="form.email" type="email" autocomplete="email" :aria-invalid="!!fieldError('email')" />
             <small v-if="fieldError('email')" class="field-error" role="alert">{{ fieldError("email") }}</small>
           </label>
         </fieldset>
 
         <fieldset class="fields">
-          <legend>Shipping address</legend>
+          <legend>{{ t("checkout.address") }}</legend>
           <label>
-            <span>Full name</span>
+            <span>{{ t("checkout.full_name") }}</span>
             <input v-model.trim="form.name" type="text" autocomplete="name" :aria-invalid="!!fieldError('name')" />
             <small v-if="fieldError('name')" class="field-error" role="alert">{{ fieldError("name") }}</small>
           </label>
           <label>
-            <span>Address line 1</span>
+            <span>{{ t("checkout.line1") }}</span>
             <input v-model.trim="form.line1" type="text" autocomplete="address-line1" :aria-invalid="!!fieldError('line1')" />
             <small v-if="fieldError('line1')" class="field-error" role="alert">{{ fieldError("line1") }}</small>
           </label>
           <label>
-            <span>Address line 2 <em>(optional)</em></span>
+            <span>{{ t("checkout.line2") }} <em>{{ t("common.optional") }}</em></span>
             <input v-model.trim="form.line2" type="text" autocomplete="address-line2" />
           </label>
           <div class="fields__row">
             <label>
-              <span>City</span>
+              <span>{{ t("checkout.city") }}</span>
               <input v-model.trim="form.city" type="text" autocomplete="address-level2" :aria-invalid="!!fieldError('city')" />
               <small v-if="fieldError('city')" class="field-error" role="alert">{{ fieldError("city") }}</small>
             </label>
             <label>
-              <span>Postal code</span>
+              <span>{{ t("checkout.postal") }}</span>
               <input v-model.trim="form.postal_code" type="text" autocomplete="postal-code" :aria-invalid="!!fieldError('postal_code')" />
               <small v-if="fieldError('postal_code')" class="field-error" role="alert">{{ fieldError("postal_code") }}</small>
             </label>
           </div>
           <label>
-            <span>Country</span>
+            <span>{{ t("checkout.country") }}</span>
             <select v-model="form.country" autocomplete="country" :aria-invalid="!!fieldError('country')">
-              <option v-for="c in SHIPPING_COUNTRIES" :key="c.code" :value="c.code">{{ c.label }}</option>
+              <option v-for="c in SHIPPING_COUNTRY_CODES" :key="c" :value="c">{{ t(`country.${c}` as MessageKey) }}</option>
             </select>
             <small v-if="fieldError('country')" class="field-error" role="alert">{{ fieldError("country") }}</small>
           </label>
@@ -232,7 +232,7 @@ onMounted(async () => {
         <button class="btn btn--primary place" :disabled="placing" type="submit">
           {{ placing ? "…" : t("checkout.place") }}
         </button>
-        <p class="fineprint">Payment is collected after your order is placed.</p>
+        <p class="fineprint">{{ t("checkout.fineprint_payment") }}</p>
       </form>
     </template>
   </main>

@@ -48,22 +48,22 @@ onMounted(() => {
           @click="navOpen = !navOpen"
           :aria-expanded="navOpen"
           aria-controls="mobile-nav-panel"
-          aria-label="Menu"
+          :aria-label="t('a11y.menu')"
         >
           <svg v-if="!navOpen" viewBox="0 0 24 24"><path d="M4 7h16M4 12h16M4 17h16" /></svg>
           <svg v-else viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18" /></svg>
         </button>
-        <RouterLink to="/" class="word" aria-label="Arvel home">ARVEL</RouterLink>
-        <nav class="nav" aria-label="Primary">
+        <RouterLink to="/" class="word" :aria-label="t('a11y.home')">ARVEL</RouterLink>
+        <nav class="nav" :aria-label="t('a11y.primary')">
           <RouterLink :to="{ name: 'catalog' }" :class="{ on: route.name === 'catalog' }">{{ t("nav.shop") }}</RouterLink>
           <RouterLink to="/">{{ t("nav.collections") }}</RouterLink>
           <RouterLink to="/">{{ t("nav.about") }}</RouterLink>
         </nav>
         <div class="tools">
-          <RouterLink :to="{ name: 'catalog' }" class="ic" aria-label="Search">
+          <RouterLink :to="{ name: 'catalog' }" class="ic" :aria-label="t('nav.search')">
             <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7" /><path d="M21 21l-4-4" /></svg>
           </RouterLink>
-          <div class="lang" role="group" aria-label="Language">
+          <div class="lang" role="group" :aria-label="t('a11y.language')">
             <button
               v-for="code in LOCALES"
               :key="code"
@@ -75,14 +75,14 @@ onMounted(() => {
               {{ code.toUpperCase() }}
             </button>
           </div>
-          <button class="ic" @click="toggleTheme" :aria-label="`Switch to ${theme === 'dark' ? 'light' : 'dark'} theme`">
+          <button class="ic" @click="toggleTheme" :aria-label="theme === 'dark' ? t('a11y.theme_light') : t('a11y.theme_dark')">
             <svg v-if="theme === 'dark'" viewBox="0 0 24 24"><circle cx="12" cy="12" r="4.5" /><path d="M12 2v3M12 19v3M2 12h3M19 12h3M5 5l2 2M17 17l2 2M19 5l-2 2M7 17l-2 2" /></svg>
             <svg v-else viewBox="0 0 24 24"><path d="M20 14.5A8 8 0 1 1 9.5 4a6.5 6.5 0 0 0 10.5 10.5z" /></svg>
           </button>
-          <RouterLink to="/account" class="ic" aria-label="Account">
+          <RouterLink to="/account" class="ic" :aria-label="t('nav.account')">
             <svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="3.4" /><path d="M5 20a7 7 0 0 1 14 0" /></svg>
           </RouterLink>
-          <RouterLink to="/cart" class="ic ic--cart" aria-label="Cart">
+          <RouterLink to="/cart" class="ic ic--cart" :aria-label="t('nav.cart')">
             <svg viewBox="0 0 24 24"><path d="M6 8h12l-1 12H7z" /><path d="M9 8a3 3 0 0 1 6 0" /></svg>
             <span v-if="count" class="n">{{ count }}</span>
           </RouterLink>
@@ -111,17 +111,17 @@ onMounted(() => {
       <div class="ft__top">
         <div class="ft__brand">
           <div class="word word--ft">ARVEL</div>
-          <p>Considered electronics. Designed to disappear into your life.</p>
+          <p>{{ t("footer.tagline") }}</p>
         </div>
         <div class="ft__cols">
-          <div><h4>Shop</h4><a>New arrivals</a><a>Audio</a><a>Displays</a><a>Accessories</a></div>
-          <div><h4>Support</h4><a>Track order</a><a>Shipping &amp; returns</a><a>Contact</a></div>
-          <div><h4>Company</h4><a>About</a><a>Stores</a><a>Journal</a></div>
+          <div><h4>{{ t("footer.shop") }}</h4><a>{{ t("footer.new_arrivals") }}</a><a>{{ t("footer.audio") }}</a><a>{{ t("footer.displays") }}</a><a>{{ t("footer.accessories") }}</a></div>
+          <div><h4>{{ t("footer.support") }}</h4><a>{{ t("footer.track_order") }}</a><a>{{ t("footer.shipping_returns") }}</a><a>{{ t("footer.contact") }}</a></div>
+          <div><h4>{{ t("footer.company") }}</h4><a>{{ t("nav.about") }}</a><a>{{ t("footer.stores") }}</a><a>{{ t("footer.journal") }}</a></div>
         </div>
       </div>
       <div class="ft__base">
-        <span>© 2026 Arvel — built on the arvel framework.</span>
-        <span>Privacy · Terms</span>
+        <span>{{ t("footer.copyright") }}</span>
+        <span>{{ t("footer.legal") }}</span>
       </div>
     </footer>
   </div>

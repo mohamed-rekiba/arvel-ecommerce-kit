@@ -54,14 +54,7 @@ export interface Paginated<T> {
 }
 
 // Display labels for the contract's closed CountryCode set (labels aren't part of the API).
-export const SHIPPING_COUNTRIES: { code: CountryCode; label: string }[] = [
-  { code: "US", label: "United States" },
-  { code: "CA", label: "Canada" },
-  { code: "GB", label: "United Kingdom" },
-  { code: "DE", label: "Germany" },
-  { code: "FR", label: "France" },
-  { code: "EG", label: "Egypt" },
-];
+export const SHIPPING_COUNTRY_CODES: CountryCode[] = ["US", "CA", "GB", "DE", "FR", "EG"];
 
 // The guest cart is keyed by an X-Cart-Token the server issues on first write; we persist it.
 const CART_TOKEN_KEY = "arvel_cart_token";

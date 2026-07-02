@@ -5,6 +5,7 @@ import { useRoute, useRouter } from "vue-router";
 import { ApiError, type Product, type ReviewList, type Variant, api, formatPrice } from "../api";
 import { useCart } from "../cart";
 import { getCachedProduct } from "../product-cache";
+import { type MessageKey, t } from "../locale";
 
 const route = useRoute();
 const router = useRouter();
@@ -58,10 +59,10 @@ async function submitReview() {
   } catch (e) {
     reviewError.value =
       e instanceof ApiError && e.status === 403
-        ? "Reviews are for verified purchasers — buy it first!"
+        ? t("pdp.review_verified_only")
         : e instanceof ApiError
-          ? Object.values(e.errors)[0]?.[0] ?? "Couldn't submit the review."
-          : "Couldn't submit the review.";
+          ? Object.values(e.errors)[0]?.[0] ?? t("pdp.review_error")
+          : t("pdp.review_error");
   } finally {
     reviewBusy.value = false;
   }
@@ -133,8 +134,8 @@ watch(() => route.params.slug, load);
     </div>
 
     <div v-else-if="status === 'error'" class="state" role="alert">
-      <p>This product could not be found.</p>
-      <button class="btn" @click="goBack">Back to shop</button>
+      <p>{{ t("pdp.not_found") }}</p>
+      <button class="btn" @click="goBack">{{ t("pdp.back") }}</button>
     </div>
 
     <div v-else-if="product" class="pdp__grid">
@@ -156,7 +157,7 @@ watch(() => route.params.slug, load);
             :key="img.id"
             class="pdp__thumb"
             :class="{ on: i === selected }"
-            :aria-label="`View image ${i + 1}`"
+            :aria-label="t('pdp.view_image', { n: i + 1 })"
             @click="selected = i"
           >
             <img :src="img.thumb_url" alt="" />
@@ -164,7 +165,7 @@ watch(() => route.params.slug, load);
         </div>
       </div>
       <div class="pdp__info">
-        <button class="pdp__back" @click="goBack">← Back to shop</button>
+        <button class="pdp__back" @click="goBack">{{ t("common.back") }} {{ t("pdp.back") }}</button>
         <p class="eyebrow" v-if="product.category">{{ product.category.translation.name }}</p>
         <h1>{{ product.translation.name }}</h1>
         <p class="pdp__price">{{ formatPrice(product.price_cents, product.currency) }}</p>
@@ -173,73 +174,73 @@ watch(() => route.params.slug, load);
         </p>
 
         <label v-if="variants.length" class="pdp__field">
-          <span class="pdp__label">Variant</span>
+          <span class="pdp__label">{{ t("pdp.variant") }}</span>
           <select v-model="selectedVariantId">
             <option v-for="v in variants" :key="v.id" :value="v.id" :disabled="v.stock <= 0">
-              {{ v.name }} — {{ v.stock > 0 ? `${v.stock} in stock` : "sold out" }}
+              {{ v.name }} — {{ v.stock > 0 ? t("pdp.in_stock", { n: v.stock }) : t("pdp.sold_out") }}
             </option>
           </select>
         </label>
 
         <Button
           class="pdp__add"
-          :label="added ? 'Added to cart ✓' : adding ? 'Adding…' : canAdd ? 'Add to cart' : 'Sold out'"
+          :label="added ? t('pdp.added') : adding ? t('card.adding') : canAdd ? t('pdp.add') : t('pdp.sold_out_label')"
           :disabled="!canAdd || adding"
           :loading="adding"
           @click="addToCart"
         />
         <div v-if="selectedVariant && selectedVariant.stock <= 0" class="pdp__alert" aria-live="polite">
-          <p v-if="alertState === 'done'" class="pdp__alert-ok">✓ We'll email you when it's back.</p>
+          <p v-if="alertState === 'done'" class="pdp__alert-ok">✓ {{ t("pdp.alert_done") }}</p>
           <p v-else-if="alertState === 'auth'" class="pdp__alert-note">
-            <RouterLink to="/account">Sign in</RouterLink> to get a back-in-stock alert.
+            <RouterLink to="/account">{{ t("pdp.sign_in") }}</RouterLink> {{ t("pdp.alert_signin_tail") }}
           </p>
-          <button v-else class="pdp__alert-btn" @click="notifyMe">Notify me when available</button>
+          <button v-else class="pdp__alert-btn" @click="notifyMe">{{ t("pdp.notify_me") }}</button>
         </div>
         <ul class="pdp__meta">
-          <li>Free returns within 30 days</li>
-          <li>Ships in 2–4 business days</li>
+          <li>{{ t("pdp.free_returns") }}</li>
+          <li>{{ t("pdp.ships") }}</li>
         </ul>
       </div>
     </div>
 
-    <section v-if="product" class="reviews" aria-label="Reviews">
+    <section v-if="product" class="reviews" :aria-label="t('pdp.reviews')">
       <h2>
-        Reviews
+        {{ t("pdp.reviews") }}
         <span v-if="reviewData && reviewData.rating_count > 0" class="reviews__avg">
           {{ stars(reviewData.rating_avg ?? 0) }} {{ reviewData.rating_avg }} · {{ reviewData.rating_count }}
         </span>
       </h2>
 
       <p v-if="!reviewData || reviewData.reviews.length === 0" class="reviews__empty">
-        No reviews yet.
+        {{ t("pdp.no_reviews") }}
       </p>
       <ul v-else class="reviews__list">
         <li v-for="r in reviewData.reviews" :key="r.id" class="review">
           <div class="review__head">
             <span class="review__stars">{{ stars(r.rating) }}</span>
             <strong v-if="r.title">{{ r.title }}</strong>
-            <span class="review__author">{{ r.author ?? "Verified buyer" }}</span>
+            <span class="review__author">{{ r.author ?? t("pdp.verified_buyer") }}</span>
           </div>
           <p class="review__body">{{ r.body }}</p>
         </li>
       </ul>
 
       <div v-if="reviewData?.mine" class="reviews__mine">
-        Your review is <strong>{{ reviewData.mine.status }}</strong
-        ><span v-if="reviewData.mine.status === 'pending'"> — it'll appear once approved.</span>
+        {{ t("pdp.your_review_is") }} <strong>{{ t(`review.${reviewData.mine.status}` as MessageKey) }}</strong
+        ><span v-if="reviewData.mine.status === 'pending'"> — {{ t("pdp.pending_tail") }}</span>
       </div>
       <form v-else class="reviews__form" @submit.prevent="submitReview">
-        <h3>Write a review</h3>
+        <h3>{{ t("pdp.write_review") }}</h3>
         <label>
-          <span>Rating</span>
+          <span>{{ t("pdp.rating") }}</span>
           <select v-model.number="reviewForm.rating">
             <option v-for="n in [5, 4, 3, 2, 1]" :key="n" :value="n">{{ stars(n) }}</option>
           </select>
         </label>
-        <label><span>Title (optional)</span><input v-model.trim="reviewForm.title" type="text" /></label>
-        <label><span>Your review</span><textarea v-model.trim="reviewForm.body" rows="3" required /></label>
+        <label><span>{{ t("pdp.title_optional") }}</span><input v-model.trim="reviewForm.title" type="text" /></label>
+        <label><span>{{ t("pdp.your_review") }}</span><textarea v-model.trim="reviewForm.body" rows="3" required /></label>
         <p v-if="reviewError" class="reviews__error" role="alert">{{ reviewError }}</p>
-        <Button type="submit" :label="reviewBusy ? 'Sending…' : 'Submit review'" :disabled="reviewBusy || !reviewForm.body" />
+        <Button type="submit" :label="reviewBusy ? t('pdp.sending') : t('pdp.submit_review')" :disabled="reviewBusy || !reviewForm.body" />
       </form>
     </section>
   </main>
