@@ -266,7 +266,7 @@ async def test_mailpit_receives_smtp(
     from arvel.kernel import set_application
     from arvel.support.facades import Mail
 
-    from app.mail.order_confirmation import OrderConfirmation
+    from app.mail.order_shipped import OrderShipped
 
     monkeypatch.setenv(
         "DATABASE_URL", f"sqlite+aiosqlite:///{tmp_path / 'mail.sqlite'}"
@@ -284,18 +284,22 @@ async def test_mailpit_receives_smtp(
     )  # register providers + config the way the server/worker entrypoints do
     await app.boot()
     try:
-        await Mail.to("smoke@example.com").send(OrderConfirmation(7, 4900))
+        # OrderShipped is a plain (non-ShouldQueue) mailable → a direct SMTP round-trip; the
+        # queued-mail path is covered end-to-end by test_queue_rail
+        await Mail.to("smoke@example.com").send(OrderShipped(7))
     finally:
         set_application(None)
 
     subjects: list[str] = []
-    for _ in range(30):
+    for _ in range(
+        30
+    ):  # poll for OUR subject — the session Mailpit is shared across tests
         messages = httpx.get(f"{mailpit['api']}/api/v1/messages").json()["messages"]
         subjects = [m["Subject"] for m in messages]
-        if subjects:
+        if "Your order #7 has shipped" in subjects:
             break
         time.sleep(0.5)
-    assert "Your order #7 is confirmed" in subjects
+    assert "Your order #7 has shipped" in subjects
 
 
 def test_dead_service_fails_loudly(kit_app: Any, tmp_path: Any) -> None:

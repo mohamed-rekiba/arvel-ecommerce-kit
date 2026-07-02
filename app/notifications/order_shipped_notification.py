@@ -1,24 +1,26 @@
-"""OrderShippedNotification — fans out over the mail + database channels (Laravel Notification).
+"""OrderShippedNotification — queued fan-out over the database + mail channels.
 
-When an order transitions to SHIPPED, the customer gets an email AND a stored (database-channel)
-notification that surfaces in their account. Exercises arvel's notification system: Notification + the
-Notifiable user + the DatabaseNotification store.
+``ShouldQueue`` puts delivery on the worker (one queued job PER channel — Laravel parity), so the
+SHIPPED transition commits without waiting on SMTP, an SMTP outage can only fail the mail job
+(retried → failed-jobs rail), and the database channel is stored by its own job regardless.
+``via()`` lists the database channel first: the stored notification is the source of truth the
+account UI reads; mail is the best-effort courtesy copy.
 """
 
 from typing import Any
 
+from arvel.events import ShouldQueue
 from arvel.notifications import Notification
 
 from app.mail.order_shipped import OrderShipped
 
 
-class OrderShippedNotification(Notification):
-    def __init__(self, order_id: int, total_cents: int) -> None:
+class OrderShippedNotification(Notification, ShouldQueue):
+    def __init__(self, order_id: int) -> None:
         self.order_id = order_id
-        self.total_cents = total_cents
 
     def via(self, notifiable: Any) -> list[str]:
-        return ["mail", "database"]
+        return ["database", "mail"]
 
     def to_mail(self, notifiable: Any) -> OrderShipped:
         return OrderShipped(self.order_id)
@@ -26,6 +28,5 @@ class OrderShippedNotification(Notification):
     def to_array(self, notifiable: Any) -> dict[str, Any]:
         return {
             "order_id": self.order_id,
-            "total_cents": self.total_cents,
             "message": f"Your order #{self.order_id} has shipped.",
         }
