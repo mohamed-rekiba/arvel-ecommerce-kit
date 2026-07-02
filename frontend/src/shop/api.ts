@@ -150,6 +150,9 @@ export const api = {
   async removeCartItem(id: number) {
     return withCartToken(await request<Cart>("DELETE", `/cart/items/${id}`));
   },
+  subscribeStockAlert(variantId: number) {
+    return request<{ message: string }>("POST", `/variants/${variantId}/stock-alert`);
+  },
   reviews(slug: string) {
     return request<ReviewList>("GET", `/products/${slug}/reviews`);
   },

@@ -77,6 +77,8 @@ import type {
   ApiRegister400,
   ApiUserPassword400,
   ApiUserUpdate400,
+  ApiVariantsStockAlertSubscribe400,
+  ApiVariantsStockAlertUnsubscribe400,
   ApiWebhooksPayment400,
   ApiWishlistToggle400,
   ApplyCouponIn,
@@ -2345,6 +2347,93 @@ export const apiAdminReviewsModerate = async (id: number,
   {
     ...options,
     method: 'POST'
+
+
+  }
+);}
+
+
+
+export type apiVariantsStockAlertSubscribeResponse200 = {
+  data: MessageOut
+  status: 200
+}
+
+export type apiVariantsStockAlertSubscribeResponse400 = {
+  data: ApiVariantsStockAlertSubscribe400
+  status: 400
+}
+
+export type apiVariantsStockAlertSubscribeResponseSuccess = (apiVariantsStockAlertSubscribeResponse200) & {
+  headers: Headers;
+};
+export type apiVariantsStockAlertSubscribeResponseError = (apiVariantsStockAlertSubscribeResponse400) & {
+  headers: Headers;
+};
+
+export type apiVariantsStockAlertSubscribeResponse = (apiVariantsStockAlertSubscribeResponseSuccess | apiVariantsStockAlertSubscribeResponseError)
+
+export const getApiVariantsStockAlertSubscribeUrl = (id: number,) => {
+
+
+
+
+  return `/api/variants/${id}/stock-alert`
+}
+
+/**
+ * Watch a SOLD-OUT variant (in-stock → 422; duplicates are an idempotent no-op).
+ * @summary ApiVariantsStockAlertSubscribe
+ */
+export const apiVariantsStockAlertSubscribe = async (id: number, options?: RequestInit): Promise<apiVariantsStockAlertSubscribeResponse> => {
+
+  return apiFetch<apiVariantsStockAlertSubscribeResponse>(getApiVariantsStockAlertSubscribeUrl(id),
+  {
+    ...options,
+    method: 'POST'
+
+
+  }
+);}
+
+
+
+export type apiVariantsStockAlertUnsubscribeResponse200 = {
+  data: MessageOut
+  status: 200
+}
+
+export type apiVariantsStockAlertUnsubscribeResponse400 = {
+  data: ApiVariantsStockAlertUnsubscribe400
+  status: 400
+}
+
+export type apiVariantsStockAlertUnsubscribeResponseSuccess = (apiVariantsStockAlertUnsubscribeResponse200) & {
+  headers: Headers;
+};
+export type apiVariantsStockAlertUnsubscribeResponseError = (apiVariantsStockAlertUnsubscribeResponse400) & {
+  headers: Headers;
+};
+
+export type apiVariantsStockAlertUnsubscribeResponse = (apiVariantsStockAlertUnsubscribeResponseSuccess | apiVariantsStockAlertUnsubscribeResponseError)
+
+export const getApiVariantsStockAlertUnsubscribeUrl = (id: number,) => {
+
+
+
+
+  return `/api/variants/${id}/stock-alert`
+}
+
+/**
+ * @summary ApiVariantsStockAlertUnsubscribe
+ */
+export const apiVariantsStockAlertUnsubscribe = async (id: number, options?: RequestInit): Promise<apiVariantsStockAlertUnsubscribeResponse> => {
+
+  return apiFetch<apiVariantsStockAlertUnsubscribeResponse>(getApiVariantsStockAlertUnsubscribeUrl(id),
+  {
+    ...options,
+    method: 'DELETE'
 
 
   }

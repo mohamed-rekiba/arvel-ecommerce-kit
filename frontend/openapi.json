@@ -924,19 +924,19 @@
         "operationId": "api.media.conversion",
         "parameters": [
           {
-            "name": "conversion",
+            "name": "id",
             "in": "path",
             "schema": {
-              "type": "string"
+              "type": "integer"
             },
             "required": true,
             "deprecated": false
           },
           {
-            "name": "id",
+            "name": "conversion",
             "in": "path",
             "schema": {
-              "type": "integer"
+              "type": "string"
             },
             "required": true,
             "deprecated": false
@@ -2943,19 +2943,19 @@
         "operationId": "api.admin.users.roles.revoke",
         "parameters": [
           {
-            "name": "role",
+            "name": "id",
             "in": "path",
             "schema": {
-              "type": "string"
+              "type": "integer"
             },
             "required": true,
             "deprecated": false
           },
           {
-            "name": "id",
+            "name": "role",
             "in": "path",
             "schema": {
-              "type": "integer"
+              "type": "string"
             },
             "required": true,
             "deprecated": false
@@ -3341,6 +3341,15 @@
         "operationId": "api.admin.reviews.moderate",
         "parameters": [
           {
+            "name": "id",
+            "in": "path",
+            "schema": {
+              "type": "integer"
+            },
+            "required": true,
+            "deprecated": false
+          },
+          {
             "name": "decision",
             "in": "path",
             "schema": {
@@ -3348,7 +3357,73 @@
             },
             "required": true,
             "deprecated": false
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Request fulfilled, document follows",
+            "headers": {},
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AdminReviewOut"
+                }
+              }
+            }
           },
+          "400": {
+            "description": "Bad request syntax or unsupported method",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "status_code": {
+                      "type": "integer"
+                    },
+                    "detail": {
+                      "type": "string"
+                    },
+                    "extra": {
+                      "additionalProperties": {},
+                      "type": [
+                        "null",
+                        "object",
+                        "array"
+                      ]
+                    }
+                  },
+                  "type": "object",
+                  "required": [
+                    "detail",
+                    "status_code"
+                  ],
+                  "description": "Validation Exception",
+                  "examples": [
+                    {
+                      "status_code": 400,
+                      "detail": "Bad Request",
+                      "extra": {}
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        },
+        "deprecated": false,
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ]
+      }
+    },
+    "/api/variants/{id}/stock-alert": {
+      "post": {
+        "summary": "ApiVariantsStockAlertSubscribe",
+        "description": "Watch a SOLD-OUT variant (in-stock \u2192 422; duplicates are an idempotent no-op).",
+        "operationId": "api.variants.stock_alert.subscribe",
+        "parameters": [
           {
             "name": "id",
             "in": "path",
@@ -3366,7 +3441,79 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/AdminReviewOut"
+                  "$ref": "#/components/schemas/MessageOut"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request syntax or unsupported method",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "status_code": {
+                      "type": "integer"
+                    },
+                    "detail": {
+                      "type": "string"
+                    },
+                    "extra": {
+                      "additionalProperties": {},
+                      "type": [
+                        "null",
+                        "object",
+                        "array"
+                      ]
+                    }
+                  },
+                  "type": "object",
+                  "required": [
+                    "detail",
+                    "status_code"
+                  ],
+                  "description": "Validation Exception",
+                  "examples": [
+                    {
+                      "status_code": 400,
+                      "detail": "Bad Request",
+                      "extra": {}
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        },
+        "deprecated": false,
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ]
+      },
+      "delete": {
+        "summary": "ApiVariantsStockAlertUnsubscribe",
+        "operationId": "api.variants.stock_alert.unsubscribe",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "schema": {
+              "type": "integer"
+            },
+            "required": true,
+            "deprecated": false
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Request fulfilled, document follows",
+            "headers": {},
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MessageOut"
                 }
               }
             }

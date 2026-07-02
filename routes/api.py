@@ -24,6 +24,7 @@ from app.controllers import auth_controller as auth
 from app.controllers import cart_controller as cart
 from app.controllers import catalog_controller as catalog
 from app.controllers import review_controller as reviews
+from app.controllers import stock_alert_controller as stock_alerts
 from app.controllers import checkout_controller as checkout
 from app.controllers import media_controller as media
 from app.controllers import notification_controller as notifications
@@ -256,6 +257,18 @@ Route.post(
     "/admin/reviews/{id:int}/{decision:str}",
     reviews.moderate,
     name="api.admin.reviews.moderate",
+).status(200).middleware(Authenticate).secure("bearer")
+
+# --- Back-in-stock alerts (signed-in customers) ----------------------------------
+Route.post(
+    "/variants/{id:int}/stock-alert",
+    stock_alerts.subscribe,
+    name="api.variants.stock_alert.subscribe",
+).status(200).middleware(Authenticate).secure("bearer")
+Route.delete(
+    "/variants/{id:int}/stock-alert",
+    stock_alerts.unsubscribe,
+    name="api.variants.stock_alert.unsubscribe",
 ).status(200).middleware(Authenticate).secure("bearer")
 
 # --- Cart (guest by X-Cart-Token, or the authenticated user's cart) -----------
