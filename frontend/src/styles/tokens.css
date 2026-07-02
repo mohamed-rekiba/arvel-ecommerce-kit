@@ -59,6 +59,13 @@
   --container-max:1320px; --container-pad:clamp(1rem,4vw,2.5rem);
   --side-w:248px; --header-h:64px; --topbar-h:62px;
   --z-header:100; --z-side:110; --z-dropdown:200; --z-overlay:300; --z-modal:310; --z-toast:400;
+
+  /* Breakpoints (mobile-first, min-width only) — literal px, no preprocessor available so these
+     can't be var()'d into an @media condition; this comment is the single source of truth:
+       640px  (--bp-sm) — large phone / small tablet: 2-up grids, inline layouts
+       1024px (--bp-lg) — desktop: 3/4-up grids, multi-column chrome
+     Base (unqueried) styles target the smallest phone. Every @media in the storefront should be
+     `min-width` using one of these two values — don't introduce a third tier. */
 }
 
 [data-theme="dark"] {

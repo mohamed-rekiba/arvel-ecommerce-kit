@@ -182,7 +182,8 @@ onMounted(async () => {
 .link { border: none; background: none; padding: 0; color: var(--color-accent); font: inherit; cursor: pointer; text-decoration: underline; text-underline-offset: 2px; }
 .orders__title { font-size: var(--text-xl); margin-bottom: var(--space-5); }
 .wish { margin-bottom: var(--space-10); }
-.wish__grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: var(--space-4); }
+.wish__grid { display: grid; grid-template-columns: 1fr; gap: var(--space-4); }
+@media (min-width: 640px) { .wish__grid { grid-template-columns: repeat(2, 1fr); } }
 .notes { margin-bottom: var(--space-10); }
 .notes__head { display: flex; align-items: center; justify-content: space-between; margin-bottom: var(--space-4); }
 .notes__head .orders__title { margin-bottom: 0; display: inline-flex; align-items: center; gap: var(--space-3); }
@@ -194,7 +195,10 @@ onMounted(async () => {
 .note__dot { width: 7px; height: 7px; border-radius: 50%; background: var(--color-accent); flex-shrink: 0; }
 .note__msg { font-size: var(--text-sm); }
 .orders__list { list-style: none; margin: 0; padding: 0; }
-.order { display: grid; grid-template-columns: 1fr auto auto; align-items: center; gap: var(--space-4); padding: var(--space-4) 0; border-top: 1px solid var(--color-border); }
+.order { display: grid; grid-template-columns: 1fr auto auto; align-items: center; gap: var(--space-3); padding: var(--space-4) 0; border-top: 1px solid var(--color-border); }
+/* grid items default to min-width:auto (sized to content); without this the flexible first column
+   can refuse to shrink below its content's intrinsic width and overflow on a narrow phone. */
+.order > div { min-width: 0; }
 .order__id { font-family: var(--font-display); font-size: var(--text-lg); margin-right: var(--space-3); }
 .order__items { color: var(--color-text-muted); font-size: var(--text-sm); }
 .order__status { padding: 2px var(--space-3); background: var(--color-accent-soft); color: var(--color-accent); border-radius: var(--radius-full); font-size: var(--text-xs); text-transform: capitalize; }

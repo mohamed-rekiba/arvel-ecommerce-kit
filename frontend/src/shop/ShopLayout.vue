@@ -1,15 +1,26 @@
 <script setup lang="ts">
-import { onMounted, ref } from "vue";
+import { onMounted, ref, watch } from "vue";
 import { useRoute, useRouter } from "vue-router";
 import { useCart } from "./cart";
 import { useWishlist } from "./wishlist";
 import { theme, toggleTheme } from "../lib/theme";
+import MobileNav from "./components/MobileNav.vue";
 
 const { count, refresh } = useCart();
 const wishlist = useWishlist();
 const router = useRouter();
 const route = useRoute();
 const scrolled = ref(false);
+
+const navOpen = ref(false);
+const navTrigger = ref<HTMLButtonElement | null>(null);
+function closeNav() {
+  navOpen.value = false;
+  navTrigger.value?.focus();
+}
+// belt-and-suspenders: also close on any route change (covers a nav-link tap not routed through
+// MobileNav's own close emit, and guards against the drawer staying open across an unrelated navigation)
+watch(() => route.fullPath, () => { navOpen.value = false; });
 
 // Where the View Transitions API drives the animation (Chrome/Edge/Safari 18+) we let it own the
 // morph; elsewhere (Firefox / older Safari) we fall back to a plain Vue cross-fade. Keying the view by
@@ -29,6 +40,17 @@ onMounted(() => {
   <div class="shop">
     <header class="hd" :class="{ 'hd--scrolled': scrolled }">
       <div class="hd__in">
+        <button
+          ref="navTrigger"
+          class="ic hamburger"
+          @click="navOpen = !navOpen"
+          :aria-expanded="navOpen"
+          aria-controls="mobile-nav-panel"
+          aria-label="Menu"
+        >
+          <svg v-if="!navOpen" viewBox="0 0 24 24"><path d="M4 7h16M4 12h16M4 17h16" /></svg>
+          <svg v-else viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18" /></svg>
+        </button>
         <RouterLink to="/" class="word" aria-label="Arvel home">ARVEL</RouterLink>
         <nav class="nav" aria-label="Primary">
           <RouterLink :to="{ name: 'catalog' }" :class="{ on: route.name === 'catalog' }">Shop</RouterLink>
@@ -53,6 +75,8 @@ onMounted(() => {
         </div>
       </div>
     </header>
+
+    <MobileNav :open="navOpen" @close="closeNav" />
 
     <main class="main">
       <RouterView v-slot="{ Component }">
@@ -95,34 +119,44 @@ onMounted(() => {
 /* header — one quiet row */
 .hd { position: sticky; top: 0; z-index: var(--z-header); background: color-mix(in srgb, var(--bg) 86%, transparent); backdrop-filter: saturate(140%) blur(14px); transition: border-color var(--motion-base), background var(--motion-base); border-bottom: 1px solid transparent; }
 .hd--scrolled { border-bottom-color: var(--border); }
-.hd__in { max-width: 1280px; margin: 0 auto; padding: 0 clamp(1.25rem, 5vw, 3.5rem); height: 76px; display: grid; grid-template-columns: 1fr auto 1fr; align-items: center; }
+/* mobile-first base: hamburger (first, left) — logo — tools, no center nav column, a shorter header
+   row. `.nav` is display:none here and `.hamburger` is display:none at ≥640px, so grid auto-placement
+   naturally packs whichever 3 items are actually visible into these 3 tracks — no explicit grid-column
+   needed on either breakpoint. */
+.hd__in { max-width: 1280px; margin: 0 auto; padding: 0 clamp(1.25rem, 5vw, 3.5rem); height: var(--topbar-h); display: grid; grid-template-columns: auto 1fr auto; align-items: center; gap: 4px; }
 .word { font-family: var(--font-display); font-weight: 700; font-size: 20px; letter-spacing: .34em; color: var(--text); text-decoration: none; }
-.nav { display: flex; gap: 34px; justify-self: center; }
+.nav { display: none; gap: 34px; justify-self: center; }
 .nav a { font-size: 12px; letter-spacing: .12em; text-transform: uppercase; font-weight: 500; color: var(--text-muted); text-decoration: none; transition: color var(--motion-base); }
 .nav a:hover, .nav a.on { color: var(--text); }
 .tools { display: flex; align-items: center; gap: 6px; justify-self: end; }
-.ic { width: 40px; height: 40px; display: grid; place-items: center; border: 0; background: none; color: var(--text-muted); cursor: pointer; border-radius: var(--radius-full); position: relative; text-decoration: none; transition: color var(--motion-base), background var(--motion-base); }
+/* icon buttons: padding grows the tap target to the 44px spec without enlarging the glyph itself
+   (DESIGN.md: "interactive targets ≥44×44px on touch (icon buttons get padding)") */
+.ic { width: 44px; height: 44px; display: grid; place-items: center; border: 0; background: none; color: var(--text-muted); cursor: pointer; border-radius: var(--radius-full); position: relative; text-decoration: none; transition: color var(--motion-base), background var(--motion-base); }
 .ic:hover { color: var(--text); background: color-mix(in srgb, var(--text) 6%, transparent); }
 .ic svg { width: 19px; height: 19px; stroke: currentColor; fill: none; stroke-width: 1.6; stroke-linecap: round; stroke-linejoin: round; }
 .ic--cart .n { position: absolute; top: 4px; right: 4px; min-width: 16px; height: 16px; padding: 0 4px; background: var(--accent); color: var(--on-accent); border-radius: 999px; font-size: 10px; font-weight: 700; display: grid; place-items: center; }
 
 .main { flex: 1; }
 
-/* footer — airy, minimal */
+/* footer — airy, minimal. Mobile-first base: everything stacks to a single column. */
 .ft { margin-top: clamp(4rem, 10vw, 8rem); border-top: 1px solid var(--border); }
-.ft__top { max-width: 1280px; margin: 0 auto; padding: clamp(3rem, 6vw, 5rem) clamp(1.25rem, 5vw, 3.5rem) clamp(2rem, 4vw, 3rem); display: grid; grid-template-columns: 1.4fr 2fr; gap: 40px; }
+.ft__top { max-width: 1280px; margin: 0 auto; padding: clamp(3rem, 6vw, 5rem) clamp(1.25rem, 5vw, 3.5rem) clamp(2rem, 4vw, 3rem); display: grid; grid-template-columns: 1fr; gap: 40px; }
 .word--ft { letter-spacing: .34em; font-size: 18px; margin-bottom: 16px; }
 .ft__brand p { color: var(--text-muted); font-size: 14px; max-width: 30ch; line-height: 1.6; }
-.ft__cols { display: grid; grid-template-columns: repeat(3, 1fr); gap: 24px; }
+.ft__cols { display: grid; grid-template-columns: 1fr; gap: 24px; }
 .ft__cols h4 { font-size: 11px; text-transform: uppercase; letter-spacing: .14em; color: var(--text-subtle); margin: 0 0 14px; font-weight: 600; }
 .ft__cols a { display: block; font-size: 14px; color: var(--text-muted); text-decoration: none; padding: 5px 0; transition: color var(--motion-base); }
 .ft__cols a:hover { color: var(--text); }
 .ft__base { max-width: 1280px; margin: 0 auto; padding: 22px clamp(1.25rem, 5vw, 3.5rem); border-top: 1px solid var(--border); display: flex; justify-content: space-between; font-size: 12px; color: var(--text-subtle); }
 
-@media (max-width: 760px) {
-  .nav { display: none; }
-  .hd__in { grid-template-columns: 1fr auto; }
-  .ft__top { grid-template-columns: 1fr; }
+@media (min-width: 640px) {
+  .hd__in { height: 76px; grid-template-columns: 1fr auto 1fr; }
+  .nav { display: flex; }
+  .hamburger { display: none; }
   .ft__cols { grid-template-columns: 1fr 1fr; }
+}
+@media (min-width: 1024px) {
+  .ft__top { grid-template-columns: 1.4fr 2fr; }
+  .ft__cols { grid-template-columns: repeat(3, 1fr); }
 }
 </style>

@@ -144,8 +144,8 @@ watch(() => route.params.slug, load);
 
 <style scoped>
 .pdp { max-width: var(--container-max); margin: 0 auto; padding: var(--space-12) var(--container-pad) 0; }
-.pdp__grid, .pdp__skeleton { display: grid; grid-template-columns: 1fr 1fr; gap: var(--space-16); align-items: start; }
-@media (max-width: 820px) { .pdp__grid, .pdp__skeleton { grid-template-columns: 1fr; gap: var(--space-8); } }
+.pdp__grid, .pdp__skeleton { display: grid; grid-template-columns: 1fr; gap: var(--space-8); align-items: start; }
+@media (min-width: 1024px) { .pdp__grid, .pdp__skeleton { grid-template-columns: 1fr 1fr; gap: var(--space-16); } }
 .pdp__media { display: flex; flex-direction: column; gap: 12px; }
 /* same 4:5 ratio as the card grid / hero (ProductCard.vue, HomeView.vue) — the View Transition morph
    animates the box between the old (card) and new (PDP) rects, and a mismatched aspect ratio makes the
