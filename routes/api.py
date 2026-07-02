@@ -16,6 +16,7 @@ from app.controllers import account_controller as account
 from app.controllers import admin_controller as admin
 from app.controllers import admin_product_controller as admin_products
 from app.controllers import admin_rbac_controller as rbac
+from app.controllers import admin_taxonomy_controller as taxonomy
 from app.controllers import admin_variant_controller as admin_variants
 from app.controllers import auth_controller as auth
 from app.controllers import cart_controller as cart
@@ -145,6 +146,30 @@ Route.delete(
     "/admin/products/{id:int}",
     admin_products.destroy,
     name="api.admin.products.destroy",
+).middleware(Authenticate).secure("bearer")
+
+# --- Admin categories + vendors (the retrievability dimensions; catalog.* authority) -----------
+Route.post(
+    "/admin/categories", taxonomy.category_store, name="api.admin.categories.store"
+).middleware(Authenticate).secure("bearer")
+Route.put(
+    "/admin/categories/{id:int}",
+    taxonomy.category_update,
+    name="api.admin.categories.update",
+).middleware(Authenticate).secure("bearer")
+Route.delete(
+    "/admin/categories/{id:int}",
+    taxonomy.category_destroy,
+    name="api.admin.categories.destroy",
+).status(200).middleware(Authenticate).secure("bearer")
+Route.get(
+    "/admin/vendors", taxonomy.vendors_index, name="api.admin.vendors.index"
+).middleware(Authenticate).secure("bearer")
+Route.post(
+    "/admin/vendors", taxonomy.vendor_store, name="api.admin.vendors.store"
+).middleware(Authenticate).secure("bearer")
+Route.put(
+    "/admin/vendors/{id:int}", taxonomy.vendor_update, name="api.admin.vendors.update"
 ).middleware(Authenticate).secure("bearer")
 
 # --- Admin variants + stock (nested under the product; catalog.update authority) ---------------

@@ -8,13 +8,18 @@
 import type {
   ActivityOut,
   AddItemIn,
+  AdminCategoryOut,
   AdminCategoryPage,
   AdminMeOut,
   AdminProductDetailOut,
   AdminProductOut,
   AdminProductPage,
+  AdminVendorOut,
+  ApiAdminCategoriesDestroy400,
   ApiAdminCategoriesIndex400,
   ApiAdminCategoriesIndexParams,
+  ApiAdminCategoriesStore400,
+  ApiAdminCategoriesUpdate400,
   ApiAdminOrdersStatus400,
   ApiAdminProductsDestroy400,
   ApiAdminProductsImage400,
@@ -32,6 +37,8 @@ import type {
   ApiAdminVariantsStock400,
   ApiAdminVariantsStore400,
   ApiAdminVariantsUpdate400,
+  ApiAdminVendorsStore400,
+  ApiAdminVendorsUpdate400,
   ApiCartItemsAdd400,
   ApiCartItemsRemove400,
   ApiCartItemsUpdate400,
@@ -56,7 +63,9 @@ import type {
   ApiWishlistToggle400,
   AssignRoleIn,
   CartOut,
+  CategoryIn,
   CategoryOut,
+  CategoryUpdateIn,
   ChangePasswordIn,
   CheckoutIn,
   CredentialsIn,
@@ -90,6 +99,8 @@ import type {
   VariantIn,
   VariantOut,
   VariantUpdateIn,
+  VendorIn,
+  VendorUpdateIn,
   VerifyEmailIn,
   WebhookIn,
   WebhookOut,
@@ -1056,6 +1067,49 @@ export const apiAdminCategoriesIndex = async (params?: ApiAdminCategoriesIndexPa
 
 
 
+export type apiAdminCategoriesStoreResponse201 = {
+  data: AdminCategoryOut
+  status: 201
+}
+
+export type apiAdminCategoriesStoreResponse400 = {
+  data: ApiAdminCategoriesStore400
+  status: 400
+}
+
+export type apiAdminCategoriesStoreResponseSuccess = (apiAdminCategoriesStoreResponse201) & {
+  headers: Headers;
+};
+export type apiAdminCategoriesStoreResponseError = (apiAdminCategoriesStoreResponse400) & {
+  headers: Headers;
+};
+
+export type apiAdminCategoriesStoreResponse = (apiAdminCategoriesStoreResponseSuccess | apiAdminCategoriesStoreResponseError)
+
+export const getApiAdminCategoriesStoreUrl = () => {
+
+
+
+
+  return `/api/admin/categories`
+}
+
+/**
+ * @summary ApiAdminCategoriesStore
+ */
+export const apiAdminCategoriesStore = async (categoryIn: CategoryIn, options?: RequestInit): Promise<apiAdminCategoriesStoreResponse> => {
+
+  return apiFetch<apiAdminCategoriesStoreResponse>(getApiAdminCategoriesStoreUrl(),
+  {
+    ...options,
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...options?.headers },
+    body: JSON.stringify(categoryIn)
+  }
+);}
+
+
+
 export type apiAdminProductsShowResponse200 = {
   data: AdminProductDetailOut
   status: 200
@@ -1185,6 +1239,218 @@ export const apiAdminProductsDestroy = async (id: number, options?: RequestInit)
     method: 'DELETE'
 
 
+  }
+);}
+
+
+
+export type apiAdminCategoriesUpdateResponse200 = {
+  data: AdminCategoryOut
+  status: 200
+}
+
+export type apiAdminCategoriesUpdateResponse400 = {
+  data: ApiAdminCategoriesUpdate400
+  status: 400
+}
+
+export type apiAdminCategoriesUpdateResponseSuccess = (apiAdminCategoriesUpdateResponse200) & {
+  headers: Headers;
+};
+export type apiAdminCategoriesUpdateResponseError = (apiAdminCategoriesUpdateResponse400) & {
+  headers: Headers;
+};
+
+export type apiAdminCategoriesUpdateResponse = (apiAdminCategoriesUpdateResponseSuccess | apiAdminCategoriesUpdateResponseError)
+
+export const getApiAdminCategoriesUpdateUrl = (id: number,) => {
+
+
+
+
+  return `/api/admin/categories/${id}`
+}
+
+/**
+ * @summary ApiAdminCategoriesUpdate
+ */
+export const apiAdminCategoriesUpdate = async (id: number,
+    categoryUpdateIn: CategoryUpdateIn, options?: RequestInit): Promise<apiAdminCategoriesUpdateResponse> => {
+
+  return apiFetch<apiAdminCategoriesUpdateResponse>(getApiAdminCategoriesUpdateUrl(id),
+  {
+    ...options,
+    method: 'PUT',
+    headers: { 'Content-Type': 'application/json', ...options?.headers },
+    body: JSON.stringify(categoryUpdateIn)
+  }
+);}
+
+
+
+export type apiAdminCategoriesDestroyResponse200 = {
+  data: MessageOut
+  status: 200
+}
+
+export type apiAdminCategoriesDestroyResponse400 = {
+  data: ApiAdminCategoriesDestroy400
+  status: 400
+}
+
+export type apiAdminCategoriesDestroyResponseSuccess = (apiAdminCategoriesDestroyResponse200) & {
+  headers: Headers;
+};
+export type apiAdminCategoriesDestroyResponseError = (apiAdminCategoriesDestroyResponse400) & {
+  headers: Headers;
+};
+
+export type apiAdminCategoriesDestroyResponse = (apiAdminCategoriesDestroyResponseSuccess | apiAdminCategoriesDestroyResponseError)
+
+export const getApiAdminCategoriesDestroyUrl = (id: number,) => {
+
+
+
+
+  return `/api/admin/categories/${id}`
+}
+
+/**
+ * @summary ApiAdminCategoriesDestroy
+ */
+export const apiAdminCategoriesDestroy = async (id: number, options?: RequestInit): Promise<apiAdminCategoriesDestroyResponse> => {
+
+  return apiFetch<apiAdminCategoriesDestroyResponse>(getApiAdminCategoriesDestroyUrl(id),
+  {
+    ...options,
+    method: 'DELETE'
+
+
+  }
+);}
+
+
+
+export type apiAdminVendorsIndexResponse200 = {
+  data: AdminVendorOut[]
+  status: 200
+}
+
+export type apiAdminVendorsIndexResponseSuccess = (apiAdminVendorsIndexResponse200) & {
+  headers: Headers;
+};
+;
+
+export type apiAdminVendorsIndexResponse = (apiAdminVendorsIndexResponseSuccess)
+
+export const getApiAdminVendorsIndexUrl = () => {
+
+
+
+
+  return `/api/admin/vendors`
+}
+
+/**
+ * @summary ApiAdminVendorsIndex
+ */
+export const apiAdminVendorsIndex = async ( options?: RequestInit): Promise<apiAdminVendorsIndexResponse> => {
+
+  return apiFetch<apiAdminVendorsIndexResponse>(getApiAdminVendorsIndexUrl(),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+export type apiAdminVendorsStoreResponse201 = {
+  data: AdminVendorOut
+  status: 201
+}
+
+export type apiAdminVendorsStoreResponse400 = {
+  data: ApiAdminVendorsStore400
+  status: 400
+}
+
+export type apiAdminVendorsStoreResponseSuccess = (apiAdminVendorsStoreResponse201) & {
+  headers: Headers;
+};
+export type apiAdminVendorsStoreResponseError = (apiAdminVendorsStoreResponse400) & {
+  headers: Headers;
+};
+
+export type apiAdminVendorsStoreResponse = (apiAdminVendorsStoreResponseSuccess | apiAdminVendorsStoreResponseError)
+
+export const getApiAdminVendorsStoreUrl = () => {
+
+
+
+
+  return `/api/admin/vendors`
+}
+
+/**
+ * @summary ApiAdminVendorsStore
+ */
+export const apiAdminVendorsStore = async (vendorIn: VendorIn, options?: RequestInit): Promise<apiAdminVendorsStoreResponse> => {
+
+  return apiFetch<apiAdminVendorsStoreResponse>(getApiAdminVendorsStoreUrl(),
+  {
+    ...options,
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...options?.headers },
+    body: JSON.stringify(vendorIn)
+  }
+);}
+
+
+
+export type apiAdminVendorsUpdateResponse200 = {
+  data: AdminVendorOut
+  status: 200
+}
+
+export type apiAdminVendorsUpdateResponse400 = {
+  data: ApiAdminVendorsUpdate400
+  status: 400
+}
+
+export type apiAdminVendorsUpdateResponseSuccess = (apiAdminVendorsUpdateResponse200) & {
+  headers: Headers;
+};
+export type apiAdminVendorsUpdateResponseError = (apiAdminVendorsUpdateResponse400) & {
+  headers: Headers;
+};
+
+export type apiAdminVendorsUpdateResponse = (apiAdminVendorsUpdateResponseSuccess | apiAdminVendorsUpdateResponseError)
+
+export const getApiAdminVendorsUpdateUrl = (id: number,) => {
+
+
+
+
+  return `/api/admin/vendors/${id}`
+}
+
+/**
+ * Rename or (un)publish a vendor — the publish flag gates the retrievability of every
+ * product the vendor owns (recomputed by the debounced views refresh).
+ * @summary ApiAdminVendorsUpdate
+ */
+export const apiAdminVendorsUpdate = async (id: number,
+    vendorUpdateIn: VendorUpdateIn, options?: RequestInit): Promise<apiAdminVendorsUpdateResponse> => {
+
+  return apiFetch<apiAdminVendorsUpdateResponse>(getApiAdminVendorsUpdateUrl(id),
+  {
+    ...options,
+    method: 'PUT',
+    headers: { 'Content-Type': 'application/json', ...options?.headers },
+    body: JSON.stringify(vendorUpdateIn)
   }
 );}
 
