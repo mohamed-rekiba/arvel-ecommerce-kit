@@ -35,6 +35,17 @@ curl -s 'localhost:8000/api/products?q=Téléphone' -H 'Accept-Language: fr' | j
 
 The PDP gallery images are webp conversions served from RustFS (S3) — `s19-pdp-french.png`.
 
+Switch to **AR** and the whole storefront flips **right-to-left** (`<html dir="rtl" lang="ar">` +
+CSS logical properties) with Arabic chrome and catalog content (`هاتف أورورا`); the admin console
+stays LTR. Arabic search rides the same Meilisearch index:
+
+```bash
+curl -s -G localhost:8000/api/products --data-urlencode 'q=أورورا' -H 'Accept-Language: ar' | jq '.data[].translation.name'
+# "هاتف أورورا"
+```
+
+Evidence: `i18n-ar-catalog-rtl.png`, `i18n-ar-pdp-rtl.png`.
+
 ## 2 — Guest cart → register → the cart follows
 
 Add to cart as a guest (the cart rides the `X-Cart-Token` header), then create an account on

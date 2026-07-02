@@ -68,25 +68,39 @@ class DatabaseSeeder(Seeder):
         )  # unpublished vendor
 
         # --- category tree (parents + published children) ---------------------
-        audio = await self._cat("Audio", "audio", fr="Audio")
+        audio = await self._cat("Audio", "audio", fr="Audio", ar="صوتيات")
         headphones = await self._cat(
-            "Headphones", "headphones", parent=audio.id, fr="Casques"
+            "Headphones", "headphones", parent=audio.id, fr="Casques", ar="سماعات رأس"
         )
-        earbuds = await self._cat("Earbuds", "earbuds", parent=audio.id, fr="Écouteurs")
+        earbuds = await self._cat(
+            "Earbuds", "earbuds", parent=audio.id, fr="Écouteurs", ar="سماعات أذن"
+        )
         speakers = await self._cat(
-            "Speakers", "speakers", parent=audio.id, fr="Enceintes"
+            "Speakers", "speakers", parent=audio.id, fr="Enceintes", ar="مكبرات صوت"
         )
-        phones = await self._cat("Phones", "phones", fr="Téléphones")
-        computing = await self._cat("Computing", "computing", fr="Informatique")
+        phones = await self._cat("Phones", "phones", fr="Téléphones", ar="هواتف")
+        computing = await self._cat(
+            "Computing", "computing", fr="Informatique", ar="حواسيب"
+        )
         laptops = await self._cat(
-            "Laptops", "laptops", parent=computing.id, fr="Ordinateurs portables"
+            "Laptops",
+            "laptops",
+            parent=computing.id,
+            fr="Ordinateurs portables",
+            ar="حواسيب محمولة",
         )
         monitors = await self._cat(
-            "Monitors", "monitors", parent=computing.id, fr="Écrans"
+            "Monitors", "monitors", parent=computing.id, fr="Écrans", ar="شاشات"
         )
-        wearables = await self._cat("Wearables", "wearables", fr="Objets connectés")
-        cameras = await self._cat("Cameras", "cameras", fr="Appareils photo")
-        accessories = await self._cat("Accessories", "accessories", fr="Accessoires")
+        wearables = await self._cat(
+            "Wearables", "wearables", fr="Objets connectés", ar="أجهزة قابلة للارتداء"
+        )
+        cameras = await self._cat(
+            "Cameras", "cameras", fr="Appareils photo", ar="كاميرات"
+        )
+        accessories = await self._cat(
+            "Accessories", "accessories", fr="Accessoires", ar="إكسسوارات"
+        )
 
         # --- catalog: (category, vendor, price_cents, image keyword, name) ----
         catalog = [
@@ -158,6 +172,28 @@ class DatabaseSeeder(Seeder):
             "Verge Charging Dock": "Station de charge Verge",
             "Verge Leather Sleeve": "Housse en cuir Verge",
         }
+        ar_names = {
+            "Eclipse Studio Headphones": "سماعات استوديو إكليبس",
+            "Pulse Wireless Earbuds": "سماعات بالس اللاسلكية",
+            "Drift Earbuds": "سماعات دريفت",
+            "Resonate Bookshelf Speaker": "مكبر صوت ريزونيت المكتبي",
+            "Nomad Portable Speaker": "مكبر صوت نوماد المحمول",
+            "Nimbus 5G Phone": "هاتف نيمبوس 5G",
+            "Aurora Phone": "هاتف أورورا",
+            "Vertex Mini": "فيرتكس ميني",
+            "Photon 14 Laptop": "حاسوب فوتون 14 المحمول",
+            "Photon 16 Pro": "فوتون 16 برو",
+            "Lumen 27 4K Monitor": "شاشة لومن 27 بدقة 4K",
+            "Lumen 32 Ultrawide": "شاشة لومن 32 العريضة",
+            "Orbit Smartwatch": "ساعة أوربِت الذكية",
+            "Orbit Sport": "أوربِت سبورت",
+            "Aperture X100 Camera": "كاميرا أبرتشر X100",
+            "Field Zoom Lens": "عدسة فيلد للتقريب",
+            "Cobalt Mechanical Keyboard": "لوحة مفاتيح كوبالت الميكانيكية",
+            "Cobalt Wireless Mouse": "فأرة كوبالت اللاسلكية",
+            "Verge Charging Dock": "قاعدة شحن فيرج",
+            "Verge Leather Sleeve": "حافظة جلدية من فيرج",
+        }
         for category, vendor_slug, price, keyword, name in catalog:
             product = await self._product(
                 name,
@@ -166,6 +202,7 @@ class DatabaseSeeder(Seeder):
                 price_cents=price,
                 published=True,
                 fr=fr_names.get(name),
+                ar=ar_names.get(name),
             )
             for _ in range(2):
                 await ProductVariantFactory().create(product_id=product.id)
@@ -211,10 +248,13 @@ class DatabaseSeeder(Seeder):
         parent: int | None = None,
         published: bool = True,
         fr: str | None = None,
+        ar: str | None = None,
     ) -> Category:
         translations: dict[str, dict[str, str]] = {"en": {"name": name}}
         if fr:
             translations["fr"] = {"name": fr}
+        if ar:
+            translations["ar"] = {"name": ar}
         return await Category.create(
             translations=translations, slug=slug, parent_id=parent, published=published
         )
@@ -228,6 +268,7 @@ class DatabaseSeeder(Seeder):
         price_cents: int,
         published: bool,
         fr: str | None = None,
+        ar: str | None = None,
     ) -> Product:
         slug = name.lower().replace(" ", "-")
         translations: dict[str, dict[str, str]] = {
@@ -240,6 +281,11 @@ class DatabaseSeeder(Seeder):
             translations["fr"] = {
                 "name": fr,
                 "description": f"{fr} — un design réfléchi, fait pour durer.",
+            }
+        if ar:
+            translations["ar"] = {
+                "name": ar,
+                "description": f"{ar} — تصميم مدروس، صُنع ليدوم.",
             }
         return await Product.create(
             translations=translations,

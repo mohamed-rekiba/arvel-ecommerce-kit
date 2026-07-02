@@ -38,7 +38,7 @@ async function submit() {
 </script>
 
 <template>
-  <div class="login">
+  <div class="login" dir="ltr">
     <div class="login__card">
       <div class="brand">
         <span class="brand__mark" aria-hidden="true" />

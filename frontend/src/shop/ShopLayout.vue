@@ -148,7 +148,7 @@ onMounted(() => {
 .ic { width: 44px; height: 44px; display: grid; place-items: center; border: 0; background: none; color: var(--text-muted); cursor: pointer; border-radius: var(--radius-full); position: relative; text-decoration: none; transition: color var(--motion-base), background var(--motion-base); }
 .ic:hover { color: var(--text); background: color-mix(in srgb, var(--text) 6%, transparent); }
 .ic svg { width: 19px; height: 19px; stroke: currentColor; fill: none; stroke-width: 1.6; stroke-linecap: round; stroke-linejoin: round; }
-.ic--cart .n { position: absolute; top: 4px; right: 4px; min-width: 16px; height: 16px; padding: 0 4px; background: var(--accent); color: var(--on-accent); border-radius: 999px; font-size: 10px; font-weight: 700; display: grid; place-items: center; }
+.ic--cart .n { position: absolute; top: 4px; inset-inline-end: 4px; min-width: 16px; height: 16px; padding: 0 4px; background: var(--accent); color: var(--on-accent); border-radius: 999px; font-size: 10px; font-weight: 700; display: grid; place-items: center; }
 
 .main { flex: 1; }
 

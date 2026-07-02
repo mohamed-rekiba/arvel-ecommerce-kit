@@ -255,7 +255,7 @@ onMounted(async () => {
 .fields input[aria-invalid="true"], .fields select[aria-invalid="true"] { border-color: var(--color-danger); }
 .fields__row { display: grid; grid-template-columns: 1fr 1fr; gap: var(--space-4); }
 .field-error { display: block; color: var(--color-danger); font-size: var(--text-xs); margin-top: var(--space-1); }
-.breakdown { margin: var(--space-6) auto var(--space-4); max-width: 320px; text-align: left; }
+.breakdown { margin: var(--space-6) auto var(--space-4); max-width: 320px; text-align: start; }
 .breakdown div { display: flex; justify-content: space-between; padding: var(--space-2) 0; font-size: var(--text-sm); }
 .breakdown__total { border-top: 1px solid var(--color-border); font-weight: 600; font-size: var(--text-base); }
 .breakdown dt { color: var(--color-text-muted); }

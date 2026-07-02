@@ -5,6 +5,7 @@ import { useRoute, useRouter } from "vue-router";
 import { type Category, type Product, api } from "../api";
 import { cacheList, cacheProducts, getCachedList } from "../product-cache";
 import ProductCard from "../components/ProductCard.vue";
+import { t } from "../locale";
 
 const route = useRoute();
 const router = useRouter();
@@ -16,11 +17,11 @@ const lastPage = ref(1);
 const status = ref<"loading" | "error" | "ready">("loading");
 
 const sortOptions = [
-  { label: "Featured", value: "featured" },
-  { label: "Price: low to high", value: "price_asc" },
-  { label: "Price: high to low", value: "price_desc" },
-  { label: "Newest", value: "newest" },
-  { label: "Name", value: "name" },
+  { label: t("sort.featured"), value: "featured" },
+  { label: t("sort.price_asc"), value: "price_asc" },
+  { label: t("sort.price_desc"), value: "price_desc" },
+  { label: t("sort.newest"), value: "newest" },
+  { label: t("sort.name"), value: "name" },
 ];
 
 // filters are the URL — shareable, and the header search drives ?q here
@@ -29,7 +30,7 @@ const q = computed(() => (route.query.q as string) || "");
 const sort = computed(() => (route.query.sort as string) || "featured");
 const page = computed(() => Number(route.query.page) || 1);
 const activeName = computed(
-  () => categories.value.find((c) => c.slug === activeCategory.value)?.translation.name ?? "All products",
+  () => categories.value.find((c) => c.slug === activeCategory.value)?.translation.name ?? t("catalog.all"),
 );
 
 // a cache key for THIS exact query, so a back-nav can repaint the same card set synchronously (the
@@ -79,11 +80,11 @@ watch(() => route.query, load);
   <div class="shop-page">
     <aside class="filters">
       <div class="filters__group">
-        <h3 class="filters__h">Categories</h3>
+        <h3 class="filters__h">{{ t("catalog.categories") }}</h3>
         <ul class="cats">
           <li>
             <button class="cat" :class="{ on: !activeCategory }" @click="setQuery({ category: undefined, page: undefined })">
-              All products
+              {{ t("catalog.all") }}
             </button>
           </li>
           <li v-for="c in categories" :key="c.id">
@@ -102,10 +103,10 @@ watch(() => route.query, load);
     <main class="results">
       <div class="results__head">
         <div>
-          <p class="eyebrow">Shop</p>
+          <p class="eyebrow">{{ t("catalog.eyebrow") }}</p>
           <h1>{{ activeName }}</h1>
           <p class="count">
-            <span v-if="status === 'ready'">{{ total }} {{ total === 1 ? "product" : "products" }}</span>
+            <span v-if="status === 'ready'">{{ total }} {{ total === 1 ? t("catalog.one") : t("catalog.many") }}</span>
             <span v-else>&nbsp;</span>
           </p>
         </div>
@@ -147,7 +148,7 @@ watch(() => route.query, load);
 .filters { position: static; }
 .filters__h { font-size: 11px; text-transform: uppercase; letter-spacing: .14em; color: var(--text-subtle); font-weight: 600; margin: 0 0 14px; }
 .cats { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: row; flex-wrap: wrap; gap: 2px; }
-.cat { display: block; width: 100%; text-align: left; border: 0; background: none; padding: 8px 10px; border-radius: var(--radius-md); font: inherit; font-size: 14px; color: var(--text-muted); cursor: pointer; transition: background var(--motion-base), color var(--motion-base); }
+.cat { display: block; width: 100%; text-align: start; border: 0; background: none; padding: 8px 10px; border-radius: var(--radius-md); font: inherit; font-size: 14px; color: var(--text-muted); cursor: pointer; transition: background var(--motion-base), color var(--motion-base); }
 .cat:hover { background: color-mix(in srgb, var(--text) 5%, transparent); color: var(--text); }
 .cat.on { background: color-mix(in srgb, var(--accent) 14%, transparent); color: var(--accent); font-weight: 600; }
 

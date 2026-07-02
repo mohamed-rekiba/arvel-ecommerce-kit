@@ -25,7 +25,11 @@ def client(tmp_path, monkeypatch):  # type: ignore[no-untyped-def]
             model.set_connection(db)
         vendor = await Vendor.create(name="Acme", slug="acme", published=True)
         cat = await Category.create(
-            translations={"en": {"name": "Phones"}, "fr": {"name": "Téléphones"}},
+            translations={
+                "en": {"name": "Phones"},
+                "fr": {"name": "Téléphones"},
+                "ar": {"name": "هواتف"},
+            },
             slug="phones",
             published=True,
         )
@@ -33,11 +37,22 @@ def client(tmp_path, monkeypatch):  # type: ignore[no-untyped-def]
             translations={
                 "en": {"name": "Aurora Phone", "description": "d"},
                 "fr": {"name": "Téléphone Aurora"},
+                "ar": {"name": "هاتف أورورا"},
             },
             slug="aurora",
             category_id=cat.id,
             vendor_id=vendor.id,
             price_cents=1000,
+            currency="USD",
+            status="active",
+            published=True,
+        )
+        await Product.create(
+            translations={"en": {"name": "Field Lens", "description": "d"}},
+            slug="field-lens",
+            category_id=cat.id,
+            vendor_id=vendor.id,
+            price_cents=2000,
             currency="USD",
             status="active",
             published=True,
@@ -72,3 +87,24 @@ def test_search_matches_the_current_locale(client) -> None:  # type: ignore[no-u
     # French query term matches the French name; the English term does not (in the fr locale)
     fr = client.get("/api/products?q=Aurora", headers={"Accept-Language": "fr"}).json()
     assert {p["slug"] for p in fr["data"]} == {"aurora"}
+
+
+def test_arabic_content_follows_accept_language(client) -> None:  # type: ignore[no-untyped-def]
+    ar = client.get("/api/products", headers={"Accept-Language": "ar"}).json()["data"]
+    by_slug = {p["slug"]: p["translation"]["name"] for p in ar}
+    assert by_slug["aurora"] == "هاتف أورورا"
+    # a product with no Arabic translation falls back to the default locale, not null
+    assert by_slug["field-lens"] == "Field Lens"
+    cats = client.get("/api/categories", headers={"Accept-Language": "ar"}).json()
+    assert cats[0]["translation"]["name"] == "هواتف"
+
+
+def test_search_matches_arabic_terms(client) -> None:  # type: ignore[no-untyped-def]
+    ar = client.get("/api/products?q=أورورا", headers={"Accept-Language": "ar"}).json()
+    assert {p["slug"] for p in ar["data"]} == {"aurora"}
+
+
+def test_unsupported_locale_falls_back_to_default(client) -> None:  # type: ignore[no-untyped-def]
+    # not in the whitelist → default-locale projection (and no SQL-path injection surface)
+    de = client.get("/api/products", headers={"Accept-Language": "de"}).json()["data"]
+    assert {p["translation"]["name"] for p in de} == {"Aurora Phone", "Field Lens"}
