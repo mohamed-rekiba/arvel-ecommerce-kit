@@ -1,18 +1,54 @@
 <script setup lang="ts">
-import { onMounted, ref, watch } from "vue";
+import { computed, onBeforeUnmount, onMounted, ref, watch } from "vue";
 import { useRoute, useRouter } from "vue-router";
+import { type Announcement, type Category, api, formatPrice } from "./api";
+import { useAuth } from "./auth";
 import { useCart } from "./cart";
 import { useWishlist } from "./wishlist";
 import { theme, toggleTheme } from "../lib/theme";
 import MobileNav from "./components/MobileNav.vue";
 
-const { count, refresh } = useCart();
+const { count, state: cartState, refresh } = useCart();
 const wishlist = useWishlist();
+const auth = useAuth();
 const router = useRouter();
 const route = useRoute();
-const scrolled = ref(false);
 
 import { LOCALES, locale, setLocale, t } from "./locale";
+
+const cartTotal = computed(() => {
+  const cart = cartState.cart;
+  if (!cart) return 0;
+  return cart.total_cents - (cart.discount_cents ?? 0);
+});
+
+// --- scoped search (the reference's category-dropdown + SEARCH bar) ----------------------------
+const categories = ref<Category[]>([]);
+const searchQ = ref(String(route.query.q ?? ""));
+const searchCat = ref("");
+function submitSearch() {
+  const query: Record<string, string> = {};
+  if (searchQ.value.trim()) query.q = searchQ.value.trim();
+  if (searchCat.value) query.category = searchCat.value;
+  router.push({ name: "catalog", query });
+}
+
+// --- collection dropdown (charcoal nav) --------------------------------------------------------
+const collOpen = ref(false);
+const collRef = ref<HTMLElement | null>(null);
+function onDocClick(e: MouseEvent) {
+  if (collRef.value && !collRef.value.contains(e.target as Node)) collOpen.value = false;
+}
+
+// --- announcement bar ---------------------------------------------------------------------------
+const announcement = ref<Announcement | null>(null);
+const dismissed = ref(false);
+const DISMISS_KEY = "arvel_announce_dismissed";
+const showAnnounce = computed(() => announcement.value !== null && !dismissed.value);
+function dismissAnnounce() {
+  if (announcement.value) localStorage.setItem(DISMISS_KEY, announcement.value.code);
+  dismissed.value = true;
+}
 
 const navOpen = ref(false);
 const navTrigger = ref<HTMLButtonElement | null>(null);
@@ -20,9 +56,10 @@ function closeNav() {
   navOpen.value = false;
   navTrigger.value?.focus();
 }
-// belt-and-suspenders: also close on any route change (covers a nav-link tap not routed through
-// MobileNav's own close emit, and guards against the drawer staying open across an unrelated navigation)
-watch(() => route.fullPath, () => { navOpen.value = false; });
+watch(() => route.fullPath, () => {
+  navOpen.value = false;
+  collOpen.value = false;
+});
 
 // Where the View Transitions API drives the animation (Chrome/Edge/Safari 18+) we let it own the
 // morph; elsewhere (Firefox / older Safari) we fall back to a plain Vue cross-fade. Keying the view by
@@ -32,37 +69,28 @@ const vtSupported = "startViewTransition" in Document.prototype;
 onMounted(() => {
   refresh();
   wishlist.refresh();
-  const onScroll = () => (scrolled.value = window.scrollY > 8);
-  window.addEventListener("scroll", onScroll, { passive: true });
-  onScroll();
+  document.addEventListener("click", onDocClick);
+  void api.categories().then((c) => (categories.value = c)).catch(() => {});
+  void api.announcement().then((a) => {
+    announcement.value = a;
+    dismissed.value = a !== null && localStorage.getItem(DISMISS_KEY) === a.code;
+  });
 });
+onBeforeUnmount(() => document.removeEventListener("click", onDocClick));
 </script>
 
 <template>
   <div class="shop">
-    <header class="hd" :class="{ 'hd--scrolled': scrolled }">
-      <div class="hd__in">
-        <button
-          ref="navTrigger"
-          class="ic hamburger"
-          @click="navOpen = !navOpen"
-          :aria-expanded="navOpen"
-          aria-controls="mobile-nav-panel"
-          :aria-label="t('a11y.menu')"
-        >
-          <svg v-if="!navOpen" viewBox="0 0 24 24"><path d="M4 7h16M4 12h16M4 17h16" /></svg>
-          <svg v-else viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18" /></svg>
-        </button>
-        <RouterLink to="/" class="word" :aria-label="t('a11y.home')">ARVEL</RouterLink>
-        <nav class="nav" :aria-label="t('a11y.primary')">
-          <RouterLink :to="{ name: 'catalog' }" :class="{ on: route.name === 'catalog' }">{{ t("nav.shop") }}</RouterLink>
-          <RouterLink to="/">{{ t("nav.collections") }}</RouterLink>
-          <RouterLink to="/">{{ t("nav.about") }}</RouterLink>
-        </nav>
-        <div class="tools">
-          <RouterLink :to="{ name: 'catalog' }" class="ic" :aria-label="t('nav.search')">
-            <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7" /><path d="M21 21l-4-4" /></svg>
-          </RouterLink>
+    <!-- utility topbar -->
+    <div class="tb">
+      <div class="tb__in">
+        <div class="tb__contact">
+          <span class="tb__welcome">{{ t("topbar.welcome") }}</span>
+          <a href="mailto:shop@arvel.test" class="tb__link">shop@arvel.test</a>
+          <span class="tb__link tb__phone" dir="ltr">+1 (086) 123-5678</span>
+        </div>
+        <div class="tb__tools">
+          <span class="tb__cur">USD</span>
           <div class="lang" role="group" :aria-label="t('a11y.language')">
             <button
               v-for="code in LOCALES"
@@ -75,31 +103,110 @@ onMounted(() => {
               {{ code.toUpperCase() }}
             </button>
           </div>
-          <button class="ic" @click="toggleTheme" :aria-label="theme === 'dark' ? t('a11y.theme_light') : t('a11y.theme_dark')">
-            <svg v-if="theme === 'dark'" viewBox="0 0 24 24"><circle cx="12" cy="12" r="4.5" /><path d="M12 2v3M12 19v3M2 12h3M19 12h3M5 5l2 2M17 17l2 2M19 5l-2 2M7 17l-2 2" /></svg>
-            <svg v-else viewBox="0 0 24 24"><path d="M20 14.5A8 8 0 1 1 9.5 4a6.5 6.5 0 0 0 10.5 10.5z" /></svg>
+          <button class="tb__theme" @click="toggleTheme" :aria-label="theme === 'dark' ? t('a11y.theme_light') : t('a11y.theme_dark')">
+            {{ theme === "dark" ? "☀" : "☾" }}
           </button>
-          <RouterLink to="/account" class="ic" :aria-label="t('nav.account')">
-            <svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="3.4" /><path d="M5 20a7 7 0 0 1 14 0" /></svg>
+        </div>
+      </div>
+    </div>
+
+    <!-- main header: logo · scoped search · account · cart -->
+    <header class="hd">
+      <div class="hd__in">
+        <button
+          ref="navTrigger"
+          class="ic hamburger"
+          @click="navOpen = !navOpen"
+          :aria-expanded="navOpen"
+          aria-controls="mobile-nav-panel"
+          :aria-label="t('a11y.menu')"
+        >
+          <svg v-if="!navOpen" viewBox="0 0 24 24"><path d="M4 7h16M4 12h16M4 17h16" /></svg>
+          <svg v-else viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18" /></svg>
+        </button>
+        <RouterLink to="/" class="brand" :aria-label="t('a11y.home')">
+          <span class="brand__name">Arvel<b>Shop</b></span>
+          <span class="brand__tag">{{ t("header.tagline") }}</span>
+        </RouterLink>
+
+        <form class="search" role="search" @submit.prevent="submitSearch">
+          <input
+            v-model.trim="searchQ"
+            type="search"
+            class="search__input"
+            :placeholder="t('header.search_ph')"
+            :aria-label="t('nav.search')"
+          />
+          <select v-model="searchCat" class="search__cat" :aria-label="t('header.all_categories')">
+            <option value="">{{ t("header.all_categories") }}</option>
+            <option v-for="c in categories" :key="c.id" :value="c.slug">{{ c.translation.name }}</option>
+          </select>
+          <button type="submit" class="search__go">{{ t("header.search") }}</button>
+        </form>
+
+        <div class="hd__tools">
+          <RouterLink to="/account" class="who">
+            <svg viewBox="0 0 24 24" class="who__ic"><circle cx="12" cy="8" r="3.4" /><path d="M5 20a7 7 0 0 1 14 0" /></svg>
+            <span class="who__meta">
+              <b>{{ auth.state.customer ? t("header.greeting", { name: auth.state.customer.name.split(" ")[0] }) : t("header.guest") }}</b>
+              <i>{{ auth.state.customer ? t("account.eyebrow") : t("header.login_register") }}</i>
+            </span>
           </RouterLink>
-          <RouterLink to="/cart" class="ic ic--cart" :aria-label="t('nav.cart')">
-            <svg viewBox="0 0 24 24"><path d="M6 8h12l-1 12H7z" /><path d="M9 8a3 3 0 0 1 6 0" /></svg>
-            <span v-if="count" class="n">{{ count }}</span>
+          <RouterLink to="/cart" class="cartw" :aria-label="t('nav.cart')">
+            <span class="cartw__ic">
+              <svg viewBox="0 0 24 24"><path d="M6 8h12l-1 12H7z" /><path d="M9 8a3 3 0 0 1 6 0" /></svg>
+              <span v-if="count" class="n">{{ count }}</span>
+            </span>
+            <span class="who__meta">
+              <b>{{ t("header.your_cart") }}</b>
+              <i class="tnum">{{ formatPrice(cartTotal) }}</i>
+            </span>
           </RouterLink>
         </div>
       </div>
     </header>
 
-    <MobileNav :open="navOpen" @close="closeNav" />
+    <!-- charcoal nav -->
+    <nav class="nv" :aria-label="t('a11y.primary')">
+      <div class="nv__in">
+        <div class="nv__links">
+          <RouterLink to="/" class="nv__a" exact-active-class="on">{{ t("nav.home") }}</RouterLink>
+          <RouterLink :to="{ name: 'catalog' }" class="nv__a" :class="{ on: route.name === 'catalog' }">{{ t("nav.shop") }}</RouterLink>
+          <div ref="collRef" class="nv__dd">
+            <button class="nv__a nv__dd-btn" :aria-expanded="collOpen" @click="collOpen = !collOpen" @keydown.escape="collOpen = false">
+              {{ t("nav.collections") }} <span aria-hidden="true">▾</span>
+            </button>
+            <div v-if="collOpen" class="nv__menu">
+              <RouterLink
+                v-for="c in categories"
+                :key="c.id"
+                class="nv__mi"
+                :to="{ name: 'catalog', query: { category: c.slug } }"
+              >
+                {{ c.translation.name }}
+              </RouterLink>
+            </div>
+          </div>
+          <RouterLink to="/deals" class="nv__a" active-class="on">{{ t("nav.deals") }}</RouterLink>
+          <RouterLink to="/" class="nv__a">{{ t("nav.about") }}</RouterLink>
+        </div>
+        <RouterLink to="/deals" class="nv__special">{{ t("nav.special") }}</RouterLink>
+      </div>
+    </nav>
+
+    <!-- announcement (live coupon) -->
+    <div v-if="showAnnounce && announcement" class="ann">
+      <p class="ann__txt">
+        🎁 {{ t("announce.text") }} <b class="ann__code">{{ announcement.code }}</b>
+        <template v-if="announcement.type === 'percent'"> — {{ t("announce.percent", { n: announcement.value }) }}</template>
+      </p>
+      <button class="ann__x" :aria-label="t('announce.dismiss')" @click="dismissAnnounce">✕</button>
+    </div>
+
+    <MobileNav :open="navOpen" :categories="categories" @close="closeNav" />
 
     <main class="main">
       <RouterView v-slot="{ Component }">
-        <!-- VT API supported: render the view DIRECTLY. A Vue <transition> co-mounts the leaving +
-             entering views, so both the old card image and the new PDP image would briefly share
-             `view-transition-name: product-N` in one snapshot — the API forbids duplicate names and
-             aborts the morph. The API (lib/transitions.ts) owns the animation here; the Vue fade is
-             only the no-VT fallback. (The morph target on BOTH directions comes from the list/detail
-             views seeding synchronously from product-cache in setup(), not from KeepAlive.) -->
         <component :is="Component" v-if="vtSupported" :key="route.path" />
         <transition v-else name="fade" mode="out-in">
           <component :is="Component" :key="route.path" />
@@ -110,7 +217,7 @@ onMounted(() => {
     <footer class="ft">
       <div class="ft__top">
         <div class="ft__brand">
-          <div class="word word--ft">ARVEL</div>
+          <div class="brand__name brand__name--ft">Arvel<b>Shop</b></div>
           <p>{{ t("footer.tagline") }}</p>
         </div>
         <div class="ft__cols">
@@ -130,50 +237,87 @@ onMounted(() => {
 <style scoped>
 .shop { min-height: 100vh; display: flex; flex-direction: column; background: var(--bg); }
 
-/* header — one quiet row */
-.hd { position: sticky; top: 0; z-index: var(--z-header); background: color-mix(in srgb, var(--bg) 86%, transparent); backdrop-filter: saturate(140%) blur(14px); transition: border-color var(--motion-base), background var(--motion-base); border-bottom: 1px solid transparent; }
-.hd--scrolled { border-bottom-color: var(--border); }
-/* mobile-first base: hamburger (first, left) — logo — tools, no center nav column, a shorter header
-   row. `.nav` is display:none here and `.hamburger` is display:none at ≥640px, so grid auto-placement
-   naturally packs whichever 3 items are actually visible into these 3 tracks — no explicit grid-column
-   needed on either breakpoint. */
-.hd__in { max-width: 1280px; margin: 0 auto; padding: 0 clamp(1.25rem, 5vw, 3.5rem); height: var(--topbar-h); display: grid; grid-template-columns: auto 1fr auto; align-items: center; gap: 4px; }
-.word { font-family: var(--font-display); font-weight: 700; font-size: 20px; letter-spacing: .34em; color: var(--text); text-decoration: none; }
-.nav { display: none; gap: 34px; justify-self: center; }
-.nav a { font-size: 12px; letter-spacing: .12em; text-transform: uppercase; font-weight: 500; color: var(--text-muted); text-decoration: none; transition: color var(--motion-base); }
-.nav a:hover, .nav a.on { color: var(--text); }
-.tools { display: flex; align-items: center; gap: 6px; justify-self: end; }
-/* icon buttons: padding grows the tap target to the 44px spec without enlarging the glyph itself
-   (DESIGN.md: "interactive targets ≥44×44px on touch (icon buttons get padding)") */
-.ic { width: 44px; height: 44px; display: grid; place-items: center; border: 0; background: none; color: var(--text-muted); cursor: pointer; border-radius: var(--radius-full); position: relative; text-decoration: none; transition: color var(--motion-base), background var(--motion-base); }
-.ic:hover { color: var(--text); background: color-mix(in srgb, var(--text) 6%, transparent); }
-.ic svg { width: 19px; height: 19px; stroke: currentColor; fill: none; stroke-width: 1.6; stroke-linecap: round; stroke-linejoin: round; }
-.ic--cart .n { position: absolute; top: 4px; inset-inline-end: 4px; min-width: 16px; height: 16px; padding: 0 4px; background: var(--accent); color: var(--on-accent); border-radius: 999px; font-size: 10px; font-weight: 700; display: grid; place-items: center; }
+/* utility topbar */
+.tb { background: var(--surface-2); border-bottom: 1px solid var(--border); font-size: 12px; }
+.tb__in { max-width: 1320px; margin: 0 auto; padding: 6px clamp(1rem, 4vw, 2.5rem); display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+.tb__contact { display: none; align-items: center; gap: 18px; color: var(--text-muted); }
+.tb__welcome { font-weight: 500; }
+.tb__link { color: var(--text-muted); text-decoration: none; }
+.tb__phone { unicode-bidi: isolate; }
+.tb__tools { display: flex; align-items: center; gap: 12px; margin-inline-start: auto; }
+.tb__cur { color: var(--text-subtle); font-weight: 600; letter-spacing: .04em; }
+.lang { display: flex; gap: 2px; }
+.lang__opt { border: 0; background: none; font: inherit; font-size: 11px; font-weight: 700; color: var(--text-muted); padding: 3px 7px; border-radius: var(--radius-full); cursor: pointer; }
+.lang__opt.on { background: var(--text); color: var(--bg); }
+.tb__theme { border: 0; background: none; font-size: 13px; cursor: pointer; color: var(--text-muted); padding: 2px 4px; }
 
-.main { flex: 1; }
+/* header */
+.hd { background: var(--surface); border-bottom: 1px solid var(--border); }
+.hd__in { max-width: 1320px; margin: 0 auto; padding: 14px clamp(1rem, 4vw, 2.5rem); display: grid; grid-template-columns: auto auto 1fr auto; align-items: center; gap: clamp(.75rem, 2.5vw, 2rem); }
+.hamburger { display: grid; }
+.ic { width: 44px; height: 44px; border: 0; background: none; place-items: center; color: var(--text); cursor: pointer; }
+.ic svg { width: 22px; height: 22px; stroke: currentColor; fill: none; stroke-width: 1.8; }
+.brand { text-decoration: none; color: var(--text); display: flex; flex-direction: column; line-height: 1.1; }
+.brand__name { font-family: var(--font-display); font-weight: 800; font-size: 22px; letter-spacing: -.01em; }
+.brand__name b { color: var(--accent-text); }
+.brand__tag { font-size: 10.5px; color: var(--text-subtle); }
+.search { display: none; grid-template-columns: 1fr auto auto; border: 2px solid var(--text); border-radius: var(--radius-full); overflow: hidden; background: var(--surface); max-width: 620px; width: 100%; justify-self: center; }
+.search__input { border: 0 !important; background: transparent !important; padding: 0 18px; height: 42px; font: inherit; font-size: 14px; min-width: 0; }
+.search__input:focus { outline: none; }
+.search__cat { border: 0 !important; border-inline-start: 1px solid var(--border) !important; border-radius: 0 !important; background: transparent !important; font-size: 13px; color: var(--text-muted); padding: 0 10px; max-width: 150px; }
+.search__go { border: 0; background: var(--accent); color: var(--on-accent); font: inherit; font-size: 13px; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; padding: 0 22px; cursor: pointer; }
+.search__go:hover { background: var(--accent-hover); }
+.hd__tools { display: flex; align-items: center; gap: clamp(.5rem, 2vw, 1.5rem); }
+.who, .cartw { display: flex; align-items: center; gap: 10px; text-decoration: none; color: var(--text); }
+.who__ic { width: 26px; height: 26px; stroke: currentColor; fill: none; stroke-width: 1.7; }
+.who__meta { display: none; flex-direction: column; line-height: 1.25; }
+.who__meta b { font-size: 13px; font-weight: 600; }
+.who__meta i { font-style: normal; font-size: 11.5px; color: var(--text-muted); }
+.cartw__ic { position: relative; display: grid; place-items: center; width: 34px; height: 34px; }
+.cartw__ic svg { width: 26px; height: 26px; stroke: currentColor; fill: none; stroke-width: 1.7; }
+.n { position: absolute; top: -3px; inset-inline-end: -5px; min-width: 17px; height: 17px; padding: 0 4px; background: var(--accent-bright); color: var(--on-accent-bright); border-radius: var(--radius-full); font-size: 10.5px; font-weight: 800; display: grid; place-items: center; }
 
-/* footer — airy, minimal. Mobile-first base: everything stacks to a single column. */
-.ft { margin-top: clamp(4rem, 10vw, 8rem); border-top: 1px solid var(--border); }
-.ft__top { max-width: 1280px; margin: 0 auto; padding: clamp(3rem, 6vw, 5rem) clamp(1.25rem, 5vw, 3.5rem) clamp(2rem, 4vw, 3rem); display: grid; grid-template-columns: 1fr; gap: 40px; }
-.word--ft { letter-spacing: .34em; font-size: 18px; margin-bottom: 16px; }
-.ft__brand p { color: var(--text-muted); font-size: 14px; max-width: 30ch; line-height: 1.6; }
+/* charcoal nav */
+.nv { background: var(--nav-bg); display: none; }
+.nv__in { max-width: 1320px; margin: 0 auto; padding: 0 clamp(1rem, 4vw, 2.5rem); display: flex; align-items: stretch; justify-content: space-between; }
+.nv__links { display: flex; align-items: stretch; }
+.nv__a { display: flex; align-items: center; gap: 6px; padding: 13px 16px; color: var(--nav-text); font-size: 12.5px; font-weight: 700; letter-spacing: .07em; text-transform: uppercase; text-decoration: none; border: 0; background: none; font-family: var(--font-text); cursor: pointer; }
+.nv__a:hover, .nv__a.on { color: var(--nav-text-hi); }
+.nv__a.on { box-shadow: inset 0 -2px 0 var(--nav-active); }
+.nv__dd { position: relative; display: flex; }
+.nv__menu { position: absolute; top: 100%; inset-inline-start: 0; z-index: var(--z-dropdown); min-width: 230px; background: var(--surface); border: 1px solid var(--border); border-radius: 0 0 var(--radius-md) var(--radius-md); box-shadow: var(--shadow-3); padding: 6px 0; }
+.nv__mi { display: block; padding: 9px 18px; font-size: 13.5px; color: var(--text); text-decoration: none; }
+.nv__mi:hover { background: var(--surface-2); color: var(--accent-text); }
+.nv__special { display: flex; align-items: center; padding: 13px 0; color: var(--nav-active); font-size: 12.5px; font-weight: 800; letter-spacing: .07em; text-transform: uppercase; text-decoration: none; }
+
+/* announcement */
+.ann { background: var(--accent-bright); color: var(--on-accent-bright); display: flex; align-items: center; justify-content: center; gap: 12px; padding: 8px clamp(1rem, 4vw, 2.5rem); }
+.ann__txt { margin: 0; font-size: 13px; font-weight: 600; text-align: center; }
+.ann__code { font-family: var(--font-mono); font-weight: 800; letter-spacing: .04em; background: color-mix(in srgb, var(--on-accent-bright) 12%, transparent); padding: 1px 8px; border-radius: var(--radius-sm); }
+.ann__x { border: 0; background: none; color: var(--on-accent-bright); font-size: 13px; cursor: pointer; padding: 4px 6px; }
+
+.main { flex: 1; background: var(--canvas); }
+
+/* footer */
+.ft { border-top: 1px solid var(--border); background: var(--surface); }
+.ft__top { max-width: 1320px; margin: 0 auto; padding: clamp(2.5rem, 5vw, 4rem) clamp(1rem, 4vw, 2.5rem) clamp(1.5rem, 3vw, 2.5rem); display: grid; grid-template-columns: 1fr; gap: 36px; }
+.brand__name--ft { font-size: 20px; }
+.ft__brand p { color: var(--text-muted); font-size: 14px; max-width: 30ch; line-height: 1.6; margin-top: 10px; }
 .ft__cols { display: grid; grid-template-columns: 1fr; gap: 24px; }
-.ft__cols h4 { font-size: 11px; text-transform: uppercase; letter-spacing: .14em; color: var(--text-subtle); margin: 0 0 14px; font-weight: 600; }
+.ft__cols h4 { font-size: 11px; text-transform: uppercase; letter-spacing: .14em; color: var(--text-subtle); margin: 0 0 14px; font-weight: 700; }
 .ft__cols a { display: block; font-size: 14px; color: var(--text-muted); text-decoration: none; padding: 5px 0; transition: color var(--motion-base); }
-.ft__cols a:hover { color: var(--text); }
-.ft__base { max-width: 1280px; margin: 0 auto; padding: 22px clamp(1.25rem, 5vw, 3.5rem); border-top: 1px solid var(--border); display: flex; justify-content: space-between; font-size: 12px; color: var(--text-subtle); }
+.ft__cols a:hover { color: var(--accent-text); }
+.ft__base { border-top: 1px solid var(--border); max-width: 1320px; margin: 0 auto; padding: 18px clamp(1rem, 4vw, 2.5rem); display: flex; align-items: center; justify-content: space-between; gap: 12px; font-size: 12.5px; color: var(--text-subtle); }
 
 @media (min-width: 640px) {
-  .hd__in { height: 76px; grid-template-columns: 1fr auto 1fr; }
-  .nav { display: flex; }
-  .hamburger { display: none; }
-  .ft__cols { grid-template-columns: 1fr 1fr; }
+  .search { display: grid; }
+  .who__meta { display: flex; }
 }
 @media (min-width: 1024px) {
-  .ft__top { grid-template-columns: 1.4fr 2fr; }
+  .tb__contact { display: flex; }
+  .nv { display: block; }
+  .hamburger { display: none; }
   .ft__cols { grid-template-columns: repeat(3, 1fr); }
+  .ft__top { grid-template-columns: 1.2fr 2fr; }
 }
-.lang { display: inline-flex; border: 1px solid var(--color-border); border-radius: var(--radius-full, 999px); overflow: hidden; }
-.lang__opt { background: none; border: 0; font: inherit; font-size: var(--text-xs); font-weight: 600; letter-spacing: 0.04em; padding: var(--space-1) var(--space-2); cursor: pointer; color: var(--color-text-muted); }
-.lang__opt.on { background: var(--color-text); color: var(--color-bg); }
 </style>

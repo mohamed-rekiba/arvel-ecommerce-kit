@@ -1,6 +1,7 @@
 import { createRouter, createWebHistory } from "vue-router";
 import { installViewTransitions } from "./lib/transitions";
 import ShopLayout from "./shop/ShopLayout.vue";
+import DealsView from "./shop/views/DealsView.vue";
 import HomeView from "./shop/views/HomeView.vue";
 import CatalogView from "./shop/views/CatalogView.vue";
 import ProductDetailView from "./shop/views/ProductDetailView.vue";
@@ -20,6 +21,9 @@ const admin = {
   callback: () => import("./admin/views/CallbackView.vue"),
   dashboard: () => import("./admin/views/DashboardView.vue"),
   products: () => import("./admin/views/ProductsView.vue"),
+  deals: () => import("./admin/views/DealsView.vue"),
+  banners: () => import("./admin/views/BannersView.vue"),
+  coupons: () => import("./admin/views/CouponsView.vue"),
   productEdit: () => import("./admin/views/ProductEditView.vue"),
   categories: () => import("./admin/views/CategoriesView.vue"),
   vendors: () => import("./admin/views/VendorsView.vue"),
@@ -43,6 +47,7 @@ const router = createRouter({
       children: [
         { path: "", name: "home", component: HomeView },
         { path: "catalog", name: "catalog", component: CatalogView },
+        { path: "deals", name: "deals", component: DealsView },
         { path: "products/:slug", name: "product", component: ProductDetailView },
         { path: "cart", name: "cart", component: CartView },
         { path: "checkout", name: "checkout", component: CheckoutView },
@@ -63,6 +68,9 @@ const router = createRouter({
         { path: "", redirect: "/admin/dashboard" },
         { path: "dashboard", component: admin.dashboard },
         { path: "products", component: admin.products },
+      { path: "deals", component: admin.deals },
+      { path: "banners", component: admin.banners },
+      { path: "coupons", component: admin.coupons },
         { path: "products/:id", component: admin.productEdit },
         { path: "categories", component: admin.categories },
         { path: "vendors", component: admin.vendors },

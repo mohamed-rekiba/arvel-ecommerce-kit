@@ -42,6 +42,7 @@ const form = reactive({
   category_id: 1,
   status: "draft",
   published: false,
+  featured: false,
   translations: {
     en: { name: "", description: "" },
     fr: { name: "", description: "" },
@@ -95,6 +96,7 @@ async function load() {
       form.category_id = detail.category_id;
       form.status = detail.status;
       form.published = detail.published;
+      form.featured = detail.featured;
       for (const tr of detail.translations) {
         if (tr.locale && (LOCALES as readonly string[]).includes(tr.locale)) {
           form.translations[tr.locale as Locale] = { name: tr.name, description: tr.description ?? "" };
@@ -152,6 +154,7 @@ async function save() {
         price_cents: form.price_cents,
         status: form.status,
         published: form.published,
+        featured: form.featured,
         translations: translationsPayload(),
       });
       notice.value = t("pedit.saved");
@@ -292,6 +295,10 @@ onMounted(load);
           <label class="field field--switch" v-if="!isCreate">
             <span>{{ t("categories.published") }}</span>
             <ToggleSwitch v-model="form.published" />
+          </label>
+          <label class="field field--switch" v-if="!isCreate">
+            <span>{{ t("pedit.featured") }}</span>
+            <ToggleSwitch v-model="form.featured" />
           </label>
         </div>
 
