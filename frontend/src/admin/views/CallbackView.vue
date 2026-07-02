@@ -26,7 +26,7 @@ onMounted(async () => {
 </script>
 
 <template>
-  <div class="callback">
+  <div class="callback" dir="ltr">
     <div v-if="error" class="callback__box">
       <p class="callback__error">{{ error }}</p>
       <RouterLink class="btn" to="/admin/login">Back to sign in</RouterLink>

@@ -128,7 +128,7 @@ onMounted(refresh);
 .qty { display: inline-flex; align-items: center; gap: var(--space-3); border: 1px solid var(--color-border-strong); border-radius: var(--radius-full); padding: var(--space-1) var(--space-2); }
 .qty button { width: 1.75rem; height: 1.75rem; border: none; background: none; cursor: pointer; font-size: var(--text-lg); color: var(--color-text); border-radius: var(--radius-full); }
 .qty button:hover { background: var(--color-surface); }
-.line__total { font-weight: var(--weight-medium); min-width: 4rem; text-align: right; }
+.line__total { font-weight: var(--weight-medium); min-width: 4rem; text-align: end; }
 .summary { background: var(--color-surface); border-radius: var(--radius-lg); padding: var(--space-8); }
 /* sticky only makes sense once the summary is an actual side column (the ≥1024px 2-col cart__grid) */
 @media (min-width: 1024px) { .summary { position: sticky; top: 88px; } }
@@ -143,7 +143,7 @@ onMounted(refresh);
 .state .btn { margin-top: var(--space-4); }
 .coupon { display: flex; gap: var(--space-2); margin: var(--space-3) 0; }
 .coupon input { flex: 1; padding: var(--space-2) var(--space-3); border: 1px solid var(--color-border); border-radius: var(--radius-md); background: var(--color-bg); color: var(--color-text); font: inherit; }
-.coupon__remove { background: none; border: 0; padding: 0; margin-left: var(--space-2); font-size: var(--text-xs); text-decoration: underline; cursor: pointer; color: var(--color-text-muted); }
+.coupon__remove { background: none; border: 0; padding: 0; margin-inline-start: var(--space-2); font-size: var(--text-xs); text-decoration: underline; cursor: pointer; color: var(--color-text-muted); }
 .coupon__error { color: var(--color-danger); font-size: var(--text-xs); margin: 0 0 var(--space-2); }
 .summary__row--discount { color: var(--color-success, #2e7d32); }
 </style>

@@ -8,7 +8,6 @@ from typing import Any, ClassVar, TypedDict
 
 from arvel import Model
 from arvel.database import SoftDeletes
-from arvel.localization import current_locale
 from arvel.media import HasMedia, MediaConversion
 
 from app.models.product_media import ProductMedia
@@ -16,14 +15,10 @@ from arvel.search import Searchable
 
 from app.casts.translations import TranslationCast, TranslationsCast
 from app.enums import ProductStatus
+from app.i18n import DEFAULT_LOCALE, SUPPORTED_LOCALES, active_locale
 from app.schemas import Translate
 
 IMAGES = "images"  # the product image gallery collection
-SUPPORTED_LOCALES = {
-    "en",
-    "fr",
-}  # storefront locales; whitelisted → no SQL injection via Accept-Language
-DEFAULT_LOCALE = "en"
 
 
 class TranslationDoc(TypedDict):
@@ -83,9 +78,7 @@ class Product(HasMedia, Searchable, Model, SoftDeletes):
     def scope_in_locale(self, query: Any, locale: str | None = None) -> Any:
         """Project ONLY the active locale's object as `translation` (Translate cast), not the whole
         translations map — `translations->'<locale>'` with a fallback to the default locale."""
-        loc = locale or current_locale.get()
-        if loc not in SUPPORTED_LOCALES:
-            loc = DEFAULT_LOCALE
+        loc = locale if locale in SUPPORTED_LOCALES else active_locale()
         return query.select_raw(Product._LOCALE_COLUMNS).select_raw(
             f"COALESCE(translations->'{loc}', translations->'{DEFAULT_LOCALE}') AS translation"
         )

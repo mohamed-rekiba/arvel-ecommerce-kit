@@ -318,12 +318,12 @@ onMounted(async () => {
 /* grid items default to min-width:auto (sized to content); without this the flexible first column
    can refuse to shrink below its content's intrinsic width and overflow on a narrow phone. */
 .order > div { min-width: 0; }
-.order__id { font-family: var(--font-display); font-size: var(--text-lg); margin-right: var(--space-3); }
+.order__id { font-family: var(--font-display); font-size: var(--text-lg); margin-inline-end: var(--space-3); }
 .order__items { color: var(--color-text-muted); font-size: var(--text-sm); }
 .order__status { padding: 2px var(--space-3); background: var(--color-accent-soft); color: var(--color-accent); border-radius: var(--radius-full); font-size: var(--text-xs); text-transform: capitalize; }
-.order__total { font-weight: var(--weight-medium); min-width: 4rem; text-align: right; }
+.order__total { font-weight: var(--weight-medium); min-width: 4rem; text-align: end; }
 .muted { color: var(--color-text-muted); }
-.verified { color: var(--color-success, #2e7d32); font-size: var(--text-xs); font-weight: 600; margin-left: var(--space-2); }
+.verified { color: var(--color-success, #2e7d32); font-size: var(--text-xs); font-weight: 600; margin-inline-start: var(--space-2); }
 .verify-note { background: var(--color-surface); border: 1px solid var(--color-border); border-radius: var(--radius-md); padding: var(--space-3) var(--space-4); font-size: var(--text-sm); margin: var(--space-4) 0; }
 .linklike { background: none; border: none; padding: 0; color: inherit; text-decoration: underline; cursor: pointer; font: inherit; }
 .panel { background: var(--color-surface); border-radius: var(--radius-lg); padding: var(--space-6); margin: var(--space-6) 0; }

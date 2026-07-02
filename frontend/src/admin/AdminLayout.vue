@@ -17,7 +17,8 @@ function signOut() {
 </script>
 
 <template>
-  <div class="console">
+  <!-- the console is English-only chrome: pin LTR so a shopper-side Arabic locale doesn't mirror it -->
+  <div class="console" dir="ltr">
     <aside class="side">
       <div class="brand"><span class="mk">A</span>Arvel Console</div>
       <div class="store">Odama Electronics Store</div>

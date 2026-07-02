@@ -44,11 +44,11 @@ watch(
   background: color-mix(in srgb, var(--ink-900) 45%, transparent);
 }
 .mnav__panel {
-  position: fixed; top: 0; left: 0; bottom: 0; z-index: var(--z-modal);
+  position: fixed; top: 0; inset-inline-start: 0; bottom: 0; z-index: var(--z-modal);
   width: min(78vw, 320px);
   display: flex; flex-direction: column; gap: 4px;
   padding: calc(var(--space-8) + env(safe-area-inset-top, 0px)) var(--space-6) var(--space-8);
-  background: var(--bg); border-right: 1px solid var(--border);
+  background: var(--bg); border-inline-end: 1px solid var(--border);
   box-shadow: var(--shadow-3);
 }
 .mnav__link {
@@ -66,6 +66,7 @@ watch(
 .mnav-enter-active .mnav__panel, .mnav-leave-active .mnav__panel { transition: transform var(--motion-slow) var(--ease-out); }
 .mnav-enter-active .mnav__backdrop, .mnav-leave-active .mnav__backdrop { transition: opacity var(--motion-base) var(--ease-out); }
 .mnav-enter-from .mnav__panel, .mnav-leave-to .mnav__panel { transform: translateX(-100%); }
+[dir="rtl"] .mnav-enter-from .mnav__panel, [dir="rtl"] .mnav-leave-to .mnav__panel { transform: translateX(100%); }
 .mnav-enter-from .mnav__backdrop, .mnav-leave-to .mnav__backdrop { opacity: 0; }
 
 @media (min-width: 640px) { .mnav { display: none; } }

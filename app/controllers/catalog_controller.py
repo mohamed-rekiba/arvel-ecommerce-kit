@@ -9,10 +9,10 @@ from typing import Any
 
 from arvel import config
 from arvel.http import Request
-from arvel.localization import current_locale
 from arvel.media import Media
 
 from app.enums import ProductStatus
+from app.i18n import active_locale
 from app.models.category import Category
 from app.models.product import IMAGES, Product
 from app.schemas import (
@@ -39,9 +39,7 @@ async def _apply_search(query: Any, q: str) -> Any:
         return query.where_in(
             "id", [h.id for h in hits] or [0]
         )  # empty hits → match nothing
-    return query.where_json_like(
-        "translations", f"{current_locale.get()}->name", f"%{q}%"
-    )
+    return query.where_json_like("translations", f"{active_locale()}->name", f"%{q}%")
 
 
 def variant_out(v: Product) -> VariantOut:

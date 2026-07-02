@@ -283,7 +283,7 @@ watch(() => route.params.slug, load);
 .review { padding: var(--space-4) 0; border-bottom: 1px solid var(--color-border); }
 .review__head { display: flex; gap: var(--space-3); align-items: baseline; }
 .review__stars { color: var(--color-warning, #b45309); letter-spacing: 2px; }
-.review__author { font-size: var(--text-xs); color: var(--color-text-muted); margin-left: auto; }
+.review__author { font-size: var(--text-xs); color: var(--color-text-muted); margin-inline-start: auto; }
 .review__body { margin: var(--space-2) 0 0; font-size: var(--text-sm); }
 .reviews__mine { background: var(--color-surface); border: 1px solid var(--color-border); border-radius: var(--radius-md); padding: var(--space-3) var(--space-4); font-size: var(--text-sm); margin-top: var(--space-4); }
 .reviews__form { margin-top: var(--space-6); display: grid; gap: var(--space-3); max-width: 420px; }

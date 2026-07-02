@@ -4,12 +4,9 @@ from typing import Any, ClassVar
 
 from arvel import Model
 from arvel.database import SoftDeletes
-from arvel.localization import current_locale
 
 from app.casts.translations import TranslationCast, TranslationsCast
-
-SUPPORTED_LOCALES = {"en", "fr"}
-DEFAULT_LOCALE = "en"
+from app.i18n import DEFAULT_LOCALE, SUPPORTED_LOCALES, active_locale
 
 
 class Category(Model, SoftDeletes):
@@ -47,9 +44,7 @@ class Category(Model, SoftDeletes):
 
     def scope_in_locale(self, query: Any, locale: str | None = None) -> Any:
         """Project only the active locale's object as `translation` (not the whole translations map)."""
-        loc = locale or current_locale.get()
-        if loc not in SUPPORTED_LOCALES:
-            loc = DEFAULT_LOCALE
+        loc = locale if locale in SUPPORTED_LOCALES else active_locale()
         return query.select_raw(Category._LOCALE_COLUMNS).select_raw(
             f"COALESCE(translations->'{loc}', translations->'{DEFAULT_LOCALE}') AS translation"
         )

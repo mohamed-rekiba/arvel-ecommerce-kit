@@ -3,6 +3,7 @@ import { computed, ref } from "vue";
 import { useRouter } from "vue-router";
 import { type Product, authToken, formatPrice } from "../api";
 import { useCart } from "../cart";
+import { t } from "../locale";
 import { useWishlist } from "../wishlist";
 
 const props = defineProps<{ product: Product }>();
@@ -60,9 +61,9 @@ async function addToBag() {
       >
         {{ saved ? "♥" : "♡" }}
       </button>
-      <span v-if="soldOut" class="media__out">Sold out</span>
+      <span v-if="soldOut" class="media__out">{{ t("card.soldout") }}</span>
       <button v-else class="add" :disabled="busy" @click.prevent.stop="addToBag">
-        {{ busy ? "Adding…" : "Add to bag" }}
+        {{ busy ? t("card.adding") : t("card.add") }}
       </button>
     </RouterLink>
     <div class="info">
@@ -79,10 +80,10 @@ async function addToBag() {
 .media img { width: 100%; height: 100%; object-fit: cover; transition: transform 1s var(--ease-out); }
 .card:hover .media img { transform: scale(1.045); }
 .media__ph { width: 100%; height: 100%; background: linear-gradient(150deg, var(--surface-2), color-mix(in srgb, var(--accent) 8%, var(--surface-2))); }
-.media__out { position: absolute; top: 14px; left: 14px; background: color-mix(in srgb, var(--bg) 85%, transparent); color: var(--text-muted); font-size: 11px; font-weight: 600; letter-spacing: .04em; text-transform: uppercase; padding: 5px 11px; border-radius: var(--radius-full); backdrop-filter: blur(6px); }
+.media__out { position: absolute; top: 14px; inset-inline-start: 14px; background: color-mix(in srgb, var(--bg) 85%, transparent); color: var(--text-muted); font-size: 11px; font-weight: 600; letter-spacing: .04em; text-transform: uppercase; padding: 5px 11px; border-radius: var(--radius-full); backdrop-filter: blur(6px); }
 /* 44px per DESIGN.md's touch-target spec (was 34px); inset tightened so the visual gap to the
    card's rounded corner stays about the same as before. */
-.heart { position: absolute; top: 8px; right: 8px; width: 44px; height: 44px; border-radius: 999px; border: 0; background: color-mix(in srgb, var(--bg) 82%, transparent); backdrop-filter: blur(6px); color: var(--text-muted); font-size: 15px; line-height: 1; cursor: pointer; display: grid; place-items: center; box-shadow: var(--shadow-1); transition: color var(--motion-base), transform var(--motion-base); }
+.heart { position: absolute; top: 8px; inset-inline-end: 8px; width: 44px; height: 44px; border-radius: 999px; border: 0; background: color-mix(in srgb, var(--bg) 82%, transparent); backdrop-filter: blur(6px); color: var(--text-muted); font-size: 15px; line-height: 1; cursor: pointer; display: grid; place-items: center; box-shadow: var(--shadow-1); transition: color var(--motion-base), transform var(--motion-base); }
 .heart:hover { transform: scale(1.08); color: var(--accent); }
 .heart.on { color: var(--accent); }
 .add { position: absolute; left: 14px; right: 14px; bottom: 14px; height: 44px; border: 0; border-radius: var(--radius-md); background: color-mix(in srgb, var(--bg) 88%, transparent); backdrop-filter: blur(8px); color: var(--text); font: inherit; font-size: 13px; font-weight: 600; cursor: pointer; opacity: 0; transform: translateY(8px); transition: opacity var(--motion-base) var(--ease), transform var(--motion-base) var(--ease), background var(--motion-base); }
