@@ -133,5 +133,5 @@ def test_roles_endpoint_lists_permissions_per_role(client) -> None:
         "catalog.update",
         "catalog.delete",
     }
-    assert roles["order-manager"] == {"orders.view", "orders.update"}
+    assert roles["order-manager"] == {"orders.view", "orders.update", "users.view"}
     assert roles["super-admin"] == set()  # bypass; no explicit grants
