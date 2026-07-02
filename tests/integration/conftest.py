@@ -218,7 +218,7 @@ def mailpit() -> Iterator[dict[str, Any]]:
 
 
 @pytest.fixture
-def kit_app(monkeypatch: pytest.MonkeyPatch, tmp_path: Path):
+def kit_app(monkeypatch: pytest.MonkeyPatch, tmp_path: Path):  # noqa: C901
     """Boot the kit through the production bootstrap with env overrides, migrations applied.
 
     Returns (TestClient factory): call with env overrides; DATABASE_URL defaults to a migrated tmp
@@ -245,4 +245,9 @@ def kit_app(monkeypatch: pytest.MonkeyPatch, tmp_path: Path):
 
         return TestClient(app=create_app().as_asgi())
 
-    return _boot
+    yield _boot
+    # clear the global app the boot installed — a later test's raw-resolver seeding must not
+    # resolve THIS test's loop-bound engine (cross-test "attached to a different loop" flakes)
+    from arvel.kernel import set_application
+
+    set_application(None)

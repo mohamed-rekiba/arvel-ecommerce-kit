@@ -38,10 +38,12 @@ async def health(request: Request) -> HealthStatus:
 
 
 async def login(request: Request, data: CredentialsIn) -> TokenOut:
-    """Verify credentials and issue a personal access token."""
+    """Verify credentials and issue a personal access token (merging any guest cart the request
+    carries — build-a-cart-then-sign-in must never strand items)."""
     user = await User.where("email", data.email).first()
     if user is None or not Hasher().check(data.password, user.password):
         abort(401, "Invalid credentials")
+    await cart.merge_guest_cart(request, user)
     token, _ = await create_token(user, name="api")
     return TokenOut(token=token)
 

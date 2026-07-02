@@ -2,11 +2,13 @@
 import { computed, onMounted, ref } from "vue";
 import { type Notification, type Order, ApiError, api, formatPrice } from "../api";
 import { useAuth } from "../auth";
+import { useCart } from "../cart";
 import { useWishlist } from "../wishlist";
 import ProductCard from "../components/ProductCard.vue";
 
 const { state, restore, login, register, logout } = useAuth();
 const wishlist = useWishlist();
+const cart = useCart();
 
 const mode = ref<"login" | "register">("login");
 const name = ref("");
@@ -50,7 +52,8 @@ async function submit() {
   try {
     if (mode.value === "login") await login(email.value, password.value);
     else await register(name.value, email.value, password.value);
-    await Promise.all([loadOrders(), loadNotifications(), wishlist.refresh()]);
+    // the guest cart (if any) was merged server-side — refresh so the badge shows it
+    await Promise.all([loadOrders(), loadNotifications(), wishlist.refresh(), cart.refresh()]);
   } catch (e) {
     error.value =
       e instanceof ApiError && e.status === 401

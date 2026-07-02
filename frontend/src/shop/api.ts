@@ -165,11 +165,13 @@ export const api = {
   async register(name: string, email: string, password: string) {
     const res = await request<{ token: string }>("POST", `/register`, { name, email, password });
     authToken.set(res.token);
+    localStorage.removeItem(CART_TOKEN_KEY); // any guest cart was merged into the account
     return res.token;
   },
   async login(email: string, password: string) {
     const res = await request<{ token: string }>("POST", `/login`, { email, password });
     authToken.set(res.token);
+    localStorage.removeItem(CART_TOKEN_KEY); // any guest cart was merged into the account
     return res.token;
   },
   forgotPassword(email: string) {
