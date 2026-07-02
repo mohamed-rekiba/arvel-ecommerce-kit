@@ -51,6 +51,8 @@ class Product(HasMedia, Searchable, Model, SoftDeletes):
         "slug": str,
         "translations": dict,  # ONE locale-major jsonb: {"en": {"name","description"}, "fr": {...}}
         "price_cents": int,
+        "rating_sum": int,
+        "rating_count": int,
         "currency": str,
         "status": str,
         "published": bool,
@@ -75,7 +77,7 @@ class Product(HasMedia, Searchable, Model, SoftDeletes):
     # the scalar columns the storefront fetches (NOT translations — only the active-locale `translation`)
     _LOCALE_COLUMNS = (
         "id, slug, price_cents, currency, status, category_id, vendor_id, published, "
-        "created_at, updated_at"
+        "rating_sum, rating_count, created_at, updated_at"
     )
 
     def scope_in_locale(self, query: Any, locale: str | None = None) -> Any:
@@ -120,6 +122,11 @@ class Product(HasMedia, Searchable, Model, SoftDeletes):
         from app.models.vendor import Vendor
 
         return self.belongs_to(Vendor)
+
+    def reviews(self) -> Any:
+        from app.models.review import Review
+
+        return self.morph_many(Review, "subject")
 
     def variants(self) -> Any:
         from app.models.product_variant import ProductVariant

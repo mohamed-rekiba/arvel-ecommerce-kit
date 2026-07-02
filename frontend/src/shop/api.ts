@@ -21,6 +21,7 @@ import type {
   VariantOut,
 } from "../api/gen/models";
 import type { CountryCode } from "../api/gen/models";
+import type { ReviewListOut, ReviewOut } from "../api/gen/models";
 
 export { ApiError } from "../api/http";
 export type { CountryCode, OrderStatus, PaymentStatus } from "../api/gen/models";
@@ -39,6 +40,8 @@ export type Payment = PaymentOut;
 export type Order = OrderOut;
 export type Customer = UserOut;
 export type Notification = NotificationOut;
+export type Review = ReviewOut;
+export type ReviewList = ReviewListOut;
 
 // arvel's LengthAwarePaginator JSON shape (DR-0022) — generic over the row type (the generated
 // ProductPage is this, fixed to ProductOut).
@@ -146,6 +149,12 @@ export const api = {
   },
   async removeCartItem(id: number) {
     return withCartToken(await request<Cart>("DELETE", `/cart/items/${id}`));
+  },
+  reviews(slug: string) {
+    return request<ReviewList>("GET", `/products/${slug}/reviews`);
+  },
+  submitReview(slug: string, payload: { rating: number; body: string; title?: string }) {
+    return request<Review>("POST", `/products/${slug}/reviews`, payload);
   },
   async applyCoupon(code: string) {
     return withCartToken(await request<Cart>("POST", `/cart/coupon`, { code }));

@@ -15,6 +15,7 @@ import type {
   ActivityOut,
   AdminCategoryOut,
   AdminOrderDetailOut,
+  AdminReviewOut,
   AdminUserDetailOut,
   AdminUserOut,
   AdminVendorOut,
@@ -51,6 +52,7 @@ export type ProductDetail = AdminProductDetailOut;
 export type AdminCategory = AdminCategoryOut;
 export type AdminUser = AdminUserOut;
 export type AdminOrderDetail = AdminOrderDetailOut;
+export type AdminReview = AdminReviewOut;
 export type AdminUserDetail = AdminUserDetailOut;
 export type Vendor = AdminVendorOut;
 export type Variant = VariantOut;
@@ -149,6 +151,9 @@ export const api = {
   assignRole: (userId: number, role: string) =>
     request<{ user_id: number; roles: string[] }>("POST", `/admin/users/${userId}/roles`, { role }),
   audit: () => request<Activity[]>("GET", "/admin/audit"),
+  adminReviews: (status = "pending") => request<AdminReviewOut[]>("GET", `/admin/reviews?status=${status}`),
+  moderateReview: (id: number, decision: "approve" | "reject") =>
+    request<AdminReviewOut>("POST", `/admin/reviews/${id}/${decision}`),
   orders: () => request<Order[]>("GET", "/admin/orders"),
   adminOrder: (id: number) => request<AdminOrderDetailOut>("GET", `/admin/orders/${id}`),
   updateOrderStatus: (id: number, status: string) =>

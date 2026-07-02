@@ -16,6 +16,7 @@ import type {
   AdminProductDetailOut,
   AdminProductOut,
   AdminProductPage,
+  AdminReviewOut,
   AdminUserDetailOut,
   AdminUserPage,
   AdminVendorOut,
@@ -37,6 +38,9 @@ import type {
   ApiAdminProductsShow400,
   ApiAdminProductsStore400,
   ApiAdminProductsUpdate400,
+  ApiAdminReviewsIndex400,
+  ApiAdminReviewsIndexParams,
+  ApiAdminReviewsModerate400,
   ApiAdminUsersIndex400,
   ApiAdminUsersIndexParams,
   ApiAdminUsersRoles400,
@@ -67,6 +71,8 @@ import type {
   ApiPasswordReset400,
   ApiProductsIndex400,
   ApiProductsIndexParams,
+  ApiProductsReviewsIndex400,
+  ApiProductsReviewsStore400,
   ApiProductsShow400,
   ApiRegister400,
   ApiUserPassword400,
@@ -104,6 +110,9 @@ import type {
   RegisterIn,
   ResetPasswordIn,
   Response,
+  ReviewIn,
+  ReviewListOut,
+  ReviewOut,
   RoleOut,
   StockAdjustIn,
   TokenOut,
@@ -2147,6 +2156,192 @@ export const getApiAdminOidcTokenUrl = () => {
 export const apiAdminOidcToken = async ( options?: RequestInit): Promise<apiAdminOidcTokenResponse> => {
 
   return apiFetch<apiAdminOidcTokenResponse>(getApiAdminOidcTokenUrl(),
+  {
+    ...options,
+    method: 'POST'
+
+
+  }
+);}
+
+
+
+export type apiProductsReviewsIndexResponse200 = {
+  data: ReviewListOut
+  status: 200
+}
+
+export type apiProductsReviewsIndexResponse400 = {
+  data: ApiProductsReviewsIndex400
+  status: 400
+}
+
+export type apiProductsReviewsIndexResponseSuccess = (apiProductsReviewsIndexResponse200) & {
+  headers: Headers;
+};
+export type apiProductsReviewsIndexResponseError = (apiProductsReviewsIndexResponse400) & {
+  headers: Headers;
+};
+
+export type apiProductsReviewsIndexResponse = (apiProductsReviewsIndexResponseSuccess | apiProductsReviewsIndexResponseError)
+
+export const getApiProductsReviewsIndexUrl = (slug: string,) => {
+
+
+
+
+  return `/api/products/${slug}/reviews`
+}
+
+/**
+ * APPROVED reviews for the product (+ the caller's own review, whatever its status).
+ * @summary ApiProductsReviewsIndex
+ */
+export const apiProductsReviewsIndex = async (slug: string, options?: RequestInit): Promise<apiProductsReviewsIndexResponse> => {
+
+  return apiFetch<apiProductsReviewsIndexResponse>(getApiProductsReviewsIndexUrl(slug),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+export type apiProductsReviewsStoreResponse201 = {
+  data: ReviewOut
+  status: 201
+}
+
+export type apiProductsReviewsStoreResponse400 = {
+  data: ApiProductsReviewsStore400
+  status: 400
+}
+
+export type apiProductsReviewsStoreResponseSuccess = (apiProductsReviewsStoreResponse201) & {
+  headers: Headers;
+};
+export type apiProductsReviewsStoreResponseError = (apiProductsReviewsStoreResponse400) & {
+  headers: Headers;
+};
+
+export type apiProductsReviewsStoreResponse = (apiProductsReviewsStoreResponseSuccess | apiProductsReviewsStoreResponseError)
+
+export const getApiProductsReviewsStoreUrl = (slug: string,) => {
+
+
+
+
+  return `/api/products/${slug}/reviews`
+}
+
+/**
+ * Submit a review — verified purchasers only, one per product; lands PENDING.
+ * @summary ApiProductsReviewsStore
+ */
+export const apiProductsReviewsStore = async (slug: string,
+    reviewIn: ReviewIn, options?: RequestInit): Promise<apiProductsReviewsStoreResponse> => {
+
+  return apiFetch<apiProductsReviewsStoreResponse>(getApiProductsReviewsStoreUrl(slug),
+  {
+    ...options,
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...options?.headers },
+    body: JSON.stringify(reviewIn)
+  }
+);}
+
+
+
+export type apiAdminReviewsIndexResponse200 = {
+  data: AdminReviewOut[]
+  status: 200
+}
+
+export type apiAdminReviewsIndexResponse400 = {
+  data: ApiAdminReviewsIndex400
+  status: 400
+}
+
+export type apiAdminReviewsIndexResponseSuccess = (apiAdminReviewsIndexResponse200) & {
+  headers: Headers;
+};
+export type apiAdminReviewsIndexResponseError = (apiAdminReviewsIndexResponse400) & {
+  headers: Headers;
+};
+
+export type apiAdminReviewsIndexResponse = (apiAdminReviewsIndexResponseSuccess | apiAdminReviewsIndexResponseError)
+
+export const getApiAdminReviewsIndexUrl = (params?: ApiAdminReviewsIndexParams,) => {
+  const normalizedParams = new URLSearchParams();
+
+  Object.entries(params || {}).forEach(([key, value]) => {
+
+    if (value !== undefined) {
+      normalizedParams.append(key, value === null ? 'null' : String(value))
+    }
+  });
+
+  const stringifiedParams = normalizedParams.toString();
+
+  return stringifiedParams.length > 0 ? `/api/admin/reviews?${stringifiedParams}` : `/api/admin/reviews`
+}
+
+/**
+ * @summary ApiAdminReviewsIndex
+ */
+export const apiAdminReviewsIndex = async (params?: ApiAdminReviewsIndexParams, options?: RequestInit): Promise<apiAdminReviewsIndexResponse> => {
+
+  return apiFetch<apiAdminReviewsIndexResponse>(getApiAdminReviewsIndexUrl(params),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+export type apiAdminReviewsModerateResponse200 = {
+  data: AdminReviewOut
+  status: 200
+}
+
+export type apiAdminReviewsModerateResponse400 = {
+  data: ApiAdminReviewsModerate400
+  status: 400
+}
+
+export type apiAdminReviewsModerateResponseSuccess = (apiAdminReviewsModerateResponse200) & {
+  headers: Headers;
+};
+export type apiAdminReviewsModerateResponseError = (apiAdminReviewsModerateResponse400) & {
+  headers: Headers;
+};
+
+export type apiAdminReviewsModerateResponse = (apiAdminReviewsModerateResponseSuccess | apiAdminReviewsModerateResponseError)
+
+export const getApiAdminReviewsModerateUrl = (id: number,
+    decision: string,) => {
+
+
+
+
+  return `/api/admin/reviews/${id}/${decision}`
+}
+
+/**
+ * Approve or reject (the path decides); approval feeds the denormalized aggregate — all
+ * transitions keep it exact (approve adds, un-approve subtracts).
+ * @summary ApiAdminReviewsModerate
+ */
+export const apiAdminReviewsModerate = async (id: number,
+    decision: string, options?: RequestInit): Promise<apiAdminReviewsModerateResponse> => {
+
+  return apiFetch<apiAdminReviewsModerateResponse>(getApiAdminReviewsModerateUrl(id,decision),
   {
     ...options,
     method: 'POST'

@@ -51,6 +51,7 @@ class Permission(str, Enum):
     ROLES_MANAGE = "roles.manage"
     AUDIT_VIEW = "audit.view"
     USERS_VIEW = "users.view"
+    REVIEWS_MODERATE = "reviews.moderate"
 
 
 class RoleName(str, Enum):
@@ -80,6 +81,7 @@ ROLE_PERMISSIONS: dict[RoleName, list[Permission]] = {
         Permission.ORDERS_VIEW,
         Permission.AUDIT_VIEW,
         Permission.USERS_VIEW,  # customer support's whole job
+        Permission.REVIEWS_MODERATE,  # user-generated content is a support surface
     ],
 }
 
@@ -106,6 +108,14 @@ ORDER_TRANSITIONS: dict[OrderStatus, set[OrderStatus]] = {
 
 def can_transition(current: OrderStatus, target: OrderStatus) -> bool:
     return target in ORDER_TRANSITIONS.get(current, set())
+
+
+class ReviewStatus(str, Enum):
+    """Moderation state of a product review."""
+
+    PENDING = "pending"
+    APPROVED = "approved"
+    REJECTED = "rejected"
 
 
 class CouponType(str, Enum):

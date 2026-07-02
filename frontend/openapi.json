@@ -924,19 +924,19 @@
         "operationId": "api.media.conversion",
         "parameters": [
           {
-            "name": "id",
+            "name": "conversion",
             "in": "path",
             "schema": {
-              "type": "integer"
+              "type": "string"
             },
             "required": true,
             "deprecated": false
           },
           {
-            "name": "conversion",
+            "name": "id",
             "in": "path",
             "schema": {
-              "type": "string"
+              "type": "integer"
             },
             "required": true,
             "deprecated": false
@@ -3101,6 +3101,323 @@
         ]
       }
     },
+    "/api/products/{slug}/reviews": {
+      "get": {
+        "summary": "ApiProductsReviewsIndex",
+        "description": "APPROVED reviews for the product (+ the caller's own review, whatever its status).",
+        "operationId": "api.products.reviews.index",
+        "parameters": [
+          {
+            "name": "slug",
+            "in": "path",
+            "schema": {
+              "type": "string"
+            },
+            "required": true,
+            "deprecated": false
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Request fulfilled, document follows",
+            "headers": {},
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ReviewListOut"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request syntax or unsupported method",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "status_code": {
+                      "type": "integer"
+                    },
+                    "detail": {
+                      "type": "string"
+                    },
+                    "extra": {
+                      "additionalProperties": {},
+                      "type": [
+                        "null",
+                        "object",
+                        "array"
+                      ]
+                    }
+                  },
+                  "type": "object",
+                  "required": [
+                    "detail",
+                    "status_code"
+                  ],
+                  "description": "Validation Exception",
+                  "examples": [
+                    {
+                      "status_code": 400,
+                      "detail": "Bad Request",
+                      "extra": {}
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        },
+        "deprecated": false
+      },
+      "post": {
+        "summary": "ApiProductsReviewsStore",
+        "description": "Submit a review \u2014 verified purchasers only, one per product; lands PENDING.",
+        "operationId": "api.products.reviews.store",
+        "parameters": [
+          {
+            "name": "slug",
+            "in": "path",
+            "schema": {
+              "type": "string"
+            },
+            "required": true,
+            "deprecated": false
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ReviewIn"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "description": "Document created, URL follows",
+            "headers": {},
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ReviewOut"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request syntax or unsupported method",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "status_code": {
+                      "type": "integer"
+                    },
+                    "detail": {
+                      "type": "string"
+                    },
+                    "extra": {
+                      "additionalProperties": {},
+                      "type": [
+                        "null",
+                        "object",
+                        "array"
+                      ]
+                    }
+                  },
+                  "type": "object",
+                  "required": [
+                    "detail",
+                    "status_code"
+                  ],
+                  "description": "Validation Exception",
+                  "examples": [
+                    {
+                      "status_code": 400,
+                      "detail": "Bad Request",
+                      "extra": {}
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        },
+        "deprecated": false,
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ]
+      }
+    },
+    "/api/admin/reviews": {
+      "get": {
+        "summary": "ApiAdminReviewsIndex",
+        "operationId": "api.admin.reviews.index",
+        "parameters": [
+          {
+            "name": "status",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "default": "pending"
+            },
+            "required": false,
+            "deprecated": false,
+            "allowEmptyValue": false,
+            "allowReserved": false
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Request fulfilled, document follows",
+            "headers": {},
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/AdminReviewOut"
+                  },
+                  "type": "array"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request syntax or unsupported method",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "status_code": {
+                      "type": "integer"
+                    },
+                    "detail": {
+                      "type": "string"
+                    },
+                    "extra": {
+                      "additionalProperties": {},
+                      "type": [
+                        "null",
+                        "object",
+                        "array"
+                      ]
+                    }
+                  },
+                  "type": "object",
+                  "required": [
+                    "detail",
+                    "status_code"
+                  ],
+                  "description": "Validation Exception",
+                  "examples": [
+                    {
+                      "status_code": 400,
+                      "detail": "Bad Request",
+                      "extra": {}
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        },
+        "deprecated": false,
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ]
+      }
+    },
+    "/api/admin/reviews/{id}/{decision}": {
+      "post": {
+        "summary": "ApiAdminReviewsModerate",
+        "description": "Approve or reject (the path decides); approval feeds the denormalized aggregate \u2014 all\ntransitions keep it exact (approve adds, un-approve subtracts).",
+        "operationId": "api.admin.reviews.moderate",
+        "parameters": [
+          {
+            "name": "decision",
+            "in": "path",
+            "schema": {
+              "type": "string"
+            },
+            "required": true,
+            "deprecated": false
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "schema": {
+              "type": "integer"
+            },
+            "required": true,
+            "deprecated": false
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Request fulfilled, document follows",
+            "headers": {},
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AdminReviewOut"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request syntax or unsupported method",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "status_code": {
+                      "type": "integer"
+                    },
+                    "detail": {
+                      "type": "string"
+                    },
+                    "extra": {
+                      "additionalProperties": {},
+                      "type": [
+                        "null",
+                        "object",
+                        "array"
+                      ]
+                    }
+                  },
+                  "type": "object",
+                  "required": [
+                    "detail",
+                    "status_code"
+                  ],
+                  "description": "Validation Exception",
+                  "examples": [
+                    {
+                      "status_code": 400,
+                      "detail": "Bad Request",
+                      "extra": {}
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        },
+        "deprecated": false,
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ]
+      }
+    },
     "/api/cart": {
       "get": {
         "summary": "ApiCartShow",
@@ -5097,6 +5414,49 @@
         ],
         "title": "AdminProductPage"
       },
+      "AdminReviewOut": {
+        "properties": {
+          "id": {
+            "type": "integer"
+          },
+          "product_slug": {
+            "type": "string"
+          },
+          "author": {
+            "type": "string"
+          },
+          "rating": {
+            "type": "integer"
+          },
+          "title": {
+            "oneOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "body": {
+            "type": "string"
+          },
+          "status": {
+            "$ref": "#/components/schemas/ReviewStatus"
+          }
+        },
+        "type": "object",
+        "required": [
+          "author",
+          "body",
+          "id",
+          "product_slug",
+          "rating",
+          "status",
+          "title"
+        ],
+        "title": "AdminReviewOut"
+      },
       "AdminUserDetailOut": {
         "properties": {
           "id": {
@@ -5981,6 +6341,19 @@
           "translation": {
             "$ref": "#/components/schemas/Translate"
           },
+          "rating_avg": {
+            "oneOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "rating_count": {
+            "type": "integer"
+          },
           "price_cents": {
             "type": "integer"
           },
@@ -6026,6 +6399,8 @@
           "gallery",
           "id",
           "price_cents",
+          "rating_avg",
+          "rating_count",
           "slug",
           "status",
           "translation"
@@ -6153,6 +6528,140 @@
         "type": "object",
         "required": [],
         "title": "Response"
+      },
+      "ReviewIn": {
+        "properties": {
+          "rating": {
+            "type": "integer"
+          },
+          "body": {
+            "type": "string"
+          },
+          "title": {
+            "oneOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "type": "object",
+        "required": [
+          "body",
+          "rating"
+        ],
+        "title": "ReviewIn"
+      },
+      "ReviewListOut": {
+        "properties": {
+          "reviews": {
+            "items": {
+              "$ref": "#/components/schemas/ReviewOut"
+            },
+            "type": "array"
+          },
+          "mine": {
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/ReviewOut"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "rating_count": {
+            "type": "integer"
+          },
+          "rating_avg": {
+            "oneOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "type": "object",
+        "required": [
+          "mine",
+          "rating_avg",
+          "rating_count",
+          "reviews"
+        ],
+        "title": "ReviewListOut"
+      },
+      "ReviewOut": {
+        "properties": {
+          "id": {
+            "type": "integer"
+          },
+          "rating": {
+            "type": "integer"
+          },
+          "title": {
+            "oneOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "body": {
+            "type": "string"
+          },
+          "status": {
+            "$ref": "#/components/schemas/ReviewStatus"
+          },
+          "author": {
+            "oneOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "created_at": {
+            "oneOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "type": "object",
+        "required": [
+          "author",
+          "body",
+          "created_at",
+          "id",
+          "rating",
+          "status",
+          "title"
+        ],
+        "title": "ReviewOut"
+      },
+      "ReviewStatus": {
+        "type": "string",
+        "enum": [
+          "pending",
+          "approved",
+          "rejected"
+        ],
+        "title": "ReviewStatus",
+        "description": "Moderation state of a product review."
       },
       "RoleOut": {
         "properties": {

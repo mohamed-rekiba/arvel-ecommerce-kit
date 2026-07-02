@@ -1,8 +1,8 @@
 <script setup lang="ts">
 import Button from "primevue/button";
-import { computed, onMounted, ref, watch } from "vue";
+import { computed, onMounted, reactive, ref, watch } from "vue";
 import { useRoute, useRouter } from "vue-router";
-import { type Product, type Variant, api, formatPrice } from "../api";
+import { ApiError, type Product, type ReviewList, type Variant, api, formatPrice } from "../api";
 import { useCart } from "../cart";
 import { getCachedProduct } from "../product-cache";
 
@@ -29,6 +29,47 @@ const image = computed(() => g.value?.url ?? g.value?.preview_url ?? null);
 const srcset = computed(() => (g.value ? `${g.value.preview_url} 600w, ${g.value.url} 900w` : undefined));
 watch(product, () => (selected.value = 0));
 const variants = computed<Variant[]>(() => product.value?.variants ?? []);
+
+// --- reviews (S16) ---------------------------------------------------------------
+const reviewData = ref<ReviewList | null>(null);
+const reviewForm = reactive({ rating: 5, title: "", body: "" });
+const reviewBusy = ref(false);
+const reviewError = ref<string | null>(null);
+
+async function loadReviews(slug: string) {
+  try {
+    reviewData.value = await api.reviews(slug);
+  } catch {
+    reviewData.value = null;
+  }
+}
+
+async function submitReview() {
+  if (!product.value) return;
+  reviewBusy.value = true;
+  reviewError.value = null;
+  try {
+    await api.submitReview(product.value.slug, {
+      rating: reviewForm.rating,
+      body: reviewForm.body,
+      ...(reviewForm.title ? { title: reviewForm.title } : {}),
+    });
+    await loadReviews(product.value.slug);
+  } catch (e) {
+    reviewError.value =
+      e instanceof ApiError && e.status === 403
+        ? "Reviews are for verified purchasers — buy it first!"
+        : e instanceof ApiError
+          ? Object.values(e.errors)[0]?.[0] ?? "Couldn't submit the review."
+          : "Couldn't submit the review.";
+  } finally {
+    reviewBusy.value = false;
+  }
+}
+
+function stars(avg: number): string {
+  return "★".repeat(Math.round(avg)) + "☆".repeat(5 - Math.round(avg));
+}
 const selectedVariant = computed(() =>
   variants.value.find((v) => v.id === selectedVariantId.value) ?? null,
 );
@@ -39,6 +80,7 @@ async function load() {
   try {
     const p = await api.product(String(route.params.slug));
     product.value = p;
+    void loadReviews(p.slug);
     selectedVariantId.value = p.variants?.find((v) => v.stock > 0)?.id ?? p.variants?.[0]?.id ?? null;
     status.value = "ready";
   } catch {
@@ -139,6 +181,47 @@ watch(() => route.params.slug, load);
         </ul>
       </div>
     </div>
+
+    <section v-if="product" class="reviews" aria-label="Reviews">
+      <h2>
+        Reviews
+        <span v-if="reviewData && reviewData.rating_count > 0" class="reviews__avg">
+          {{ stars(reviewData.rating_avg ?? 0) }} {{ reviewData.rating_avg }} · {{ reviewData.rating_count }}
+        </span>
+      </h2>
+
+      <p v-if="!reviewData || reviewData.reviews.length === 0" class="reviews__empty">
+        No reviews yet.
+      </p>
+      <ul v-else class="reviews__list">
+        <li v-for="r in reviewData.reviews" :key="r.id" class="review">
+          <div class="review__head">
+            <span class="review__stars">{{ stars(r.rating) }}</span>
+            <strong v-if="r.title">{{ r.title }}</strong>
+            <span class="review__author">{{ r.author ?? "Verified buyer" }}</span>
+          </div>
+          <p class="review__body">{{ r.body }}</p>
+        </li>
+      </ul>
+
+      <div v-if="reviewData?.mine" class="reviews__mine">
+        Your review is <strong>{{ reviewData.mine.status }}</strong
+        ><span v-if="reviewData.mine.status === 'pending'"> — it'll appear once approved.</span>
+      </div>
+      <form v-else class="reviews__form" @submit.prevent="submitReview">
+        <h3>Write a review</h3>
+        <label>
+          <span>Rating</span>
+          <select v-model.number="reviewForm.rating">
+            <option v-for="n in [5, 4, 3, 2, 1]" :key="n" :value="n">{{ stars(n) }}</option>
+          </select>
+        </label>
+        <label><span>Title (optional)</span><input v-model.trim="reviewForm.title" type="text" /></label>
+        <label><span>Your review</span><textarea v-model.trim="reviewForm.body" rows="3" required /></label>
+        <p v-if="reviewError" class="reviews__error" role="alert">{{ reviewError }}</p>
+        <Button type="submit" :label="reviewBusy ? 'Sending…' : 'Submit review'" :disabled="reviewBusy || !reviewForm.body" />
+      </form>
+    </section>
   </main>
 </template>
 
@@ -172,4 +255,20 @@ watch(() => route.params.slug, load);
 .skeleton--media { aspect-ratio: 3 / 4; border-radius: var(--radius-lg); }
 .skeleton--text { height: 2.5rem; margin-top: var(--space-8); }
 @keyframes pulse { 50% { opacity: 0.55; } }
+.reviews { max-width: 720px; margin: var(--space-16) auto 0; padding: 0 var(--container-pad) var(--space-16); }
+.reviews h2 { font-size: var(--text-2xl); display: flex; align-items: baseline; gap: var(--space-4); }
+.reviews__avg { font-size: var(--text-sm); color: var(--color-text-muted); }
+.reviews__empty { color: var(--color-text-muted); }
+.reviews__list { list-style: none; margin: var(--space-4) 0; padding: 0; }
+.review { padding: var(--space-4) 0; border-bottom: 1px solid var(--color-border); }
+.review__head { display: flex; gap: var(--space-3); align-items: baseline; }
+.review__stars { color: var(--color-warning, #b45309); letter-spacing: 2px; }
+.review__author { font-size: var(--text-xs); color: var(--color-text-muted); margin-left: auto; }
+.review__body { margin: var(--space-2) 0 0; font-size: var(--text-sm); }
+.reviews__mine { background: var(--color-surface); border: 1px solid var(--color-border); border-radius: var(--radius-md); padding: var(--space-3) var(--space-4); font-size: var(--text-sm); margin-top: var(--space-4); }
+.reviews__form { margin-top: var(--space-6); display: grid; gap: var(--space-3); max-width: 420px; }
+.reviews__form h3 { margin: 0; font-size: var(--text-lg); }
+.reviews__form label span { display: block; font-size: var(--text-sm); margin-bottom: var(--space-1); }
+.reviews__form input, .reviews__form select, .reviews__form textarea { width: 100%; padding: var(--space-2) var(--space-3); border: 1px solid var(--color-border); border-radius: var(--radius-md); background: var(--color-bg); color: var(--color-text); font: inherit; }
+.reviews__error { color: var(--color-danger); font-size: var(--text-sm); margin: 0; }
 </style>
