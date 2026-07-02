@@ -51,6 +51,8 @@ async function advance(next: OrderStatus) {
   }
 }
 
+const formatWhen = (iso: string | null) => (iso ? new Date(iso).toLocaleString() : "");
+
 const severity = (status: string) =>
   status === "paid" || status === "delivered"
     ? "success"
@@ -111,6 +113,10 @@ onMounted(load);
             <div><dt>Subtotal</dt><dd>{{ formatPrice(order.subtotal_cents) }}</dd></div>
             <div><dt>Shipping</dt><dd>{{ formatPrice(order.shipping_cents) }}</dd></div>
             <div><dt>Tax</dt><dd>{{ formatPrice(order.tax_cents) }}</dd></div>
+            <div v-if="order.discount_cents > 0" class="breakdown__discount">
+              <dt>Discount{{ order.coupon_code ? ` (${order.coupon_code})` : "" }}</dt>
+              <dd>−{{ formatPrice(order.discount_cents) }}</dd>
+            </div>
             <div class="breakdown__total"><dt>Total</dt><dd>{{ formatPrice(order.total_cents) }}</dd></div>
           </dl>
         </section>
@@ -146,7 +152,7 @@ onMounted(load);
             <span v-if="event.properties.from" class="muted">
               {{ event.properties.from }} → {{ event.properties.to }}
             </span>
-            <span class="muted">{{ event.created_at ?? "" }}</span>
+            <span class="muted">{{ formatWhen(event.created_at) }}</span>
           </li>
         </ol>
       </section>

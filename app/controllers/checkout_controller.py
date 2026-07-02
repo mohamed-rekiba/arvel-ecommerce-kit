@@ -385,6 +385,7 @@ async def admin_order_show(request: Request) -> AdminOrderDetailOut:
     the transition history from the activity trail. Requires orders.view."""
     from arvel.activitylog import Activity
 
+    from app.controllers.serializers import iso as _iso
     from app.enums import PaymentStatus as _PS
     from app.models.payment import Payment
     from app.schemas import (
@@ -416,9 +417,6 @@ async def admin_order_show(request: Request) -> AdminOrderDetailOut:
         .get()
     )
 
-    def _iso(value: object) -> str | None:
-        return None if value is None else str(value)
-
     return AdminOrderDetailOut(
         id=order.id,
         status=_status_value(order),
@@ -427,6 +425,8 @@ async def admin_order_show(request: Request) -> AdminOrderDetailOut:
         subtotal_cents=order.subtotal_cents,
         shipping_cents=order.shipping_cents,
         tax_cents=order.tax_cents,
+        coupon_code=order.coupon_code,
+        discount_cents=order.discount_cents,
         total_cents=order.total_cents,
         currency=_currency_value(order),
         customer=customer,

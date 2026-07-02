@@ -7,6 +7,7 @@ from arvel.http import Request
 from arvel.support import current_user
 from arvel.validation import ValidationException
 
+from app.controllers.serializers import iso as _iso
 from app.enums import OrderStatus, Permission, ReviewStatus
 from app.models.order import Order
 from app.models.order_item import OrderItem
@@ -42,7 +43,7 @@ def _out(review: Review, author: str | None = None) -> ReviewOut:
         body=review.body,
         status=_status(review),
         author=author,
-        created_at=None if review.created_at is None else str(review.created_at),
+        created_at=_iso(review.created_at),
     )
 
 

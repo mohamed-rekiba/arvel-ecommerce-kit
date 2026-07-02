@@ -5309,6 +5309,19 @@
           "tax_cents": {
             "type": "integer"
           },
+          "coupon_code": {
+            "oneOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "discount_cents": {
+            "type": "integer"
+          },
           "total_cents": {
             "type": "integer"
           },
@@ -5348,8 +5361,10 @@
         "required": [
           "address",
           "contact_email",
+          "coupon_code",
           "currency",
           "customer",
+          "discount_cents",
           "history",
           "id",
           "items",
