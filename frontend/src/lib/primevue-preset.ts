@@ -1,24 +1,25 @@
-// PrimeVue theme preset mapped to the arvel-ecommerce-kit "Boutique" palette (see styles/tokens.css /
-// DESIGN.md): plum (Royal Scepter) primary, warm-greige surfaces in light, Blue Noir in dark. Dark mode
-// follows our own `[data-theme="dark"]` selector so the header toggle drives PrimeVue too.
+// PrimeVue theme preset mapped to the arvel-ecommerce-kit "Marketplace" palette (see
+// styles/tokens.css / DESIGN.md): amber primary used sparingly, paper neutrals in light, warm
+// graphite in dark. Dark mode follows our own `[data-theme="dark"]` selector so the header
+// toggle drives PrimeVue too.
 import { definePreset } from "@primeuix/themes";
 import Aura from "@primeuix/themes/aura";
 
 export const ArvelPreset = definePreset(Aura, {
   semantic: {
-    // Royal Scepter #795663 — a tonal plum scale
+    // Amber #B45309 — a tonal amber scale (500 is the text-safe brand accent)
     primary: {
-      50: "#F5EEF1",
-      100: "#E7D9DF",
-      200: "#D3BAC5",
-      300: "#BC9AAB",
-      400: "#9E7285",
-      500: "#795663",
-      600: "#674654",
-      700: "#543A46",
-      800: "#412D37",
-      900: "#2E2027",
-      950: "#1B1318",
+      50: "#FDF4E7",
+      100: "#F9E3C4",
+      200: "#F2C98D",
+      300: "#EAAC55",
+      400: "#D97A08",
+      500: "#B45309",
+      600: "#9A4708",
+      700: "#8F4A05",
+      800: "#6E3904",
+      900: "#4C2803",
+      950: "#2B1702",
     },
     focusRing: { width: "2px", style: "solid", offset: "2px" },
     colorScheme: {
@@ -27,50 +28,50 @@ export const ArvelPreset = definePreset(Aura, {
           color: "{primary.500}",
           contrastColor: "#ffffff",
           hoverColor: "{primary.400}",
-          activeColor: "{primary.600}",
+          activeColor: "{primary.700}",
         },
-        // warm greige neutrals
+        // warm paper neutrals
         surface: {
           0: "#ffffff",
-          50: "#FBF8F5",
-          100: "#F3EDE7",
-          200: "#E7DFD7",
-          300: "#D8CEC4",
-          400: "#B7ABA0",
-          500: "#8C8177",
-          600: "#6E645B",
-          700: "#554D46",
-          800: "#3A342F",
-          900: "#241F1B",
-          950: "#17130F",
+          50: "#F7F6F3",
+          100: "#F1EFEB",
+          200: "#E8E6E0",
+          300: "#D6D3CB",
+          400: "#B3AFA6",
+          500: "#8B887E",
+          600: "#6E6B62",
+          700: "#54524B",
+          800: "#3A3833",
+          900: "#232220",
+          950: "#151412",
         },
-        content: { background: "#ffffff", borderColor: "#E7DFD7" },
-        text: { color: "#12212E", mutedColor: "#55625D" },
+        content: { background: "#ffffff", borderColor: "#E8E6E0" },
+        text: { color: "#18181B", mutedColor: "#54555A" },
       },
       dark: {
         primary: {
-          color: "{primary.300}",
-          contrastColor: "#160E13",
-          hoverColor: "{primary.200}",
-          activeColor: "{primary.400}",
+          color: "#E8A33D",
+          contrastColor: "#201503",
+          hoverColor: "#F2B65A",
+          activeColor: "#D18F26",
         },
-        // Blue Noir base
+        // warm graphite
         surface: {
-          0: "#EDE4DE",
-          50: "#CBD2D8",
-          100: "#A6B0BF",
-          200: "#79857D",
-          300: "#4A5A66",
-          400: "#33465A",
-          500: "#22415A",
-          600: "#173247",
-          700: "#132B3D",
-          800: "#0B2030",
-          900: "#06192A",
-          950: "#011627",
+          0: "#F0EEE8",
+          50: "#D8D5CE",
+          100: "#ACA79D",
+          200: "#8B867C",
+          300: "#5C584F",
+          400: "#3B372F",
+          500: "#2E2B26",
+          600: "#262420",
+          700: "#1D1C19",
+          800: "#191815",
+          900: "#151412",
+          950: "#100F0E",
         },
-        content: { background: "#0B2030", borderColor: "#173247" },
-        text: { color: "#EDE4DE", mutedColor: "#9DA8A0" },
+        content: { background: "#1D1C19", borderColor: "#2E2B26" },
+        text: { color: "#F0EEE8", mutedColor: "#ACA79D" },
       },
     },
   },

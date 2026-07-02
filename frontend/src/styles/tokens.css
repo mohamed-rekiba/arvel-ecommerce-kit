@@ -1,57 +1,62 @@
-/* arvel-ecommerce-kit — design tokens (v3 "Commerce"). Single source of truth; mirrors
+/* arvel-ecommerce-kit — design tokens (v5 "Marketplace"). Single source of truth; mirrors
    projects/arvel-ecommerce-kit/design/DESIGN.md. One file, two registers (.shop / .console),
-   full light + dark theme ([data-theme]). Never hardcode color/space/radius/type in a component. */
+   full light + dark theme ([data-theme]). Never hardcode color/space/radius/type in a component.
+
+   Reference: warm-minimal marketplace — paper canvas, pure-white cards separated by hairline
+   borders (near-shadowless), near-black ink, ONE amber accent used sparingly (stars, badges,
+   links), linen promo bands, bold uppercase display headings. */
 
 :root {
-  /* brand — "Boutique" (Dusky Rose · Thistle · Hawthorne · Royal Scepter · Blue Noir) */
-  --plum-400:#8D6675; --plum-500:#795663; --plum-600:#674654;   /* Royal Scepter — primary accent */
-  --noir-900:#011627; --noir-800:#0A2033;                        /* Blue Noir — ink / dark base */
-  --pine-800:#283D3B; --sage-500:#8A9688; --blush-300:#D9BCAF;   /* Hawthorne · Thistle · Dusky Rose */
-  /* legacy chrome aliases so the navy shells stay navy under the new names */
-  --ink-900:var(--noir-900); --ink-800:var(--noir-800); --ink-700:#12293C;
+  /* brand — "Marketplace" (Paper · Ink · Amber · Linen) */
+  --amber-700:#8F4A05; --amber-600:#B45309; --amber-500:#D97A08;  /* text-safe amber ramp */
+  --amber-bright:#F5A623;                                          /* graphic amber: stars, badges */
+  --ink-950:#121214; --ink-900:#18181B; --ink-800:#232326;         /* neutral ink */
+  --linen-100:#F6EEE3; --linen-200:#F0E4D4;                        /* promo band tints */
 
-  /* neutrals (light) — warm greige, blush-tinted */
-  --white:#FFFFFF; --bg:#FBF8F5; --canvas:#F3EDE7; --surface:#FFFFFF; --surface-2:#F6F0EA;
-  --border:#E7DFD7; --border-2:#D8CEC4;
-  --text:#12212E; --text-muted:#55625D; --text-subtle:#6E7A74; --text-inverse:#FFFFFF;
+  /* neutrals (light) — warm paper */
+  --white:#FFFFFF; --bg:#F7F6F3; --canvas:#F1EFEB; --surface:#FFFFFF; --surface-2:#F2F0EC;
+  --band:var(--linen-100);
+  --border:#E8E6E0; --border-2:#D6D3CB;
+  --text:#18181B; --text-muted:#54555A; --text-subtle:#6E6F75; --text-inverse:#FFFFFF;
 
-  /* semantic (muted, palette-harmonized) */
-  --accent:var(--plum-500); --accent-hover:var(--plum-400); --accent-press:var(--plum-600);
-  --on-accent:#FFFFFF;                                           /* white on plum = 6.1:1 */
-  --success:#4E7856; --success-bg:#E6EEE7; --success-fg:#355F44;
-  --danger:#9E4B4B;  --danger-bg:#F4E2DF;  --danger-fg:#823636;  /* brick-rose, not pure red */
-  --warn:#B0803A;    --warn-bg:#F3E9D6;    --warn-fg:#7E5820;    /* ochre */
-  --info:#3E6B78;    --info-bg:#DEEAEC;    --info-fg:#2B525E;    /* muted teal */
-  --sale:#9E4B4B;    --focus:#8D6675;
+  /* semantic */
+  --accent:var(--amber-600); --accent-hover:var(--amber-500); --accent-press:var(--amber-700);
+  --on-accent:#FFFFFF;                                            /* white on amber-600 = 4.8:1 */
+  --star:var(--amber-bright);
+  --success:#3F7A4E; --success-bg:#E4F0E6; --success-fg:#2E5E3B;
+  --danger:#B03A3A;  --danger-bg:#F7E3E1;  --danger-fg:#8E2F2F;
+  --warn:#B0803A;    --warn-bg:#F6ECD8;    --warn-fg:#7E5820;
+  --info:#3B6E9E;    --info-bg:#E2ECF5;    --info-fg:#2C5479;
+  --sale:var(--amber-bright); --focus:var(--amber-600);
 
-  /* category tiles (muted family; ≥24px bold text) */
-  --cat-violet:#795663; --cat-blue:#21384A; --cat-orange:#B0803A;
-  --cat-teal:#3E6B78; --cat-rose:#B0838C; --cat-indigo:#4A4A63;
+  /* category tiles (ink text on linen; ≥24px bold text) */
+  --cat-violet:#6B5A70; --cat-blue:#33506B; --cat-orange:#B0803A;
+  --cat-teal:#3E6B78; --cat-rose:#A56B76; --cat-indigo:#4A4A63;
 
-  /* admin sidebar (Blue Noir, both themes) */
-  --side-bg:var(--noir-900); --side-bg-2:#0A2033; --side-active:rgba(121,86,99,.24);
-  --side-text:#9BA69C; --side-text-hi:#F3EDE7; --side-border:#12293C;
+  /* admin sidebar — paper chrome (light) / graphite (dark), ink text, amber active */
+  --side-bg:#FFFFFF; --side-bg-2:#F2F0EC; --side-active:color-mix(in srgb, var(--amber-600) 12%, transparent);
+  --side-text:#54555A; --side-text-hi:#18181B; --side-border:#E8E6E0;
 
-  /* type */
-  --font-display:"Sora","Cairo","Inter",ui-sans-serif,system-ui,sans-serif;
+  /* type — Archivo: bold geometric display (uppercase heroes); Inter text; Cairo/Plex Arabic */
+  --font-display:"Archivo","Cairo","Inter",ui-sans-serif,system-ui,sans-serif;
   --font-text:"Inter","IBM Plex Sans Arabic",ui-sans-serif,system-ui,sans-serif;
   --font-mono:ui-monospace,"SF Mono",Menlo,monospace;
   --text-2xs:.6875rem; --text-xs:.75rem; --text-sm:.875rem; --text-base:1rem;
   --text-lg:1.125rem; --text-xl:1.375rem; --text-2xl:1.75rem; --text-3xl:2.25rem; --text-4xl:3rem; --text-5xl:3.5rem;
-  --leading-tight:1.2; --leading-snug:1.4; --leading-normal:1.6;
+  --leading-tight:1.15; --leading-snug:1.4; --leading-normal:1.6;
   --weight-regular:400; --weight-medium:500; --weight-semibold:600; --weight-bold:700;
-  --tracking-tight:-0.02em;
+  --tracking-tight:-0.01em; --tracking-wide:.08em;
 
   /* space (4px) */
   --space-1:.25rem; --space-2:.5rem; --space-3:.75rem; --space-4:1rem; --space-5:1.25rem;
   --space-6:1.5rem; --space-8:2rem; --space-10:2.5rem; --space-12:3rem; --space-16:4rem; --space-20:5rem; --space-24:6rem;
 
-  /* radius / elevation / motion */
-  --radius-sm:6px; --radius-md:10px; --radius-lg:14px; --radius-xl:20px; --radius-full:999px;
-  --shadow-1:0 1px 2px rgba(16,22,39,.06),0 1px 1px rgba(16,22,39,.04);
-  --shadow-2:0 4px 12px rgba(16,22,39,.08);
-  --shadow-3:0 12px 32px rgba(16,22,39,.12);
-  --shadow-pop:0 8px 28px rgba(16,22,39,.16);
+  /* radius / elevation / motion — crisp cards, near-shadowless (borders do the separation) */
+  --radius-sm:5px; --radius-md:8px; --radius-lg:12px; --radius-xl:16px; --radius-full:999px;
+  --shadow-1:0 1px 2px rgba(18,18,20,.04);
+  --shadow-2:0 2px 8px rgba(18,18,20,.06);
+  --shadow-3:0 8px 24px rgba(18,18,20,.08);
+  --shadow-pop:0 8px 28px rgba(18,18,20,.12);
   --motion-fast:120ms; --motion-base:180ms; --motion-slow:280ms;
   --ease:cubic-bezier(.2,0,0,1); --ease-out:cubic-bezier(.22,1,.36,1);
 
@@ -69,32 +74,36 @@
 }
 
 [data-theme="dark"] {
-  /* Blue Noir base — this palette is built for dark */
-  --bg:#011627; --canvas:#020E18; --surface:#0B2030; --surface-2:#132B3D;
-  --border:#173247; --border-2:#22415A;
-  --text:#EDE4DE; --text-muted:#9DA8A0; --text-subtle:#79857D; --text-inverse:#011627;
-  --plum-400:#C39AAC; --plum-500:#B58B9C; --plum-600:#A5768A; --on-accent:#160E13; /* ink on soft plum */
-  --success-bg:#10261A; --success-fg:#7FB088; --danger-bg:#2A1414; --danger-fg:#D99A9A;
-  --warn-bg:#2A2010; --warn-fg:#D9B472; --info-bg:#0E2830; --info-fg:#8FB8C2; --focus:#C39AAC;
-  --side-bg:#010E18; --side-bg-2:#0A2033; --side-active:rgba(181,139,156,.20);
-  --side-text:#9DA8A0; --side-border:#12293C;
-  --shadow-1:0 1px 2px rgba(0,0,0,.5); --shadow-2:0 4px 12px rgba(0,0,0,.5);
-  --shadow-3:0 12px 32px rgba(0,0,0,.6); --shadow-pop:0 8px 28px rgba(0,0,0,.65);
+  /* warm graphite — paper's night register (not blue, not pure black) */
+  --bg:#151412; --canvas:#100F0E; --surface:#1D1C19; --surface-2:#262420;
+  --band:#242019;
+  --border:#2E2B26; --border-2:#3B372F;
+  --text:#F0EEE8; --text-muted:#ACA79D; --text-subtle:#8B867C; --text-inverse:#151412;
+  --amber-600:#E8A33D; --amber-500:#F2B65A; --amber-700:#D18F26; /* brighter ramp for dark */
+  --on-accent:#201503;                                            /* ink on bright amber */
+  --star:#FFB84D; --sale:#FFB84D;
+  --success-bg:#182619; --success-fg:#8FC49A; --danger-bg:#2C1615; --danger-fg:#E3A09A;
+  --warn-bg:#2A2110; --warn-fg:#DDB871; --info-bg:#14222E; --info-fg:#93BBDD; --focus:#E8A33D;
+  --cat-violet:#8D7A93; --cat-blue:#5E7E9E; --cat-rose:#BC8B95;
+  --side-bg:#191815; --side-bg-2:#22201C; --side-active:color-mix(in srgb, var(--amber-600) 16%, transparent);
+  --side-text:#ACA79D; --side-text-hi:#F0EEE8; --side-border:#2E2B26;
+  --shadow-1:0 1px 2px rgba(0,0,0,.4); --shadow-2:0 2px 8px rgba(0,0,0,.45);
+  --shadow-3:0 8px 24px rgba(0,0,0,.5); --shadow-pop:0 8px 28px rgba(0,0,0,.55);
 }
 
-/* registers — .shop follows the theme --bg (warm greige in light, Blue Noir in dark);
-   the console sits on the greige/near-black canvas. */
+/* registers — .shop follows the theme --bg (paper in light, graphite in dark);
+   the console sits on the slightly deeper canvas. */
 .console { --bg:var(--canvas); }
 
 /* ── compatibility shim ───────────────────────────────────────────────────────
    Legacy --color-* names used by views ported from the pre-consolidation apps map
-   to v3 tokens, so those views adopt the new palette + dark theme unchanged. New
-   code should use the v3 names above; migrate a view off these when it's redesigned. */
+   to v4 tokens, so those views adopt the new palette + dark theme unchanged. New
+   code should use the v4 names above; migrate a view off these when it's redesigned. */
 :root {
   --color-bg:var(--bg); --color-surface:var(--surface); --color-surface-2:var(--surface-2);
   --color-border:var(--border); --color-border-strong:var(--border-2);
   --color-text:var(--text); --color-text-muted:var(--text-muted); --color-text-faint:var(--text-subtle);
-  --color-text-inverse:var(--on-accent);          /* text sits on the amber accent → ink */
+  --color-text-inverse:var(--on-accent);          /* text sits on the accent → on-accent */
   --color-accent:var(--accent); --color-accent-hover:var(--accent-hover);
   --color-accent-text:var(--on-accent);
   --color-accent-soft:color-mix(in srgb, var(--accent) 14%, transparent);
