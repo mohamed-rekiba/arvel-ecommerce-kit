@@ -12,7 +12,14 @@ from typing import Any
 
 from arvel import Schema
 
-from app.enums import CountryCode, CouponType, Currency, OrderStatus, PaymentStatus
+from app.enums import (
+    CountryCode,
+    CouponType,
+    Currency,
+    OrderStatus,
+    PaymentStatus,
+    ReviewStatus,
+)
 
 # --- shared / catalog ---------------------------------------------------------
 
@@ -52,6 +59,8 @@ class ProductOut(Schema, omit_defaults=True):
     id: int
     slug: str
     translation: Translate  # the active locale's name/description (scope_in_locale)
+    rating_avg: float | None
+    rating_count: int
     price_cents: int
     currency: str
     status: str
@@ -360,6 +369,39 @@ class OrderOut(Schema):
         PaymentStatus | None
     )  # latest payment attempt (None = never attempted)
     items: list[OrderLineOut]
+
+
+class ReviewIn(Schema):
+    rating: int
+    body: str
+    title: str | None = None
+
+
+class ReviewOut(Schema):
+    id: int
+    rating: int
+    title: str | None
+    body: str
+    status: ReviewStatus
+    author: str | None
+    created_at: str | None
+
+
+class ReviewListOut(Schema):
+    reviews: list[ReviewOut]  # approved only
+    mine: ReviewOut | None  # the caller's own review, any status
+    rating_count: int
+    rating_avg: float | None
+
+
+class AdminReviewOut(Schema):
+    id: int
+    product_slug: str
+    author: str
+    rating: int
+    title: str | None
+    body: str
+    status: ReviewStatus
 
 
 class OrderStatusIn(Schema):

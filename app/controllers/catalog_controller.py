@@ -88,10 +88,14 @@ async def product_out(p: Product) -> ProductOut:
     images = await p.get_media(
         IMAGES
     )  # uses the eager-loaded `media` relation when present
+    rating_count = int(getattr(p, "rating_count", 0) or 0)
+    rating_sum = int(getattr(p, "rating_sum", 0) or 0)
     return ProductOut(
         id=p.id,
         slug=p.slug,
         translation=p.translation,
+        rating_avg=round(rating_sum / rating_count, 1) if rating_count else None,
+        rating_count=rating_count,
         price_cents=p.price_cents,
         currency=p.currency,
         status=ProductStatus(p.status).value,

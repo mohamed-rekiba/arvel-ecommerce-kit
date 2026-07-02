@@ -23,6 +23,7 @@ from app.controllers import admin_variant_controller as admin_variants
 from app.controllers import auth_controller as auth
 from app.controllers import cart_controller as cart
 from app.controllers import catalog_controller as catalog
+from app.controllers import review_controller as reviews
 from app.controllers import checkout_controller as checkout
 from app.controllers import media_controller as media
 from app.controllers import notification_controller as notifications
@@ -240,6 +241,22 @@ Route.get("/admin/me", admin.me, name="api.admin.me").secure("oidc")
 Route.post(
     "/admin/oidc/token", admin.oidc_exchange, name="api.admin.oidc.token"
 ).status(200).secure("oidc")
+
+# --- Product reviews (verified purchasers; moderated) ---------------------------
+Route.get(
+    "/products/{slug:str}/reviews", reviews.index, name="api.products.reviews.index"
+)
+Route.post(
+    "/products/{slug:str}/reviews", reviews.store, name="api.products.reviews.store"
+).middleware(Authenticate).secure("bearer")
+Route.get(
+    "/admin/reviews", reviews.admin_index, name="api.admin.reviews.index"
+).middleware(Authenticate).secure("bearer")
+Route.post(
+    "/admin/reviews/{id:int}/{decision:str}",
+    reviews.moderate,
+    name="api.admin.reviews.moderate",
+).status(200).middleware(Authenticate).secure("bearer")
 
 # --- Cart (guest by X-Cart-Token, or the authenticated user's cart) -----------
 Route.get("/cart", cart.show, name="api.cart.show")

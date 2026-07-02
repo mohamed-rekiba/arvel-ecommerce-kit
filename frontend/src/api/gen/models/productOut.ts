@@ -14,6 +14,8 @@ export interface ProductOut {
   id: number;
   slug: string;
   translation: Translate;
+  rating_avg: number | null;
+  rating_count: number;
   price_cents: number;
   currency: string;
   status: string;

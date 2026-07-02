@@ -33,7 +33,8 @@ function signOut() {
       <nav>
         <RouterLink to="/admin/products" class="item"><svg viewBox="0 0 24 24" class="ic"><path d="M3 7l9-4 9 4-9 4z"/><path d="M3 7v10l9 4 9-4V7"/></svg>Products</RouterLink>
         <RouterLink to="/admin/categories" class="item" active-class="on"><svg viewBox="0 0 24 24" class="ic"><path d="M4 5h7v7H4zM13 5h7v7h-7zM4 14h7v5H4zM13 14h7v5h-7z"/></svg>Categories</RouterLink>
-        <RouterLink to="/admin/vendors" class="item" active-class="on"><svg viewBox="0 0 24 24" class="ic"><path d="M4 7l8-4 8 4v10l-8 4-8-4z"/><path d="M4 7l8 4 8-4M12 11v10"/></svg>Vendors</RouterLink>
+        <RouterLink to="/admin/reviews" class="item" active-class="on"><svg viewBox="0 0 24 24" class="ic"><path d="M12 3l2.5 5.5 6 .6-4.5 4 1.3 5.9L12 16l-5.3 3 1.3-5.9-4.5-4 6-.6z"/></svg>Reviews</RouterLink>
+      <RouterLink to="/admin/vendors" class="item" active-class="on"><svg viewBox="0 0 24 24" class="ic"><path d="M4 7l8-4 8 4v10l-8 4-8-4z"/><path d="M4 7l8 4 8-4M12 11v10"/></svg>Vendors</RouterLink>
         <span class="item item--soon"><svg viewBox="0 0 24 24" class="ic"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M4 18l5-4 4 3 3-2 4 3"/></svg>Media<i>soon</i></span>
       </nav>
 
