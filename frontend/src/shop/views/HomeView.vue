@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { computed, onMounted, ref } from "vue";
 import { type Category, type Product, api, formatPrice } from "../api";
+import { cacheProducts } from "../product-cache";
 import ProductCard from "../components/ProductCard.vue";
 
 const categories = ref<Category[]>([]);
@@ -17,6 +18,7 @@ onMounted(async () => {
     const [cats, page] = await Promise.all([api.categories(), api.products({ page: 1 })]);
     categories.value = cats;
     products.value = page.data;
+    cacheProducts(page.data); // lets the PDP paint the image immediately for the shared-element morph
   } finally {
     loading.value = false;
   }

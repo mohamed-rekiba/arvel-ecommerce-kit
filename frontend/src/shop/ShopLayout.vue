@@ -11,6 +11,11 @@ const router = useRouter();
 const route = useRoute();
 const scrolled = ref(false);
 
+// Where the View Transitions API drives the animation (Chrome/Edge/Safari 18+) we let it own the
+// morph; elsewhere (Firefox / older Safari) we fall back to a plain Vue cross-fade. Keying the view by
+// path also forces a fresh mount per route so the PDP re-reads the product cache in setup().
+const vtSupported = "startViewTransition" in Document.prototype;
+
 onMounted(() => {
   refresh();
   wishlist.refresh();
@@ -49,7 +54,13 @@ onMounted(() => {
       </div>
     </header>
 
-    <main class="main"><RouterView /></main>
+    <main class="main">
+      <RouterView v-slot="{ Component }">
+        <transition :name="vtSupported ? 'vt' : 'fade'" :mode="vtSupported ? undefined : 'out-in'">
+          <component :is="Component" :key="route.path" />
+        </transition>
+      </RouterView>
+    </main>
 
     <footer class="ft">
       <div class="ft__top">

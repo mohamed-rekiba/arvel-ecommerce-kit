@@ -41,6 +41,12 @@ input:disabled, select:disabled, textarea:disabled { opacity: .6; cursor: not-al
   ::view-transition-group(*),::view-transition-old(*),::view-transition-new(*) { animation: none !important; }
 }
 
+/* Fallback route transition for browsers without the View Transitions API (Firefox / older Safari):
+   a plain Vue <transition name="fade" mode="out-in"> cross-fade. Where the VT API IS supported the
+   view uses name="vt" (no CSS here) so the API owns the morph and these rules never fire. */
+.fade-enter-active, .fade-leave-active { transition: opacity 220ms var(--ease-out); }
+.fade-enter-from, .fade-leave-to { opacity: 0; }
+
 /* View Transitions (lib/transitions.ts): a soft cross-fade between routes + a container-transform
    morph for shared elements (product image grid → PDP). */
 @media (prefers-reduced-motion: no-preference) {

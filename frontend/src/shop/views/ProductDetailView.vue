@@ -4,14 +4,20 @@ import { computed, onMounted, ref, watch } from "vue";
 import { useRoute, useRouter } from "vue-router";
 import { type Product, type Variant, api, formatPrice } from "../api";
 import { useCart } from "../cart";
+import { getCachedProduct } from "../product-cache";
 
 const route = useRoute();
 const router = useRouter();
 const { add } = useCart();
 
-const product = ref<Product | null>(null);
-const status = ref<"loading" | "error" | "ready">("loading");
-const selectedVariantId = ref<number | null>(null);
+// seed synchronously from the list cache so the image paints on the first frame — the View Transition
+// needs the shared element present on the new page to morph into (else it degrades to a fade).
+const cached = getCachedProduct(String(route.params.slug));
+const product = ref<Product | null>(cached);
+const status = ref<"loading" | "error" | "ready">(cached ? "ready" : "loading");
+const selectedVariantId = ref<number | null>(
+  cached?.variants?.find((v) => v.stock > 0)?.id ?? cached?.variants?.[0]?.id ?? null,
+);
 const adding = ref(false);
 const added = ref(false);
 
@@ -29,14 +35,14 @@ const selectedVariant = computed(() =>
 const canAdd = computed(() => selectedVariant.value != null && selectedVariant.value.stock > 0);
 
 async function load() {
-  status.value = "loading";
+  if (!product.value) status.value = "loading"; // keep the cached image on screen while refreshing
   try {
     const p = await api.product(String(route.params.slug));
     product.value = p;
     selectedVariantId.value = p.variants?.find((v) => v.stock > 0)?.id ?? p.variants?.[0]?.id ?? null;
     status.value = "ready";
   } catch {
-    status.value = "error";
+    if (!product.value) status.value = "error";
   }
 }
 

@@ -3,6 +3,7 @@ import Select from "primevue/select";
 import { computed, onMounted, ref, watch } from "vue";
 import { useRoute, useRouter } from "vue-router";
 import { type Category, type Product, api } from "../api";
+import { cacheProducts } from "../product-cache";
 import ProductCard from "../components/ProductCard.vue";
 
 const route = useRoute();
@@ -47,6 +48,7 @@ async function load() {
       page: page.value,
     });
     products.value = res.data;
+    cacheProducts(res.data); // so the PDP can render the image instantly (for the shared-element morph)
     total.value = res.total;
     lastPage.value = res.last_page;
     status.value = "ready";
