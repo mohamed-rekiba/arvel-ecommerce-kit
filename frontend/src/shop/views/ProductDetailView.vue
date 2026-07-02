@@ -67,6 +67,19 @@ async function submitReview() {
   }
 }
 
+// back-in-stock (S17)
+const alertState = ref<"idle" | "done" | "auth">("idle");
+
+async function notifyMe() {
+  if (!selectedVariant.value) return;
+  try {
+    await api.subscribeStockAlert(selectedVariant.value.id);
+    alertState.value = "done";
+  } catch (e) {
+    alertState.value = e instanceof ApiError && e.status === 401 ? "auth" : "idle";
+  }
+}
+
 function stars(avg: number): string {
   return "★".repeat(Math.round(avg)) + "☆".repeat(5 - Math.round(avg));
 }
@@ -175,6 +188,13 @@ watch(() => route.params.slug, load);
           :loading="adding"
           @click="addToCart"
         />
+        <div v-if="selectedVariant && selectedVariant.stock <= 0" class="pdp__alert" aria-live="polite">
+          <p v-if="alertState === 'done'" class="pdp__alert-ok">✓ We'll email you when it's back.</p>
+          <p v-else-if="alertState === 'auth'" class="pdp__alert-note">
+            <RouterLink to="/account">Sign in</RouterLink> to get a back-in-stock alert.
+          </p>
+          <button v-else class="pdp__alert-btn" @click="notifyMe">Notify me when available</button>
+        </div>
         <ul class="pdp__meta">
           <li>Free returns within 30 days</li>
           <li>Ships in 2–4 business days</li>
@@ -271,4 +291,8 @@ watch(() => route.params.slug, load);
 .reviews__form label span { display: block; font-size: var(--text-sm); margin-bottom: var(--space-1); }
 .reviews__form input, .reviews__form select, .reviews__form textarea { width: 100%; padding: var(--space-2) var(--space-3); border: 1px solid var(--color-border); border-radius: var(--radius-md); background: var(--color-bg); color: var(--color-text); font: inherit; }
 .reviews__error { color: var(--color-danger); font-size: var(--text-sm); margin: 0; }
+.pdp__alert { margin-top: var(--space-3); }
+.pdp__alert-btn { background: none; border: 1px solid var(--color-border); border-radius: var(--radius-md); padding: var(--space-2) var(--space-4); font: inherit; font-size: var(--text-sm); cursor: pointer; color: var(--color-text); }
+.pdp__alert-ok { color: var(--color-success, #2e7d32); font-size: var(--text-sm); }
+.pdp__alert-note { font-size: var(--text-sm); color: var(--color-text-muted); }
 </style>

@@ -167,6 +167,10 @@ async def adjust_stock(request: Request, data: StockAdjustIn) -> VariantOut:
         )
         .log("adjusted stock")
     )
+    # a genuine 0→positive edge wakes the back-in-stock subscribers (queued fan-out, one-shot)
+    from app.services.stock_alert_service import notify_back_in_stock
+
+    await notify_back_in_stock(locked, before=before, after=target)
     return _out(locked)
 
 
