@@ -459,6 +459,8 @@ class AdminOrderDetailOut(Schema):
     subtotal_cents: int
     shipping_cents: int
     tax_cents: int
+    coupon_code: str | None
+    discount_cents: int
     total_cents: int
     currency: Currency
     customer: AdminOrderCustomerOut | None  # None = a guest order

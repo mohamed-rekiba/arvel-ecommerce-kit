@@ -8,18 +8,9 @@ from arvel import abort
 from arvel.http import Request
 from arvel.support import current_user
 
+from app.controllers.serializers import iso as _iso
 from app.models.user import User
 from app.schemas import MessageOut, NotificationOut
-
-
-def _iso(value: Any) -> str | None:
-    if value is None:
-        return None
-    for attr in ("to_iso", "isoformat"):
-        fn = getattr(value, attr, None)
-        if callable(fn):
-            return str(fn()).split("[", 1)[0]  # strip arvel Date's RFC-9557 [UTC] tail
-    return str(value)
 
 
 def _out(row: Any) -> NotificationOut:

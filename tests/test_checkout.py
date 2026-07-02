@@ -370,9 +370,14 @@ def test_admin_order_detail_shows_everything(client) -> None:
     assert body["items"][0]["product_name"] == "Tee"
     assert body["address"]["city"] == "Portland"
     assert body["payments"] == []  # never paid through the gateway in this test
+    # the discount breakdown is part of the admin detail (0/None without a coupon)
+    assert (body["coupon_code"], body["discount_cents"]) == (None, 0)
     # the transition is in the history with its properties
     changes = [e for e in body["history"] if e["description"] == "order status changed"]
     assert changes and changes[-1]["properties"] == {"from": "pending", "to": "paid"}
+    # timestamps are standard ISO-8601, not the arvel Date repr / RFC-9557 form
+    when = changes[-1]["created_at"]
+    assert when and "Date(" not in when and "[" not in when
 
     # a guest order labels the contact and has no customer link
     guest_cart = client.post(
