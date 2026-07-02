@@ -10,6 +10,7 @@ import type {
   AddItemIn,
   AdminCategoryPage,
   AdminMeOut,
+  AdminProductDetailOut,
   AdminProductOut,
   AdminProductPage,
   ApiAdminCategoriesIndex400,
@@ -19,6 +20,8 @@ import type {
   ApiAdminProductsImage400,
   ApiAdminProductsIndex400,
   ApiAdminProductsIndexParams,
+  ApiAdminProductsMediaDestroy400,
+  ApiAdminProductsShow400,
   ApiAdminProductsStore400,
   ApiAdminProductsUpdate400,
   ApiAdminUsersRoles400,
@@ -859,6 +862,53 @@ export const apiAdminProductsImage = async (id: number, options?: RequestInit): 
 
 
 
+export type apiAdminProductsMediaDestroyResponse200 = {
+  data: GalleryImageOut[]
+  status: 200
+}
+
+export type apiAdminProductsMediaDestroyResponse400 = {
+  data: ApiAdminProductsMediaDestroy400
+  status: 400
+}
+
+export type apiAdminProductsMediaDestroyResponseSuccess = (apiAdminProductsMediaDestroyResponse200) & {
+  headers: Headers;
+};
+export type apiAdminProductsMediaDestroyResponseError = (apiAdminProductsMediaDestroyResponse400) & {
+  headers: Headers;
+};
+
+export type apiAdminProductsMediaDestroyResponse = (apiAdminProductsMediaDestroyResponseSuccess | apiAdminProductsMediaDestroyResponseError)
+
+export const getApiAdminProductsMediaDestroyUrl = (id: number,
+    mediaId: number,) => {
+
+
+
+
+  return `/api/admin/products/${id}/media/${mediaId}`
+}
+
+/**
+ * Remove ONE gallery image (row + stored files via HasMedia.delete_media); returns the
+ * updated gallery. catalog.update authority; a foreign media id can't cross products.
+ * @summary ApiAdminProductsMediaDestroy
+ */
+export const apiAdminProductsMediaDestroy = async (id: number,
+    mediaId: number, options?: RequestInit): Promise<apiAdminProductsMediaDestroyResponse> => {
+
+  return apiFetch<apiAdminProductsMediaDestroyResponse>(getApiAdminProductsMediaDestroyUrl(id,mediaId),
+  {
+    ...options,
+    method: 'DELETE'
+
+
+  }
+);}
+
+
+
 export type apiAdminProductsIndexResponse200 = {
   data: AdminProductPage
   status: 200
@@ -939,7 +989,7 @@ export const getApiAdminProductsStoreUrl = () => {
 }
 
 /**
- * Create a product (admins only). The name/description are stored in the default (en) locale.
+ * Create a product (admins only) with per-locale content (en required).
  * @summary ApiAdminProductsStore
  */
 export const apiAdminProductsStore = async (productIn: ProductIn, options?: RequestInit): Promise<apiAdminProductsStoreResponse> => {
@@ -1006,6 +1056,50 @@ export const apiAdminCategoriesIndex = async (params?: ApiAdminCategoriesIndexPa
 
 
 
+export type apiAdminProductsShowResponse200 = {
+  data: AdminProductDetailOut
+  status: 200
+}
+
+export type apiAdminProductsShowResponse400 = {
+  data: ApiAdminProductsShow400
+  status: 400
+}
+
+export type apiAdminProductsShowResponseSuccess = (apiAdminProductsShowResponse200) & {
+  headers: Headers;
+};
+export type apiAdminProductsShowResponseError = (apiAdminProductsShowResponse400) & {
+  headers: Headers;
+};
+
+export type apiAdminProductsShowResponse = (apiAdminProductsShowResponseSuccess | apiAdminProductsShowResponseError)
+
+export const getApiAdminProductsShowUrl = (id: number,) => {
+
+
+
+
+  return `/api/admin/products/${id}`
+}
+
+/**
+ * One product with variants + gallery — the editor's read (hidden products included).
+ * @summary ApiAdminProductsShow
+ */
+export const apiAdminProductsShow = async (id: number, options?: RequestInit): Promise<apiAdminProductsShowResponse> => {
+
+  return apiFetch<apiAdminProductsShowResponse>(getApiAdminProductsShowUrl(id),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
 export type apiAdminProductsUpdateResponse200 = {
   data: AdminProductOut
   status: 200
@@ -1034,7 +1128,8 @@ export const getApiAdminProductsUpdateUrl = (id: number,) => {
 }
 
 /**
- * Update a product (admins only; 404 to non-admins so existence isn't leaked).
+ * Update a product — per-locale content, price, category, status, visibility (admins only;
+ * 404 to non-admins so existence isn't leaked).
  * @summary ApiAdminProductsUpdate
  */
 export const apiAdminProductsUpdate = async (id: number,

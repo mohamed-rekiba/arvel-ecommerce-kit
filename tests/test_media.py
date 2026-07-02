@@ -134,3 +134,77 @@ def test_rejects_non_image_upload(client) -> None:
         headers=admin,
     )
     assert resp.status_code == 422
+
+
+def test_admin_deletes_one_gallery_image(client) -> None:
+    """S10: DELETE removes ONE image (row + files) and returns the updated gallery; a foreign
+    media id 404s and a customer is denied."""
+    admin = _auth(client, "admin@example.com", "secret-admin")
+    first = client.post(
+        "/api/admin/products/1/image",
+        files={"image": ("a.png", _PNG, "image/png")},
+        headers=admin,
+    ).json()[0]
+    second = client.post(
+        "/api/admin/products/1/image",
+        files={"image": ("b.png", _PNG, "image/png")},
+        headers=admin,
+    ).json()[1]
+
+    # a customer can't delete media
+    customer = _auth(client, "cara@example.com", "secret-cara")
+    assert (
+        client.delete(
+            f"/api/admin/products/1/media/{first['id']}", headers=customer
+        ).status_code
+        == 403
+    )
+
+    gallery = client.delete(f"/api/admin/products/1/media/{first['id']}", headers=admin)
+    assert gallery.status_code == 200
+    assert [g["id"] for g in gallery.json()] == [second["id"]]
+    # the deleted original no longer serves
+    assert client.get(f"/api/media/{first['id']}").status_code == 404
+    # an id that isn't attached to this product → 404
+    assert (
+        client.delete("/api/admin/products/1/media/999", headers=admin).status_code
+        == 404
+    )
+
+
+def test_admin_product_detail_and_translations_update(client) -> None:
+    """S10: the editor's read (detail incl. variants+gallery) and per-locale update round-trip."""
+    admin = _auth(client, "admin@example.com", "secret-admin")
+    detail = client.get("/api/admin/products/1", headers=admin)
+    assert detail.status_code == 200
+    body = detail.json()
+    assert (
+        body["price_cents"] == 2000 and body["variants"] == [] and body["gallery"] == []
+    )
+
+    updated = client.put(
+        "/api/admin/products/1",
+        json={
+            "published": True,
+            "translations": {
+                "en": {"name": "Tee", "description": "A tee."},
+                "fr": {"name": "T-shirt", "description": "Un t-shirt."},
+            },
+        },
+        headers=admin,
+    )
+    assert updated.status_code == 200, updated.text
+    locales = {t["locale"]: t["name"] for t in updated.json()["translations"]}
+    assert locales == {"en": "Tee", "fr": "T-shirt"}
+
+    # the storefront serves the fr content
+    fr = client.get("/api/products/tee", headers={"Accept-Language": "fr"})
+    assert fr.json()["translation"]["name"] == "T-shirt"
+
+    # an unsupported locale is rejected with a field error
+    bad = client.put(
+        "/api/admin/products/1",
+        json={"translations": {"en": {"name": "Tee"}, "xx": {"name": "nope"}}},
+        headers=admin,
+    )
+    assert bad.status_code == 422 and "translations" in bad.json()["errors"]

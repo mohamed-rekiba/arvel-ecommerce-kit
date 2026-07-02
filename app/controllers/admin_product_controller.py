@@ -14,17 +14,19 @@ from arvel.activitylog import activity
 
 from app.enums import Permission, ProductStatus
 from app.models.category import Category
-from app.models.product import Product
+from app.models.product import SUPPORTED_LOCALES, Product
 from app.models.user import User
 from app.schemas import (
     AdminCategoryOut,
     AdminCategoryPage,
+    AdminProductDetailOut,
     AdminProductOut,
     AdminProductPage,
     MessageOut,
     ProductIn,
-    Translate,
+    TranslationFieldsIn,
     UpdateProductIn,
+    VariantOut,
 )
 
 
@@ -106,29 +108,87 @@ def _admin_product_out(product: Product, *, is_visible: bool) -> AdminProductOut
     )
 
 
+def _validated_translations(
+    payload: dict[str, "TranslationFieldsIn"] | None,
+) -> dict[str, dict[str, str | None]] | None:
+    """Locale-whitelist + shape-check a translations map; None passes through (no change)."""
+    if payload is None:
+        return None
+    bad = [locale for locale in payload if locale not in SUPPORTED_LOCALES]
+    if bad:
+        raise ValidationException(
+            {"translations": [f"Unsupported locale(s): {', '.join(sorted(bad))}."]}
+        )
+    if "en" not in payload:
+        raise ValidationException(
+            {"translations": ["English (en) content is required."]}
+        )
+    for locale, fields in payload.items():
+        if not fields.name.strip():
+            raise ValidationException(
+                {"translations": [f"The {locale} name can't be empty."]}
+            )
+    return {
+        locale: {"name": fields.name, "description": fields.description}
+        for locale, fields in payload.items()
+    }
+
+
+async def show(request: Request) -> AdminProductDetailOut:
+    """One product with variants + gallery — the editor's read (hidden products included)."""
+    from app.controllers.catalog_controller import gallery_image_out
+    from app.models.product_variant import ProductVariant
+
+    await _require_admin()
+    product = (
+        await Product.with_visibility()
+        .where("id", int(request.path_param("id")))
+        .first_or_fail()
+    )
+    variants = await ProductVariant.where("product_id", product.id).order_by("id").get()
+    from app.controllers.media_controller import IMAGES
+
+    gallery = [gallery_image_out(m) for m in await product.get_media(IMAGES)]
+    return AdminProductDetailOut(
+        id=product.id,
+        slug=product.slug,
+        translations=product.translations,
+        status=ProductStatus(product.status).value,
+        published=bool(product.published),
+        is_visible=bool(getattr(product, "is_visible", False)),
+        price_cents=product.price_cents,
+        category_id=product.category_id,
+        variants=[
+            VariantOut(
+                id=v.id,
+                sku=v.sku,
+                name=v.name,
+                price_adjustment_cents=v.price_adjustment_cents,
+                stock=v.stock,
+            )
+            for v in variants
+        ],
+        gallery=gallery,
+    )
+
+
 async def store(request: Request, data: ProductIn) -> AdminProductOut:
-    """Create a product (admins only). The name/description are stored in the default (en) locale."""
+    """Create a product (admins only) with per-locale content (en required)."""
     user = _current_user()
     if not await user.can("create", Product):
         abort(403, "Only admins may create products.")
     validator = Validator(
-        {
-            "category_id": data.category_id,
-            "name": data.name,
-            "price_cents": data.price_cents,
-        },
-        {
-            "category_id": "required|integer",
-            "name": "required|string",
-            "price_cents": "required|integer|min:0",
-        },
+        {"category_id": data.category_id, "price_cents": data.price_cents},
+        {"category_id": "required|integer", "price_cents": "required|integer|min:0"},
     )
     if validator.fails():
         raise ValidationException(validator.errors())
+    translations = _validated_translations(data.translations)
+    assert translations is not None  # ProductIn.translations is required
     product = await Product.create(
         category_id=data.category_id,
-        translations={"en": {"name": data.name, "description": data.description}},
-        slug=Str.slug(data.name),
+        translations=translations,
+        slug=Str.slug(translations["en"]["name"] or ""),
         price_cents=data.price_cents,
         currency="USD",
         status=ProductStatus.DRAFT,
@@ -137,33 +197,39 @@ async def store(request: Request, data: ProductIn) -> AdminProductOut:
         activity()
         .caused_by(user)
         .performed_on(product)
-        .with_properties({"name": data.name, "slug": product.slug})
+        .with_properties({"name": translations["en"]["name"], "slug": product.slug})
         .log("created product")
     )
     return _admin_product_out(product, is_visible=False)  # a new draft is never visible
 
 
 async def update(request: Request, data: UpdateProductIn) -> AdminProductOut:
-    """Update a product (admins only; 404 to non-admins so existence isn't leaked)."""
+    """Update a product — per-locale content, price, category, status, visibility (admins only;
+    404 to non-admins so existence isn't leaked)."""
     user = _current_user()
     product = await Product.find_or_fail(int(request.path_param("id")))
     if not await user.can("update", product):
         abort(404, "Product not found")
-    if data.name is not None:  # update the en translation, preserving other locales
-        existing: list[Translate] = product.translations
-        current = {
-            t.locale: {"name": t.name, "description": t.description} for t in existing
-        }
-        current["en"] = {
-            "name": data.name,
-            "description": current.get("en", {}).get("description"),
-        }
-        product.translations = current
+    translations = _validated_translations(data.translations)
+    if translations is not None:
+        product.translations = translations
+    if data.category_id is not None:
+        await Category.find_or_fail(data.category_id)  # 404 on a bogus category
+        product.category_id = data.category_id
     if data.price_cents is not None:
+        if data.price_cents < 0:
+            raise ValidationException({"price_cents": ["The price can't be negative."]})
         product.price_cents = data.price_cents
     if data.status is not None:
         product.status = ProductStatus(data.status)
+    if data.published is not None:
+        product.published = data.published
     await product.save()
+    if data.published is not None or data.status is not None:
+        # visibility inputs changed → flag the retrievable views dirty (debounced refresh)
+        from app.services.catalog_visibility_service import CatalogVisibilityService
+
+        await CatalogVisibilityService.mark_dirty()
     await (
         activity()
         .caused_by(user)
@@ -172,7 +238,13 @@ async def update(request: Request, data: UpdateProductIn) -> AdminProductOut:
             {
                 "changed": [
                     k
-                    for k in ("name", "price_cents", "status")
+                    for k in (
+                        "translations",
+                        "category_id",
+                        "price_cents",
+                        "status",
+                        "published",
+                    )
                     if getattr(data, k) is not None
                 ]
             }

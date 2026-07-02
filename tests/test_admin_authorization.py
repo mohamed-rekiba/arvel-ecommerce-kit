@@ -81,7 +81,12 @@ def test_unauthenticated_is_rejected(client) -> None:
     # (A guest with a malformed body may surface 400 first — body validation precedes route
     # middleware in litestar — but a guest can never succeed, which is the security property.)
     resp = client.post(
-        "/api/admin/products", json={"category_id": 1, "name": "X", "price_cents": 100}
+        "/api/admin/products",
+        json={
+            "category_id": 1,
+            "price_cents": 100,
+            "translations": {"en": {"name": "X"}},
+        },
     )
     assert resp.status_code == 401
 
@@ -90,14 +95,20 @@ def test_customer_cannot_mutate_catalog(client) -> None:
     token = _token(client, "cara@example.com", "secret-cara")
     create = client.post(
         "/api/admin/products",
-        json={"category_id": 1, "name": "Hacky", "price_cents": 100},
+        json={
+            "category_id": 1,
+            "price_cents": 100,
+            "translations": {"en": {"name": "Hacky"}},
+        },
         headers=_auth(token),
     )
     assert create.status_code == 403  # policy.create → deny() → 403
     # update/delete deny AS 404 (deny_as_not_found) — existence not leaked
     assert (
         client.put(
-            "/api/admin/products/1", json={"name": "x"}, headers=_auth(token)
+            "/api/admin/products/1",
+            json={"translations": {"en": {"name": "x"}}},
+            headers=_auth(token),
         ).status_code
         == 404
     )
@@ -110,7 +121,11 @@ def test_admin_can_mutate_catalog(client) -> None:
     token = _token(client, "admin@example.com", "secret-admin")
     create = client.post(
         "/api/admin/products",
-        json={"category_id": 1, "name": "Admin Tee", "price_cents": 2500},
+        json={
+            "category_id": 1,
+            "price_cents": 2500,
+            "translations": {"en": {"name": "Admin Tee"}},
+        },
         headers=_auth(token),
     )
     assert create.status_code == 201
@@ -118,7 +133,7 @@ def test_admin_can_mutate_catalog(client) -> None:
 
     upd = client.put(
         f"/api/admin/products/{new_id}",
-        json={"name": "Admin Tee v2", "status": "active"},
+        json={"translations": {"en": {"name": "Admin Tee v2"}}, "status": "active"},
         headers=_auth(token),
     )
     assert upd.status_code == 200
@@ -135,7 +150,11 @@ def test_admin_create_validates(client) -> None:
     token = _token(client, "admin@example.com", "secret-admin")
     bad = client.post(
         "/api/admin/products",
-        json={"category_id": 1, "name": "", "price_cents": -5},
+        json={
+            "category_id": 1,
+            "price_cents": -5,
+            "translations": {"en": {"name": ""}},
+        },
         headers=_auth(token),
     )
     assert bad.status_code == 422

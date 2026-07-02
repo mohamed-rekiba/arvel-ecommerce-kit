@@ -45,6 +45,18 @@ async def upload_image(request: Request) -> list[GalleryImageOut]:
     return [gallery_image_out(m) for m in await product.get_media(IMAGES)]
 
 
+async def delete_image(request: Request) -> list[GalleryImageOut]:
+    """Remove ONE gallery image (row + stored files via HasMedia.delete_media); returns the
+    updated gallery. catalog.update authority; a foreign media id can't cross products."""
+    user = current_user.get()
+    if user is None or not await user.can(Permission.CATALOG_UPDATE.value):
+        abort(403, "You may not modify product media.")
+    product = await Product.find_or_fail(int(request.path_param("id")))
+    if not await product.delete_media(int(request.path_param("media_id"))):
+        abort(404, "Media not found")
+    return [gallery_image_out(m) for m in await product.get_media(IMAGES)]
+
+
 async def serve_media(request: Request) -> Response:
     """Stream a media item — the original, or a named conversion (thumb/preview)."""
     media = await Media.find_or_fail(int(request.path_param("id")))

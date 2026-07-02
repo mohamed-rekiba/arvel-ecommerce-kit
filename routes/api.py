@@ -113,6 +113,11 @@ Route.post(
     media.upload_image,
     name="api.admin.products.image",
 ).middleware(Authenticate).secure("bearer")
+Route.delete(
+    "/admin/products/{id:int}/media/{media_id:int}",
+    media.delete_image,
+    name="api.admin.products.media.destroy",
+).status(200).middleware(Authenticate).secure("bearer")
 
 # --- Admin product CRUD (auth-guarded by middleware; policy-guarded in the controller) --------
 # Authenticate (401 if guest) runs as route middleware BEFORE body parsing — Laravel ordering; the
@@ -126,6 +131,9 @@ Route.get(
     "/admin/categories",
     admin_products.categories_index,
     name="api.admin.categories.index",
+).middleware(Authenticate).secure("bearer")
+Route.get(
+    "/admin/products/{id:int}", admin_products.show, name="api.admin.products.show"
 ).middleware(Authenticate).secure("bearer")
 Route.post(
     "/admin/products", admin_products.store, name="api.admin.products.store"
