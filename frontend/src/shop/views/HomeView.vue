@@ -235,7 +235,7 @@ function nudgeRail(dir: number) {
 .hero__img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
 .hero__scrim { position: absolute; inset: 0; background: linear-gradient(to var(--scrim-end, right), color-mix(in srgb, var(--hero-band) 92%, transparent) 0%, color-mix(in srgb, var(--hero-band) 62%, transparent) 48%, transparent 78%); }
 [dir="rtl"] .hero__scrim { --scrim-end: left; }
-.hero__copy { position: relative; z-index: 1; height: 100%; display: flex; flex-direction: column; justify-content: center; gap: 12px; padding: clamp(1.25rem, 4.5vw, 3.5rem); max-width: min(58ch, 100%); }
+.hero__copy { position: relative; z-index: 1; height: 100%; display: flex; flex-direction: column; justify-content: center; gap: 12px; padding-block: clamp(1.25rem, 4.5vw, 3.5rem); padding-inline: max(60px, clamp(1.25rem, 4.5vw, 3.5rem)); max-width: min(62ch, 100%); }
 .hero__chip { align-self: flex-start; background: var(--accent-bright); color: var(--on-accent-bright); font-size: 11.5px; font-weight: 800; letter-spacing: .06em; text-transform: uppercase; padding: 5px 12px; border-radius: var(--radius-full); }
 .hero__copy h1 { font-family: var(--font-display); font-size: clamp(1.55rem, 4vw, 3rem); font-weight: 800; text-transform: uppercase; letter-spacing: .01em; line-height: 1.08; color: var(--text); }
 .hero__copy p { margin: 0; font-size: clamp(13.5px, 1.6vw, 15px); color: var(--text-muted); max-width: 40ch; }
