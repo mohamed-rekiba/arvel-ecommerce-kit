@@ -407,6 +407,22 @@ class NewsletterSubscriberOut(Schema):
     created_at: str | None
 
 
+class MediaItemOut(Schema):
+    """One row of the back-office media library — any stored file with its owner resolved."""
+
+    id: int
+    owner_type: str
+    owner_id: int
+    owner_label: str
+    collection: str
+    file_name: str
+    mime_type: str
+    size: int
+    url: str
+    thumb_url: str | None
+    created_at: str | None
+
+
 class SettingsOut(Schema):
     """The public storefront settings (whitelisted keys only)."""
 

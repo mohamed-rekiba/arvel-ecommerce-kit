@@ -272,7 +272,7 @@ export const api = {
   },
   uploadAvatar(file: File) {
     const form = new FormData();
-    form.append("file", file);
+    form.append("image", file);
     // no JSON content-type — the browser sets the multipart boundary
     return apiFetch<Customer>(`/api/account/avatar`, { method: "POST", body: form });
   },
