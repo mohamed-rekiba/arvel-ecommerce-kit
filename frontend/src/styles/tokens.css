@@ -82,24 +82,25 @@
 }
 
 [data-theme="dark"] {
-  /* neutral charcoal — the reference's nav tone becomes the canvas */
-  --bg:#161617; --canvas:#111112; --surface:#1E1E1F; --surface-2:#28282A;
-  --band:#2A2118; --hero-band:#2A2118;
-  --border:#2F2F31; --border-2:#3C3C3F;
-  --text:#F0EFEC; --text-muted:#ABAAA5; --text-subtle:#8A8984; --text-inverse:#161617;
-  --nav-bg:#111112; --nav-text:#ABAAA5; --nav-text-hi:#FFFFFF;
-  --orange-600:#FF9D45; --orange-500:#FFB068; --orange-700:#F08A2B; /* brightened, ink-on-accent */
-  --on-accent:#221100;
-  --accent-text:#FFA657;   /* ≥7:1 on surface/surface-2/band (dark) */
+  /* "night commerce" — cool neutral blacks with clearly-elevated surfaces; the vivid orange and
+     the product photography carry the color. No brown, no mud. */
+  --bg:#131417; --canvas:#0E0F12; --surface:#17181C; --surface-2:#1E2025;
+  --band:#1A1D26; --hero-band:#1A1D26;
+  --border:#2A2C33; --border-2:#383B44;
+  --text:#F2F3F5; --text-muted:#A6A9B1; --text-subtle:#878B94; --text-inverse:#131417;
+  --nav-bg:#0B0C0E; --nav-text:#A6A9B1; --nav-text-hi:#FFFFFF;
+  --orange-600:#FF8A3D; --orange-500:#FFA05C; --orange-700:#F0752A; /* vivid, ink-on-accent */
+  --on-accent:#1F1204;
+  --accent-text:#FFA05C;   /* ≥7:1 on surface/surface-2/band (dark) */
   --on-accent-bright:#221100;
-  --star:#FFB84D; --sale:#FF8A80; --sale-bg:#33201E;
-  --success-bg:#1A2A1C; --success-fg:#8FC49A; --danger-bg:#2E1817; --danger-fg:#E3A09A;
-  --warn-bg:#2B2212; --warn-fg:#DDB871; --info-bg:#152331; --info-fg:#93BBDD; --focus:#FF9D45;
-  --cat-violet:#8D7A93; --cat-blue:#5E7E9E; --cat-rose:#BC8B95;
-  --side-bg:#1A1A1B; --side-bg-2:#242426; --side-active:color-mix(in srgb, var(--orange-600) 16%, transparent);
-  --side-text:#ABAAA5; --side-text-hi:#F0EFEC; --side-border:#2F2F31;
-  --shadow-1:0 1px 2px rgba(0,0,0,.4); --shadow-2:0 2px 8px rgba(0,0,0,.45);
-  --shadow-3:0 8px 24px rgba(0,0,0,.5); --shadow-pop:0 8px 28px rgba(0,0,0,.55);
+  --star:#FFC24D; --sale:#FF6B6B; --sale-bg:#31191C;
+  --success-bg:#14281B; --success-fg:#7ED495; --danger-bg:#301719; --danger-fg:#FF9B95;
+  --warn-bg:#2C230F; --warn-fg:#E9C063; --info-bg:#122334; --info-fg:#8FC1EE; --focus:#FF8A3D;
+  --cat-violet:#9D89A6; --cat-blue:#6E8FB3; --cat-rose:#C795A0;
+  --side-bg:#101114; --side-bg-2:#1A1B20; --side-active:color-mix(in srgb, var(--orange-600) 18%, transparent);
+  --side-text:#A6A9B1; --side-text-hi:#F2F3F5; --side-border:#2A2C33;
+  --shadow-1:0 1px 2px rgba(0,0,0,.5); --shadow-2:0 2px 10px rgba(0,0,0,.5);
+  --shadow-3:0 10px 28px rgba(0,0,0,.55); --shadow-pop:0 10px 32px rgba(0,0,0,.6);
 }
 
 /* registers — .shop follows the theme --bg (paper in light, graphite in dark);
