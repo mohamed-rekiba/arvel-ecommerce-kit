@@ -2,19 +2,20 @@
 import Button from "primevue/button";
 import Column from "primevue/column";
 import DataTable from "primevue/datatable";
+import InputText from "primevue/inputtext";
 import Tag from "primevue/tag";
-import { onMounted, ref } from "vue";
-import { type Order, type OrderStatus, ApiError, ORDER_TRANSITIONS, api, formatPrice } from "../api";
+import { onMounted, ref, watch } from "vue";
+import { type Order, ApiError, api, formatPrice, nextStates } from "../api";
 import { type MessageKey, t } from "../locale";
 
 const orders = ref<Order[]>([]);
 const status = ref<"loading" | "error" | "ready">("loading");
+const STATUSES = ["pending", "paid", "shipped", "delivered", "cancelled"] as const;
+const statusFilter = ref<string>("");
+const q = ref("");
+let debounce: ReturnType<typeof setTimeout> | null = null;
 const notice = ref<string | null>(null);
 const busyId = ref<number | null>(null);
-
-function nextStates(status: OrderStatus): OrderStatus[] {
-  return ORDER_TRANSITIONS[status] ?? [];
-}
 
 const severity: Record<string, string> = {
   pending: "secondary",
@@ -27,7 +28,10 @@ const severity: Record<string, string> = {
 async function load() {
   status.value = "loading";
   try {
-    orders.value = await api.orders();
+    orders.value = await api.orders({
+      ...(statusFilter.value ? { status: statusFilter.value } : {}),
+      ...(q.value.trim() ? { q: q.value.trim() } : {}),
+    });
     status.value = "ready";
   } catch (e) {
     status.value = "error";
@@ -53,6 +57,11 @@ async function transition(order: Order, next: string) {
 function itemCount(o: Order): number {
   return o.items.reduce((n, i) => n + i.quantity, 0);
 }
+watch(statusFilter, load);
+watch(q, () => {
+  if (debounce) clearTimeout(debounce);
+  debounce = setTimeout(load, 350);
+});
 onMounted(load);
 </script>
 
@@ -66,6 +75,20 @@ onMounted(load);
 
     <p v-if="notice" class="notice" role="alert">{{ notice }}</p>
 
+    <div class="toolbar">
+      <div class="chips" role="group" :aria-label="t('common.status')">
+        <button class="chip" :class="{ on: statusFilter === '' }" @click="statusFilter = ''">{{ t("orders.all") }}</button>
+        <button
+          v-for="st in STATUSES"
+          :key="st"
+          class="chip"
+          :class="{ on: statusFilter === st }"
+          @click="statusFilter = st"
+        >{{ t(`order.${st}` as MessageKey) }}</button>
+      </div>
+      <InputText v-model="q" class="search" :placeholder="t('orders.search_ph')" :aria-label="t('orders.search_ph')" />
+    </div>
+
     <div class="panel">
       <DataTable :value="orders" :loading="status === 'loading'" paginator :rows="10" data-key="id" size="small" striped-rows>
         <template #empty><p class="empty">{{ t("orders.none") }}</p></template>
@@ -77,6 +100,14 @@ onMounted(load);
         <Column :header="t('orders.items')">
           <template #body="{ data }">{{ itemCount(data) }}</template>
         </Column>
+        <Column :header="t('orders.contact')">
+          <template #body="{ data }"><span class="muted">{{ data.contact_email }}</span></template>
+        </Column>
+        <Column :header="t('orders.method')">
+          <template #body="{ data }">
+            <Tag :value="t(`pay.${data.payment_method}` as MessageKey)" :severity="data.payment_method === 'cod' ? 'warn' : 'info'" />
+          </template>
+        </Column>
         <Column :header="t('common.total')">
           <template #body="{ data }"><span class="mono">{{ formatPrice(data.total_cents) }}</span></template>
         </Column>
@@ -87,9 +118,9 @@ onMounted(load);
         </Column>
         <Column :header="t('orders.advance')">
           <template #body="{ data }">
-            <div v-if="nextStates(data.status).length" class="actions">
+            <div v-if="nextStates(data).length" class="actions">
               <Button
-                v-for="next in nextStates(data.status)"
+                v-for="next in nextStates(data)"
                 :key="next"
                 :label="t(`order.${next}` as MessageKey)"
                 size="small"
@@ -114,6 +145,11 @@ onMounted(load);
 .sub { color: var(--text-muted); font-size: 13px; margin: 0; }
 .notice { background: var(--danger-bg); color: var(--danger-fg); padding: 10px 14px; border-radius: var(--radius-md); font-size: 13px; margin-bottom: 16px; }
 .panel { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-lg); box-shadow: var(--shadow-1); overflow: hidden; }
+.toolbar { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 14px; }
+.chips { display: flex; flex-wrap: wrap; gap: 6px; }
+.chip { padding: 7px 14px; border-radius: 999px; border: 1px solid var(--border); background: var(--surface); color: var(--text-muted); font-size: 12.5px; font-weight: 600; cursor: pointer; text-transform: capitalize; }
+.chip.on { background: var(--accent); border-color: var(--accent); color: var(--on-accent); }
+.search { min-width: 240px; }
 .mono { font-family: var(--font-mono); font-size: 12.5px; }
 .actions { display: inline-flex; gap: 6px; }
 .muted { color: var(--text-subtle); }
