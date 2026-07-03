@@ -244,8 +244,9 @@ onBeforeUnmount(stopPolling);
 /* lines */
 .lines { list-style: none; margin: 0; padding: 0; }
 .line { display: flex; align-items: center; gap: 12px; padding: 10px 0; border-bottom: 1px solid var(--border); }
-.line__img { width: 48px; height: 48px; border-radius: var(--radius-sm); overflow: hidden; background: var(--surface-2); border: 1px solid var(--border); flex-shrink: 0; display: grid; place-items: center; }
+.line__img { width: 48px; height: 48px; border-radius: var(--radius-sm); overflow: hidden; background: var(--photo-well); border: 1px solid var(--border); flex-shrink: 0; display: grid; place-items: center; }
 .line__img img { width: 100%; height: 100%; object-fit: cover; }
+[data-theme="dark"] .line__img img { filter: brightness(.88); }
 .line__ph { width: 100%; height: 100%; background: var(--surface-2); }
 .line__meta { flex: 1; min-width: 0; display: flex; flex-direction: column; }
 .line__meta b { font-size: 13.5px; font-weight: 600; }

@@ -111,8 +111,15 @@ async function addToBag() {
 .card { display: flex; flex-direction: column; background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-md); overflow: hidden; transition: box-shadow var(--motion-base), transform var(--motion-base); }
 .card:hover { box-shadow: var(--shadow-2); }
 .card--out { opacity: .75; }
-.media { position: relative; display: block; aspect-ratio: 1 / 1; overflow: hidden; background: var(--surface); }
+.media { position: relative; display: block; aspect-ratio: 1 / 1; overflow: hidden; background: var(--photo-well); }
+/* dark: the well becomes an inset "framed tile" — card surface visible around it — and a cool
+   veil pulls warm photo whites toward the neutral register */
+[data-theme="dark"] .media { margin: 8px 8px 0; aspect-ratio: auto; height: 0; padding-bottom: calc(100% - 16px); border-radius: var(--radius-md); }
+[data-theme="dark"] .media::after { content: ""; position: absolute; inset: 0; background: rgb(19 20 23 / .05); pointer-events: none; }
+[data-theme="dark"] .media img { position: absolute; inset: 0; }
 .media img { width: 100%; height: 100%; object-fit: cover; transition: transform .8s var(--ease-out); }
+/* dark: dim imagery ~12% (thumbnail-dimming pattern) so white-background shots don't glare */
+[data-theme="dark"] .media img { filter: brightness(.88); }
 .card:hover .media img { transform: scale(1.04); }
 .media__ph { width: 100%; height: 100%; background: var(--surface-2); }
 .badges { position: absolute; top: 10px; inset-inline-start: 10px; display: flex; flex-direction: column; gap: 6px; }

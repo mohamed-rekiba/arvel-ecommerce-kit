@@ -57,8 +57,9 @@ const soldPct = computed(() => {
 
 <style scoped>
 .deal { display: grid; grid-template-columns: 1fr; gap: 16px; background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-lg); padding: 18px; }
-.deal__media { position: relative; display: block; aspect-ratio: 1 / 1; border-radius: var(--radius-md); overflow: hidden; background: var(--surface-2); }
+.deal__media { position: relative; display: block; aspect-ratio: 1 / 1; border-radius: var(--radius-md); overflow: hidden; background: var(--photo-well); }
 .deal__media img { width: 100%; height: 100%; object-fit: cover; }
+[data-theme="dark"] .deal__media img { filter: brightness(.88); }
 .deal__ph { width: 100%; height: 100%; background: var(--surface-2); }
 .deal__badge { position: absolute; top: 10px; inset-inline-start: 10px; background: var(--accent-bright); color: var(--on-accent-bright); font-size: 12px; font-weight: 800; padding: 4px 10px; border-radius: var(--radius-sm); }
 .deal__info { display: flex; flex-direction: column; gap: 8px; min-width: 0; }

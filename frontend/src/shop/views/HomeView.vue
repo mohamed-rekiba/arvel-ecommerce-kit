@@ -266,8 +266,9 @@ function nudgeRail(dir: number) {
 .cats::-webkit-scrollbar { display: none; }
 .cat { flex: 0 0 auto; width: 104px; scroll-snap-align: start; display: flex; flex-direction: column; align-items: center; gap: 8px; padding: 12px 8px; background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-md); text-decoration: none; color: var(--text); transition: box-shadow var(--motion-base), border-color var(--motion-base); }
 .cat:hover { box-shadow: var(--shadow-2); border-color: var(--border-2); }
-.cat__imgwrap { width: 72px; height: 72px; border-radius: var(--radius-full); overflow: hidden; background: var(--surface-2); display: grid; place-items: center; }
+.cat__imgwrap { width: 72px; height: 72px; border-radius: var(--radius-full); overflow: hidden; background: var(--photo-well); display: grid; place-items: center; }
 .cat__imgwrap img { width: 100%; height: 100%; object-fit: cover; }
+[data-theme="dark"] .cat__imgwrap img { filter: brightness(.88); }
 .cat__ph { width: 100%; height: 100%; background: var(--surface-2); }
 .cat b { font-size: 12px; font-weight: 600; text-align: center; line-height: 1.25; }
 .cat:hover b { color: var(--accent-text); }

@@ -105,7 +105,7 @@ onMounted(load);
 
 .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 14px; }
 .card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-lg); overflow: hidden; box-shadow: var(--shadow-1); }
-.card__img { display: block; aspect-ratio: 4 / 3; background: var(--surface-2); }
+.card__img { display: block; aspect-ratio: 4 / 3; background: var(--photo-well); }
 .card__img img { width: 100%; height: 100%; object-fit: cover; }
 .card__meta { padding: 10px 12px; display: flex; flex-direction: column; gap: 3px; }
 .card__owner { font-size: 13px; font-weight: 600; color: var(--text); text-decoration: none; }
