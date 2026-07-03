@@ -44,11 +44,16 @@ const admin = {
   newsletter: () => import("./admin/views/NewsletterView.vue"),
 };
 
+const RESTORE_SCROLL = new Set(["catalog", "deals"]);
+
 const router = createRouter({
   history: createWebHistory(),
-  // On browser back/forward, Vue Router passes the position the page was scrolled to when it was left
-  // (savedPosition) — restore that instead of forcing the top, or every back-nav loses your place.
-  scrollBehavior: (_to, _from, savedPosition) => savedPosition ?? { top: 0 },
+  // Back/forward restores the reading position ONLY where that aids browsing — long lists
+  // you drill into and return to (catalog, deals: PDP -> back must land on the same row).
+  // Everywhere else back goes to the top: restoring home to its footer reads as "the back
+  // button is broken", not as continuity.
+  scrollBehavior: (to, _from, savedPosition) =>
+    savedPosition && RESTORE_SCROLL.has(String(to.name)) ? savedPosition : { top: 0 },
   routes: [
     {
       path: "/",
