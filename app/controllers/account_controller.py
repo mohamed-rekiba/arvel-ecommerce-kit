@@ -46,7 +46,7 @@ async def avatar_url(user: User, conversion: str = "profile") -> str | None:
     return f"/api/media/{media[0].id}/{conversion}"
 
 
-async def _user_out(user: User) -> UserOut:
+async def user_out(user: User) -> UserOut:
     return UserOut(
         id=user.id,
         name=user.name,
@@ -93,7 +93,7 @@ async def update_profile(request: Request, data: ProfileIn) -> UserOut:
     await user.save()
     if email_changed:
         await _send_verification(user)
-    return await _user_out(user)
+    return await user_out(user)
 
 
 async def change_password(request: Request, data: ChangePasswordIn) -> MessageOut:
@@ -162,4 +162,4 @@ async def upload_avatar(request: Request) -> UserOut:
         ) from exc
     for media in previous:
         await user.delete_media(media.id)
-    return await _user_out(user)
+    return await user_out(user)
