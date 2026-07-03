@@ -32,13 +32,29 @@ def _me(request: Request) -> User:
     return user
 
 
-def _user_out(user: User) -> UserOut:
+async def avatar_url(user: User, conversion: str = "profile") -> str | None:
+    """The user's avatar (a one-image media collection), as a serving URL — public-bucket URL
+    when the disk exposes one, else the app-streamed /api/media route."""
+    from app.models.user import AVATAR
+
+    media = await user.get_media(AVATAR)
+    if not media:
+        return None
+    url = media[0].get_url(conversion)
+    if url and url.startswith(("http://", "https://")):
+        return url
+    return f"/api/media/{media[0].id}/{conversion}"
+
+
+async def _user_out(user: User) -> UserOut:
     return UserOut(
         id=user.id,
         name=user.name,
         email=user.email,
         phone=user.phone,
         email_verified=user.email_verified_at is not None,
+        avatar_url=await avatar_url(user),
+        locale=str(getattr(user, "locale", None) or "en"),
     )
 
 
@@ -77,7 +93,7 @@ async def update_profile(request: Request, data: ProfileIn) -> UserOut:
     await user.save()
     if email_changed:
         await _send_verification(user)
-    return _user_out(user)
+    return await _user_out(user)
 
 
 async def change_password(request: Request, data: ChangePasswordIn) -> MessageOut:
@@ -117,3 +133,33 @@ async def verify_email(request: Request, data: VerifyEmailIn) -> MessageOut:
         user.email_verified_at = Date.now()
         await user.save()
     return MessageOut(message="Email verified — welcome aboard!")
+
+
+async def upload_avatar(request: Request) -> UserOut:
+    """Attach/replace the account avatar (one image; the previous one is removed)."""
+    from arvel.validation import ValidationException
+
+    from app.models.user import AVATAR
+    from app.services.product_image_service import ProductImageService
+
+    user = _me(request)
+    upload = await request.file("image")
+    if upload is None:
+        raise ValidationException({"image": ["An image file is required."]})
+    raw = await upload.read()
+    previous = await user.get_media(AVATAR)
+    try:
+        await ProductImageService().attach_uploaded(
+            user,
+            raw,
+            file_name=upload.client_name or "avatar.png",
+            mime_type=upload.content_type,
+            collection=AVATAR,
+        )
+    except Exception as exc:  # noqa: BLE001 — any decode/store failure is a client error
+        raise ValidationException(
+            {"image": ["The file is not a valid image."]}
+        ) from exc
+    for media in previous:
+        await user.delete_media(media.id)
+    return await _user_out(user)

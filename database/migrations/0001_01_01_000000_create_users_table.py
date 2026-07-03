@@ -15,6 +15,7 @@ class CreateUsersTable(Migration):
             t.string("password")
             # PII stored via arvel's `encrypted` cast — ciphertext at rest, so text-sized
             t.text("phone").nullable()
+            t.string("locale", 5).default(value="en")  # mail/notification language
             t.string("role").default(
                 value="customer"
             ).index()  # customer | admin (UserRole)

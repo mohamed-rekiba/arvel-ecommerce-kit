@@ -86,6 +86,13 @@ ROLE_PERMISSIONS: dict[RoleName, list[Permission]] = {
 }
 
 
+class PaymentMethod(str, Enum):
+    """How the order is settled: the payment gateway after placing, or cash on delivery."""
+
+    GATEWAY = "gateway"
+    COD = "cod"
+
+
 class OrderStatus(str, Enum):
     """An order's lifecycle state."""
 
@@ -106,7 +113,13 @@ ORDER_TRANSITIONS: dict[OrderStatus, set[OrderStatus]] = {
 }
 
 
-def can_transition(current: OrderStatus, target: OrderStatus) -> bool:
+def can_transition(
+    current: OrderStatus, target: OrderStatus, *, cod: bool = False
+) -> bool:
+    """The order state machine. Cash-on-delivery orders are never paid through the gateway, so
+    they may ship straight from PENDING (settlement happens at the door)."""
+    if cod and current is OrderStatus.PENDING and target is OrderStatus.SHIPPED:
+        return True
     return target in ORDER_TRANSITIONS.get(current, set())
 
 
