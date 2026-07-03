@@ -15,6 +15,7 @@ from arvel.telemetry import span
 from arvel.validation import ValidationException, Validator
 
 from app.controllers.cart_controller import line_presentation, resolve_cart
+from app.i18n import active_locale
 from app.controllers.order_access import resolve_owned_order
 from app.enums import (
     CountryCode,
@@ -93,9 +94,7 @@ async def _latest_payment_status(order: Order) -> PaymentStatus | None:
     return status if isinstance(status, PaymentStatus) else PaymentStatus(status)
 
 
-async def log_transition(
-    order: Order, before: OrderStatus, after: OrderStatus
-) -> None:
+async def log_transition(order: Order, before: OrderStatus, after: OrderStatus) -> None:
     """Every status change lands in the activity trail — the admin history AND the customer's
     tracking timeline read from it."""
     from arvel.activitylog import activity
@@ -114,7 +113,10 @@ def _method_value(order: Order) -> PaymentMethod:
 
 
 async def _order_out(
-    order: Order, items: list[OrderItem], payment_status: PaymentStatus | None = None
+    order: Order,
+    items: list[OrderItem],
+    payment_status: PaymentStatus | None = None,
+    timeline: list[OrderTimelineOut] | None = None,
 ) -> OrderOut:
     looks = await line_presentation([i.product_variant_id for i in items])
     return OrderOut(
@@ -143,6 +145,7 @@ async def _order_out(
             )
             for i in items
         ],
+        timeline=timeline,
     )
 
 
@@ -384,6 +387,7 @@ async def checkout(request: Request, data: CheckoutIn) -> OrderOut:
             user_id=order.user_id,
             total_cents=order.total_cents,
             contact_email=order.contact_email,
+            locale=active_locale(),
         ),
     )
     return await _order_out(order, order_items)
@@ -421,21 +425,19 @@ async def _timeline(order: Order) -> list[OrderTimelineOut]:
             OrderStatus.SHIPPED,
             OrderStatus.DELIVERED,
         ]
-    return [
-        OrderTimelineOut(status=step, at=reached.get(step.value)) for step in path
-    ]
+    return [OrderTimelineOut(status=step, at=reached.get(step.value)) for step in path]
 
 
 async def show(request: Request) -> OrderOut:
     """One order, with lines + breakdown + the tracking timeline — for the signed-in owner or
     the order-token holder."""
     order = await resolve_owned_order(request, int(request.path_param("id")))
-    out = await _order_out(
+    return await _order_out(
         order,
         await order.items().get(),
         payment_status=await _latest_payment_status(order),
+        timeline=await _timeline(order),
     )
-    return OrderOut(**{**{f: getattr(out, f) for f in out.__struct_fields__}, "timeline": await _timeline(order)})
 
 
 async def cancel(request: Request) -> OrderOut:

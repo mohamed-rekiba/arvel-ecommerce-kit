@@ -1,0 +1,23 @@
+{
+  "mail": {
+    "confirmed": {
+      "subject": "Votre commande n°{order} est confirmée",
+      "title": "Merci pour votre commande !",
+      "body": "La commande n°{order} d'un total de {total} a bien été reçue."
+    },
+    "shipped": {
+      "subject": "Votre commande n°{order} a été expédiée",
+      "title": "En route !",
+      "body": "La commande n°{order} a été expédiée et arrive vers vous."
+    },
+    "back_in_stock": {
+      "subject": "De retour en stock : {product}",
+      "title": "Il est de retour !",
+      "body": "{product} est à nouveau disponible — dans la limite du stock."
+    }
+  },
+  "notif": {
+    "shipped": "Votre commande n°{order} a été expédiée.",
+    "back_in_stock": "{product} est de retour en stock."
+  }
+}

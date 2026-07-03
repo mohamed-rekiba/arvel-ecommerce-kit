@@ -57,6 +57,14 @@ async def login(request: Request, data: CredentialsIn) -> TokenOut:
     if user is None or not Hasher().check(data.password, user.password):
         abort(401, "Invalid credentials")
     await cart.merge_guest_cart(request, user)
+    from app.i18n import active_locale
+
+    locale = active_locale()
+    if getattr(user, "locale", None) != locale:
+        user.locale = (
+            locale  # the sign-in language becomes the mail/notification language
+        )
+        await user.save()
     token, _ = await create_token(user, name="api")
     return TokenOut(token=token)
 

@@ -257,7 +257,9 @@ def test_order_timeline_tracks_transitions(client) -> None:
     cara = _auth(client)
     admin = _auth(client, "admin@example.com", "secret-admin")
     addr = client.post("/api/account/addresses", json=_ADDR, headers=cara).json()
-    client.post("/api/cart/items", json={"product_variant_id": 1, "quantity": 1}, headers=cara)
+    client.post(
+        "/api/cart/items", json={"product_variant_id": 1, "quantity": 1}, headers=cara
+    )
     order = client.post(
         "/api/checkout",
         json={"address_id": addr["id"], "payment_method": "cod"},
@@ -272,7 +274,9 @@ def test_order_timeline_tracks_transitions(client) -> None:
     ]  # COD path skips the paid step
 
     client.post(
-        f"/api/admin/orders/{order['id']}/status", json={"status": "shipped"}, headers=admin
+        f"/api/admin/orders/{order['id']}/status",
+        json={"status": "shipped"},
+        headers=admin,
     )
     timeline = client.get(f"/api/orders/{order['id']}", headers=cara).json()["timeline"]
     assert [(s["status"], s["at"] is not None) for s in timeline] == [
@@ -282,10 +286,16 @@ def test_order_timeline_tracks_transitions(client) -> None:
     ]
 
     # a cancelled order shows the terminal branch
-    client.post("/api/cart/items", json={"product_variant_id": 1, "quantity": 1}, headers=cara)
-    doomed = client.post("/api/checkout", json={"address_id": addr["id"]}, headers=cara).json()
+    client.post(
+        "/api/cart/items", json={"product_variant_id": 1, "quantity": 1}, headers=cara
+    )
+    doomed = client.post(
+        "/api/checkout", json={"address_id": addr["id"]}, headers=cara
+    ).json()
     client.post(f"/api/orders/{doomed['id']}/cancel", headers=cara)
-    timeline = client.get(f"/api/orders/{doomed['id']}", headers=cara).json()["timeline"]
+    timeline = client.get(f"/api/orders/{doomed['id']}", headers=cara).json()[
+        "timeline"
+    ]
     assert [s["status"] for s in timeline] == ["pending", "cancelled"]
     assert timeline[-1]["at"] is not None
 
@@ -296,8 +306,12 @@ def test_invoice_renders_server_side_html(client) -> None:
     cara = _auth(client)
     rival = _auth(client, "rival@example.com", "secret-rival")
     addr = client.post("/api/account/addresses", json=_ADDR, headers=cara).json()
-    client.post("/api/cart/items", json={"product_variant_id": 1, "quantity": 2}, headers=cara)
-    order = client.post("/api/checkout", json={"address_id": addr["id"]}, headers=cara).json()
+    client.post(
+        "/api/cart/items", json={"product_variant_id": 1, "quantity": 2}, headers=cara
+    )
+    order = client.post(
+        "/api/checkout", json={"address_id": addr["id"]}, headers=cara
+    ).json()
 
     page = client.get(f"/api/orders/{order['id']}/invoice", headers=cara)
     assert page.status_code == 200
@@ -312,5 +326,71 @@ def test_invoice_renders_server_side_html(client) -> None:
         headers={**cara, "Accept-Language": "fr"},
     )
     assert "Facture" in fr.text
-    assert client.get(f"/api/orders/{order['id']}/invoice", headers=rival).status_code == 404
+    assert (
+        client.get(f"/api/orders/{order['id']}/invoice", headers=rival).status_code
+        == 404
+    )
     assert client.get(f"/api/orders/{order['id']}/invoice").status_code == 401
+
+
+def test_server_side_localization(client) -> None:
+    """v6.1 A9 — arvel.localization file catalogs: validation errors localize to the request
+    locale; users capture their sign-in locale; notifications render in the RECIPIENT's language."""
+    # a French checkout with a missing address field errors in French (lang/fr/validation.json)
+    cara = _auth(client)
+    client.post(
+        "/api/cart/items", json={"product_variant_id": 1, "quantity": 1}, headers=cara
+    )
+    resp = client.post(
+        "/api/checkout", json={}, headers={**cara, "Accept-Language": "fr"}
+    )
+    assert resp.status_code == 422
+    assert "obligatoire" in str(resp.json())
+
+    # signing in under ar stores the locale on the user…
+    client.post(
+        "/api/login",
+        json={"email": "cara@example.com", "password": "secret-cara"},
+        headers={"Accept-Language": "ar"},
+    )
+    me = client.get("/api/user", headers=_auth(client)).json()
+    assert me["locale"] == "en"  # this login was en again — last sign-in wins
+
+    ar_headers = {"Accept-Language": "ar"}
+    token = client.post(
+        "/api/login",
+        json={"email": "cara@example.com", "password": "secret-cara"},
+        headers=ar_headers,
+    ).json()["token"]
+    auth_ar = {"Authorization": f"Bearer {token}"}
+    assert client.get("/api/user", headers=auth_ar).json()["locale"] == "ar"
+
+    # …and the shipped notification renders in Arabic for that recipient
+    addr = client.post("/api/account/addresses", json=_ADDR, headers=auth_ar).json()
+    client.post(
+        "/api/cart/items",
+        json={"product_variant_id": 1, "quantity": 1},
+        headers=auth_ar,
+    )
+    order = client.post(
+        "/api/checkout",
+        json={"address_id": addr["id"], "payment_method": "cod"},
+        headers=auth_ar,
+    ).json()
+    admin = _auth(client, "admin@example.com", "secret-admin")
+    client.post(
+        f"/api/admin/orders/{order['id']}/status",
+        json={"status": "shipped"},
+        headers=admin,
+    )
+    import time
+
+    def arabic_note() -> bool:
+        notes = client.get("/api/notifications", headers=auth_ar).json()
+        return any("شُحن" in n["message"] or "تم شحن" in n["message"] for n in notes)
+
+    for _ in range(40):
+        if arabic_note():
+            break
+        time.sleep(0.05)
+    assert arabic_note()

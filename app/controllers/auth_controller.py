@@ -46,7 +46,14 @@ async def register(request: Request, data: RegisterIn) -> TokenOut:
         raise ValidationException(validator.errors())
     if await User.where("email", data.email).first() is not None:
         raise ValidationException({"email": ["This email is already registered."]})
-    user = await User.create(name=data.name, email=data.email, password=data.password)
+    from app.i18n import active_locale
+
+    user = await User.create(
+        name=data.name,
+        email=data.email,
+        password=data.password,
+        locale=active_locale(),
+    )
     await merge_guest_cart(
         request, user
     )  # a guest's cart follows them into the new account

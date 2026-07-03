@@ -1,0 +1,23 @@
+{
+  "mail": {
+    "confirmed": {
+      "subject": "تم تأكيد طلبك رقم {order}",
+      "title": "شكرًا لطلبك!",
+      "body": "استلمنا الطلب رقم {order} بإجمالي {total}."
+    },
+    "shipped": {
+      "subject": "تم شحن طلبك رقم {order}",
+      "title": "في الطريق إليك!",
+      "body": "شُحن الطلب رقم {order} وهو في طريقه إليك."
+    },
+    "back_in_stock": {
+      "subject": "عاد إلى المخزون: {product}",
+      "title": "عاد من جديد!",
+      "body": "{product} أصبح متوفرًا مجددًا — حتى نفاد الكمية."
+    }
+  },
+  "notif": {
+    "shipped": "تم شحن طلبك رقم {order}.",
+    "back_in_stock": "{product} عاد إلى المخزون."
+  }
+}

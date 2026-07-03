@@ -22,9 +22,7 @@ from app.services import settings_service
 
 async def public_settings(request: Request) -> SettingsOut:
     values = await settings_service.all_settings()
-    return SettingsOut(
-        values={k: values[k] for k in settings_service.PUBLIC_KEYS}
-    )
+    return SettingsOut(values={k: values[k] for k in settings_service.PUBLIC_KEYS})
 
 
 async def subscribe(request: Request, data: NewsletterIn) -> MessageOut:
@@ -71,7 +69,10 @@ async def newsletter_index(request: Request) -> list[NewsletterSubscriberOut]:
     rows = await NewsletterSubscriber.order_by("id", "desc").get()
     return [
         NewsletterSubscriberOut(
-            id=r.id, email=r.email, locale=r.locale or "en", created_at=_iso(r.created_at)
+            id=r.id,
+            email=r.email,
+            locale=r.locale or "en",
+            created_at=_iso(r.created_at),
         )
         for r in rows
     ]

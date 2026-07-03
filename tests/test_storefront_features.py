@@ -187,10 +187,19 @@ def test_categories_carry_a_derived_tile_image(client) -> None:
 
 
 def test_newsletter_subscribe_is_idempotent_and_validated(client) -> None:
-    assert client.post("/api/newsletter", json={"email": "not-an-email"}).status_code == 422
-    assert client.post("/api/newsletter", json={"email": "fan@example.com"}).status_code == 200
+    assert (
+        client.post("/api/newsletter", json={"email": "not-an-email"}).status_code
+        == 422
+    )
+    assert (
+        client.post("/api/newsletter", json={"email": "fan@example.com"}).status_code
+        == 200
+    )
     # same email again → still 200, still one row (via the admin list)
-    assert client.post("/api/newsletter", json={"email": "FAN@example.com "}).status_code == 200
+    assert (
+        client.post("/api/newsletter", json={"email": "FAN@example.com "}).status_code
+        == 200
+    )
     admin = _admin(client)
     rows = client.get("/api/admin/newsletter", headers=admin).json()
     assert [r["email"] for r in rows] == ["fan@example.com"]
