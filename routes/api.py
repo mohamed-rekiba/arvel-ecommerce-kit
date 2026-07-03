@@ -19,6 +19,7 @@ from app.controllers import admin_deal_controller as admin_deals
 from app.controllers import address_controller as addresses
 from app.controllers import announcement_controller as announcement
 from app.controllers import banner_controller as banners
+from app.controllers import invoice_controller as invoice
 from app.controllers import deal_controller as deals
 from app.controllers import admin_product_controller as admin_products
 from app.controllers import admin_rbac_controller as rbac
@@ -363,6 +364,7 @@ Route.get("/orders", checkout.my_orders, name="api.orders.index").middleware(
 # One order: the signed-in owner (bearer) OR the holder of the order's access token
 # (X-Order-Token, issued at checkout) — controller-level ownership, so guests can use it.
 Route.get("/orders/{id:int}", checkout.show, name="api.orders.show")
+Route.get("/orders/{id:int}/invoice", invoice.show, name="api.orders.invoice")
 Route.post("/orders/{id:int}/cancel", checkout.cancel, name="api.orders.cancel").status(
     200
 )  # a transition, not a creation

@@ -1,0 +1,80 @@
+{# The printable order invoice — the kit's arvel.views (Jinja) exercise. Server-rendered,
+   print-first CSS, locale-shaped strings passed in by the controller. #}
+<!doctype html>
+<html lang="{{ locale }}" dir="{{ 'rtl' if locale == 'ar' else 'ltr' }}">
+<head>
+<meta charset="utf-8">
+<title>{{ t.invoice }} #{{ order.id }}</title>
+<style>
+  :root { color-scheme: light; }
+  * { box-sizing: border-box; }
+  body { font: 14px/1.5 -apple-system, "Segoe UI", Roboto, sans-serif; color: #18181b; margin: 0; padding: 40px; }
+  .head { display: flex; justify-content: space-between; align-items: flex-start; border-bottom: 2px solid #18181b; padding-bottom: 16px; }
+  .brand { font-size: 22px; font-weight: 800; }
+  .brand b { color: #c2410c; }
+  .meta { text-align: end; font-size: 13px; color: #54555a; }
+  h1 { font-size: 18px; margin: 24px 0 4px; }
+  .muted { color: #54555a; }
+  .grid { display: flex; gap: 48px; margin: 18px 0 26px; }
+  table { width: 100%; border-collapse: collapse; margin-top: 8px; }
+  th { text-align: start; font-size: 11px; text-transform: uppercase; letter-spacing: .06em; color: #54555a; border-bottom: 1px solid #d8d6d0; padding: 8px 6px; }
+  td { padding: 9px 6px; border-bottom: 1px solid #e9e8e4; }
+  .num { text-align: end; font-variant-numeric: tabular-nums; }
+  .totals { margin-inline-start: auto; width: 260px; margin-top: 14px; }
+  .totals div { display: flex; justify-content: space-between; padding: 4px 0; }
+  .totals .grand { border-top: 2px solid #18181b; font-weight: 800; margin-top: 6px; padding-top: 8px; }
+  .badge { display: inline-block; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: .05em; padding: 3px 10px; border: 1px solid #18181b; border-radius: 999px; }
+  footer { margin-top: 40px; font-size: 12px; color: #54555a; text-align: center; }
+  @media print { body { padding: 0; } .noprint { display: none; } }
+</style>
+</head>
+<body>
+  <div class="head">
+    <div class="brand">Arvel<b>Shop</b></div>
+    <div class="meta">
+      <div>{{ t.invoice }} <b>#{{ order.id }}</b></div>
+      <div>{{ order.placed_at }}</div>
+      <div><span class="badge">{{ t.status }}: {{ t.status_label }}</span></div>
+    </div>
+  </div>
+
+  <div class="grid">
+    <div>
+      <h1>{{ t.bill_to }}</h1>
+      <div>{{ order.ship_name }}</div>
+      <div class="muted">{{ order.ship_line1 }}{% if order.ship_line2 %}<br>{{ order.ship_line2 }}{% endif %}</div>
+      <div class="muted">{{ order.ship_city }}, {{ order.ship_postal_code }} {{ order.ship_country }}</div>
+      <div class="muted">{{ order.contact_email }}</div>
+    </div>
+    <div>
+      <h1>{{ t.payment }}</h1>
+      <div>{{ t.method_label }}</div>
+    </div>
+  </div>
+
+  <table>
+    <thead><tr><th>{{ t.item }}</th><th class="num">{{ t.qty }}</th><th class="num">{{ t.unit }}</th><th class="num">{{ t.amount }}</th></tr></thead>
+    <tbody>
+      {% for line in lines %}
+      <tr>
+        <td>{{ line.name }} — {{ line.variant }}</td>
+        <td class="num">{{ line.qty }}</td>
+        <td class="num">{{ line.unit }}</td>
+        <td class="num">{{ line.total }}</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+
+  <div class="totals">
+    <div><span>{{ t.subtotal }}</span><span class="num">{{ money.subtotal }}</span></div>
+    <div><span>{{ t.shipping }}</span><span class="num">{{ money.shipping }}</span></div>
+    <div><span>{{ t.tax }}</span><span class="num">{{ money.tax }}</span></div>
+    {% if money.discount %}<div><span>{{ t.discount }}{% if order.coupon_code %} ({{ order.coupon_code }}){% endif %}</span><span class="num">−{{ money.discount }}</span></div>{% endif %}
+    <div class="grand"><span>{{ t.total }}</span><span class="num">{{ money.total }}</span></div>
+  </div>
+
+  <footer>{{ t.footer }}</footer>
+  <script class="noprint">window.addEventListener("load", () => setTimeout(() => window.print(), 150));</script>
+</body>
+</html>

@@ -434,6 +434,13 @@ class UpdateProductIn(Schema):
 # --- checkout / orders / payments ---------------------------------------------
 
 
+class OrderTimelineOut(Schema):
+    """One step of the customer-facing tracking stepper."""
+
+    status: OrderStatus
+    at: str | None  # ISO — None for steps not reached yet
+
+
 class OrderLineOut(Schema):
     product_variant_id: int
     product_name: str
@@ -520,6 +527,7 @@ class OrderOut(Schema):
         PaymentStatus | None
     )  # latest payment attempt (None = never attempted)
     items: list[OrderLineOut]
+    timeline: list[OrderTimelineOut] | None = None  # populated on the single-order read
 
 
 class ReviewIn(Schema):

@@ -249,3 +249,68 @@ def test_avatar_upload_and_replace(client) -> None:
     )
     assert bad.status_code == 422
     assert client.post("/api/account/avatar").status_code == 401
+
+
+def test_order_timeline_tracks_transitions(client) -> None:
+    """v6.1 tracking stepper: placed at created_at; admin transitions land with timestamps;
+    unreached steps come back with at=None; cancelled collapses the path."""
+    cara = _auth(client)
+    admin = _auth(client, "admin@example.com", "secret-admin")
+    addr = client.post("/api/account/addresses", json=_ADDR, headers=cara).json()
+    client.post("/api/cart/items", json={"product_variant_id": 1, "quantity": 1}, headers=cara)
+    order = client.post(
+        "/api/checkout",
+        json={"address_id": addr["id"], "payment_method": "cod"},
+        headers=cara,
+    ).json()
+
+    timeline = client.get(f"/api/orders/{order['id']}", headers=cara).json()["timeline"]
+    assert [(s["status"], s["at"] is not None) for s in timeline] == [
+        ("pending", True),
+        ("shipped", False),
+        ("delivered", False),
+    ]  # COD path skips the paid step
+
+    client.post(
+        f"/api/admin/orders/{order['id']}/status", json={"status": "shipped"}, headers=admin
+    )
+    timeline = client.get(f"/api/orders/{order['id']}", headers=cara).json()["timeline"]
+    assert [(s["status"], s["at"] is not None) for s in timeline] == [
+        ("pending", True),
+        ("shipped", True),
+        ("delivered", False),
+    ]
+
+    # a cancelled order shows the terminal branch
+    client.post("/api/cart/items", json={"product_variant_id": 1, "quantity": 1}, headers=cara)
+    doomed = client.post("/api/checkout", json={"address_id": addr["id"]}, headers=cara).json()
+    client.post(f"/api/orders/{doomed['id']}/cancel", headers=cara)
+    timeline = client.get(f"/api/orders/{doomed['id']}", headers=cara).json()["timeline"]
+    assert [s["status"] for s in timeline] == ["pending", "cancelled"]
+    assert timeline[-1]["at"] is not None
+
+
+def test_invoice_renders_server_side_html(client) -> None:
+    """v6.1 — the printable invoice exercises arvel.views (Jinja): owner-guarded, localized,
+    carries the order lines + totals."""
+    cara = _auth(client)
+    rival = _auth(client, "rival@example.com", "secret-rival")
+    addr = client.post("/api/account/addresses", json=_ADDR, headers=cara).json()
+    client.post("/api/cart/items", json={"product_variant_id": 1, "quantity": 2}, headers=cara)
+    order = client.post("/api/checkout", json={"address_id": addr["id"]}, headers=cara).json()
+
+    page = client.get(f"/api/orders/{order['id']}/invoice", headers=cara)
+    assert page.status_code == 200
+    assert "text/html" in page.headers["content-type"]
+    html = page.text
+    assert f"#{order['id']}" in html and "Widget" in html and "Cara Buyer" in html
+    assert "Invoice" in html
+
+    # localized (fr) and guarded (rival 404, guest 401)
+    fr = client.get(
+        f"/api/orders/{order['id']}/invoice",
+        headers={**cara, "Accept-Language": "fr"},
+    )
+    assert "Facture" in fr.text
+    assert client.get(f"/api/orders/{order['id']}/invoice", headers=rival).status_code == 404
+    assert client.get(f"/api/orders/{order['id']}/invoice").status_code == 401
