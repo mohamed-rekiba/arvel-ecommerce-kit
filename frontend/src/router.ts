@@ -39,6 +39,9 @@ const admin = {
   orders: () => import("./admin/views/OrdersView.vue"),
   roles: () => import("./admin/views/RolesView.vue"),
   audit: () => import("./admin/views/AuditView.vue"),
+  media: () => import("./admin/views/MediaView.vue"),
+  settings: () => import("./admin/views/SettingsView.vue"),
+  newsletter: () => import("./admin/views/NewsletterView.vue"),
 };
 
 const router = createRouter({
@@ -96,6 +99,9 @@ const router = createRouter({
         { path: "reviews", component: admin.reviews },
         { path: "orders", component: admin.orders },
         { path: "orders/:id", component: admin.orderDetail },
+        { path: "media", component: admin.media },
+        { path: "settings", component: admin.settings },
+        { path: "newsletter", component: admin.newsletter },
         { path: "roles", component: admin.roles },
         { path: "audit", component: admin.audit },
       ],

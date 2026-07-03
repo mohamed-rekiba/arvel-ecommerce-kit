@@ -7,7 +7,9 @@ schema — never password hashes, tokens, or reset material."""
 from arvel import abort
 from arvel.http import Request
 from arvel.support import current_user
+from app.controllers.account_controller import avatar_url
 from app.enums import Permission
+from app.models.address import Address
 from app.models.order import Order
 from app.models.user import User
 from app.schemas import AdminUserDetailOut, AdminUserOut, AdminUserPage
@@ -32,6 +34,7 @@ async def _user_out(user: User) -> AdminUserOut:
         email=user.email,
         email_verified=user.email_verified_at is not None,
         roles=sorted(r.name for r in await user.roles()),
+        avatar_url=await avatar_url(user, "chip"),
     )
 
 
@@ -72,4 +75,6 @@ async def show(request: Request) -> AdminUserDetailOut:
         roles=base.roles,
         orders_count=len(orders),
         total_spent_cents=sum(o.total_cents for o in orders),
+        addresses_count=len(await Address.where("user_id", user.id).get()),
+        avatar_url=base.avatar_url,
     )

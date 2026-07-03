@@ -104,8 +104,14 @@ onMounted(load);
         <Column :header="t('users.user')">
           <template #body="{ data }">
             <button class="ulink" @click="open(data)">
-              <span class="pname">{{ data.name }}</span>
-              <span class="pslug">{{ data.email }}</span>
+              <span class="uava">
+                <img v-if="data.avatar_url" :src="data.avatar_url" alt="" />
+                <svg v-else viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="8" r="3.4" /><path d="M5 20a7 7 0 0 1 14 0" /></svg>
+              </span>
+              <span class="umeta">
+                <span class="pname">{{ data.name }}</span>
+                <span class="pslug">{{ data.email }}</span>
+              </span>
             </button>
           </template>
         </Column>
@@ -158,6 +164,11 @@ onMounted(load);
 .ulink { background: none; border: 0; padding: 0; text-align: start; cursor: pointer; font: inherit; color: inherit; display: block; }
 .ulink:hover .pname { text-decoration: underline; }
 .pname { font-weight: 600; display: block; }
+.ulink { display: flex; align-items: center; gap: 10px; }
+.uava { width: 32px; height: 32px; border-radius: 999px; overflow: hidden; background: var(--surface-2); display: grid; place-items: center; flex-shrink: 0; }
+.uava img { width: 100%; height: 100%; object-fit: cover; }
+.uava svg { width: 16px; height: 16px; stroke: var(--text-subtle); fill: none; stroke-width: 1.6; }
+.umeta { min-width: 0; text-align: start; }
 .pslug { font-size: var(--text-xs); color: var(--color-text-muted); }
 .role-tag { margin-inline-end: var(--space-1); }
 .stat { margin: var(--space-2) 0 var(--space-4); }
