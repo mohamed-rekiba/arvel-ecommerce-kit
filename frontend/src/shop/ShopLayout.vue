@@ -302,7 +302,7 @@ onBeforeUnmount(() => document.removeEventListener("click", onDocClick));
 .brand__name { font-family: var(--font-display); font-weight: 800; font-size: 22px; letter-spacing: -.01em; }
 .brand__name b { color: var(--accent-text); }
 .brand__tag { font-size: 10.5px; color: var(--text-subtle); }
-.search { display: grid; grid-template-columns: 1fr auto auto; border: 2px solid var(--text); border-radius: var(--radius-full); overflow: hidden; background: var(--surface); max-width: 620px; width: 100%; justify-self: center; }
+.search { display: grid; grid-template-columns: minmax(110px, 1fr) auto auto; border: 2px solid var(--text); border-radius: var(--radius-full); overflow: hidden; background: var(--surface); max-width: 620px; width: 100%; justify-self: center; }
 .search__input { border: 0 !important; background: transparent !important; padding: 0 18px; height: 42px; font: inherit; font-size: 14px; min-width: 0; }
 .search__input:focus { outline: none; }
 .search__cat { border: 0 !important; border-inline-start: 1px solid var(--border) !important; border-radius: 0 !important; background: transparent !important; font-size: 13px; color: var(--text-muted); padding: 0 10px; max-width: 150px; }
@@ -362,6 +362,10 @@ onBeforeUnmount(() => document.removeEventListener("click", onDocClick));
 
 @media (min-width: 640px) {
   .who__meta { display: flex; }
+}
+/* 640-1023: search shares the header row — drop the category select so input + button fit */
+@media (min-width: 640px) and (max-width: 1023.98px) {
+  .search__cat { display: none; }
 }
 @media (min-width: 1024px) {
   .tb__contact { display: flex; }
