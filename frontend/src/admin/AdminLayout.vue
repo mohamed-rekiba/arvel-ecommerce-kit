@@ -40,14 +40,15 @@ function signOut() {
         <RouterLink to="/admin/deals" class="item" active-class="on"><svg viewBox="0 0 24 24" class="ic"><path d="M12 3v18M5 8l7-5 7 5M7 21h10"/></svg>{{ t("nav.deals") }}</RouterLink>
         <RouterLink to="/admin/coupons" class="item" active-class="on"><svg viewBox="0 0 24 24" class="ic"><path d="M4 8a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v2a2 2 0 0 0 0 4v2a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2v-2a2 2 0 0 0 0-4z"/><path d="M12 6v12"/></svg>{{ t("nav.coupons") }}</RouterLink>
         <RouterLink to="/admin/banners" class="item" active-class="on"><svg viewBox="0 0 24 24" class="ic"><rect x="3" y="5" width="18" height="12" rx="2"/><path d="M3 20h18"/></svg>{{ t("nav.banners") }}</RouterLink>
-        <span class="item item--soon"><svg viewBox="0 0 24 24" class="ic"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M4 18l5-4 4 3 3-2 4 3"/></svg>{{ t("nav.media") }}<i>{{ t("nav.soon") }}</i></span>
+        <RouterLink to="/admin/media" class="item" active-class="on"><svg viewBox="0 0 24 24" class="ic"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M4 18l5-4 4 3 3-2 4 3"/></svg>{{ t("nav.media") }}</RouterLink>
       </nav>
 
       <p class="lbl">{{ t("nav.system") }}</p>
       <nav>
         <RouterLink to="/admin/roles" class="item"><svg viewBox="0 0 24 24" class="ic"><path d="M12 3l8 4v5c0 5-3.5 8-8 9-4.5-1-8-4-8-9V7z"/></svg>{{ t("nav.roles") }}</RouterLink>
         <RouterLink to="/admin/audit" class="item"><svg viewBox="0 0 24 24" class="ic"><path d="M8 6h11M8 12h11M8 18h11M3.5 6h.01M3.5 12h.01M3.5 18h.01"/></svg>{{ t("nav.audit") }}</RouterLink>
-        <span class="item item--soon"><svg viewBox="0 0 24 24" class="ic"><circle cx="12" cy="12" r="3"/><path d="M4 12a8 8 0 0 1 .5-2.8l-2-1.5 2-3.4 2.3 1"/></svg>{{ t("nav.settings") }}<i>{{ t("nav.soon") }}</i></span>
+        <RouterLink to="/admin/settings" class="item" active-class="on"><svg viewBox="0 0 24 24" class="ic"><circle cx="12" cy="12" r="3"/><path d="M4 12a8 8 0 0 1 .5-2.8l-2-1.5 2-3.4 2.3 1"/></svg>{{ t("nav.settings") }}</RouterLink>
+        <RouterLink to="/admin/newsletter" class="item" active-class="on"><svg viewBox="0 0 24 24" class="ic"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="M3 7l9 6 9-6"/></svg>{{ t("nav.newsletter") }}</RouterLink>
       </nav>
     </aside>
 
