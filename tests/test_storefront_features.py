@@ -184,3 +184,39 @@ def test_categories_carry_a_derived_tile_image(client) -> None:
 
     cats = client.get("/api/categories").json()
     assert cats[0]["image_url"]  # the gear category now shows a product thumb
+
+
+def test_newsletter_subscribe_is_idempotent_and_validated(client) -> None:
+    assert client.post("/api/newsletter", json={"email": "not-an-email"}).status_code == 422
+    assert client.post("/api/newsletter", json={"email": "fan@example.com"}).status_code == 200
+    # same email again → still 200, still one row (via the admin list)
+    assert client.post("/api/newsletter", json={"email": "FAN@example.com "}).status_code == 200
+    admin = _admin(client)
+    rows = client.get("/api/admin/newsletter", headers=admin).json()
+    assert [r["email"] for r in rows] == ["fan@example.com"]
+
+
+def test_settings_roundtrip_public_whitelist_and_cache_invalidation(client) -> None:
+    # defaults flow to the public endpoint
+    pub = client.get("/api/settings").json()["values"]
+    assert pub["store.phone"].startswith("+1")
+
+    admin = _admin(client)
+    updated = client.patch(
+        "/api/admin/settings",
+        json={"values": {"store.phone": "+20 111 222 3333", "store.welcome": "Ahlan!"}},
+        headers=admin,
+    )
+    assert updated.status_code == 200, updated.text
+    # the cached public read reflects the write immediately (invalidate-on-write)
+    pub = client.get("/api/settings").json()["values"]
+    assert pub["store.phone"] == "+20 111 222 3333" and pub["store.welcome"] == "Ahlan!"
+
+    # unknown keys are rejected; customers can't touch settings
+    assert (
+        client.patch(
+            "/api/admin/settings", json={"values": {"evil.key": "x"}}, headers=admin
+        ).status_code
+        == 422
+    )
+    assert client.get("/api/admin/newsletter").status_code == 401
