@@ -29,5 +29,6 @@ export interface OrderOut {
   payment_method: PaymentMethod;
   payment_status: PaymentStatus | null;
   items: OrderLineOut[];
+  placed_at?: string | null;
   timeline?: OrderTimelineOut[] | null;
 }

@@ -15,6 +15,7 @@ from arvel.telemetry import span
 from arvel.validation import ValidationException, Validator
 
 from app.controllers.cart_controller import line_presentation, resolve_cart
+from app.controllers.serializers import iso as _iso
 from app.i18n import active_locale
 from app.controllers.order_access import resolve_owned_order
 from app.enums import (
@@ -145,6 +146,7 @@ async def _order_out(
             )
             for i in items
         ],
+        placed_at=_iso(getattr(order, "created_at", None)),
         timeline=timeline,
     )
 

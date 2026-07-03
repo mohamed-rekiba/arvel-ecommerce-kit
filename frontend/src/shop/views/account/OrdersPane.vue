@@ -23,8 +23,7 @@ async function load() {
 }
 
 function placedAt(order: Order): string {
-  const first = order.timeline?.[0]?.at;
-  return first ? new Date(first).toLocaleDateString() : "—";
+  return order.placed_at ? new Date(order.placed_at).toLocaleDateString() : "—";
 }
 
 const cancellable = (o: Order) => o.status === "pending" || o.status === "paid";

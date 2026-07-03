@@ -978,19 +978,19 @@
         "operationId": "api.media.conversion",
         "parameters": [
           {
-            "name": "conversion",
+            "name": "id",
             "in": "path",
             "schema": {
-              "type": "string"
+              "type": "integer"
             },
             "required": true,
             "deprecated": false
           },
           {
-            "name": "id",
+            "name": "conversion",
             "in": "path",
             "schema": {
-              "type": "integer"
+              "type": "string"
             },
             "required": true,
             "deprecated": false
@@ -1135,7 +1135,7 @@
         "operationId": "api.admin.products.media.destroy",
         "parameters": [
           {
-            "name": "media_id",
+            "name": "id",
             "in": "path",
             "schema": {
               "type": "integer"
@@ -1144,7 +1144,7 @@
             "deprecated": false
           },
           {
-            "name": "id",
+            "name": "media_id",
             "in": "path",
             "schema": {
               "type": "integer"
@@ -3395,19 +3395,19 @@
         "operationId": "api.admin.reviews.moderate",
         "parameters": [
           {
-            "name": "decision",
+            "name": "id",
             "in": "path",
             "schema": {
-              "type": "string"
+              "type": "integer"
             },
             "required": true,
             "deprecated": false
           },
           {
-            "name": "id",
+            "name": "decision",
             "in": "path",
             "schema": {
-              "type": "integer"
+              "type": "string"
             },
             "required": true,
             "deprecated": false
@@ -8312,6 +8312,16 @@
               "$ref": "#/components/schemas/OrderLineOut"
             },
             "type": "array"
+          },
+          "placed_at": {
+            "oneOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ]
           },
           "timeline": {
             "oneOf": [
