@@ -502,11 +502,25 @@ async def my_orders(request: Request) -> list[OrderOut]:
 
 
 async def admin_orders_index(request: Request) -> list[OrderOut]:
-    """List every order (newest first) for the back office. Requires orders.view."""
+    """List orders (newest first) for the back office, narrowed by ``?status=`` and searched
+    by ``?q=`` (order id, or a case-insensitive contact-email fragment). Requires orders.view."""
     user = current_user.get()
     if user is None or not await user.can(Permission.ORDERS_VIEW.value):
         abort(403, "You may not view orders.")
-    orders = await Order.order_by("id", "desc").get()
+    query = Order.order_by("id", "desc")
+    status = str(request.query("status", "") or "")
+    if status:
+        try:
+            query = query.where("status", OrderStatus(status).value)
+        except ValueError:
+            abort(422, f"Unknown status '{status}'")
+    q = str(request.query("q", "") or "").strip()
+    if q:
+        if q.isdigit():
+            query = query.where("id", int(q))
+        else:
+            query = query.where("contact_email", "ilike", f"%{q}%")
+    orders = await query.get()
     return [await _order_out(o, await o.items().get()) for o in orders]
 
 

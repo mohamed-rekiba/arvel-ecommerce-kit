@@ -19,6 +19,7 @@ from app.controllers import admin_deal_controller as admin_deals
 from app.controllers import address_controller as addresses
 from app.controllers import announcement_controller as announcement
 from app.controllers import banner_controller as banners
+from app.controllers import admin_media_controller as media_library
 from app.controllers import invoice_controller as invoice
 from app.controllers import settings_controller as settings
 from app.controllers import deal_controller as deals
@@ -325,6 +326,9 @@ Route.get(
 ).middleware(Authenticate).secure("bearer")
 Route.patch(
     "/admin/settings", settings.update_settings, name="api.admin.settings.update"
+).middleware(Authenticate).secure("bearer")
+Route.get(
+    "/admin/media", media_library.index, name="api.admin.media"
 ).middleware(Authenticate).secure("bearer")
 Route.get(
     "/admin/newsletter", settings.newsletter_index, name="api.admin.newsletter"

@@ -399,3 +399,44 @@ def test_admin_order_detail_shows_everything(client) -> None:
         client.get(f"/api/admin/orders/{order_id}", headers=customer).status_code == 403
     )
     assert client.get(f"/api/admin/orders/{order_id}").status_code == 401
+
+
+def test_admin_orders_filter_and_search(client) -> None:
+    """v6.1 C — the back-office order list narrows by ?status= and searches ?q= by
+    order id or contact email."""
+    customer = _login(client, "cara@example.com", "secret-cara")
+    ids = []
+    for _ in range(2):
+        client.post(
+            "/api/cart/items",
+            json={"product_variant_id": 1, "quantity": 1},
+            headers=customer,
+        )
+        ids.append(
+            client.post("/api/checkout", json=checkout_body(), headers=customer).json()[
+                "id"
+            ]
+        )
+
+    admin = _login(client, "admin@example.com", "secret-admin")
+    # move one order along so the statuses differ (mark paid via the admin transition)
+    client.post(
+        f"/api/admin/orders/{ids[0]}/status", json={"status": "paid"}, headers=admin
+    )
+
+    paid = client.get("/api/admin/orders?status=paid", headers=admin).json()
+    assert {o["id"] for o in paid} == {ids[0]}
+    pending = client.get("/api/admin/orders?status=pending", headers=admin).json()
+    assert ids[1] in {o["id"] for o in pending} and ids[0] not in {
+        o["id"] for o in pending
+    }
+
+    # q matches an order id...
+    by_id = client.get(f"/api/admin/orders?q={ids[1]}", headers=admin).json()
+    assert {o["id"] for o in by_id} == {ids[1]}
+    # ...or a contact-email fragment (case-insensitive)
+    by_email = client.get("/api/admin/orders?q=CARA@", headers=admin).json()
+    assert set(ids) <= {o["id"] for o in by_email}
+
+    # an unknown status is a validation error, not a silent empty list
+    assert client.get("/api/admin/orders?status=nope", headers=admin).status_code == 422

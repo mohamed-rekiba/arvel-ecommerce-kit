@@ -208,3 +208,38 @@ def test_admin_product_detail_and_translations_update(client) -> None:
         headers=admin,
     )
     assert bad.status_code == 422 and "translations" in bad.json()["errors"]
+
+
+def test_admin_media_library_aggregates_every_collection(client) -> None:
+    """v6.1 C — GET /api/admin/media is the back-office media library: every stored file
+    across products, banners and avatars, with an owner label + link target."""
+    admin = _auth(client, "admin@example.com", "secret-admin")
+    cara = _auth(client, "cara@example.com", "secret-cara")
+
+    # one product gallery image + one customer avatar
+    client.post(
+        "/api/admin/products/1/image",
+        files={"image": ("shot.png", _PNG, "image/png")},
+        headers=admin,
+    )
+    client.post(
+        "/api/account/avatar",
+        files={"image": ("face.png", _PNG, "image/png")},
+        headers=cara,
+    )
+
+    listing = client.get("/api/admin/media", headers=admin)
+    assert listing.status_code == 200
+    rows = listing.json()
+    assert len(rows) == 2
+    by_collection = {r["collection"]: r for r in rows}
+    gallery = by_collection["images"]
+    assert gallery["owner_type"] == "product"
+    assert gallery["owner_label"] == "Tee"
+    assert gallery["url"].startswith("/api/media/")
+    assert gallery["size"] > 0 and gallery["mime_type"] == "image/png"
+    avatar = by_collection["avatar"]
+    assert avatar["owner_type"] == "user" and avatar["owner_label"] == "Cara"
+
+    # permission-guarded: a customer is refused
+    assert client.get("/api/admin/media", headers=cara).status_code == 403
