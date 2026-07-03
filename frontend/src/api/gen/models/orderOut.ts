@@ -9,6 +9,8 @@ import type { AddressOut } from './addressOut';
 import type { Currency } from './currency';
 import type { OrderLineOut } from './orderLineOut';
 import type { OrderStatus } from './orderStatus';
+import type { OrderTimelineOut } from './orderTimelineOut';
+import type { PaymentMethod } from './paymentMethod';
 import type { PaymentStatus } from './paymentStatus';
 
 export interface OrderOut {
@@ -24,6 +26,8 @@ export interface OrderOut {
   discount_cents: number;
   total_cents: number;
   currency: Currency;
+  payment_method: PaymentMethod;
   payment_status: PaymentStatus | null;
   items: OrderLineOut[];
+  timeline?: OrderTimelineOut[] | null;
 }

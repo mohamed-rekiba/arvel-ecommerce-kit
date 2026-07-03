@@ -12,6 +12,7 @@ import type { AdminOrderPaymentOut } from './adminOrderPaymentOut';
 import type { Currency } from './currency';
 import type { OrderLineOut } from './orderLineOut';
 import type { OrderStatus } from './orderStatus';
+import type { PaymentMethod } from './paymentMethod';
 
 export interface AdminOrderDetailOut {
   id: number;
@@ -25,6 +26,7 @@ export interface AdminOrderDetailOut {
   discount_cents: number;
   total_cents: number;
   currency: Currency;
+  payment_method: PaymentMethod;
   customer: AdminOrderCustomerOut | null;
   items: OrderLineOut[];
   payments: AdminOrderPaymentOut[];

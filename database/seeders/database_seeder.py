@@ -56,7 +56,24 @@ class DatabaseSeeder(Seeder):
         await (
             RolesPermissionsSeeder().run()
         )  # permissions, roles, one back-office user per role
-        await UserFactory().create(name="Test User", email="test@example.com")
+        test_user = await UserFactory().create(
+            name="Test User", email="test@example.com"
+        )
+        from app.models.address import Address
+        from app.models.newsletter_subscriber import NewsletterSubscriber
+
+        await Address.create(
+            user_id=test_user.id,
+            label="Home",
+            name="Test User",
+            line1="12 Sample Street",
+            city="Cairo",
+            postal_code="11511",
+            country="EG",
+            is_default=True,
+        )
+        for email in ("fan@example.com", "amie@example.fr"):
+            await NewsletterSubscriber.create(email=email, locale="en")
 
         # --- vendors (brands) -------------------------------------------------
         vendors: dict[str, Vendor] = {}

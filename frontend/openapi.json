@@ -978,19 +978,19 @@
         "operationId": "api.media.conversion",
         "parameters": [
           {
-            "name": "id",
+            "name": "conversion",
             "in": "path",
             "schema": {
-              "type": "integer"
+              "type": "string"
             },
             "required": true,
             "deprecated": false
           },
           {
-            "name": "conversion",
+            "name": "id",
             "in": "path",
             "schema": {
-              "type": "string"
+              "type": "integer"
             },
             "required": true,
             "deprecated": false
@@ -1135,7 +1135,7 @@
         "operationId": "api.admin.products.media.destroy",
         "parameters": [
           {
-            "name": "id",
+            "name": "media_id",
             "in": "path",
             "schema": {
               "type": "integer"
@@ -1144,7 +1144,7 @@
             "deprecated": false
           },
           {
-            "name": "media_id",
+            "name": "id",
             "in": "path",
             "schema": {
               "type": "integer"
@@ -3395,19 +3395,19 @@
         "operationId": "api.admin.reviews.moderate",
         "parameters": [
           {
-            "name": "id",
+            "name": "decision",
             "in": "path",
             "schema": {
-              "type": "integer"
+              "type": "string"
             },
             "required": true,
             "deprecated": false
           },
           {
-            "name": "decision",
+            "name": "id",
             "in": "path",
             "schema": {
-              "type": "string"
+              "type": "integer"
             },
             "required": true,
             "deprecated": false
@@ -3944,6 +3944,290 @@
         "deprecated": false
       }
     },
+    "/api/account/avatar": {
+      "post": {
+        "summary": "ApiAccountAvatar",
+        "description": "Attach/replace the account avatar (one image; the previous one is removed).",
+        "operationId": "api.account.avatar",
+        "responses": {
+          "201": {
+            "description": "Document created, URL follows",
+            "headers": {},
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UserOut"
+                }
+              }
+            }
+          }
+        },
+        "deprecated": false,
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ]
+      }
+    },
+    "/api/account/addresses": {
+      "get": {
+        "summary": "ApiAccountAddressesIndex",
+        "operationId": "api.account.addresses.index",
+        "responses": {
+          "200": {
+            "description": "Request fulfilled, document follows",
+            "headers": {},
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/SavedAddressOut"
+                  },
+                  "type": "array"
+                }
+              }
+            }
+          }
+        },
+        "deprecated": false,
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ]
+      },
+      "post": {
+        "summary": "ApiAccountAddressesStore",
+        "operationId": "api.account.addresses.store",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SavedAddressIn"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "description": "Document created, URL follows",
+            "headers": {},
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SavedAddressOut"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request syntax or unsupported method",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "status_code": {
+                      "type": "integer"
+                    },
+                    "detail": {
+                      "type": "string"
+                    },
+                    "extra": {
+                      "additionalProperties": {},
+                      "type": [
+                        "null",
+                        "object",
+                        "array"
+                      ]
+                    }
+                  },
+                  "type": "object",
+                  "required": [
+                    "detail",
+                    "status_code"
+                  ],
+                  "description": "Validation Exception",
+                  "examples": [
+                    {
+                      "status_code": 400,
+                      "detail": "Bad Request",
+                      "extra": {}
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        },
+        "deprecated": false,
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ]
+      }
+    },
+    "/api/account/addresses/{id}": {
+      "delete": {
+        "summary": "ApiAccountAddressesDestroy",
+        "operationId": "api.account.addresses.destroy",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "schema": {
+              "type": "integer"
+            },
+            "required": true,
+            "deprecated": false
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Request fulfilled, document follows",
+            "headers": {},
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": {
+                    "type": "string"
+                  },
+                  "type": "object"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request syntax or unsupported method",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "status_code": {
+                      "type": "integer"
+                    },
+                    "detail": {
+                      "type": "string"
+                    },
+                    "extra": {
+                      "additionalProperties": {},
+                      "type": [
+                        "null",
+                        "object",
+                        "array"
+                      ]
+                    }
+                  },
+                  "type": "object",
+                  "required": [
+                    "detail",
+                    "status_code"
+                  ],
+                  "description": "Validation Exception",
+                  "examples": [
+                    {
+                      "status_code": 400,
+                      "detail": "Bad Request",
+                      "extra": {}
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        },
+        "deprecated": false,
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ]
+      },
+      "patch": {
+        "summary": "ApiAccountAddressesUpdate",
+        "operationId": "api.account.addresses.update",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "schema": {
+              "type": "integer"
+            },
+            "required": true,
+            "deprecated": false
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SavedAddressIn"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Request fulfilled, document follows",
+            "headers": {},
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SavedAddressOut"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request syntax or unsupported method",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "status_code": {
+                      "type": "integer"
+                    },
+                    "detail": {
+                      "type": "string"
+                    },
+                    "extra": {
+                      "additionalProperties": {},
+                      "type": [
+                        "null",
+                        "object",
+                        "array"
+                      ]
+                    }
+                  },
+                  "type": "object",
+                  "required": [
+                    "detail",
+                    "status_code"
+                  ],
+                  "description": "Validation Exception",
+                  "examples": [
+                    {
+                      "status_code": 400,
+                      "detail": "Bad Request",
+                      "extra": {}
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        },
+        "deprecated": false,
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ]
+      }
+    },
     "/api/deals": {
       "get": {
         "summary": "ApiDealsIndex",
@@ -3985,6 +4269,219 @@
           }
         },
         "deprecated": false
+      }
+    },
+    "/api/settings": {
+      "get": {
+        "summary": "ApiSettings",
+        "operationId": "api.settings",
+        "responses": {
+          "200": {
+            "description": "Request fulfilled, document follows",
+            "headers": {},
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SettingsOut"
+                }
+              }
+            }
+          }
+        },
+        "deprecated": false
+      }
+    },
+    "/api/newsletter": {
+      "post": {
+        "summary": "ApiNewsletter",
+        "description": "Idempotent newsletter signup \u2014 re-subscribing an existing email is a friendly 200.",
+        "operationId": "api.newsletter",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/NewsletterIn"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Request fulfilled, document follows",
+            "headers": {},
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MessageOut"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request syntax or unsupported method",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "status_code": {
+                      "type": "integer"
+                    },
+                    "detail": {
+                      "type": "string"
+                    },
+                    "extra": {
+                      "additionalProperties": {},
+                      "type": [
+                        "null",
+                        "object",
+                        "array"
+                      ]
+                    }
+                  },
+                  "type": "object",
+                  "required": [
+                    "detail",
+                    "status_code"
+                  ],
+                  "description": "Validation Exception",
+                  "examples": [
+                    {
+                      "status_code": 400,
+                      "detail": "Bad Request",
+                      "extra": {}
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        },
+        "deprecated": false
+      }
+    },
+    "/api/admin/settings": {
+      "get": {
+        "summary": "ApiAdminSettings",
+        "operationId": "api.admin.settings",
+        "responses": {
+          "200": {
+            "description": "Request fulfilled, document follows",
+            "headers": {},
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SettingsOut"
+                }
+              }
+            }
+          }
+        },
+        "deprecated": false,
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ]
+      },
+      "patch": {
+        "summary": "ApiAdminSettingsUpdate",
+        "operationId": "api.admin.settings.update",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SettingsIn"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Request fulfilled, document follows",
+            "headers": {},
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SettingsOut"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request syntax or unsupported method",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "status_code": {
+                      "type": "integer"
+                    },
+                    "detail": {
+                      "type": "string"
+                    },
+                    "extra": {
+                      "additionalProperties": {},
+                      "type": [
+                        "null",
+                        "object",
+                        "array"
+                      ]
+                    }
+                  },
+                  "type": "object",
+                  "required": [
+                    "detail",
+                    "status_code"
+                  ],
+                  "description": "Validation Exception",
+                  "examples": [
+                    {
+                      "status_code": 400,
+                      "detail": "Bad Request",
+                      "extra": {}
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        },
+        "deprecated": false,
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ]
+      }
+    },
+    "/api/admin/newsletter": {
+      "get": {
+        "summary": "ApiAdminNewsletter",
+        "operationId": "api.admin.newsletter",
+        "responses": {
+          "200": {
+            "description": "Request fulfilled, document follows",
+            "headers": {},
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/NewsletterSubscriberOut"
+                  },
+                  "type": "array"
+                }
+              }
+            }
+          }
+        },
+        "deprecated": false,
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ]
       }
     },
     "/api/banners": {
@@ -4907,7 +5404,7 @@
     "/api/orders/{id}": {
       "get": {
         "summary": "ApiOrdersShow",
-        "description": "One order, with lines + breakdown \u2014 for the signed-in owner or the order-token holder.",
+        "description": "One order, with lines + breakdown + the tracking timeline \u2014 for the signed-in owner or\nthe order-token holder.",
         "operationId": "api.orders.show",
         "parameters": [
           {
@@ -4928,6 +5425,75 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/OrderOut"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request syntax or unsupported method",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "status_code": {
+                      "type": "integer"
+                    },
+                    "detail": {
+                      "type": "string"
+                    },
+                    "extra": {
+                      "additionalProperties": {},
+                      "type": [
+                        "null",
+                        "object",
+                        "array"
+                      ]
+                    }
+                  },
+                  "type": "object",
+                  "required": [
+                    "detail",
+                    "status_code"
+                  ],
+                  "description": "Validation Exception",
+                  "examples": [
+                    {
+                      "status_code": 400,
+                      "detail": "Bad Request",
+                      "extra": {}
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        },
+        "deprecated": false
+      }
+    },
+    "/api/orders/{id}/invoice": {
+      "get": {
+        "summary": "ApiOrdersInvoice",
+        "operationId": "api.orders.invoice",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "schema": {
+              "type": "integer"
+            },
+            "required": true,
+            "deprecated": false
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Request fulfilled, document follows",
+            "headers": {},
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Response"
                 }
               }
             }
@@ -6139,6 +6705,9 @@
           "currency": {
             "$ref": "#/components/schemas/Currency"
           },
+          "payment_method": {
+            "$ref": "#/components/schemas/PaymentMethod"
+          },
           "customer": {
             "oneOf": [
               {
@@ -6179,6 +6748,7 @@
           "history",
           "id",
           "items",
+          "payment_method",
           "payments",
           "shipping_cents",
           "status",
@@ -6809,6 +7379,22 @@
           "product_variant_id": {
             "type": "integer"
           },
+          "product_name": {
+            "type": "string"
+          },
+          "variant_name": {
+            "type": "string"
+          },
+          "image_url": {
+            "oneOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
           "quantity": {
             "type": "integer"
           },
@@ -6822,10 +7408,13 @@
         "type": "object",
         "required": [
           "id",
+          "image_url",
           "line_total_cents",
+          "product_name",
           "product_variant_id",
           "quantity",
-          "unit_price_cents"
+          "unit_price_cents",
+          "variant_name"
         ],
         "title": "CartLineOut"
       },
@@ -7020,6 +7609,19 @@
                 "type": "null"
               }
             ]
+          },
+          "address_id": {
+            "oneOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "payment_method": {
+            "$ref": "#/components/schemas/PaymentMethod"
           }
         },
         "type": "object",
@@ -7412,6 +8014,49 @@
         ],
         "title": "MetricsOut"
       },
+      "NewsletterIn": {
+        "properties": {
+          "email": {
+            "type": "string"
+          }
+        },
+        "type": "object",
+        "required": [
+          "email"
+        ],
+        "title": "NewsletterIn"
+      },
+      "NewsletterSubscriberOut": {
+        "properties": {
+          "id": {
+            "type": "integer"
+          },
+          "email": {
+            "type": "string"
+          },
+          "locale": {
+            "type": "string"
+          },
+          "created_at": {
+            "oneOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "type": "object",
+        "required": [
+          "created_at",
+          "email",
+          "id",
+          "locale"
+        ],
+        "title": "NewsletterSubscriberOut"
+      },
       "NotificationOut": {
         "properties": {
           "id": {
@@ -7458,6 +8103,16 @@
           "variant_name": {
             "type": "string"
           },
+          "image_url": {
+            "oneOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
           "quantity": {
             "type": "integer"
           },
@@ -7467,6 +8122,7 @@
         },
         "type": "object",
         "required": [
+          "image_url",
           "product_name",
           "product_variant_id",
           "quantity",
@@ -7520,6 +8176,9 @@
           "currency": {
             "$ref": "#/components/schemas/Currency"
           },
+          "payment_method": {
+            "$ref": "#/components/schemas/PaymentMethod"
+          },
           "payment_status": {
             "oneOf": [
               {
@@ -7535,6 +8194,19 @@
               "$ref": "#/components/schemas/OrderLineOut"
             },
             "type": "array"
+          },
+          "timeline": {
+            "oneOf": [
+              {
+                "items": {
+                  "$ref": "#/components/schemas/OrderTimelineOut"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ]
           }
         },
         "type": "object",
@@ -7546,6 +8218,7 @@
           "discount_cents",
           "id",
           "items",
+          "payment_method",
           "payment_status",
           "shipping_cents",
           "status",
@@ -7579,6 +8252,39 @@
           "status"
         ],
         "title": "OrderStatusIn"
+      },
+      "OrderTimelineOut": {
+        "properties": {
+          "status": {
+            "$ref": "#/components/schemas/OrderStatus"
+          },
+          "at": {
+            "oneOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "type": "object",
+        "required": [
+          "at",
+          "status"
+        ],
+        "title": "OrderTimelineOut"
+      },
+      "PaymentMethod": {
+        "type": "string",
+        "enum": [
+          "gateway",
+          "cod"
+        ],
+        "title": "PaymentMethod",
+        "description": "How the order is settled: the payment gateway after placing, or cash on delivery.",
+        "default": "gateway"
       },
       "PaymentOut": {
         "properties": {
@@ -8066,6 +8772,167 @@
         ],
         "title": "RoleOut"
       },
+      "SavedAddressIn": {
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "line1": {
+            "type": "string"
+          },
+          "city": {
+            "type": "string"
+          },
+          "postal_code": {
+            "type": "string"
+          },
+          "country": {
+            "$ref": "#/components/schemas/CountryCode"
+          },
+          "label": {
+            "oneOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "line2": {
+            "oneOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "phone": {
+            "oneOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "is_default": {
+            "type": "boolean",
+            "default": false
+          }
+        },
+        "type": "object",
+        "required": [
+          "city",
+          "country",
+          "line1",
+          "name",
+          "postal_code"
+        ],
+        "title": "SavedAddressIn"
+      },
+      "SavedAddressOut": {
+        "properties": {
+          "id": {
+            "type": "integer"
+          },
+          "label": {
+            "oneOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "name": {
+            "type": "string"
+          },
+          "line1": {
+            "type": "string"
+          },
+          "line2": {
+            "oneOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "city": {
+            "type": "string"
+          },
+          "postal_code": {
+            "type": "string"
+          },
+          "country": {
+            "$ref": "#/components/schemas/CountryCode"
+          },
+          "phone": {
+            "oneOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "is_default": {
+            "type": "boolean"
+          }
+        },
+        "type": "object",
+        "required": [
+          "city",
+          "country",
+          "id",
+          "is_default",
+          "label",
+          "line1",
+          "line2",
+          "name",
+          "phone",
+          "postal_code"
+        ],
+        "title": "SavedAddressOut"
+      },
+      "SettingsIn": {
+        "properties": {
+          "values": {
+            "additionalProperties": {
+              "type": "string"
+            },
+            "type": "object"
+          }
+        },
+        "type": "object",
+        "required": [
+          "values"
+        ],
+        "title": "SettingsIn"
+      },
+      "SettingsOut": {
+        "properties": {
+          "values": {
+            "additionalProperties": {
+              "type": "string"
+            },
+            "type": "object"
+          }
+        },
+        "type": "object",
+        "required": [
+          "values"
+        ],
+        "title": "SettingsOut"
+      },
       "StockAdjustIn": {
         "properties": {
           "set": {
@@ -8268,13 +9135,28 @@
           },
           "email_verified": {
             "type": "boolean"
+          },
+          "avatar_url": {
+            "oneOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "locale": {
+            "type": "string"
           }
         },
         "type": "object",
         "required": [
+          "avatar_url",
           "email",
           "email_verified",
           "id",
+          "locale",
           "name",
           "phone"
         ],
