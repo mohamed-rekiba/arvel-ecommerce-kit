@@ -80,6 +80,16 @@ const TRUST = [
 const maxDealPct = computed(() =>
   deals.value.reduce((max, d) => Math.max(max, d.percent_off), 0),
 );
+
+// --- categories rail (scroll-snap; arrow nudges on desktop) ---------------------------------
+const railEl = ref<HTMLElement | null>(null);
+function nudgeRail(dir: number) {
+  const el = railEl.value;
+  if (!el) return;
+  // scrollBy respects RTL: positive x always moves toward inline-end
+  const rtl = getComputedStyle(el).direction === "rtl";
+  el.scrollBy({ left: dir * (rtl ? -1 : 1) * el.clientWidth * 0.7, behavior: "smooth" });
+}
 </script>
 
 <template>
@@ -94,7 +104,16 @@ const maxDealPct = computed(() =>
     >
       <div class="hero__frame">
         <transition name="fade" mode="out-in">
-          <div :key="slides[slide].id" class="hero__slide" :class="{ 'hero__slide--bare': !slides[slide].image_url }">
+          <div :key="slides[slide].id" class="hero__slide">
+            <picture v-if="slides[slide].image_url">
+              <source
+                v-if="slides[slide].mobile_image_url"
+                media="(max-width: 639px)"
+                :srcset="slides[slide].mobile_image_url ?? undefined"
+              />
+              <img class="hero__img" :src="slides[slide].image_url ?? undefined" :alt="slides[slide].title" />
+            </picture>
+            <div class="hero__scrim" aria-hidden="true" />
             <div class="hero__copy">
               <span v-if="slides[slide].chip" class="hero__chip">{{ slides[slide].chip }}</span>
               <h1>{{ slides[slide].title }}</h1>
@@ -103,12 +122,6 @@ const maxDealPct = computed(() =>
                 {{ slides[slide].cta_label || t("home.explore") }}
               </RouterLink>
             </div>
-            <img
-              v-if="slides[slide].image_url"
-              class="hero__img"
-              :src="slides[slide].image_url ?? undefined"
-              :alt="slides[slide].title"
-            />
           </div>
         </transition>
         <button v-if="slides.length > 1" class="hero__nav hero__nav--prev" :aria-label="t('catalog.prev')" @click="nextSlide(-1)">‹</button>
@@ -138,14 +151,21 @@ const maxDealPct = computed(() =>
       </ul>
     </section>
 
-    <!-- popular categories -->
+    <!-- popular categories — scroll-snap rail (all categories) -->
     <section v-if="categories.length" class="wrap block">
-      <h2 class="sect">{{ t("home.popular_categories") }}</h2>
-      <div class="cats">
+      <div class="railhead">
+        <h2 class="sect sect--rail">{{ t("home.popular_categories") }}</h2>
+        <div class="rail__arrows">
+          <button class="rail__btn" :aria-label="t('catalog.prev')" @click="nudgeRail(-1)">‹</button>
+          <button class="rail__btn" :aria-label="t('catalog.next')" @click="nudgeRail(1)">›</button>
+        </div>
+      </div>
+      <div ref="railEl" class="cats" role="list">
         <RouterLink
-          v-for="c in categories.slice(0, 6)"
+          v-for="c in categories"
           :key="c.id"
           class="cat"
+          role="listitem"
           :to="{ name: 'catalog', query: { category: c.slug } }"
         >
           <span class="cat__imgwrap">
@@ -202,17 +222,20 @@ const maxDealPct = computed(() =>
 .sect { font-family: var(--font-display); font-size: clamp(1.25rem, 2.4vw, 1.65rem); font-weight: 800; margin-bottom: clamp(1rem, 2.5vw, 1.75rem); text-align: center; position: relative; }
 .sect::after { content: ""; display: block; width: 56px; height: 3px; border-radius: 2px; background: var(--accent-bright); margin: 10px auto 0; }
 
-/* hero */
+/* hero — fixed-height frame; the image is an absolute cover layer behind a scrim, so slide
+   heights can never differ per image (issue 3) */
 .hero { padding-top: clamp(1rem, 2.5vw, 1.75rem); }
-.hero__frame { position: relative; border-radius: var(--radius-lg); overflow: hidden; background: var(--hero-band); border: 1px solid var(--border); }
-.hero__slide { display: grid; grid-template-columns: 1fr; min-height: 320px; }
-.hero__copy { display: flex; flex-direction: column; justify-content: center; gap: 14px; padding: clamp(1.5rem, 4.5vw, 3.5rem); z-index: 1; }
+.hero__frame { position: relative; border-radius: var(--radius-lg); overflow: hidden; background: var(--hero-band); border: 1px solid var(--border); height: clamp(340px, 42vw, 420px); }
+.hero__slide { position: absolute; inset: 0; }
+.hero__img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
+.hero__scrim { position: absolute; inset: 0; background: linear-gradient(to var(--scrim-end, right), color-mix(in srgb, var(--hero-band) 92%, transparent) 0%, color-mix(in srgb, var(--hero-band) 62%, transparent) 48%, transparent 78%); }
+[dir="rtl"] .hero__scrim { --scrim-end: left; }
+.hero__copy { position: relative; z-index: 1; height: 100%; display: flex; flex-direction: column; justify-content: center; gap: 12px; padding: clamp(1.25rem, 4.5vw, 3.5rem); max-width: min(58ch, 100%); }
 .hero__chip { align-self: flex-start; background: var(--accent-bright); color: var(--on-accent-bright); font-size: 11.5px; font-weight: 800; letter-spacing: .06em; text-transform: uppercase; padding: 5px 12px; border-radius: var(--radius-full); }
-.hero__copy h1 { font-family: var(--font-display); font-size: clamp(1.7rem, 4vw, 3rem); font-weight: 800; text-transform: uppercase; letter-spacing: .01em; line-height: 1.08; color: var(--text); }
-.hero__copy p { margin: 0; font-size: 15px; color: var(--text-muted); max-width: 40ch; }
-.hero__cta { align-self: flex-start; margin-top: 6px; background: var(--text); color: var(--bg); font-size: 13px; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; text-decoration: none; padding: 13px 26px; border-radius: var(--radius-full); }
+.hero__copy h1 { font-family: var(--font-display); font-size: clamp(1.55rem, 4vw, 3rem); font-weight: 800; text-transform: uppercase; letter-spacing: .01em; line-height: 1.08; color: var(--text); }
+.hero__copy p { margin: 0; font-size: clamp(13.5px, 1.6vw, 15px); color: var(--text-muted); max-width: 40ch; }
+.hero__cta { align-self: flex-start; margin-top: 6px; background: var(--text); color: var(--bg); font-size: 13px; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; text-decoration: none; padding: 12px 24px; border-radius: var(--radius-full); }
 .hero__cta:hover { opacity: .9; }
-.hero__img { width: 100%; height: 100%; object-fit: cover; min-height: 220px; }
 .hero__nav { position: absolute; top: 50%; transform: translateY(-50%); width: 40px; height: 40px; border-radius: 999px; border: 0; background: color-mix(in srgb, var(--surface) 85%, transparent); color: var(--text); font-size: 22px; line-height: 1; cursor: pointer; display: grid; place-items: center; box-shadow: var(--shadow-2); z-index: 2; }
 .hero__nav--prev { inset-inline-start: 12px; }
 .hero__nav--next { inset-inline-end: 12px; }
@@ -228,14 +251,20 @@ const maxDealPct = computed(() =>
 .trust__meta b { font-size: 12.5px; font-weight: 700; }
 .trust__meta i { font-style: normal; font-size: 11px; color: var(--text-subtle); }
 
-/* categories rail */
-.cats { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; }
-.cat { display: flex; flex-direction: column; align-items: center; gap: 10px; padding: 16px 10px; background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-md); text-decoration: none; color: var(--text); transition: box-shadow var(--motion-base), border-color var(--motion-base); }
+/* categories — horizontal scroll-snap rail of compact tiles (issue 2) */
+.railhead { display: flex; align-items: center; justify-content: center; position: relative; }
+.sect--rail { margin-bottom: clamp(1rem, 2.5vw, 1.75rem); }
+.rail__arrows { display: none; position: absolute; inset-inline-end: 0; top: 4px; gap: 8px; }
+.rail__btn { width: 34px; height: 34px; border-radius: 999px; border: 1px solid var(--border); background: var(--surface); color: var(--text); font-size: 19px; line-height: 1; cursor: pointer; display: grid; place-items: center; }
+.rail__btn:hover { border-color: var(--border-2); box-shadow: var(--shadow-1); }
+.cats { display: flex; gap: 12px; overflow-x: auto; scroll-snap-type: x mandatory; padding-block: 4px 10px; scrollbar-width: none; }
+.cats::-webkit-scrollbar { display: none; }
+.cat { flex: 0 0 auto; width: 104px; scroll-snap-align: start; display: flex; flex-direction: column; align-items: center; gap: 8px; padding: 12px 8px; background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-md); text-decoration: none; color: var(--text); transition: box-shadow var(--motion-base), border-color var(--motion-base); }
 .cat:hover { box-shadow: var(--shadow-2); border-color: var(--border-2); }
-.cat__imgwrap { width: 92px; height: 92px; border-radius: var(--radius-md); overflow: hidden; background: var(--surface-2); display: grid; place-items: center; }
+.cat__imgwrap { width: 72px; height: 72px; border-radius: var(--radius-full); overflow: hidden; background: var(--surface-2); display: grid; place-items: center; }
 .cat__imgwrap img { width: 100%; height: 100%; object-fit: cover; }
 .cat__ph { width: 100%; height: 100%; background: var(--surface-2); }
-.cat b { font-size: 13px; font-weight: 600; text-align: center; }
+.cat b { font-size: 12px; font-weight: 600; text-align: center; line-height: 1.25; }
 .cat:hover b { color: var(--accent-text); }
 
 /* deals */
@@ -260,15 +289,15 @@ const maxDealPct = computed(() =>
 .empty { color: var(--text-subtle); padding: 32px 0; text-align: center; }
 
 @media (min-width: 640px) {
-  .hero__slide { grid-template-columns: 1.05fr .95fr; }
   .trust { grid-template-columns: repeat(3, 1fr); }
-  .cats { grid-template-columns: repeat(3, 1fr); }
+  .cat { width: 128px; }
+  .cat__imgwrap { width: 88px; height: 88px; }
   .deals { grid-template-columns: repeat(2, 1fr); }
   .grid { grid-template-columns: repeat(3, 1fr); }
 }
 @media (min-width: 1024px) {
   .trust { grid-template-columns: repeat(5, 1fr); }
-  .cats { grid-template-columns: repeat(6, 1fr); }
+  .rail__arrows { display: flex; }
   .promos { grid-template-columns: 1fr 1.4fr 1fr; }
   .grid { grid-template-columns: repeat(4, 1fr); }
 }
