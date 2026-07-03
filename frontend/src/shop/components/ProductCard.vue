@@ -115,7 +115,7 @@ async function addToBag() {
 /* dark: the well becomes an inset "framed tile" — card surface visible around it — and a cool
    veil pulls warm photo whites toward the neutral register */
 [data-theme="dark"] .media { margin: 8px 8px 0; aspect-ratio: auto; height: 0; padding-bottom: calc(100% - 16px); border-radius: var(--radius-md); }
-[data-theme="dark"] .media::after { content: ""; position: absolute; inset: 0; background: rgb(19 20 23 / .05); pointer-events: none; }
+[data-theme="dark"] .media::after { content: ""; position: absolute; inset: 0; background: color-mix(in srgb, var(--bg) 5%, transparent); pointer-events: none; }
 [data-theme="dark"] .media img { position: absolute; inset: 0; }
 .media img { width: 100%; height: 100%; object-fit: cover; transition: transform .8s var(--ease-out); }
 /* dark: dim imagery ~12% (thumbnail-dimming pattern) so white-background shots don't glare */
