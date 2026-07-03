@@ -47,9 +47,12 @@ onMounted(refresh);
     <div v-else class="cart__grid">
       <ul class="lines">
         <li v-for="line in state.cart.items" :key="line.id" class="line">
-          <div class="line__thumb" aria-hidden="true" />
+          <div class="line__thumb">
+            <img v-if="line.image_url" :src="line.image_url" :alt="line.product_name" />
+          </div>
           <div class="line__meta">
-            <span class="line__name">{{ t("cart.variant_n", { n: line.product_variant_id }) }}</span>
+            <span class="line__name">{{ line.product_name }}</span>
+            <span class="line__variant">{{ line.variant_name }}</span>
             <span class="line__unit">{{ t("cart.each", { price: formatPrice(line.unit_price_cents) }) }}</span>
             <button class="line__remove" @click="remove(line.id)">{{ t("cart.remove") }}</button>
           </div>
@@ -110,7 +113,9 @@ onMounted(refresh);
   border-top: 1px solid var(--color-border);
 }
 .line:last-child { border-bottom: 1px solid var(--color-border); }
-.line__thumb { grid-column: 1; grid-row: 1 / 3; width: 56px; aspect-ratio: 3 / 4; background: var(--color-surface); border-radius: var(--radius-sm); }
+.line__thumb { grid-column: 1; grid-row: 1 / 3; width: 56px; aspect-ratio: 3 / 4; background: var(--color-surface); border-radius: var(--radius-sm); overflow: hidden; border: 1px solid var(--border); }
+.line__thumb img { width: 100%; height: 100%; object-fit: cover; }
+.line__variant { font-size: var(--text-xs); color: var(--color-text-muted); }
 .line__meta { grid-column: 2; grid-row: 1; display: flex; flex-direction: column; gap: 2px; }
 .qty { grid-column: 2; grid-row: 2; justify-self: start; }
 .line__total { grid-column: 3; grid-row: 1 / 3; }

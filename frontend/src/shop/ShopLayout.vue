@@ -6,11 +6,14 @@ import { useAuth } from "./auth";
 import { useCart } from "./cart";
 import { useWishlist } from "./wishlist";
 import { theme, toggleTheme } from "../lib/theme";
+import { useSettings } from "./settings";
+import NewsletterBand from "./components/NewsletterBand.vue";
 import MobileNav from "./components/MobileNav.vue";
 
 const { count, state: cartState, refresh } = useCart();
 const wishlist = useWishlist();
 const auth = useAuth();
+const settings = useSettings();
 const router = useRouter();
 const route = useRoute();
 
@@ -68,6 +71,7 @@ const vtSupported = "startViewTransition" in Document.prototype;
 
 onMounted(() => {
   refresh();
+  void settings.load();
   wishlist.refresh();
   document.addEventListener("click", onDocClick);
   void api.categories().then((c) => (categories.value = c)).catch(() => {});
@@ -85,9 +89,9 @@ onBeforeUnmount(() => document.removeEventListener("click", onDocClick));
     <div class="tb">
       <div class="tb__in">
         <div class="tb__contact">
-          <span class="tb__welcome">{{ t("topbar.welcome") }}</span>
-          <a href="mailto:shop@arvel.test" class="tb__link">shop@arvel.test</a>
-          <span class="tb__link tb__phone" dir="ltr">+1 (086) 123-5678</span>
+          <span class="tb__welcome">{{ settings.get("store.welcome") || t("topbar.welcome") }}</span>
+          <a :href="`mailto:${settings.get('store.email', 'shop@arvel.test')}`" class="tb__link">{{ settings.get("store.email", "shop@arvel.test") }}</a>
+          <span class="tb__link tb__phone" dir="ltr">{{ settings.get("store.phone", "+1 (086) 123-5678") }}</span>
         </div>
         <div class="tb__tools">
           <span class="tb__cur">USD</span>
@@ -213,6 +217,8 @@ onBeforeUnmount(() => document.removeEventListener("click", onDocClick));
         </transition>
       </RouterView>
     </main>
+
+    <NewsletterBand />
 
     <footer class="ft">
       <div class="ft__top">

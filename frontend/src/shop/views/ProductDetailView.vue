@@ -235,6 +235,25 @@ watch(() => route.params.slug, load);
       </div>
     </div>
 
+    <!-- sticky mobile buy bar: price + qty + CTA, sits above the bottom tab bar on phones -->
+    <div v-if="product" class="buybar">
+      <div class="buybar__price">
+        <template v-if="product.deal">
+          <b class="tnum buybar__sale">{{ formatPrice(dealUnitPrice ?? baseUnitPrice, product.currency) }}</b>
+          <s class="tnum">{{ formatPrice(baseUnitPrice, product.currency) }}</s>
+        </template>
+        <b v-else class="tnum">{{ formatPrice(baseUnitPrice, product.currency) }}</b>
+      </div>
+      <div class="qtysel qtysel--sm" role="group" :aria-label="t('cart.quantity')">
+        <button type="button" :aria-label="t('cart.decrease')" :disabled="qty <= 1" @click="qty = Math.max(1, qty - 1)">−</button>
+        <span class="tnum">{{ qty }}</span>
+        <button type="button" :aria-label="t('cart.increase')" :disabled="qty >= (selectedVariant?.stock ?? 1)" @click="qty += 1">+</button>
+      </div>
+      <button class="buybar__cta" :disabled="!canAdd || adding" @click="addToCart">
+        {{ added ? t("pdp.added") : adding ? t("card.adding") : canAdd ? t("pdp.add") : t("pdp.sold_out_label") }}
+      </button>
+    </div>
+
     <section v-if="product" class="reviews" :aria-label="t('pdp.reviews')">
       <h2>
         {{ t("pdp.reviews") }}
@@ -306,6 +325,18 @@ watch(() => route.params.slug, load);
 .pdp__dealends { font-size: 12.5px; font-weight: 700; color: var(--text-muted); text-transform: uppercase; letter-spacing: .05em; }
 .pdp__buyrow { display: flex; align-items: center; gap: 12px; }
 .pdp__buyrow .pdp__add { flex: 1; }
+/* sticky mobile buy bar — above the layout's bottom tab bar; desktop keeps the inline buyrow */
+.buybar { position: fixed; bottom: 62px; inset-inline: 0; z-index: var(--z-header); display: flex; align-items: center; gap: 10px; padding: 10px clamp(1rem, 4vw, 2rem); padding-bottom: calc(10px + env(safe-area-inset-bottom, 0px) * 0); background: var(--surface); border-top: 1px solid var(--border); box-shadow: var(--shadow-2); }
+.buybar__price { display: flex; flex-direction: column; line-height: 1.15; min-width: 0; }
+.buybar__price b { font-family: var(--font-display); font-size: 17px; font-weight: 800; }
+.buybar__price s { font-size: 11.5px; color: var(--text-subtle); }
+.buybar__sale { color: var(--sale); }
+.buybar__cta { flex: 1; padding: 12px; border: 0; border-radius: var(--radius-full); background: var(--accent); color: var(--on-accent); font-size: 13px; font-weight: 800; letter-spacing: .04em; text-transform: uppercase; cursor: pointer; }
+.buybar__cta:disabled { opacity: .55; }
+.qtysel--sm button { height: 38px; width: 34px; }
+.qtysel--sm span { min-width: 30px; }
+@media (min-width: 1024px) { .buybar { display: none; } }
+
 .qtysel { display: inline-flex; align-items: center; border: 1px solid var(--border-2); border-radius: var(--radius-full); overflow: hidden; }
 .qtysel button { width: 40px; height: 44px; border: 0; background: var(--surface-2); color: var(--text); font-size: 17px; cursor: pointer; }
 .qtysel button:disabled { opacity: .4; cursor: default; }
