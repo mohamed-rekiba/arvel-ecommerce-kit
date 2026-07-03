@@ -521,7 +521,9 @@ async def admin_orders_index(request: Request) -> list[OrderOut]:
         if q.isdigit():
             query = query.where("id", int(q))
         else:
-            query = query.where("contact_email", "ilike", f"%{q}%")
+            # escape LIKE metacharacters so a literal % or _ in the search stays literal
+            safe = q.replace("\\", "\\\\").replace("%", "\\%").replace("_", "\\_")
+            query = query.where("contact_email", "ilike", f"%{safe}%")
     orders = await query.get()
     return [await _order_out(o, await o.items().get()) for o in orders]
 

@@ -163,4 +163,11 @@ async def show(request: Request) -> Response:
             },
         },
     ).render()
-    return Response(content=html, headers={"content-type": "text/html; charset=utf-8"})
+    return Response(
+        content=html,
+        headers={
+            "content-type": "text/html; charset=utf-8",
+            # the receipt token rides the URL — never let it leak via a Referer header
+            "referrer-policy": "no-referrer",
+        },
+    )
