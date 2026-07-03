@@ -396,6 +396,27 @@ class AdminBannerOut(Schema):
     image_url: str | None
 
 
+class NewsletterIn(Schema):
+    email: str
+
+
+class NewsletterSubscriberOut(Schema):
+    id: int
+    email: str
+    locale: str
+    created_at: str | None
+
+
+class SettingsOut(Schema):
+    """The public storefront settings (whitelisted keys only)."""
+
+    values: dict[str, str]
+
+
+class SettingsIn(Schema):
+    values: dict[str, str]
+
+
 class AnnouncementOut(Schema):
     """The storefront announcement bar — the newest live coupon flagged for announcement."""
 
