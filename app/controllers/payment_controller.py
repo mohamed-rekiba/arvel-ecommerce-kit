@@ -114,6 +114,11 @@ async def webhook(request: Request, data: WebhookIn) -> WebhookOut:
                     if can_transition(current, OrderStatus.PAID):
                         order.status = OrderStatus.PAID
                         await order.save()
+                        from app.controllers.checkout_controller import (
+                            log_transition,
+                        )
+
+                        await log_transition(order, current, OrderStatus.PAID)
         elif data.type == "charge.failed":
             # the charge died at the gateway: mark the payment failed; the order stays PENDING
             # so the customer can retry payment

@@ -44,6 +44,7 @@ from app.schemas import (
     OrderLineOut,
     OrderOut,
     OrderStatusIn,
+    OrderTimelineOut,
 )
 
 # The shop's documented money rules — server-authoritative, never trusted from the client:
@@ -90,6 +91,21 @@ async def _latest_payment_status(order: Order) -> PaymentStatus | None:
         return None
     status = payment.status
     return status if isinstance(status, PaymentStatus) else PaymentStatus(status)
+
+
+async def log_transition(
+    order: Order, before: OrderStatus, after: OrderStatus
+) -> None:
+    """Every status change lands in the activity trail — the admin history AND the customer's
+    tracking timeline read from it."""
+    from arvel.activitylog import activity
+
+    await (
+        activity()
+        .performed_on(order)
+        .with_properties({"from": before.value, "to": after.value})
+        .log("order status changed")
+    )
 
 
 def _method_value(order: Order) -> PaymentMethod:
@@ -373,14 +389,53 @@ async def checkout(request: Request, data: CheckoutIn) -> OrderOut:
     return await _order_out(order, order_items)
 
 
+async def _timeline(order: Order) -> list[OrderTimelineOut]:
+    """The customer-facing tracking stepper: placed (created_at) + every status change from the
+    activity trail. Steps not reached yet are emitted with at=None so the UI can grey them."""
+    from arvel.activitylog import Activity
+
+    from app.controllers.serializers import iso as _iso
+
+    events = (
+        await Activity.where("subject_type", "Order")
+        .where("subject_id", order.id)
+        .order_by("id")
+        .get()
+    )
+    reached: dict[str, str | None] = {
+        OrderStatus.PENDING.value: _iso(getattr(order, "created_at", None))
+    }
+    for event in events:
+        props = dict(event.properties or {})
+        target = props.get("to")
+        if event.description == "order status changed" and target:
+            reached[str(target)] = _iso(event.created_at)
+    if OrderStatus.CANCELLED.value in reached:
+        path = [OrderStatus.PENDING, OrderStatus.CANCELLED]
+    elif _method_value(order) is PaymentMethod.COD:
+        path = [OrderStatus.PENDING, OrderStatus.SHIPPED, OrderStatus.DELIVERED]
+    else:
+        path = [
+            OrderStatus.PENDING,
+            OrderStatus.PAID,
+            OrderStatus.SHIPPED,
+            OrderStatus.DELIVERED,
+        ]
+    return [
+        OrderTimelineOut(status=step, at=reached.get(step.value)) for step in path
+    ]
+
+
 async def show(request: Request) -> OrderOut:
-    """One order, with lines + breakdown — for the signed-in owner or the order-token holder."""
+    """One order, with lines + breakdown + the tracking timeline — for the signed-in owner or
+    the order-token holder."""
     order = await resolve_owned_order(request, int(request.path_param("id")))
-    return await _order_out(
+    out = await _order_out(
         order,
         await order.items().get(),
         payment_status=await _latest_payment_status(order),
     )
+    return OrderOut(**{**{f: getattr(out, f) for f in out.__struct_fields__}, "timeline": await _timeline(order)})
 
 
 async def cancel(request: Request) -> OrderOut:
@@ -414,8 +469,14 @@ async def cancel(request: Request) -> OrderOut:
             if variant is not None:
                 variant.stock = variant.stock + item.quantity
                 await variant.save()
+        before = (
+            locked.status
+            if isinstance(locked.status, OrderStatus)
+            else OrderStatus(locked.status)
+        )
         locked.status = OrderStatus.CANCELLED
         await locked.save()
+        await log_transition(locked, before, OrderStatus.CANCELLED)
     return await _order_out(
         locked, items, payment_status=await _latest_payment_status(locked)
     )
