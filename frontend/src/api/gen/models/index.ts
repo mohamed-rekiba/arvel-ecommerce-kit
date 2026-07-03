@@ -210,6 +210,7 @@ export * from './forgotPasswordIn';
 export * from './forgotPasswordOut';
 export * from './galleryImageOut';
 export * from './healthStatus';
+export * from './mediaItemOut';
 export * from './messageOut';
 export * from './metricsOut';
 export * from './newsletterIn';

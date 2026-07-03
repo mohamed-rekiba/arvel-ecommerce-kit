@@ -12,4 +12,5 @@ export interface AdminUserOut {
   email: string;
   email_verified: boolean;
   roles: string[];
+  avatar_url?: string | null;
 }

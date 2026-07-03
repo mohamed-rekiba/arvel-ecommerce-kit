@@ -564,6 +564,7 @@ class OrderOut(Schema):
         PaymentStatus | None
     )  # latest payment attempt (None = never attempted)
     items: list[OrderLineOut]
+    placed_at: str | None = None  # ISO created_at — the account order cards show it
     timeline: list[OrderTimelineOut] | None = None  # populated on the single-order read
 
 
@@ -673,6 +674,7 @@ class AdminUserOut(Schema):
     email: str
     email_verified: bool
     roles: list[str]
+    avatar_url: str | None = None
 
 
 class AdminUserPage(Schema):
@@ -691,6 +693,8 @@ class AdminUserDetailOut(Schema):
     roles: list[str]
     orders_count: int
     total_spent_cents: int
+    addresses_count: int = 0
+    avatar_url: str | None = None
 
 
 class CategoryIn(Schema):

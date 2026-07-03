@@ -123,6 +123,7 @@ import type {
   ForgotPasswordOut,
   GalleryImageOut,
   HealthStatus,
+  MediaItemOut,
   MessageOut,
   MetricsOut,
   NewsletterIn,
@@ -3158,6 +3159,42 @@ export const apiAdminSettingsUpdate = async (settingsIn: SettingsIn, options?: R
 
 
 
+export type apiAdminMediaResponse200 = {
+  data: MediaItemOut[]
+  status: 200
+}
+
+export type apiAdminMediaResponseSuccess = (apiAdminMediaResponse200) & {
+  headers: Headers;
+};
+;
+
+export type apiAdminMediaResponse = (apiAdminMediaResponseSuccess)
+
+export const getApiAdminMediaUrl = () => {
+
+
+
+
+  return `/api/admin/media`
+}
+
+/**
+ * @summary ApiAdminMedia
+ */
+export const apiAdminMedia = async ( options?: RequestInit): Promise<apiAdminMediaResponse> => {
+
+  return apiFetch<apiAdminMediaResponse>(getApiAdminMediaUrl(),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
 export type apiAdminNewsletterResponse200 = {
   data: NewsletterSubscriberOut[]
   status: 200
@@ -4160,7 +4197,8 @@ export const getApiAdminOrdersIndexUrl = () => {
 }
 
 /**
- * List every order (newest first) for the back office. Requires orders.view.
+ * List orders (newest first) for the back office, narrowed by ``?status=`` and searched
+ * by ``?q=`` (order id, or a case-insensitive contact-email fragment). Requires orders.view.
  * @summary ApiAdminOrdersIndex
  */
 export const apiAdminOrdersIndex = async ( options?: RequestInit): Promise<apiAdminOrdersIndexResponse> => {
