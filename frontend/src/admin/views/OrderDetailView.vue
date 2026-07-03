@@ -5,11 +5,11 @@ import { computed, onMounted, ref } from "vue";
 import { useRoute } from "vue-router";
 import {
   ApiError,
-  ORDER_TRANSITIONS,
   type AdminOrderDetail,
   type OrderStatus,
   api,
   formatPrice,
+  nextStates as transitionsFor,
 } from "../api";
 import { currentLocale } from "../../lib/i18n";
 import { type MessageKey as MK, t as tr } from "../locale";
@@ -22,7 +22,7 @@ const notice = ref<string | null>(null);
 const acting = ref(false);
 
 const nextStates = computed<OrderStatus[]>(() =>
-  order.value ? (ORDER_TRANSITIONS[order.value.status] ?? []) : [],
+  order.value ? transitionsFor(order.value) : [],
 );
 
 async function load() {
@@ -77,6 +77,7 @@ onMounted(load);
           <h1>
             {{ tr("orders.order") }} #{{ order.id }}
             <Tag :value="tr(`order.${order.status}` as MK)" :severity="severity(order.status)" />
+            <Tag :value="tr(`pay.${order.payment_method}` as MK)" :severity="order.payment_method === 'cod' ? 'warn' : 'info'" />
           </h1>
           <p class="sub">
             <template v-if="order.customer">

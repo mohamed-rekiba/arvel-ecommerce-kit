@@ -338,7 +338,7 @@ onMounted(async () => {
 .fields { border: 0; margin: 22px 0 0; padding: 0; }
 .fields legend { font-size: 12px; font-weight: 800; letter-spacing: .05em; text-transform: uppercase; color: var(--text-subtle); margin-bottom: 12px; }
 .fields label:not(.radio) { display: block; margin-bottom: 13px; }
-.fields label span { display: block; font-size: 13px; font-weight: 600; margin-bottom: 5px; }
+.fields label:not(.radio) span { display: block; font-size: 13px; font-weight: 600; margin-bottom: 5px; }
 .fields label em { color: var(--text-subtle); font-style: normal; font-size: 11.5px; }
 .fields input, .fields select { width: 100%; padding: 11px 13px; border: 1px solid var(--border-2); border-radius: var(--radius-sm); background: var(--bg); color: var(--text); font: inherit; }
 .fields input:focus, .fields select:focus { outline: none; border-color: var(--accent); }

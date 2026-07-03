@@ -47,6 +47,9 @@ import type {
   AdminCouponOut,
   CouponIn,
   CouponUpdateIn,
+  MediaItemOut,
+  NewsletterSubscriberOut,
+  SettingsOutValues,
 } from "../api/gen/models";
 
 export type Translation = Translate;
@@ -67,6 +70,9 @@ export type AdminReview = AdminReviewOut;
 export type AdminUserDetail = AdminUserDetailOut;
 export type Vendor = AdminVendorOut;
 export type Variant = VariantOut;
+export type MediaItem = MediaItemOut;
+export type NewsletterSubscriber = NewsletterSubscriberOut;
+export type SettingsValues = SettingsOutValues;
 export type GalleryImage = GalleryImageOut;
 export type { OrderStatus, ProductIn, StockAdjustIn, UpdateProductIn, VariantIn, VariantUpdateIn };
 
@@ -87,6 +93,12 @@ export const ORDER_TRANSITIONS: Record<OrderStatus, OrderStatus[]> = {
   delivered: [],
   cancelled: [],
 };
+
+// COD orders never pass through "paid" — they ship straight from pending (server can_transition(cod=True)).
+export function nextStates(order: { status: OrderStatus; payment_method: Order["payment_method"] }): OrderStatus[] {
+  if (order.payment_method === "cod" && order.status === "pending") return ["shipped", "cancelled"];
+  return ORDER_TRANSITIONS[order.status] ?? [];
+}
 
 export { ApiError } from "../api/http";
 import { apiFetch } from "../api/http";
@@ -181,7 +193,17 @@ export const api = {
   adminReviews: (status = "pending") => request<AdminReviewOut[]>("GET", `/admin/reviews?status=${status}`),
   moderateReview: (id: number, decision: "approve" | "reject") =>
     request<AdminReviewOut>("POST", `/admin/reviews/${id}/${decision}`),
-  orders: () => request<Order[]>("GET", "/admin/orders"),
+  orders: (params: { status?: string; q?: string } = {}) => {
+    const qs = new URLSearchParams();
+    if (params.status) qs.set("status", params.status);
+    if (params.q) qs.set("q", params.q);
+    return request<Order[]>("GET", `/admin/orders${qs.toString() ? `?${qs}` : ""}`);
+  },
+  adminMedia: () => request<MediaItemOut[]>("GET", "/admin/media"),
+  adminSettings: () => request<{ values: SettingsOutValues }>("GET", "/admin/settings"),
+  updateSettings: (values: Record<string, string>) =>
+    request<{ values: SettingsOutValues }>("PATCH", "/admin/settings", { values }),
+  newsletter: () => request<NewsletterSubscriberOut[]>("GET", "/admin/newsletter"),
   adminOrder: (id: number) => request<AdminOrderDetailOut>("GET", `/admin/orders/${id}`),
   updateOrderStatus: (id: number, status: string) =>
     request<Order>("POST", `/admin/orders/${id}/status`, { status }),
