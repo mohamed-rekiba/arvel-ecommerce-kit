@@ -231,6 +231,33 @@ onBeforeUnmount(() => document.removeEventListener("click", onDocClick));
         <span>{{ t("footer.legal") }}</span>
       </div>
     </footer>
+
+    <!-- mobile bottom tab bar (marketplace pattern) -->
+    <nav class="tabbar" :aria-label="t('a11y.primary')">
+      <RouterLink to="/" class="tabbar__i" exact-active-class="on">
+        <svg viewBox="0 0 24 24"><path d="M3 11l9-8 9 8M5 9v11h14V9" /></svg>
+        <span>{{ t("nav.home") }}</span>
+      </RouterLink>
+      <RouterLink :to="{ name: 'catalog' }" class="tabbar__i" :class="{ on: route.name === 'catalog' }">
+        <svg viewBox="0 0 24 24"><path d="M4 5h7v7H4zM13 5h7v7h-7zM4 14h7v5H4zM13 14h7v5h-7z" /></svg>
+        <span>{{ t("nav.shop") }}</span>
+      </RouterLink>
+      <RouterLink to="/deals" class="tabbar__i" active-class="on">
+        <svg viewBox="0 0 24 24"><path d="M12 3v18M5 8l7-5 7 5M7 21h10" /></svg>
+        <span>{{ t("nav.deals") }}</span>
+      </RouterLink>
+      <RouterLink to="/cart" class="tabbar__i" active-class="on">
+        <span class="tabbar__badgewrap">
+          <svg viewBox="0 0 24 24"><path d="M6 8h12l-1 12H7z" /><path d="M9 8a3 3 0 0 1 6 0" /></svg>
+          <span v-if="count" class="tabbar__n">{{ count }}</span>
+        </span>
+        <span>{{ t("nav.cart") }}</span>
+      </RouterLink>
+      <RouterLink to="/account" class="tabbar__i" active-class="on">
+        <svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="3.4" /><path d="M5 20a7 7 0 0 1 14 0" /></svg>
+        <span>{{ t("nav.account") }}</span>
+      </RouterLink>
+    </nav>
   </div>
 </template>
 
@@ -253,7 +280,15 @@ onBeforeUnmount(() => document.removeEventListener("click", onDocClick));
 
 /* header */
 .hd { background: var(--surface); border-bottom: 1px solid var(--border); }
-.hd__in { max-width: 1320px; margin: 0 auto; padding: 14px clamp(1rem, 4vw, 2.5rem); display: grid; grid-template-columns: auto auto 1fr auto; align-items: center; gap: clamp(.75rem, 2.5vw, 2rem); }
+.hd__in { max-width: 1320px; margin: 0 auto; padding: 10px clamp(1rem, 4vw, 2.5rem); display: grid; grid-template-columns: auto auto 1fr auto; grid-template-areas: "menu brand . tools" "search search search search"; align-items: center; gap: 10px clamp(.5rem, 2vw, 2rem); }
+.hamburger { grid-area: menu; }
+.brand { grid-area: brand; }
+.search { grid-area: search; }
+.hd__tools { grid-area: tools; }
+@media (min-width: 640px) {
+  .hd__in { grid-template-areas: none; grid-template-columns: auto auto 1fr auto; padding: 14px clamp(1rem, 4vw, 2.5rem); }
+  .hamburger, .brand, .search, .hd__tools { grid-area: auto; }
+}
 .hamburger { display: grid; }
 .ic { width: 44px; height: 44px; border: 0; background: none; place-items: center; color: var(--text); cursor: pointer; }
 .ic svg { width: 22px; height: 22px; stroke: currentColor; fill: none; stroke-width: 1.8; }
@@ -261,7 +296,7 @@ onBeforeUnmount(() => document.removeEventListener("click", onDocClick));
 .brand__name { font-family: var(--font-display); font-weight: 800; font-size: 22px; letter-spacing: -.01em; }
 .brand__name b { color: var(--accent-text); }
 .brand__tag { font-size: 10.5px; color: var(--text-subtle); }
-.search { display: none; grid-template-columns: 1fr auto auto; border: 2px solid var(--text); border-radius: var(--radius-full); overflow: hidden; background: var(--surface); max-width: 620px; width: 100%; justify-self: center; }
+.search { display: grid; grid-template-columns: 1fr auto auto; border: 2px solid var(--text); border-radius: var(--radius-full); overflow: hidden; background: var(--surface); max-width: 620px; width: 100%; justify-self: center; }
 .search__input { border: 0 !important; background: transparent !important; padding: 0 18px; height: 42px; font: inherit; font-size: 14px; min-width: 0; }
 .search__input:focus { outline: none; }
 .search__cat { border: 0 !important; border-inline-start: 1px solid var(--border) !important; border-radius: 0 !important; background: transparent !important; font-size: 13px; color: var(--text-muted); padding: 0 10px; max-width: 150px; }
@@ -296,7 +331,17 @@ onBeforeUnmount(() => document.removeEventListener("click", onDocClick));
 .ann__code { font-family: var(--font-mono); font-weight: 800; letter-spacing: .04em; background: color-mix(in srgb, var(--on-accent-bright) 12%, transparent); padding: 1px 8px; border-radius: var(--radius-sm); }
 .ann__x { border: 0; background: none; color: var(--on-accent-bright); font-size: 13px; cursor: pointer; padding: 4px 6px; }
 
-.main { flex: 1; background: var(--canvas); }
+.main { flex: 1; background: var(--canvas); padding-bottom: 64px; }
+@media (min-width: 1024px) { .main { padding-bottom: 0; } }
+
+/* bottom tab bar — phones/tablets only */
+.tabbar { position: fixed; bottom: 0; inset-inline: 0; z-index: var(--z-header); display: grid; grid-template-columns: repeat(5, 1fr); background: var(--surface); border-top: 1px solid var(--border); padding-bottom: env(safe-area-inset-bottom, 0px); }
+.tabbar__i { display: flex; flex-direction: column; align-items: center; gap: 2px; padding: 8px 0 6px; font-size: 10.5px; font-weight: 600; color: var(--text-muted); text-decoration: none; }
+.tabbar__i svg { width: 22px; height: 22px; stroke: currentColor; fill: none; stroke-width: 1.7; }
+.tabbar__i.on { color: var(--accent-text); }
+.tabbar__badgewrap { position: relative; display: grid; place-items: center; }
+.tabbar__n { position: absolute; top: -4px; inset-inline-end: -8px; min-width: 15px; height: 15px; padding: 0 3px; background: var(--accent-bright); color: var(--on-accent-bright); border-radius: var(--radius-full); font-size: 9.5px; font-weight: 800; display: grid; place-items: center; }
+@media (min-width: 1024px) { .tabbar { display: none; } }
 
 /* footer */
 .ft { border-top: 1px solid var(--border); background: var(--surface); }
@@ -310,7 +355,6 @@ onBeforeUnmount(() => document.removeEventListener("click", onDocClick));
 .ft__base { border-top: 1px solid var(--border); max-width: 1320px; margin: 0 auto; padding: 18px clamp(1rem, 4vw, 2.5rem); display: flex; align-items: center; justify-content: space-between; gap: 12px; font-size: 12.5px; color: var(--text-subtle); }
 
 @media (min-width: 640px) {
-  .search { display: grid; }
   .who__meta { display: flex; }
 }
 @media (min-width: 1024px) {
