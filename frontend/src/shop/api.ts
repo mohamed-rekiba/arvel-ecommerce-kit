@@ -23,6 +23,13 @@ import type {
 import type { CountryCode } from "../api/gen/models";
 import type { ReviewListOut, ReviewOut } from "../api/gen/models";
 import type { AnnouncementOut, BannerOut, DealOut, ProductDealOut } from "../api/gen/models";
+import type {
+  OrderTimelineOut,
+  PaymentMethod,
+  SavedAddressIn,
+  SavedAddressOut,
+  SettingsOutValues,
+} from "../api/gen/models";
 
 export { ApiError } from "../api/http";
 export type { CountryCode, OrderStatus, PaymentStatus } from "../api/gen/models";
@@ -47,6 +54,11 @@ export type Deal = DealOut;
 export type ProductDeal = ProductDealOut;
 export type Announcement = AnnouncementOut;
 export type ReviewList = ReviewListOut;
+export type SavedAddress = SavedAddressOut;
+export type SavedAddressPayload = SavedAddressIn;
+export type TimelineStep = OrderTimelineOut;
+export type { PaymentMethod };
+export type PublicSettings = SettingsOutValues;
 
 // arvel's LengthAwarePaginator JSON shape (DR-0022) — generic over the row type (the generated
 // ProductPage is this, fixed to ProductOut).
@@ -245,6 +257,34 @@ export const api = {
   },
   markNotificationsRead() {
     return request<{ message: string }>("POST", `/notifications/read`);
+  },
+  addresses() {
+    return get<SavedAddress[]>(`/account/addresses`);
+  },
+  createAddress(payload: SavedAddressPayload) {
+    return request<SavedAddress>("POST", `/account/addresses`, payload);
+  },
+  updateAddress(id: number, payload: SavedAddressPayload) {
+    return request<SavedAddress>("PUT", `/account/addresses/${id}`, payload);
+  },
+  deleteAddress(id: number) {
+    return request<{ status: string }>("DELETE", `/account/addresses/${id}`);
+  },
+  uploadAvatar(file: File) {
+    const form = new FormData();
+    form.append("file", file);
+    // no JSON content-type — the browser sets the multipart boundary
+    return apiFetch<Customer>(`/api/account/avatar`, { method: "POST", body: form });
+  },
+  publicSettings() {
+    return get<{ values: PublicSettings }>(`/settings`);
+  },
+  subscribeNewsletter(email: string) {
+    return request<{ status: string }>("POST", `/newsletter`, { email });
+  },
+  // The invoice is a server-rendered HTML page — opened in a new tab, not fetched as JSON.
+  invoiceUrl(id: number, orderToken?: string) {
+    return `/api/orders/${id}/invoice${orderToken ? `?token=${encodeURIComponent(orderToken)}` : ""}`;
   },
   wishlist() {
     return get<Product[]>(`/wishlist`);

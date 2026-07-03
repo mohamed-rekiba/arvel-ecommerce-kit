@@ -100,7 +100,11 @@ def _money(cents: int) -> str:
 
 
 async def show(request: Request) -> Response:
-    order = await resolve_owned_order(request, int(request.path_param("id")))
+    order = await resolve_owned_order(
+        request,
+        int(request.path_param("id")),
+        query_token=str(request.query("token", "") or ""),
+    )
     items = await order.items().get()
     locale = active_locale()
     t = dict(_STRINGS[locale])

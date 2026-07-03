@@ -19,9 +19,13 @@ from app.models.order import Order
 ORDER_TOKEN_HEADER = "X-Order-Token"
 
 
-async def resolve_owned_order(request: Request, order_id: int) -> Order:
+async def resolve_owned_order(
+    request: Request, order_id: int, *, query_token: str = ""
+) -> Order:
+    """``query_token`` lets a route opt in to accepting the receipt token as a query param —
+    only the invoice does (a print view opened in a browser tab, where headers can't be set)."""
     user = current_user.get()
-    provided_token = request.header(ORDER_TOKEN_HEADER, "") or ""
+    provided_token = request.header(ORDER_TOKEN_HEADER, "") or query_token
     if user is None and not provided_token:
         abort(401, "Unauthenticated")
     order = await Order.find(order_id)
