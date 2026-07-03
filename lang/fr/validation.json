@@ -1,0 +1,11 @@
+{
+  "required": "Le champ {field} est obligatoire.",
+  "string": "Le champ {field} doit être une chaîne.",
+  "email": "Le champ {field} doit être une adresse e-mail valide.",
+  "min": "Le champ {field} doit être au moins {arg}.",
+  "max": "Le champ {field} ne peut pas dépasser {arg}.",
+  "in": "Le champ {field} est invalide.",
+  "integer": "Le champ {field} doit être un entier.",
+  "numeric": "Le champ {field} doit être un nombre.",
+  "confirmed": "La confirmation du champ {field} ne correspond pas."
+}

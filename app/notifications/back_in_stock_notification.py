@@ -5,6 +5,7 @@ from typing import Any
 from arvel.events import ShouldQueue
 from arvel.notifications import Notification
 
+from app.i18n import trans_in
 from app.mail.back_in_stock import BackInStock
 
 
@@ -18,10 +19,20 @@ class BackInStockNotification(Notification, ShouldQueue):
         return ["database", "mail"]
 
     def to_mail(self, notifiable: Any) -> BackInStock:
-        return BackInStock(self.product_name, self.product_slug, self.variant_name)
+        return BackInStock(
+            self.product_name,
+            self.product_slug,
+            self.variant_name,
+            locale=str(getattr(notifiable, "locale", None) or "en"),
+        )
 
     def to_array(self, notifiable: Any) -> dict[str, Any]:
+        locale = str(getattr(notifiable, "locale", None) or "en")
         return {
             "product_slug": self.product_slug,
-            "message": f"{self.product_name} ({self.variant_name}) is back in stock!",
+            "message": trans_in(
+                locale,
+                "shop.notif.back_in_stock",
+                product=f"{self.product_name} ({self.variant_name})",
+            ),
         }

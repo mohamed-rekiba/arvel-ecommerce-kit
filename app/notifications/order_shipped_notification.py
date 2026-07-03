@@ -12,6 +12,7 @@ from typing import Any
 from arvel.events import ShouldQueue
 from arvel.notifications import Notification
 
+from app.i18n import trans_in
 from app.mail.order_shipped import OrderShipped
 
 
@@ -23,10 +24,13 @@ class OrderShippedNotification(Notification, ShouldQueue):
         return ["database", "mail"]
 
     def to_mail(self, notifiable: Any) -> OrderShipped:
-        return OrderShipped(self.order_id)
+        return OrderShipped(
+            self.order_id, locale=str(getattr(notifiable, "locale", None) or "en")
+        )
 
     def to_array(self, notifiable: Any) -> dict[str, Any]:
+        locale = str(getattr(notifiable, "locale", None) or "en")
         return {
             "order_id": self.order_id,
-            "message": f"Your order #{self.order_id} has shipped.",
+            "message": trans_in(locale, "shop.notif.shipped", order=self.order_id),
         }

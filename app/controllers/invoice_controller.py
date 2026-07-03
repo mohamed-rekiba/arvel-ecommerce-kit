@@ -71,9 +71,27 @@ _STRINGS: dict[str, dict[str, str]] = {
 }
 
 _STATUS_LABELS: dict[str, dict[str, str]] = {
-    "en": {"pending": "pending", "paid": "paid", "shipped": "shipped", "delivered": "delivered", "cancelled": "cancelled"},
-    "fr": {"pending": "en attente", "paid": "payée", "shipped": "expédiée", "delivered": "livrée", "cancelled": "annulée"},
-    "ar": {"pending": "قيد الانتظار", "paid": "مدفوع", "shipped": "تم الشحن", "delivered": "تم التسليم", "cancelled": "ملغى"},
+    "en": {
+        "pending": "pending",
+        "paid": "paid",
+        "shipped": "shipped",
+        "delivered": "delivered",
+        "cancelled": "cancelled",
+    },
+    "fr": {
+        "pending": "en attente",
+        "paid": "payée",
+        "shipped": "expédiée",
+        "delivered": "livrée",
+        "cancelled": "annulée",
+    },
+    "ar": {
+        "pending": "قيد الانتظار",
+        "paid": "مدفوع",
+        "shipped": "تم الشحن",
+        "delivered": "تم التسليم",
+        "cancelled": "ملغى",
+    },
 }
 
 
@@ -87,12 +105,18 @@ async def show(request: Request) -> Response:
     locale = active_locale()
     t = dict(_STRINGS[locale])
     status = (
-        order.status if isinstance(order.status, OrderStatus) else OrderStatus(order.status)
+        order.status
+        if isinstance(order.status, OrderStatus)
+        else OrderStatus(order.status)
     )
-    method = str(getattr(order, "payment_method", None) or "gateway")
-    method = method.value if hasattr(method, "value") else method
+    raw_method = getattr(order, "payment_method", None) or PaymentMethod.GATEWAY
+    method = (
+        raw_method
+        if isinstance(raw_method, PaymentMethod)
+        else PaymentMethod(str(raw_method))
+    )
     t["status_label"] = _STATUS_LABELS[locale][status.value]
-    t["method_label"] = t[PaymentMethod(method).value]
+    t["method_label"] = t[method.value]
 
     looks = await line_presentation([i.product_variant_id for i in items])
     lines: list[dict[str, Any]] = [
@@ -128,7 +152,9 @@ async def show(request: Request) -> Response:
                 "subtotal": _money(order.subtotal_cents),
                 "shipping": _money(order.shipping_cents),
                 "tax": _money(order.tax_cents),
-                "discount": _money(order.discount_cents) if order.discount_cents else None,
+                "discount": _money(order.discount_cents)
+                if order.discount_cents
+                else None,
                 "total": _money(order.total_cents),
             },
         },

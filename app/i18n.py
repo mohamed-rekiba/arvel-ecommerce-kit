@@ -17,3 +17,13 @@ def active_locale() -> str:
     whitelisted to SUPPORTED_LOCALES with a fallback to the default."""
     locale = current_locale.get()
     return locale if locale in SUPPORTED_LOCALES else DEFAULT_LOCALE
+
+
+def trans_in(locale: str, key: str, **replace: object) -> str:
+    """A translation resolved for an EXPLICIT locale (mail/notifications render on the worker
+    where no request locale exists — the recipient's stored locale drives the language)."""
+    from arvel.kernel import app
+
+    loc = locale if locale in SUPPORTED_LOCALES else DEFAULT_LOCALE
+    result: str = app("translator").get(key, dict(replace), loc)
+    return result
