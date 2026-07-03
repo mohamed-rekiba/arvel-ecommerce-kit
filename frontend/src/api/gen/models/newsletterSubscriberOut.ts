@@ -6,12 +6,9 @@
  * OpenAPI spec version: 0.1.0
  */
 
-export interface UserOut {
+export interface NewsletterSubscriberOut {
   id: number;
-  name: string;
   email: string;
-  phone: string | null;
-  email_verified: boolean;
-  avatar_url: string | null;
   locale: string;
+  created_at: string | null;
 }

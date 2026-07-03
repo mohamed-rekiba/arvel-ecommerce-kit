@@ -23,6 +23,10 @@ import type {
   AdminUserPage,
   AdminVendorOut,
   AnnouncementOut,
+  ApiAccountAddressesDestroy200,
+  ApiAccountAddressesDestroy400,
+  ApiAccountAddressesStore400,
+  ApiAccountAddressesUpdate400,
   ApiAdminBannersDestroy200,
   ApiAdminBannersDestroy400,
   ApiAdminBannersImage400,
@@ -53,6 +57,7 @@ import type {
   ApiAdminReviewsIndex400,
   ApiAdminReviewsIndexParams,
   ApiAdminReviewsModerate400,
+  ApiAdminSettingsUpdate400,
   ApiAdminUsersIndex400,
   ApiAdminUsersIndexParams,
   ApiAdminUsersRoles400,
@@ -76,7 +81,9 @@ import type {
   ApiLogin400,
   ApiMediaConversion400,
   ApiMediaShow400,
+  ApiNewsletter400,
   ApiOrdersCancel400,
+  ApiOrdersInvoice400,
   ApiOrdersPay400,
   ApiOrdersShow400,
   ApiPasswordForgot400,
@@ -118,6 +125,8 @@ import type {
   HealthStatus,
   MessageOut,
   MetricsOut,
+  NewsletterIn,
+  NewsletterSubscriberOut,
   NotificationOut,
   OrderOut,
   OrderStatusIn,
@@ -134,6 +143,10 @@ import type {
   ReviewListOut,
   ReviewOut,
   RoleOut,
+  SavedAddressIn,
+  SavedAddressOut,
+  SettingsIn,
+  SettingsOut,
   StockAdjustIn,
   TokenOut,
   UpdateItemIn,
@@ -2711,6 +2724,209 @@ export const apiCartCouponRemove = async ( options?: RequestInit): Promise<apiCa
 
 
 
+export type apiAccountAvatarResponse201 = {
+  data: UserOut
+  status: 201
+}
+
+export type apiAccountAvatarResponseSuccess = (apiAccountAvatarResponse201) & {
+  headers: Headers;
+};
+;
+
+export type apiAccountAvatarResponse = (apiAccountAvatarResponseSuccess)
+
+export const getApiAccountAvatarUrl = () => {
+
+
+
+
+  return `/api/account/avatar`
+}
+
+/**
+ * Attach/replace the account avatar (one image; the previous one is removed).
+ * @summary ApiAccountAvatar
+ */
+export const apiAccountAvatar = async ( options?: RequestInit): Promise<apiAccountAvatarResponse> => {
+
+  return apiFetch<apiAccountAvatarResponse>(getApiAccountAvatarUrl(),
+  {
+    ...options,
+    method: 'POST'
+
+
+  }
+);}
+
+
+
+export type apiAccountAddressesIndexResponse200 = {
+  data: SavedAddressOut[]
+  status: 200
+}
+
+export type apiAccountAddressesIndexResponseSuccess = (apiAccountAddressesIndexResponse200) & {
+  headers: Headers;
+};
+;
+
+export type apiAccountAddressesIndexResponse = (apiAccountAddressesIndexResponseSuccess)
+
+export const getApiAccountAddressesIndexUrl = () => {
+
+
+
+
+  return `/api/account/addresses`
+}
+
+/**
+ * @summary ApiAccountAddressesIndex
+ */
+export const apiAccountAddressesIndex = async ( options?: RequestInit): Promise<apiAccountAddressesIndexResponse> => {
+
+  return apiFetch<apiAccountAddressesIndexResponse>(getApiAccountAddressesIndexUrl(),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+export type apiAccountAddressesStoreResponse201 = {
+  data: SavedAddressOut
+  status: 201
+}
+
+export type apiAccountAddressesStoreResponse400 = {
+  data: ApiAccountAddressesStore400
+  status: 400
+}
+
+export type apiAccountAddressesStoreResponseSuccess = (apiAccountAddressesStoreResponse201) & {
+  headers: Headers;
+};
+export type apiAccountAddressesStoreResponseError = (apiAccountAddressesStoreResponse400) & {
+  headers: Headers;
+};
+
+export type apiAccountAddressesStoreResponse = (apiAccountAddressesStoreResponseSuccess | apiAccountAddressesStoreResponseError)
+
+export const getApiAccountAddressesStoreUrl = () => {
+
+
+
+
+  return `/api/account/addresses`
+}
+
+/**
+ * @summary ApiAccountAddressesStore
+ */
+export const apiAccountAddressesStore = async (savedAddressIn: SavedAddressIn, options?: RequestInit): Promise<apiAccountAddressesStoreResponse> => {
+
+  return apiFetch<apiAccountAddressesStoreResponse>(getApiAccountAddressesStoreUrl(),
+  {
+    ...options,
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...options?.headers },
+    body: JSON.stringify(savedAddressIn)
+  }
+);}
+
+
+
+export type apiAccountAddressesDestroyResponse200 = {
+  data: ApiAccountAddressesDestroy200
+  status: 200
+}
+
+export type apiAccountAddressesDestroyResponse400 = {
+  data: ApiAccountAddressesDestroy400
+  status: 400
+}
+
+export type apiAccountAddressesDestroyResponseSuccess = (apiAccountAddressesDestroyResponse200) & {
+  headers: Headers;
+};
+export type apiAccountAddressesDestroyResponseError = (apiAccountAddressesDestroyResponse400) & {
+  headers: Headers;
+};
+
+export type apiAccountAddressesDestroyResponse = (apiAccountAddressesDestroyResponseSuccess | apiAccountAddressesDestroyResponseError)
+
+export const getApiAccountAddressesDestroyUrl = (id: number,) => {
+
+
+
+
+  return `/api/account/addresses/${id}`
+}
+
+/**
+ * @summary ApiAccountAddressesDestroy
+ */
+export const apiAccountAddressesDestroy = async (id: number, options?: RequestInit): Promise<apiAccountAddressesDestroyResponse> => {
+
+  return apiFetch<apiAccountAddressesDestroyResponse>(getApiAccountAddressesDestroyUrl(id),
+  {
+    ...options,
+    method: 'DELETE'
+
+
+  }
+);}
+
+
+
+export type apiAccountAddressesUpdateResponse200 = {
+  data: SavedAddressOut
+  status: 200
+}
+
+export type apiAccountAddressesUpdateResponse400 = {
+  data: ApiAccountAddressesUpdate400
+  status: 400
+}
+
+export type apiAccountAddressesUpdateResponseSuccess = (apiAccountAddressesUpdateResponse200) & {
+  headers: Headers;
+};
+export type apiAccountAddressesUpdateResponseError = (apiAccountAddressesUpdateResponse400) & {
+  headers: Headers;
+};
+
+export type apiAccountAddressesUpdateResponse = (apiAccountAddressesUpdateResponseSuccess | apiAccountAddressesUpdateResponseError)
+
+export const getApiAccountAddressesUpdateUrl = (id: number,) => {
+
+
+
+
+  return `/api/account/addresses/${id}`
+}
+
+/**
+ * @summary ApiAccountAddressesUpdate
+ */
+export const apiAccountAddressesUpdate = async (id: number,
+    savedAddressIn: SavedAddressIn, options?: RequestInit): Promise<apiAccountAddressesUpdateResponse> => {
+
+  return apiFetch<apiAccountAddressesUpdateResponse>(getApiAccountAddressesUpdateUrl(id),
+  {
+    ...options,
+    method: 'PATCH',
+    headers: { 'Content-Type': 'application/json', ...options?.headers },
+    body: JSON.stringify(savedAddressIn)
+  }
+);}
+
+
+
 export type apiDealsIndexResponse200 = {
   data: DealOut[]
   status: 200
@@ -2773,6 +2989,201 @@ export const getApiAnnouncementUrl = () => {
 export const apiAnnouncement = async ( options?: RequestInit): Promise<apiAnnouncementResponse> => {
 
   return apiFetch<apiAnnouncementResponse>(getApiAnnouncementUrl(),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+export type apiSettingsResponse200 = {
+  data: SettingsOut
+  status: 200
+}
+
+export type apiSettingsResponseSuccess = (apiSettingsResponse200) & {
+  headers: Headers;
+};
+;
+
+export type apiSettingsResponse = (apiSettingsResponseSuccess)
+
+export const getApiSettingsUrl = () => {
+
+
+
+
+  return `/api/settings`
+}
+
+/**
+ * @summary ApiSettings
+ */
+export const apiSettings = async ( options?: RequestInit): Promise<apiSettingsResponse> => {
+
+  return apiFetch<apiSettingsResponse>(getApiSettingsUrl(),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+export type apiNewsletterResponse200 = {
+  data: MessageOut
+  status: 200
+}
+
+export type apiNewsletterResponse400 = {
+  data: ApiNewsletter400
+  status: 400
+}
+
+export type apiNewsletterResponseSuccess = (apiNewsletterResponse200) & {
+  headers: Headers;
+};
+export type apiNewsletterResponseError = (apiNewsletterResponse400) & {
+  headers: Headers;
+};
+
+export type apiNewsletterResponse = (apiNewsletterResponseSuccess | apiNewsletterResponseError)
+
+export const getApiNewsletterUrl = () => {
+
+
+
+
+  return `/api/newsletter`
+}
+
+/**
+ * Idempotent newsletter signup — re-subscribing an existing email is a friendly 200.
+ * @summary ApiNewsletter
+ */
+export const apiNewsletter = async (newsletterIn: NewsletterIn, options?: RequestInit): Promise<apiNewsletterResponse> => {
+
+  return apiFetch<apiNewsletterResponse>(getApiNewsletterUrl(),
+  {
+    ...options,
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...options?.headers },
+    body: JSON.stringify(newsletterIn)
+  }
+);}
+
+
+
+export type apiAdminSettingsResponse200 = {
+  data: SettingsOut
+  status: 200
+}
+
+export type apiAdminSettingsResponseSuccess = (apiAdminSettingsResponse200) & {
+  headers: Headers;
+};
+;
+
+export type apiAdminSettingsResponse = (apiAdminSettingsResponseSuccess)
+
+export const getApiAdminSettingsUrl = () => {
+
+
+
+
+  return `/api/admin/settings`
+}
+
+/**
+ * @summary ApiAdminSettings
+ */
+export const apiAdminSettings = async ( options?: RequestInit): Promise<apiAdminSettingsResponse> => {
+
+  return apiFetch<apiAdminSettingsResponse>(getApiAdminSettingsUrl(),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+export type apiAdminSettingsUpdateResponse200 = {
+  data: SettingsOut
+  status: 200
+}
+
+export type apiAdminSettingsUpdateResponse400 = {
+  data: ApiAdminSettingsUpdate400
+  status: 400
+}
+
+export type apiAdminSettingsUpdateResponseSuccess = (apiAdminSettingsUpdateResponse200) & {
+  headers: Headers;
+};
+export type apiAdminSettingsUpdateResponseError = (apiAdminSettingsUpdateResponse400) & {
+  headers: Headers;
+};
+
+export type apiAdminSettingsUpdateResponse = (apiAdminSettingsUpdateResponseSuccess | apiAdminSettingsUpdateResponseError)
+
+export const getApiAdminSettingsUpdateUrl = () => {
+
+
+
+
+  return `/api/admin/settings`
+}
+
+/**
+ * @summary ApiAdminSettingsUpdate
+ */
+export const apiAdminSettingsUpdate = async (settingsIn: SettingsIn, options?: RequestInit): Promise<apiAdminSettingsUpdateResponse> => {
+
+  return apiFetch<apiAdminSettingsUpdateResponse>(getApiAdminSettingsUpdateUrl(),
+  {
+    ...options,
+    method: 'PATCH',
+    headers: { 'Content-Type': 'application/json', ...options?.headers },
+    body: JSON.stringify(settingsIn)
+  }
+);}
+
+
+
+export type apiAdminNewsletterResponse200 = {
+  data: NewsletterSubscriberOut[]
+  status: 200
+}
+
+export type apiAdminNewsletterResponseSuccess = (apiAdminNewsletterResponse200) & {
+  headers: Headers;
+};
+;
+
+export type apiAdminNewsletterResponse = (apiAdminNewsletterResponseSuccess)
+
+export const getApiAdminNewsletterUrl = () => {
+
+
+
+
+  return `/api/admin/newsletter`
+}
+
+/**
+ * @summary ApiAdminNewsletter
+ */
+export const apiAdminNewsletter = async ( options?: RequestInit): Promise<apiAdminNewsletterResponse> => {
+
+  return apiFetch<apiAdminNewsletterResponse>(getApiAdminNewsletterUrl(),
   {
     ...options,
     method: 'GET'
@@ -3467,12 +3878,56 @@ export const getApiOrdersShowUrl = (id: number,) => {
 }
 
 /**
- * One order, with lines + breakdown — for the signed-in owner or the order-token holder.
+ * One order, with lines + breakdown + the tracking timeline — for the signed-in owner or
+ * the order-token holder.
  * @summary ApiOrdersShow
  */
 export const apiOrdersShow = async (id: number, options?: RequestInit): Promise<apiOrdersShowResponse> => {
 
   return apiFetch<apiOrdersShowResponse>(getApiOrdersShowUrl(id),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+export type apiOrdersInvoiceResponse200 = {
+  data: Response
+  status: 200
+}
+
+export type apiOrdersInvoiceResponse400 = {
+  data: ApiOrdersInvoice400
+  status: 400
+}
+
+export type apiOrdersInvoiceResponseSuccess = (apiOrdersInvoiceResponse200) & {
+  headers: Headers;
+};
+export type apiOrdersInvoiceResponseError = (apiOrdersInvoiceResponse400) & {
+  headers: Headers;
+};
+
+export type apiOrdersInvoiceResponse = (apiOrdersInvoiceResponseSuccess | apiOrdersInvoiceResponseError)
+
+export const getApiOrdersInvoiceUrl = (id: number,) => {
+
+
+
+
+  return `/api/orders/${id}/invoice`
+}
+
+/**
+ * @summary ApiOrdersInvoice
+ */
+export const apiOrdersInvoice = async (id: number, options?: RequestInit): Promise<apiOrdersInvoiceResponse> => {
+
+  return apiFetch<apiOrdersInvoiceResponse>(getApiOrdersInvoiceUrl(id),
   {
     ...options,
     method: 'GET'
