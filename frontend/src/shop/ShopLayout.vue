@@ -63,10 +63,17 @@ function goBack() {
   else router.push("/");
 }
 
-// footer accordions (phones only; >=1024 renders the three open columns)
+// footer accordions (phones only; >=1024 renders the three open columns). The desktop
+// headers are visual no-ops, so they leave the tab order and report the true (open) state.
 const openCol = ref<string | null>(null);
 function toggleCol(name: string) {
   openCol.value = openCol.value === name ? null : name;
+}
+const desktopMq = window.matchMedia("(min-width: 1024px)");
+const isDesktop = ref(desktopMq.matches);
+desktopMq.addEventListener("change", (e) => (isDesktop.value = e.matches));
+function colExpanded(name: string): boolean {
+  return isDesktop.value || openCol.value === name;
 }
 const navTrigger = ref<HTMLButtonElement | null>(null);
 function closeNav() {
@@ -246,22 +253,22 @@ onBeforeUnmount(() => document.removeEventListener("click", onDocClick));
         </div>
         <div class="ft__cols">
           <div class="ft__col" :class="{ open: openCol === 'shop' }">
-            <button class="ft__h" :aria-expanded="openCol === 'shop'" @click="toggleCol('shop')">
+            <button class="ft__h" :aria-expanded="colExpanded('shop')" :aria-controls="`ft-links-shop`" :tabindex="isDesktop ? -1 : 0" @click="toggleCol('shop')">
               {{ t("footer.shop") }}<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 9l6 6 6-6" /></svg>
             </button>
-            <div class="ft__links"><a>{{ t("footer.new_arrivals") }}</a><a>{{ t("footer.audio") }}</a><a>{{ t("footer.displays") }}</a><a>{{ t("footer.accessories") }}</a></div>
+            <div id="ft-links-shop" class="ft__links"><a>{{ t("footer.new_arrivals") }}</a><a>{{ t("footer.audio") }}</a><a>{{ t("footer.displays") }}</a><a>{{ t("footer.accessories") }}</a></div>
           </div>
           <div class="ft__col" :class="{ open: openCol === 'support' }">
-            <button class="ft__h" :aria-expanded="openCol === 'support'" @click="toggleCol('support')">
+            <button class="ft__h" :aria-expanded="colExpanded('support')" :aria-controls="`ft-links-support`" :tabindex="isDesktop ? -1 : 0" @click="toggleCol('support')">
               {{ t("footer.support") }}<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 9l6 6 6-6" /></svg>
             </button>
-            <div class="ft__links"><a>{{ t("footer.track_order") }}</a><a>{{ t("footer.shipping_returns") }}</a><a>{{ t("footer.contact") }}</a></div>
+            <div id="ft-links-support" class="ft__links"><a>{{ t("footer.track_order") }}</a><a>{{ t("footer.shipping_returns") }}</a><a>{{ t("footer.contact") }}</a></div>
           </div>
           <div class="ft__col" :class="{ open: openCol === 'company' }">
-            <button class="ft__h" :aria-expanded="openCol === 'company'" @click="toggleCol('company')">
+            <button class="ft__h" :aria-expanded="colExpanded('company')" :aria-controls="`ft-links-company`" :tabindex="isDesktop ? -1 : 0" @click="toggleCol('company')">
               {{ t("footer.company") }}<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 9l6 6 6-6" /></svg>
             </button>
-            <div class="ft__links"><a>{{ t("nav.about") }}</a><a>{{ t("footer.stores") }}</a><a>{{ t("footer.journal") }}</a></div>
+            <div id="ft-links-company" class="ft__links"><a>{{ t("nav.about") }}</a><a>{{ t("footer.stores") }}</a><a>{{ t("footer.journal") }}</a></div>
           </div>
         </div>
       </div>
