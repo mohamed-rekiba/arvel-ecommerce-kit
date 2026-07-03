@@ -67,9 +67,9 @@ async def me(request: Request) -> UserOut:
     user = await User.find(user_id)
     if user is None:
         abort(401, "Unauthenticated")
-    from app.controllers.account_controller import _user_out
+    from app.controllers.account_controller import user_out
 
-    return await _user_out(user)
+    return await user_out(user)
 
 
 Route.get("/health", health, name="api.health")
