@@ -8,6 +8,7 @@ import { cacheCategories, cacheList, cacheProducts, getCachedCategories, getCach
 import DealCard from "../components/DealCard.vue";
 import ProductCard from "../components/ProductCard.vue";
 import { t } from "../locale";
+import { useSettings } from "../settings";
 
 const cachedProducts = getCachedList("home");
 const categories = ref<Category[]>(getCachedCategories() ?? []);
@@ -48,6 +49,7 @@ function stopAuto() {
 }
 
 onMounted(async () => {
+  void settings.load();
   try {
     const [cats, page, dealList, bannerList] = await Promise.all([
       api.categories(),
@@ -76,6 +78,9 @@ const TRUST = [
   { icon: "🎧", title: "home.trust4", sub: "home.trust4_sub" },
   { icon: "🛡", title: "home.trust5", sub: "home.trust5_sub" },
 ] as const;
+
+const settings = useSettings();
+const freeShipOver = computed(() => settings.get("store.free_shipping_over", "79"));
 
 const maxDealPct = computed(() =>
   deals.value.reduce((max, d) => Math.max(max, d.percent_off), 0),
@@ -146,7 +151,7 @@ function nudgeRail(dir: number) {
       <ul class="trust">
         <li v-for="item in TRUST" :key="item.title" class="trust__cell">
           <span class="trust__ic" aria-hidden="true">{{ item.icon }}</span>
-          <span class="trust__meta"><b>{{ t(item.title) }}</b><i>{{ t(item.sub) }}</i></span>
+          <span class="trust__meta"><b>{{ t(item.title) }}</b><i>{{ item.sub === "home.trust1_sub" ? t(item.sub, { n: freeShipOver }) : t(item.sub) }}</i></span>
         </li>
       </ul>
     </section>
