@@ -161,7 +161,6 @@ watch(() => route.params.slug, load);
             :srcset="srcset"
             sizes="(max-width: 900px) 100vw, 44vw"
             :alt="product.translation.name"
-            :style="product ? { viewTransitionName: `product-${product.id}` } : {}"
           />
           <div v-else class="pdp__placeholder" aria-hidden="true" />
         </div>

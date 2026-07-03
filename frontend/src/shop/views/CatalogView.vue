@@ -3,7 +3,15 @@ import Select from "primevue/select";
 import { computed, onMounted, ref, watch } from "vue";
 import { useRoute, useRouter } from "vue-router";
 import { type Category, type Product, api } from "../api";
-import { cacheList, cacheProducts, getCachedList } from "../product-cache";
+import {
+  cacheCategories,
+  cacheList,
+  cacheListMeta,
+  cacheProducts,
+  getCachedCategories,
+  getCachedList,
+  getCachedListMeta,
+} from "../product-cache";
 import ProductCard from "../components/ProductCard.vue";
 import { t } from "../locale";
 
@@ -11,7 +19,7 @@ const route = useRoute();
 const router = useRouter();
 
 const products = ref<Product[]>([]);
-const categories = ref<Category[]>([]);
+const categories = ref<Category[]>(getCachedCategories() ?? []);
 const total = ref(0);
 const lastPage = ref(1);
 const status = ref<"loading" | "error" | "ready">("loading");
@@ -49,9 +57,14 @@ const activeName = computed(
 const listKey = () =>
   `catalog:${JSON.stringify({ q: q.value, category: activeCategory.value, sort: sort.value, page: page.value, min: minPrice.value, max: maxPrice.value })}`;
 const seeded = getCachedList(listKey());
+const seededMeta = getCachedListMeta(listKey());
 if (seeded) {
   products.value = seeded;
   status.value = "ready";
+}
+if (seededMeta) {
+  total.value = seededMeta.total;
+  lastPage.value = seededMeta.lastPage;
 }
 
 function setQuery(patch: Record<string, string | number | undefined>) {
@@ -76,6 +89,7 @@ async function load() {
     cacheList(listKey(), res.data); // back morph: catalog repaints these cards synchronously on remount
     total.value = res.total;
     lastPage.value = res.last_page;
+    cacheListMeta(listKey(), { total: res.total, lastPage: res.last_page });
     status.value = "ready";
   } catch {
     if (!products.value.length) status.value = "error";
@@ -84,6 +98,7 @@ async function load() {
 
 onMounted(async () => {
   categories.value = await api.categories().catch(() => []);
+  cacheCategories(categories.value);
   await load();
 });
 watch(() => route.query, load);

@@ -4,7 +4,17 @@
 // handles its empty state (no banners → static slide; no deals → section hides).
 import { computed, onBeforeUnmount, onMounted, ref } from "vue";
 import { type Banner, type Category, type Deal, type Product, api } from "../api";
-import { cacheCategories, cacheList, cacheProducts, getCachedCategories, getCachedList } from "../product-cache";
+import {
+  cacheBanners,
+  cacheCategories,
+  cacheDeals,
+  cacheList,
+  cacheProducts,
+  getCachedBanners,
+  getCachedCategories,
+  getCachedDeals,
+  getCachedList,
+} from "../product-cache";
 import DealCard from "../components/DealCard.vue";
 import ProductCard from "../components/ProductCard.vue";
 import { t } from "../locale";
@@ -13,8 +23,8 @@ import { useSettings } from "../settings";
 const cachedProducts = getCachedList("home");
 const categories = ref<Category[]>(getCachedCategories() ?? []);
 const featured = ref<Product[]>(cachedProducts ?? []);
-const deals = ref<Deal[]>([]);
-const banners = ref<Banner[]>([]);
+const deals = ref<Deal[]>(getCachedDeals() ?? []);
+const banners = ref<Banner[]>(getCachedBanners() ?? []);
 const loading = ref(cachedProducts === null);
 
 // --- hero carousel -------------------------------------------------------------------------
@@ -63,7 +73,9 @@ onMounted(async () => {
     cacheProducts(page.data);
     cacheList("home", page.data);
     deals.value = dealList;
+    cacheDeals(dealList);
     banners.value = bannerList;
+    cacheBanners(bannerList);
     startAuto();
   } finally {
     loading.value = false;

@@ -85,11 +85,6 @@ watch(() => route.fullPath, () => {
   collOpen.value = false;
 });
 
-// Where the View Transitions API drives the animation (Chrome/Edge/Safari 18+) we let it own the
-// morph; elsewhere (Firefox / older Safari) we fall back to a plain Vue cross-fade. Keying the view by
-// path also forces a fresh mount per route so the PDP re-reads the product cache in setup().
-const vtSupported = "startViewTransition" in Document.prototype;
-
 onMounted(() => {
   refresh();
   void settings.load();
@@ -235,9 +230,16 @@ onBeforeUnmount(() => document.removeEventListener("click", onDocClick));
     <MobileNav :open="navOpen" :categories="categories" @close="closeNav" />
 
     <main class="main">
+      <!-- a plain Vue cross-fade for every browser. Deliberately NOT mode="out-in": that mode
+           delays mounting the entering page until the leaving page's transition finishes, so
+           vue-router's scroll restoration — which runs right after the route resolves — would
+           apply against a page that hasn't mounted yet (its real content still absent, so a
+           restored mid-page position gets clamped to whatever the page's true height is at that
+           moment). Simultaneous mode mounts the new page immediately (matching what
+           scrollBehavior assumes); .fade-leave-active pins the OUTGOING page to the viewport so
+           it fades out without contributing to the new page's layout/height. -->
       <RouterView v-slot="{ Component }">
-        <component :is="Component" v-if="vtSupported" :key="route.path" />
-        <transition v-else name="fade" mode="out-in">
+        <transition name="fade">
           <component :is="Component" :key="route.path" />
         </transition>
       </RouterView>
@@ -426,5 +428,15 @@ onBeforeUnmount(() => document.removeEventListener("click", onDocClick));
   .ft__h svg { display: none; }
   .ft__links { display: block; padding-bottom: 0; }
   .ft__links a { padding: 5px 0; }
+}
+
+/* route cross-fade — the only page-transition mechanism now (View Transitions API removed).
+   Simultaneous mode (no mode="out-in"): see the template comment above. The leaving page is
+   pinned to the viewport so it overlaps and fades without affecting the entering page's height. */
+.fade-enter-active, .fade-leave-active { transition: opacity .16s var(--ease-out, ease); }
+.fade-enter-from, .fade-leave-to { opacity: 0; }
+.fade-leave-active { position: fixed; inset: 0; overflow: hidden; pointer-events: none; }
+@media (prefers-reduced-motion: reduce) {
+  .fade-enter-active, .fade-leave-active { transition: none; }
 }
 </style>

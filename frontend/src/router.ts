@@ -1,5 +1,4 @@
 import { createRouter, createWebHistory } from "vue-router";
-import { installViewTransitions } from "./lib/transitions";
 import ShopLayout from "./shop/ShopLayout.vue";
 import DealsView from "./shop/views/DealsView.vue";
 import HomeView from "./shop/views/HomeView.vue";
@@ -44,16 +43,17 @@ const admin = {
   newsletter: () => import("./admin/views/NewsletterView.vue"),
 };
 
-const RESTORE_SCROLL = new Set(["catalog", "deals"]);
+// Real continuity is "I drilled into a product, hit back, land where I was" — that holds
+// no matter which page you drilled in from (home's featured/deals rail, catalog, the
+// wishlist table). It's keyed on the page you're LEAVING, not the one you're landing on:
+// a lateral nav (tab bar, footer link) away from any page never touches the PDP, so it
+// still resets to top — restoring an unrelated saved scroll there reads as breakage.
+const RESTORE_SCROLL_FROM = new Set(["product"]);
 
 const router = createRouter({
   history: createWebHistory(),
-  // Back/forward restores the reading position ONLY where that aids browsing — long lists
-  // you drill into and return to (catalog, deals: PDP -> back must land on the same row).
-  // Everywhere else back goes to the top: restoring home to its footer reads as "the back
-  // button is broken", not as continuity.
-  scrollBehavior: (to, _from, savedPosition) =>
-    savedPosition && RESTORE_SCROLL.has(String(to.name)) ? savedPosition : { top: 0 },
+  scrollBehavior: (_to, from, savedPosition) =>
+    savedPosition && RESTORE_SCROLL_FROM.has(String(from.name)) ? savedPosition : { top: 0 },
   routes: [
     {
       path: "/",
@@ -124,7 +124,5 @@ router.beforeEach((to) => {
   }
   return true;
 });
-
-installViewTransitions(router); // cross-fade + shared-element morphs between routes
 
 export default router;
