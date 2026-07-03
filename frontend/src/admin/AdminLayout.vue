@@ -1,6 +1,6 @@
 <script setup lang="ts">
-import { computed, onMounted } from "vue";
-import { useRouter } from "vue-router";
+import { computed, onMounted, ref, watch } from "vue";
+import { useRoute, useRouter } from "vue-router";
 import { useAuth } from "./auth";
 import { theme, toggleTheme } from "../lib/theme";
 import { LOCALES, locale, setLocale } from "../lib/i18n";
@@ -8,7 +8,12 @@ import { t } from "./locale";
 
 const { state, restore, logout } = useAuth();
 const router = useRouter();
+const route = useRoute();
 onMounted(restore);
+
+// off-canvas nav drawer on phones/tablets (<860px); closes on navigation
+const navOpen = ref(false);
+watch(() => route.fullPath, () => (navOpen.value = false));
 
 const initial = computed(() => (state.user?.name ?? state.user?.email ?? "?").charAt(0).toUpperCase());
 
@@ -20,7 +25,13 @@ function signOut() {
 
 <template>
   <div class="console">
-    <aside class="side">
+    <button
+      v-if="navOpen"
+      class="scrim"
+      :aria-label="t('nav.close_menu')"
+      @click="navOpen = false"
+    />
+    <aside id="admin-nav" class="side" :class="{ 'side--open': navOpen }">
       <div class="brand"><span class="mk">A</span>Arvel Console</div>
       <div class="store">Odama Electronics Store</div>
 
@@ -54,6 +65,15 @@ function signOut() {
 
     <div class="main">
       <div class="top">
+        <button
+          class="burger"
+          :aria-expanded="navOpen"
+          aria-controls="admin-nav"
+          :aria-label="t('nav.menu')"
+          @click="navOpen = !navOpen"
+        >
+          <svg viewBox="0 0 24 24" class="ic"><path d="M4 7h16M4 12h16M4 17h16"/></svg>
+        </button>
         <div class="cmdk">
           <svg viewBox="0 0 24 24" class="ic ic--sm"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4-4"/></svg>
           {{ t("nav.search_hint") }}<kbd>⌘K</kbd>
@@ -110,7 +130,23 @@ function signOut() {
 .me__meta b { font-size: 13px; max-width: 140px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .me__out { align-self: flex-start; border: 0; background: none; padding: 0; color: var(--accent); font: inherit; font-size: 11px; cursor: pointer; }
 .content { padding: 24px; }
-@media (max-width: 860px) { .side { width: 64px; } .brand, .store, .lbl, .item span:not(.n), .item i, .me__meta { display: none; } }
+.burger { display: none; width: 38px; height: 38px; border-radius: 10px; border: 0; background: transparent; color: var(--text-muted); cursor: pointer; place-items: center; }
+.burger:hover { background: var(--surface-2); }
+.scrim { position: fixed; inset: 0; z-index: calc(var(--z-header) + 1); border: 0; padding: 0; background: rgb(0 0 0 / .45); cursor: pointer; }
+@media (max-width: 859.98px) {
+  /* off-canvas drawer: full labels, never a clipped 64px rail */
+  .side { position: fixed; inset-block: 0; inset-inline-start: 0; width: 264px; height: 100dvh; z-index: calc(var(--z-header) + 2); transform: translateX(-100%); transition: transform .22s var(--ease-out, ease); box-shadow: var(--shadow-3); }
+  [dir="rtl"] .side { transform: translateX(100%); }
+  /* the rtl rule above outspecifies a bare .side--open — state must win in both directions */
+  .side--open, [dir="rtl"] .side--open { transform: translateX(0); }
+  .burger { display: grid; }
+  .top { padding: 0 12px; gap: 8px; }
+  .content { padding: clamp(12px, 3vw, 24px); }
+}
+@media (max-width: 639.98px) {
+  .cmdk { display: none; }
+  .me__meta b { display: none; }
+}
 .lang { display: flex; gap: 2px; margin-inline-end: 6px; }
 .lang__opt { border: 0; background: none; font: inherit; font-size: 11.5px; font-weight: 600; letter-spacing: .06em; color: var(--text-muted); padding: 4px 7px; border-radius: 6px; cursor: pointer; }
 .lang__opt.on { background: var(--accent); color: var(--on-accent, #fff); }

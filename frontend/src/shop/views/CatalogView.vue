@@ -174,12 +174,17 @@ watch(() => route.query, load);
 <style scoped>
 .shop-page { max-width: 1280px; margin: 0 auto; padding: clamp(1.5rem, 4vw, 3rem) clamp(1.25rem, 5vw, 3.5rem) 0; display: grid; grid-template-columns: 1fr; gap: clamp(2rem, 4vw, 3.5rem); }
 .eyebrow { font-size: 11px; text-transform: uppercase; letter-spacing: .2em; color: var(--accent); font-weight: 600; }
-.filters { position: static; }
-.filters__h { font-size: 11px; text-transform: uppercase; letter-spacing: .14em; color: var(--text-subtle); font-weight: 600; margin: 0 0 14px; }
-.cats { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: row; flex-wrap: wrap; gap: 2px; }
-.cat { display: block; width: 100%; text-align: start; border: 0; background: none; padding: 8px 10px; border-radius: var(--radius-md); font: inherit; font-size: 14px; color: var(--text-muted); cursor: pointer; transition: background var(--motion-base), color var(--motion-base); }
+/* mobile-first: the filter block is two compact rows (chip rail + price line), not a
+   wrapped cloud that pushes the products below the fold */
+.filters { position: static; display: flex; flex-direction: column; gap: 10px; }
+.filters__group { min-width: 0; }
+.filters__h { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); }
+.cats { list-style: none; margin: 0; padding: 2px 0 6px; display: flex; flex-wrap: nowrap; gap: 8px; overflow-x: auto; scroll-snap-type: x proximity; scrollbar-width: none; }
+.cats::-webkit-scrollbar { display: none; }
+.cats li { flex: 0 0 auto; scroll-snap-align: start; }
+.cat { display: block; white-space: nowrap; border: 1px solid var(--border); background: var(--surface); padding: 8px 15px; border-radius: var(--radius-full); font: inherit; font-size: 13px; font-weight: 600; color: var(--text-muted); cursor: pointer; transition: background var(--motion-base), color var(--motion-base), border-color var(--motion-base); }
 .cat:hover { background: color-mix(in srgb, var(--text) 5%, transparent); color: var(--text); }
-.cat.on { background: color-mix(in srgb, var(--accent) 14%, transparent); color: var(--accent); font-weight: 600; }
+.cat.on { background: color-mix(in srgb, var(--accent) 14%, transparent); border-color: color-mix(in srgb, var(--accent) 45%, var(--border)); color: var(--accent-text); }
 
 .results__head { display: flex; align-items: flex-end; justify-content: space-between; gap: 20px; margin-bottom: clamp(1.5rem, 3vw, 2.25rem); }
 .results__head h1 { font-family: var(--font-display); font-size: clamp(1.6rem, 3vw, 2.4rem); font-weight: 700; letter-spacing: -.02em; margin: 8px 0 4px; }
@@ -198,8 +203,13 @@ watch(() => route.query, load);
 @media (min-width: 640px) { .grid { grid-template-columns: repeat(2, 1fr); } }
 @media (min-width: 1024px) {
   .shop-page { grid-template-columns: 220px 1fr; }
-  .filters { position: sticky; top: 96px; align-self: start; }
-  .cats { flex-direction: column; }
+  .filters { position: sticky; top: 96px; align-self: start; gap: 0; }
+  .filters__h { position: static; width: auto; height: auto; overflow: visible; clip-path: none; font-size: 11px; text-transform: uppercase; letter-spacing: .14em; color: var(--text-subtle); font-weight: 600; margin: 0 0 14px; }
+  .filters__group + .filters__group { margin-top: 26px; }
+  .cats { flex-direction: column; flex-wrap: nowrap; overflow: visible; gap: 2px; padding: 0; }
+  .cats li { flex: none; }
+  .cat { width: 100%; text-align: start; border: 0; background: none; padding: 8px 10px; border-radius: var(--radius-md); font-size: 14px; font-weight: 500; white-space: normal; }
+  .cat.on { background: color-mix(in srgb, var(--accent) 14%, transparent); color: var(--accent); font-weight: 600; }
   .grid { grid-template-columns: repeat(3, 1fr); }
 }
 .pricef { display: flex; align-items: center; gap: 6px; }
