@@ -46,6 +46,9 @@ async def pay(request: Request) -> PaymentOut:
     """Create a charge for the order via the gateway — the signed-in owner or the guest holding
     the order's access token (guests must be able to pay; PENDING-only)."""
     order = await resolve_owned_order(request, int(request.path_param("id")))
+    method = getattr(order, "payment_method", None) or "gateway"
+    if str(method) == "cod" or getattr(method, "value", "") == "cod":
+        abort(422, "This order is cash on delivery — nothing to pay online.")
     status = (
         order.status
         if isinstance(order.status, OrderStatus)

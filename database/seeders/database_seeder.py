@@ -274,9 +274,24 @@ class DatabaseSeeder(Seeder):
         banners = [
             (
                 {
-                    "en": {"title": "Premium audio, quietly considered", "subtitle": "Studio headphones and speakers chosen for how they feel.", "chip": "New arrival", "cta_label": "Shop now"},
-                    "fr": {"title": "L'audio haut de gamme, pensé en toute discrétion", "subtitle": "Casques studio et enceintes choisis pour leurs sensations.", "chip": "Nouveauté", "cta_label": "Acheter"},
-                    "ar": {"title": "صوتيات فاخرة بتصميم هادئ", "subtitle": "سماعات استوديو ومكبرات صوت اخترناها لإحساسها.", "chip": "وصل حديثًا", "cta_label": "تسوق الآن"},
+                    "en": {
+                        "title": "Premium audio, quietly considered",
+                        "subtitle": "Studio headphones and speakers chosen for how they feel.",
+                        "chip": "New arrival",
+                        "cta_label": "Shop now",
+                    },
+                    "fr": {
+                        "title": "L'audio haut de gamme, pensé en toute discrétion",
+                        "subtitle": "Casques studio et enceintes choisis pour leurs sensations.",
+                        "chip": "Nouveauté",
+                        "cta_label": "Acheter",
+                    },
+                    "ar": {
+                        "title": "صوتيات فاخرة بتصميم هادئ",
+                        "subtitle": "سماعات استوديو ومكبرات صوت اخترناها لإحساسها.",
+                        "chip": "وصل حديثًا",
+                        "cta_label": "تسوق الآن",
+                    },
                 },
                 "/catalog?category=audio",
                 0,
@@ -284,9 +299,24 @@ class DatabaseSeeder(Seeder):
             ),
             (
                 {
-                    "en": {"title": "Deals of the day", "subtitle": "Timed flash sales on the gear you already wanted.", "chip": "Up to 25% off", "cta_label": "Grab the deal"},
-                    "fr": {"title": "Offres du jour", "subtitle": "Ventes flash chronométrées sur le matériel que vous vouliez déjà.", "chip": "Jusqu'à −25 %", "cta_label": "Profiter de l'offre"},
-                    "ar": {"title": "عروض اليوم", "subtitle": "تخفيضات مؤقتة على الأجهزة التي أردتها دائمًا.", "chip": "خصم حتى 25%", "cta_label": "اغتنم العرض"},
+                    "en": {
+                        "title": "Deals of the day",
+                        "subtitle": "Timed flash sales on the gear you already wanted.",
+                        "chip": "Up to 25% off",
+                        "cta_label": "Grab the deal",
+                    },
+                    "fr": {
+                        "title": "Offres du jour",
+                        "subtitle": "Ventes flash chronométrées sur le matériel que vous vouliez déjà.",
+                        "chip": "Jusqu'à −25 %",
+                        "cta_label": "Profiter de l'offre",
+                    },
+                    "ar": {
+                        "title": "عروض اليوم",
+                        "subtitle": "تخفيضات مؤقتة على الأجهزة التي أردتها دائمًا.",
+                        "chip": "خصم حتى 25%",
+                        "cta_label": "اغتنم العرض",
+                    },
                 },
                 "/deals",
                 1,
@@ -294,9 +324,24 @@ class DatabaseSeeder(Seeder):
             ),
             (
                 {
-                    "en": {"title": "Work sharp, travel light", "subtitle": "Laptops and monitors for people who notice the difference.", "chip": "Computing", "cta_label": "Explore"},
-                    "fr": {"title": "Travaillez net, voyagez léger", "subtitle": "Ordinateurs et écrans pour ceux qui voient la différence.", "chip": "Informatique", "cta_label": "Explorer"},
-                    "ar": {"title": "اعمل بحدة، وسافر بخفة", "subtitle": "حواسيب وشاشات لمن يلاحظ الفرق.", "chip": "حواسيب", "cta_label": "استكشف"},
+                    "en": {
+                        "title": "Work sharp, travel light",
+                        "subtitle": "Laptops and monitors for people who notice the difference.",
+                        "chip": "Computing",
+                        "cta_label": "Explore",
+                    },
+                    "fr": {
+                        "title": "Travaillez net, voyagez léger",
+                        "subtitle": "Ordinateurs et écrans pour ceux qui voient la différence.",
+                        "chip": "Informatique",
+                        "cta_label": "Explorer",
+                    },
+                    "ar": {
+                        "title": "اعمل بحدة، وسافر بخفة",
+                        "subtitle": "حواسيب وشاشات لمن يلاحظ الفرق.",
+                        "chip": "حواسيب",
+                        "cta_label": "استكشف",
+                    },
                 },
                 "/catalog?category=computing",
                 2,

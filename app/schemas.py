@@ -19,6 +19,7 @@ from app.enums import (
     OrderStatus,
     PaymentStatus,
     ReviewStatus,
+    PaymentMethod,
 )
 
 # --- shared / catalog ---------------------------------------------------------
@@ -197,6 +198,8 @@ class UserOut(Schema):
     email: str
     phone: str | None
     email_verified: bool
+    avatar_url: str | None  # the `profile` conversion
+    locale: str
 
 
 class ProfileIn(Schema):
@@ -292,6 +295,9 @@ class UpdateItemIn(Schema):
 class CartLineOut(Schema):
     id: int
     product_variant_id: int
+    product_name: str
+    variant_name: str
+    image_url: str | None  # the product's thumb — cart rows show what's being bought
     quantity: int
     unit_price_cents: int
     line_total_cents: int
@@ -432,8 +438,36 @@ class OrderLineOut(Schema):
     product_variant_id: int
     product_name: str
     variant_name: str
+    image_url: str | None  # resolved at read time via variant→product media
     quantity: int
     unit_price_cents: int
+
+
+class SavedAddressIn(Schema):
+    """Create/update a saved address-book entry (validated at the controller)."""
+
+    name: str
+    line1: str
+    city: str
+    postal_code: str
+    country: "CountryCode"
+    label: str | None = None
+    line2: str | None = None
+    phone: str | None = None
+    is_default: bool = False
+
+
+class SavedAddressOut(Schema):
+    id: int
+    label: str | None
+    name: str
+    line1: str
+    line2: str | None
+    city: str
+    postal_code: str
+    country: "CountryCode"
+    phone: str | None
+    is_default: bool
 
 
 class AddressIn(Schema):
@@ -450,10 +484,13 @@ class AddressIn(Schema):
 
 class CheckoutIn(Schema):
     """Checkout submission: contact email (required for guests; defaults to the account email for
-    signed-in customers) + shipping address."""
+    signed-in customers) + shipping address — inline, or a saved address-book id (owned), plus
+    the payment method (gateway = pay after placing; cod = collect on delivery)."""
 
     email: str | None = None
     address: AddressIn | None = None
+    address_id: int | None = None  # a saved address-book entry (signed-in customers)
+    payment_method: "PaymentMethod" = PaymentMethod.GATEWAY
 
 
 class AddressOut(Schema):
@@ -478,6 +515,7 @@ class OrderOut(Schema):
     discount_cents: int
     total_cents: int
     currency: Currency
+    payment_method: "PaymentMethod"
     payment_status: (
         PaymentStatus | None
     )  # latest payment attempt (None = never attempted)
@@ -577,6 +615,7 @@ class AdminOrderDetailOut(Schema):
     discount_cents: int
     total_cents: int
     currency: Currency
+    payment_method: "PaymentMethod"
     customer: AdminOrderCustomerOut | None  # None = a guest order
     items: list[OrderLineOut]
     payments: list[AdminOrderPaymentOut]

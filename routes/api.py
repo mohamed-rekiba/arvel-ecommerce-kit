@@ -16,6 +16,7 @@ from app.controllers import account_controller as account
 from app.controllers import admin_controller as admin
 from app.controllers import admin_coupon_controller as admin_coupons
 from app.controllers import admin_deal_controller as admin_deals
+from app.controllers import address_controller as addresses
 from app.controllers import announcement_controller as announcement
 from app.controllers import banner_controller as banners
 from app.controllers import deal_controller as deals
@@ -66,13 +67,9 @@ async def me(request: Request) -> UserOut:
     user = await User.find(user_id)
     if user is None:
         abort(401, "Unauthenticated")
-    return UserOut(
-        id=user.id,
-        name=user.name,
-        email=user.email,
-        phone=user.phone,
-        email_verified=user.email_verified_at is not None,
-    )
+    from app.controllers.account_controller import _user_out
+
+    return await _user_out(user)
 
 
 Route.get("/health", health, name="api.health")
@@ -286,6 +283,25 @@ Route.post("/cart/coupon", cart.apply_coupon, name="api.cart.coupon.apply").stat
 Route.delete("/cart/coupon", cart.remove_coupon, name="api.cart.coupon.remove").status(
     200
 )
+
+# --- Address book (signed-in customers) --------------------------------------------
+Route.post(
+    "/account/avatar", account.upload_avatar, name="api.account.avatar"
+).middleware(Authenticate).secure("bearer")
+Route.get(
+    "/account/addresses", addresses.index, name="api.account.addresses.index"
+).middleware(Authenticate).secure("bearer")
+Route.post(
+    "/account/addresses", addresses.store, name="api.account.addresses.store"
+).middleware(Authenticate).secure("bearer")
+Route.patch(
+    "/account/addresses/{id:int}", addresses.update, name="api.account.addresses.update"
+).middleware(Authenticate).secure("bearer")
+Route.delete(
+    "/account/addresses/{id:int}",
+    addresses.destroy,
+    name="api.account.addresses.destroy",
+).middleware(Authenticate).secure("bearer")
 
 # --- Deals (flash sales) ----------------------------------------------------------
 Route.get("/deals", deals.index, name="api.deals.index")

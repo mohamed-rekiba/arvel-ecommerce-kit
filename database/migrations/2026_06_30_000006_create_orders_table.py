@@ -14,6 +14,9 @@ class CreateOrdersTable(Migration):
             # contact + shipping address captured at checkout (guests included — it's how their
             # order mail reaches them); line2 is the only optional part of an address
             t.string("contact_email")
+            t.string("payment_method", 10).default(
+                value="gateway"
+            )  # PaymentMethod enum
             t.string("ship_name")
             t.string("ship_line1")
             t.string("ship_line2").nullable()

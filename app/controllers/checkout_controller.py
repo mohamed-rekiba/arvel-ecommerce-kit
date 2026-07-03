@@ -14,7 +14,7 @@ from arvel.support import Str, current_user
 from arvel.telemetry import span
 from arvel.validation import ValidationException, Validator
 
-from app.controllers.cart_controller import resolve_cart
+from app.controllers.cart_controller import line_presentation, resolve_cart
 from app.controllers.order_access import resolve_owned_order
 from app.enums import (
     CountryCode,
@@ -23,6 +23,7 @@ from app.enums import (
     PaymentStatus,
     Permission,
     can_transition,
+    PaymentMethod,
 )
 from app.events.order_placed import OrderPlaced
 from app.jobs.fulfill_order import ORDERS_FULFILLED_KEY
@@ -35,6 +36,7 @@ from app.notifications.order_shipped_notification import OrderShippedNotificatio
 from app.models.product import Product
 from app.models.product_variant import ProductVariant
 from app.schemas import (
+    AddressIn,
     AddressOut,
     AdminOrderDetailOut,
     CheckoutIn,
@@ -90,9 +92,15 @@ async def _latest_payment_status(order: Order) -> PaymentStatus | None:
     return status if isinstance(status, PaymentStatus) else PaymentStatus(status)
 
 
-def _order_out(
+def _method_value(order: Order) -> PaymentMethod:
+    raw = getattr(order, "payment_method", None) or PaymentMethod.GATEWAY.value
+    return raw if isinstance(raw, PaymentMethod) else PaymentMethod(raw)
+
+
+async def _order_out(
     order: Order, items: list[OrderItem], payment_status: PaymentStatus | None = None
 ) -> OrderOut:
+    looks = await line_presentation([i.product_variant_id for i in items])
     return OrderOut(
         id=order.id,
         status=_status_value(order),
@@ -106,12 +114,14 @@ def _order_out(
         discount_cents=order.discount_cents or 0,
         total_cents=order.total_cents,
         currency=_currency_value(order),
+        payment_method=_method_value(order),
         payment_status=payment_status,
         items=[
             OrderLineOut(
                 product_variant_id=i.product_variant_id,
                 product_name=i.product_name,
                 variant_name=i.variant_name,
+                image_url=looks.get(i.product_variant_id, ("", "", None))[2],
                 quantity=i.quantity,
                 unit_price_cents=i.unit_price_cents,
             )
@@ -204,6 +214,26 @@ async def checkout(request: Request, data: CheckoutIn) -> OrderOut:
         abort(422, "Your cart is empty.")
 
     user = current_user.get()
+    if data.address_id is not None:
+        if user is None:
+            abort(401, "Sign in to use a saved address.")
+        from app.models.address import Address
+
+        saved = await Address.find(data.address_id)
+        if saved is None or saved.user_id != user.id:
+            abort(404, "Address not found")
+        data = CheckoutIn(
+            email=data.email,
+            address=AddressIn(
+                name=saved.name,
+                line1=saved.line1,
+                line2=saved.line2,
+                city=saved.city,
+                postal_code=saved.postal_code,
+                country=saved.country,
+            ),
+            payment_method=data.payment_method,
+        )
     contact_email, ship_fields = _validate_checkout(
         data, user.email if user is not None else None
     )
@@ -287,6 +317,7 @@ async def checkout(request: Request, data: CheckoutIn) -> OrderOut:
             order = await Order.create(
                 user_id=user.id if user is not None else None,
                 status=OrderStatus.PENDING,
+                payment_method=data.payment_method.value,
                 token=Str.random(40),
                 contact_email=contact_email,
                 coupon_code=cart.coupon_code,
@@ -339,13 +370,13 @@ async def checkout(request: Request, data: CheckoutIn) -> OrderOut:
             contact_email=order.contact_email,
         ),
     )
-    return _order_out(order, order_items)
+    return await _order_out(order, order_items)
 
 
 async def show(request: Request) -> OrderOut:
     """One order, with lines + breakdown — for the signed-in owner or the order-token holder."""
     order = await resolve_owned_order(request, int(request.path_param("id")))
-    return _order_out(
+    return await _order_out(
         order,
         await order.items().get(),
         payment_status=await _latest_payment_status(order),
@@ -385,7 +416,7 @@ async def cancel(request: Request) -> OrderOut:
                 await variant.save()
         locked.status = OrderStatus.CANCELLED
         await locked.save()
-    return _order_out(
+    return await _order_out(
         locked, items, payment_status=await _latest_payment_status(locked)
     )
 
@@ -404,7 +435,7 @@ async def my_orders(request: Request) -> list[OrderOut]:
     if user is None:
         abort(401, "Unauthenticated")
     orders = await Order.where("user_id", user.id).order_by("id", "desc").get()
-    return [_order_out(o, await o.items().get()) for o in orders]
+    return [await _order_out(o, await o.items().get()) for o in orders]
 
 
 async def admin_orders_index(request: Request) -> list[OrderOut]:
@@ -413,7 +444,7 @@ async def admin_orders_index(request: Request) -> list[OrderOut]:
     if user is None or not await user.can(Permission.ORDERS_VIEW.value):
         abort(403, "You may not view orders.")
     orders = await Order.order_by("id", "desc").get()
-    return [_order_out(o, await o.items().get()) for o in orders]
+    return [await _order_out(o, await o.items().get()) for o in orders]
 
 
 async def admin_order_show(request: Request) -> AdminOrderDetailOut:
@@ -437,6 +468,7 @@ async def admin_order_show(request: Request) -> AdminOrderDetailOut:
         abort(403, "You may not view orders.")
     order = await Order.find_or_fail(int(request.path_param("id")))
     items = await order.items().get()
+    looks = await line_presentation([i.product_variant_id for i in items])
 
     customer = None
     if order.user_id is not None:
@@ -466,12 +498,14 @@ async def admin_order_show(request: Request) -> AdminOrderDetailOut:
         discount_cents=order.discount_cents,
         total_cents=order.total_cents,
         currency=_currency_value(order),
+        payment_method=_method_value(order),
         customer=customer,
         items=[
             OrderLineOut(
                 product_variant_id=i.product_variant_id,
                 product_name=i.product_name,
                 variant_name=i.variant_name,
+                image_url=looks.get(i.product_variant_id, ("", "", None))[2],
                 quantity=i.quantity,
                 unit_price_cents=i.unit_price_cents,
             )
@@ -519,7 +553,9 @@ async def update_status(request: Request, data: OrderStatusIn) -> OrderOut:
         if isinstance(order.status, OrderStatus)
         else OrderStatus(order.status)
     )
-    if not can_transition(current, target):
+    if not can_transition(
+        current, target, cod=_method_value(order) is PaymentMethod.COD
+    ):
         raise ValidationException(
             {"status": [f"Cannot transition from {current.value} to {target.value}."]}
         )
@@ -540,4 +576,4 @@ async def update_status(request: Request, data: OrderStatusIn) -> OrderOut:
         customer = await User.find(order.user_id)
         if customer is not None:
             await customer.notify(OrderShippedNotification(order.id))
-    return _order_out(order, await order.items().get())
+    return await _order_out(order, await order.items().get())

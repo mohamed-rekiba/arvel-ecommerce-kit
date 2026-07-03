@@ -158,3 +158,17 @@ def test_add_unknown_variant_404(client) -> None:
         ).status_code
         == 404
     )
+
+
+def test_cart_lines_carry_presentation(client) -> None:
+    """v6.1: a cart row shows WHAT is being bought — localized product name, variant name, and
+    the product's thumb (None when the product has no media)."""
+    cart = client.post(
+        "/api/cart/items", json={"product_variant_id": 1, "quantity": 1}
+    ).json()
+    line = cart["items"][0]
+    assert line["product_name"] and line["product_name"] != "?"
+    assert line["variant_name"]
+    assert (
+        "image_url" in line
+    )  # None without media; a thumb URL once an image is attached
