@@ -42,22 +42,9 @@ select { color-scheme: light dark; }
 input:disabled, select:disabled, textarea:disabled { opacity: .6; cursor: not-allowed; }
 @media (prefers-reduced-motion: reduce) {
   *,*::before,*::after { animation-duration: .01ms !important; animation-iteration-count: 1 !important; transition-duration: .01ms !important; }
-  ::view-transition-group(*),::view-transition-old(*),::view-transition-new(*) { animation: none !important; }
 }
 
-/* Fallback route transition for browsers without the View Transitions API (Firefox / older Safari):
-   a plain Vue <transition name="fade" mode="out-in"> cross-fade. Where the VT API IS supported the
-   view uses name="vt" (no CSS here) so the API owns the morph and these rules never fire. */
-.fade-enter-active, .fade-leave-active { transition: opacity 220ms var(--ease-out); }
-.fade-enter-from, .fade-leave-to { opacity: 0; }
-
-/* View Transitions (lib/transitions.ts): a soft cross-fade between routes + a container-transform
-   morph for shared elements (product image grid → PDP). */
-@media (prefers-reduced-motion: no-preference) {
-  ::view-transition-old(root),::view-transition-new(root) {
-    animation-duration: 240ms; animation-timing-function: var(--ease-out);
-  }
-  ::view-transition-group(*) {
-    animation-duration: 380ms; animation-timing-function: var(--ease-out);
-  }
-}
+/* The route cross-fade lives in ShopLayout.vue (scoped `.fade-*`) — the View Transitions API
+   this file used to style (`::view-transition-*`) was removed; it raced vue-router's own scroll
+   restoration. Don't reintroduce a second, global `.fade-*` here — that's exactly the kind of
+   silently-shadowed duplicate that caused the Firefox fallback to be a no-op for months. */
