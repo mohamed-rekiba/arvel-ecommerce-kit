@@ -332,6 +332,14 @@ def test_invoice_renders_server_side_html(client) -> None:
     )
     assert client.get(f"/api/orders/{order['id']}/invoice").status_code == 401
 
+    # the browser opens the invoice in a new tab (no way to set a bearer/receipt header there),
+    # so this route ALONE also honors the receipt token as a query param — like a signed URL
+    linked = client.get(f"/api/orders/{order['id']}/invoice?token={order['token']}")
+    assert linked.status_code == 200 and f"#{order['id']}" in linked.text
+    assert (
+        client.get(f"/api/orders/{order['id']}/invoice?token=wrong").status_code == 404
+    )
+
 
 def test_server_side_localization(client) -> None:
     """v6.1 A9 — arvel.localization file catalogs: validation errors localize to the request

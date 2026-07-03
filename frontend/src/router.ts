@@ -11,7 +11,13 @@ import OrderDetailView from "./shop/views/OrderDetailView.vue";
 import ForgotPasswordView from "./shop/views/ForgotPasswordView.vue";
 import ResetPasswordView from "./shop/views/ResetPasswordView.vue";
 import VerifyEmailView from "./shop/views/VerifyEmailView.vue";
-import AccountView from "./shop/views/AccountView.vue";
+import AccountLayout from "./shop/views/account/AccountLayout.vue";
+import ProfilePane from "./shop/views/account/ProfilePane.vue";
+import OrdersPane from "./shop/views/account/OrdersPane.vue";
+import AddressesPane from "./shop/views/account/AddressesPane.vue";
+import WishlistPane from "./shop/views/account/WishlistPane.vue";
+import SecurityPane from "./shop/views/account/SecurityPane.vue";
+import NotificationsPane from "./shop/views/account/NotificationsPane.vue";
 
 // The admin section is lazy-loaded — a separate chunk (with its Keycloak/OIDC client) that a storefront
 // visitor never downloads. `manualChunks` in vite.config groups all of src/admin/* into one `admin` chunk.
@@ -52,7 +58,19 @@ const router = createRouter({
         { path: "cart", name: "cart", component: CartView },
         { path: "checkout", name: "checkout", component: CheckoutView },
         { path: "orders/:id", name: "order", component: OrderDetailView },
-        { path: "account", name: "account", component: AccountView },
+        {
+          path: "account",
+          component: AccountLayout,
+          children: [
+            { path: "", name: "account", redirect: { path: "/account/profile" } },
+            { path: "profile", name: "account-profile", component: ProfilePane },
+            { path: "orders", name: "account-orders", component: OrdersPane },
+            { path: "addresses", name: "account-addresses", component: AddressesPane },
+            { path: "wishlist", name: "account-wishlist", component: WishlistPane },
+            { path: "security", name: "account-security", component: SecurityPane },
+            { path: "notifications", name: "account-notifications", component: NotificationsPane },
+          ],
+        },
         { path: "forgot-password", name: "forgot-password", component: ForgotPasswordView },
         { path: "reset-password", name: "reset-password", component: ResetPasswordView },
         { path: "verify-email", name: "verify-email", component: VerifyEmailView },

@@ -1,4 +1,8 @@
 <script setup lang="ts">
+// Order detail + Track Your Order (profile ref 3): the stepper renders the server-derived
+// timeline (A4 — created_at + the activity trail; COD orders have no "paid" step), then the
+// lines with thumbs, totals, delivery address, payment method, and actions (pay / cancel /
+// invoice). Cancelled is a terminal branch: the trail collapses to placed → cancelled.
 import { computed, onBeforeUnmount, onMounted, ref } from "vue";
 import { useRoute } from "vue-router";
 import { type Order, api, formatPrice, orderTokens } from "../api";
@@ -18,7 +22,19 @@ let pollTimer: ReturnType<typeof setInterval> | null = null;
 const cancellable = computed(
   () => order.value !== null && ["pending", "paid"].includes(order.value.status),
 );
-const payable = computed(() => order.value?.status === "pending");
+const payable = computed(
+  () => order.value?.status === "pending" && order.value.payment_method === "gateway",
+);
+
+const steps = computed(() => order.value?.timeline ?? []);
+const doneCount = computed(() => steps.value.filter((s) => s.at !== null).length);
+
+function stepLabel(status: string): string {
+  return t(`order.step_${status}` as MessageKey);
+}
+function stepTime(at: string | null): string {
+  return at ? new Date(at).toLocaleString() : "";
+}
 
 function stopPolling() {
   if (pollTimer !== null) clearInterval(pollTimer);
@@ -77,47 +93,89 @@ async function cancelOrder() {
   }
 }
 
+function openInvoice() {
+  if (!order.value) return;
+  window.open(api.invoiceUrl(order.value.id, token ?? order.value.token), "_blank", "noopener");
+}
+
 onMounted(load);
 onBeforeUnmount(stopPolling);
 </script>
 
 <template>
   <main class="detail">
-    <p v-if="loading" class="muted">{{ t("common.loading") }}</p>
+    <p v-if="loading" class="muted center">{{ t("common.loading") }}</p>
 
     <div v-else-if="failed || !order" class="state">
       <h1>{{ t("order.not_found") }}</h1>
       <p class="muted">{{ t("order.not_found_note") }}</p>
-      <RouterLink class="btn btn--primary" to="/account">{{ t("order.back_account") }}</RouterLink>
+      <RouterLink class="act act--primary" to="/account">{{ t("order.back_account") }}</RouterLink>
     </div>
 
     <template v-else>
-      <header class="detail__head">
+      <header class="head">
         <p class="eyebrow">{{ t("order.eyebrow") }}</p>
         <h1>
           {{ t("checkout.order") }} #{{ order.id }}
-          <span class="badge" :class="`badge--${order.status}`">{{ t(`order.${order.status}` as MessageKey) }}</span>
+          <span class="chip" :class="`chip--${order.status}`">{{ t(`order.${order.status}` as MessageKey) }}</span>
         </h1>
         <p v-if="order.payment_status === 'failed' && order.status === 'pending'" class="muted">
           {{ t("order.last_payment_failed") }}
         </p>
       </header>
 
+      <!-- tracking stepper -->
+      <section v-if="steps.length" class="panel">
+        <h2>{{ t("order.track_title") }}</h2>
+        <ol class="track">
+          <li
+            v-for="(s, i) in steps"
+            :key="s.status"
+            class="step"
+            :class="{
+              'step--done': s.at !== null,
+              'step--current': s.at !== null && i === doneCount - 1,
+              'step--cancelled': s.status === 'cancelled',
+            }"
+          >
+            <span class="step__dot" aria-hidden="true">
+              <svg v-if="s.at !== null && s.status !== 'cancelled'" viewBox="0 0 24 24"><path d="M5 12l5 5 9-10" /></svg>
+              <svg v-else-if="s.status === 'cancelled'" viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18" /></svg>
+            </span>
+            <span class="step__meta">
+              <b>{{ stepLabel(s.status) }}</b>
+              <i v-if="s.at">{{ stepTime(s.at) }}</i>
+            </span>
+          </li>
+        </ol>
+      </section>
+
       <section class="panel">
         <h2>{{ t("order.items") }}</h2>
         <ul class="lines">
-          <li v-for="line in order.items" :key="line.product_variant_id">
-            <span>{{ line.quantity }} × {{ line.product_name }} — {{ line.variant_name }}</span>
-            <span>{{ formatPrice(line.unit_price_cents * line.quantity) }}</span>
+          <li v-for="line in order.items" :key="line.product_variant_id" class="line">
+            <span class="line__img">
+              <img v-if="line.image_url" :src="line.image_url" :alt="line.product_name" />
+              <span v-else class="line__ph" aria-hidden="true" />
+            </span>
+            <span class="line__meta">
+              <b>{{ line.product_name }}</b>
+              <i>{{ line.variant_name }} · ×{{ line.quantity }}</i>
+            </span>
+            <span class="line__price tnum">{{ formatPrice(line.unit_price_cents * line.quantity) }}</span>
           </li>
         </ul>
         <dl class="breakdown">
-          <div><dt>{{ t("checkout.subtotal") }}</dt><dd>{{ formatPrice(order.subtotal_cents) }}</dd></div>
-          <div><dt>{{ t("cart.shipping") }}</dt><dd>{{ formatPrice(order.shipping_cents) }}</dd></div>
-          <div><dt>{{ t("checkout.tax") }}</dt><dd>{{ formatPrice(order.tax_cents) }}</dd></div>
-          <div v-if="order.discount_cents > 0"><dt>{{ t("checkout.discount") }} ({{ order.coupon_code }})</dt><dd>−{{ formatPrice(order.discount_cents) }}</dd></div>
-          <div class="breakdown__total"><dt>{{ t("cart.total") }}</dt><dd>{{ formatPrice(order.total_cents) }}</dd></div>
+          <div><dt>{{ t("checkout.subtotal") }}</dt><dd class="tnum">{{ formatPrice(order.subtotal_cents) }}</dd></div>
+          <div><dt>{{ t("cart.shipping") }}</dt><dd class="tnum">{{ formatPrice(order.shipping_cents) }}</dd></div>
+          <div><dt>{{ t("checkout.tax") }}</dt><dd class="tnum">{{ formatPrice(order.tax_cents) }}</dd></div>
+          <div v-if="order.discount_cents > 0"><dt>{{ t("checkout.discount") }} ({{ order.coupon_code }})</dt><dd class="tnum">−{{ formatPrice(order.discount_cents) }}</dd></div>
+          <div class="breakdown__total"><dt>{{ t("cart.total") }}</dt><dd class="tnum">{{ formatPrice(order.total_cents) }}</dd></div>
         </dl>
+        <p class="method">
+          <span class="method__label">{{ t("account.order_method") }}:</span>
+          {{ t(`pay.${order.payment_method}` as MessageKey) }}
+        </p>
       </section>
 
       <section class="panel">
@@ -132,45 +190,88 @@ onBeforeUnmount(stopPolling);
 
       <section class="actions" aria-live="polite">
         <p v-if="actionError" class="error" role="alert">{{ actionError }}</p>
-        <button
-          v-if="payable"
-          class="btn btn--primary"
-          :disabled="acting"
-          @click="payNow"
-        >
+        <button v-if="payable" class="act act--primary" :disabled="acting" @click="payNow">
           {{ acting ? t("checkout.processing_short") : t("checkout.pay_now", { total: formatPrice(order.total_cents) }) }}
         </button>
-        <button v-if="cancellable" class="btn btn--danger" :disabled="acting" @click="cancelOrder">
+        <button class="act" @click="openInvoice">{{ t("account.order_invoice") }}</button>
+        <button v-if="cancellable" class="act act--danger" :disabled="acting" @click="cancelOrder">
           {{ t("order.cancel") }}
         </button>
-        <p v-if="order.status === 'cancelled'" class="muted">
-          {{ t("order.cancelled_note") }}
-        </p>
+        <p v-if="order.status === 'cancelled'" class="muted">{{ t("order.cancelled_note") }}</p>
       </section>
     </template>
   </main>
 </template>
 
 <style scoped>
-.detail { max-width: 640px; margin: 0 auto; padding: var(--space-16) var(--container-pad) var(--space-16); }
-.detail__head { margin-bottom: var(--space-8); }
-.detail__head h1 { font-size: var(--text-3xl); margin-top: var(--space-2); display: flex; align-items: center; gap: var(--space-3); }
-.badge { font-size: var(--text-xs); font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; padding: var(--space-1) var(--space-3); border-radius: var(--radius-full, 999px); background: var(--color-surface); border: 1px solid var(--color-border); }
-.badge--paid { color: var(--color-success, #2e7d32); border-color: currentColor; }
-.badge--cancelled { color: var(--color-danger); border-color: currentColor; }
-.panel { background: var(--color-surface); border-radius: var(--radius-lg); padding: var(--space-6); margin-bottom: var(--space-5); }
-.panel h2 { font-size: var(--text-sm); font-weight: 600; letter-spacing: 0.04em; text-transform: uppercase; color: var(--color-text-muted); margin: 0 0 var(--space-4); }
+.detail { max-width: 720px; margin: 0 auto; padding: clamp(1.5rem, 4vw, 3rem) clamp(1rem, 4vw, 2.5rem) clamp(3rem, 6vw, 5rem); }
+.center { text-align: center; }
+.eyebrow { font-size: 11px; font-weight: 800; letter-spacing: .1em; text-transform: uppercase; color: var(--accent-text); }
+.head { margin-bottom: 20px; }
+.head h1 { font-family: var(--font-display); font-size: clamp(1.35rem, 3vw, 1.8rem); font-weight: 800; margin-top: 4px; display: flex; flex-wrap: wrap; align-items: center; gap: 10px; }
+.chip { padding: 4px 12px; border-radius: var(--radius-full); font-family: var(--font-text); font-size: 11.5px; font-weight: 700; text-transform: capitalize; background: var(--info-bg); color: var(--info-fg); }
+.chip--paid, .chip--delivered { background: var(--success-bg); color: var(--success-fg); }
+.chip--cancelled { background: var(--danger-bg); color: var(--danger-fg); }
+.chip--shipped { background: var(--warn-bg); color: var(--warn-fg); }
+
+.panel { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-md); padding: clamp(1rem, 3vw, 1.5rem); margin-bottom: 14px; }
+.panel h2 { font-size: 12px; font-weight: 800; letter-spacing: .06em; text-transform: uppercase; color: var(--text-subtle); margin-bottom: 16px; }
+
+/* stepper — vertical on phones, horizontal >=640px */
+.track { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 0; counter-reset: step; }
+.step { position: relative; display: flex; align-items: flex-start; gap: 12px; padding-bottom: 22px; }
+.step:last-child { padding-bottom: 0; }
+.step::before { content: ""; position: absolute; inset-inline-start: 13px; top: 28px; bottom: 0; width: 2px; background: var(--border-2); }
+.step:last-child::before { display: none; }
+.step--done::before { background: var(--accent); }
+.step__dot { width: 28px; height: 28px; border-radius: 999px; border: 2px solid var(--border-2); background: var(--surface); display: grid; place-items: center; flex-shrink: 0; z-index: 1; }
+.step__dot svg { width: 14px; height: 14px; stroke: currentColor; fill: none; stroke-width: 2.4; }
+.step--done .step__dot { border-color: var(--accent); background: var(--accent); color: var(--on-accent); }
+.step--cancelled .step__dot { border-color: var(--sale); background: var(--danger-bg); color: var(--danger-fg); }
+.step__meta { display: flex; flex-direction: column; gap: 2px; padding-top: 3px; }
+.step__meta b { font-size: 13.5px; font-weight: 700; color: var(--text-subtle); }
+.step--done .step__meta b { color: var(--text); }
+.step--cancelled .step__meta b { color: var(--danger-fg); }
+.step__meta i { font-style: normal; font-size: 11.5px; color: var(--text-subtle); }
+
+@media (min-width: 640px) {
+  .track { flex-direction: row; }
+  .step { flex: 1; flex-direction: column; align-items: center; text-align: center; gap: 8px; padding-bottom: 0; }
+  .step::before { inset-inline-start: 50%; top: 13px; bottom: auto; width: 100%; height: 2px; }
+  .step__meta { padding-top: 0; }
+}
+
+/* lines */
 .lines { list-style: none; margin: 0; padding: 0; }
-.lines li { display: flex; justify-content: space-between; gap: var(--space-4); padding: var(--space-3) 0; border-bottom: 1px solid var(--color-border); font-size: var(--text-sm); }
-.breakdown { margin: var(--space-4) 0 0; }
-.breakdown div { display: flex; justify-content: space-between; padding: var(--space-2) 0; font-size: var(--text-sm); }
-.breakdown__total { border-top: 1px solid var(--color-border); font-weight: 600; font-size: var(--text-base); }
-.breakdown dt { color: var(--color-text-muted); }
+.line { display: flex; align-items: center; gap: 12px; padding: 10px 0; border-bottom: 1px solid var(--border); }
+.line__img { width: 48px; height: 48px; border-radius: var(--radius-sm); overflow: hidden; background: var(--surface-2); border: 1px solid var(--border); flex-shrink: 0; display: grid; place-items: center; }
+.line__img img { width: 100%; height: 100%; object-fit: cover; }
+.line__ph { width: 100%; height: 100%; background: var(--surface-2); }
+.line__meta { flex: 1; min-width: 0; display: flex; flex-direction: column; }
+.line__meta b { font-size: 13.5px; font-weight: 600; }
+.line__meta i { font-style: normal; font-size: 12px; color: var(--text-subtle); }
+.line__price { font-size: 13.5px; font-weight: 700; }
+
+.breakdown { margin: 14px 0 0; }
+.breakdown div { display: flex; justify-content: space-between; padding: 6px 0; font-size: 13.5px; }
+.breakdown dt { color: var(--text-muted); }
 .breakdown dd { margin: 0; }
-.address { font-style: normal; line-height: 1.6; margin-bottom: var(--space-3); }
-.actions { display: flex; flex-wrap: wrap; gap: var(--space-3); align-items: center; }
-.btn--danger { color: var(--color-danger); border-color: var(--color-danger); }
-.error { width: 100%; color: var(--color-danger); font-size: var(--text-sm); }
-.muted { color: var(--color-text-muted); font-size: var(--text-sm); }
-.state { text-align: center; padding: var(--space-16) 0; }
+.breakdown__total { border-top: 1px solid var(--border); font-weight: 700; font-size: 15px; margin-top: 4px; padding-top: 10px; }
+.method { margin-top: 12px; font-size: 13px; }
+.method__label { color: var(--text-subtle); }
+
+.address { font-style: normal; line-height: 1.6; margin-bottom: 8px; font-size: 14px; }
+.muted { color: var(--text-subtle); font-size: 13px; }
+.error { width: 100%; color: var(--sale); font-size: 13px; }
+.state { text-align: center; padding: 64px 0; }
+.state h1 { font-family: var(--font-display); font-size: 1.5rem; font-weight: 800; margin-bottom: 8px; }
+
+.actions { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; }
+.act { padding: 11px 22px; border-radius: var(--radius-full); border: 1px solid var(--border-2); background: var(--surface); color: var(--text); font-size: 13px; font-weight: 700; text-decoration: none; cursor: pointer; }
+.act:hover { border-color: var(--accent); color: var(--accent-text); }
+.act--primary { background: var(--accent); border-color: var(--accent); color: var(--on-accent); }
+.act--primary:hover { color: var(--on-accent); opacity: .92; }
+.act--danger { color: var(--sale); }
+.act--danger:hover { border-color: var(--sale); color: var(--sale); }
+.act:disabled { opacity: .6; cursor: default; }
 </style>
