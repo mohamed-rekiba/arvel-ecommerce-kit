@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, onMounted, ref, watch } from "vue";
+import { computed, nextTick, onMounted, ref, watch } from "vue";
 import { useRoute, useRouter } from "vue-router";
 import { useAuth } from "./auth";
 import { theme, toggleTheme } from "../lib/theme";
@@ -11,8 +11,20 @@ const router = useRouter();
 const route = useRoute();
 onMounted(restore);
 
-// off-canvas nav drawer on phones/tablets (<860px); closes on navigation
+// off-canvas nav drawer on phones/tablets (<860px); closes on navigation, Escape, or scrim.
+// Focus follows the disclosure: into the drawer on open, back to the burger on close.
 const navOpen = ref(false);
+const sideRef = ref<HTMLElement | null>(null);
+const burgerRef = ref<HTMLButtonElement | null>(null);
+function closeNav() {
+  navOpen.value = false;
+  burgerRef.value?.focus();
+}
+watch(navOpen, async (open) => {
+  if (!open) return;
+  await nextTick();
+  sideRef.value?.querySelector<HTMLElement>("a.item")?.focus();
+});
 watch(() => route.fullPath, () => (navOpen.value = false));
 
 const initial = computed(() => (state.user?.name ?? state.user?.email ?? "?").charAt(0).toUpperCase());
@@ -29,9 +41,9 @@ function signOut() {
       v-if="navOpen"
       class="scrim"
       :aria-label="t('nav.close_menu')"
-      @click="navOpen = false"
+      @click="closeNav"
     />
-    <aside id="admin-nav" class="side" :class="{ 'side--open': navOpen }">
+    <aside id="admin-nav" ref="sideRef" class="side" :class="{ 'side--open': navOpen }" @keydown.escape="navOpen && closeNav()">
       <div class="brand"><span class="mk">A</span>Arvel Console</div>
       <div class="store">Odama Electronics Store</div>
 
@@ -66,6 +78,7 @@ function signOut() {
     <div class="main">
       <div class="top">
         <button
+          ref="burgerRef"
           class="burger"
           :aria-expanded="navOpen"
           aria-controls="admin-nav"
@@ -135,10 +148,10 @@ function signOut() {
 .scrim { position: fixed; inset: 0; z-index: calc(var(--z-header) + 1); border: 0; padding: 0; background: rgb(0 0 0 / .45); cursor: pointer; }
 @media (max-width: 859.98px) {
   /* off-canvas drawer: full labels, never a clipped 64px rail */
-  .side { position: fixed; inset-block: 0; inset-inline-start: 0; width: 264px; height: 100dvh; z-index: calc(var(--z-header) + 2); transform: translateX(-100%); transition: transform .22s var(--ease-out, ease); box-shadow: var(--shadow-3); }
+  .side { position: fixed; inset-block: 0; inset-inline-start: 0; width: 264px; height: 100dvh; z-index: calc(var(--z-header) + 2); transform: translateX(-100%); visibility: hidden; transition: transform .22s var(--ease-out, ease), visibility 0s .22s; box-shadow: var(--shadow-3); }
   [dir="rtl"] .side { transform: translateX(100%); }
   /* the rtl rule above outspecifies a bare .side--open — state must win in both directions */
-  .side--open, [dir="rtl"] .side--open { transform: translateX(0); }
+  .side--open, [dir="rtl"] .side--open { transform: translateX(0); visibility: visible; transition: transform .22s var(--ease-out, ease), visibility 0s; }
   .burger { display: grid; }
   .top { padding: 0 12px; gap: 8px; }
   .content { padding: clamp(12px, 3vw, 24px); }
