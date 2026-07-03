@@ -4456,6 +4456,34 @@
         ]
       }
     },
+    "/api/admin/media": {
+      "get": {
+        "summary": "ApiAdminMedia",
+        "operationId": "api.admin.media",
+        "responses": {
+          "200": {
+            "description": "Request fulfilled, document follows",
+            "headers": {},
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/MediaItemOut"
+                  },
+                  "type": "array"
+                }
+              }
+            }
+          }
+        },
+        "deprecated": false,
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ]
+      }
+    },
     "/api/admin/newsletter": {
       "get": {
         "summary": "ApiAdminNewsletter",
@@ -5772,7 +5800,7 @@
     "/api/admin/orders": {
       "get": {
         "summary": "ApiAdminOrdersIndex",
-        "description": "List every order (newest first) for the back office. Requires orders.view.",
+        "description": "List orders (newest first) for the back office, narrowed by ``?status=`` and searched\nby ``?q=`` (order id, or a case-insensitive contact-email fragment). Requires orders.view.",
         "operationId": "api.admin.orders.index",
         "responses": {
           "200": {
@@ -7033,6 +7061,20 @@
           },
           "total_spent_cents": {
             "type": "integer"
+          },
+          "addresses_count": {
+            "type": "integer",
+            "default": 0
+          },
+          "avatar_url": {
+            "oneOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ]
           }
         },
         "type": "object",
@@ -7066,6 +7108,16 @@
               "type": "string"
             },
             "type": "array"
+          },
+          "avatar_url": {
+            "oneOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ]
           }
         },
         "type": "object",
@@ -7985,6 +8037,72 @@
           "status"
         ],
         "title": "HealthStatus"
+      },
+      "MediaItemOut": {
+        "properties": {
+          "id": {
+            "type": "integer"
+          },
+          "owner_type": {
+            "type": "string"
+          },
+          "owner_id": {
+            "type": "integer"
+          },
+          "owner_label": {
+            "type": "string"
+          },
+          "collection": {
+            "type": "string"
+          },
+          "file_name": {
+            "type": "string"
+          },
+          "mime_type": {
+            "type": "string"
+          },
+          "size": {
+            "type": "integer"
+          },
+          "url": {
+            "type": "string"
+          },
+          "thumb_url": {
+            "oneOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "created_at": {
+            "oneOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "type": "object",
+        "required": [
+          "collection",
+          "created_at",
+          "file_name",
+          "id",
+          "mime_type",
+          "owner_id",
+          "owner_label",
+          "owner_type",
+          "size",
+          "thumb_url",
+          "url"
+        ],
+        "title": "MediaItemOut"
       },
       "MessageOut": {
         "properties": {
