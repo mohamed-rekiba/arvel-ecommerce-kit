@@ -54,6 +54,20 @@ function dismissAnnounce() {
 }
 
 const navOpen = ref(false);
+
+// chrome back button (phones): every route except home shows it in place of the hamburger;
+// in-app history goes back, a cold deep-link falls back to home
+const showBack = computed(() => route.name !== "home");
+function goBack() {
+  if (window.history.state?.back) router.back();
+  else router.push("/");
+}
+
+// footer accordions (phones only; >=1024 renders the three open columns)
+const openCol = ref<string | null>(null);
+function toggleCol(name: string) {
+  openCol.value = openCol.value === name ? null : name;
+}
 const navTrigger = ref<HTMLButtonElement | null>(null);
 function closeNav() {
   navOpen.value = false;
@@ -117,7 +131,11 @@ onBeforeUnmount(() => document.removeEventListener("click", onDocClick));
     <!-- main header: logo · scoped search · account · cart -->
     <header class="hd">
       <div class="hd__in">
+        <button v-if="showBack" class="ic backbtn" :aria-label="t('common.back_label')" @click="goBack">
+          <svg viewBox="0 0 24 24"><path d="M15 5l-7 7 7 7" /></svg>
+        </button>
         <button
+          v-else
           ref="navTrigger"
           class="ic hamburger"
           @click="navOpen = !navOpen"
@@ -227,9 +245,24 @@ onBeforeUnmount(() => document.removeEventListener("click", onDocClick));
           <p>{{ t("footer.tagline") }}</p>
         </div>
         <div class="ft__cols">
-          <div><h4>{{ t("footer.shop") }}</h4><a>{{ t("footer.new_arrivals") }}</a><a>{{ t("footer.audio") }}</a><a>{{ t("footer.displays") }}</a><a>{{ t("footer.accessories") }}</a></div>
-          <div><h4>{{ t("footer.support") }}</h4><a>{{ t("footer.track_order") }}</a><a>{{ t("footer.shipping_returns") }}</a><a>{{ t("footer.contact") }}</a></div>
-          <div><h4>{{ t("footer.company") }}</h4><a>{{ t("nav.about") }}</a><a>{{ t("footer.stores") }}</a><a>{{ t("footer.journal") }}</a></div>
+          <div class="ft__col" :class="{ open: openCol === 'shop' }">
+            <button class="ft__h" :aria-expanded="openCol === 'shop'" @click="toggleCol('shop')">
+              {{ t("footer.shop") }}<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 9l6 6 6-6" /></svg>
+            </button>
+            <div class="ft__links"><a>{{ t("footer.new_arrivals") }}</a><a>{{ t("footer.audio") }}</a><a>{{ t("footer.displays") }}</a><a>{{ t("footer.accessories") }}</a></div>
+          </div>
+          <div class="ft__col" :class="{ open: openCol === 'support' }">
+            <button class="ft__h" :aria-expanded="openCol === 'support'" @click="toggleCol('support')">
+              {{ t("footer.support") }}<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 9l6 6 6-6" /></svg>
+            </button>
+            <div class="ft__links"><a>{{ t("footer.track_order") }}</a><a>{{ t("footer.shipping_returns") }}</a><a>{{ t("footer.contact") }}</a></div>
+          </div>
+          <div class="ft__col" :class="{ open: openCol === 'company' }">
+            <button class="ft__h" :aria-expanded="openCol === 'company'" @click="toggleCol('company')">
+              {{ t("footer.company") }}<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 9l6 6 6-6" /></svg>
+            </button>
+            <div class="ft__links"><a>{{ t("nav.about") }}</a><a>{{ t("footer.stores") }}</a><a>{{ t("footer.journal") }}</a></div>
+          </div>
         </div>
       </div>
       <div class="ft__base">
@@ -287,7 +320,8 @@ onBeforeUnmount(() => document.removeEventListener("click", onDocClick));
 /* header */
 .hd { background: var(--surface); border-bottom: 1px solid var(--border); }
 .hd__in { max-width: 1320px; margin: 0 auto; padding: 10px clamp(1rem, 4vw, 2.5rem); display: grid; grid-template-columns: auto auto 1fr auto; grid-template-areas: "menu brand . tools" "search search search search"; align-items: center; gap: 10px clamp(.5rem, 2vw, 2rem); }
-.hamburger { grid-area: menu; }
+.hamburger, .backbtn { grid-area: menu; }
+[dir="rtl"] .backbtn svg { transform: scaleX(-1); }
 .brand { grid-area: brand; }
 .search { grid-area: search; }
 .hd__tools { grid-area: tools; }
@@ -351,13 +385,20 @@ onBeforeUnmount(() => document.removeEventListener("click", onDocClick));
 
 /* footer */
 .ft { border-top: 1px solid var(--border); background: var(--surface); }
-.ft__top { max-width: 1320px; margin: 0 auto; padding: clamp(2.5rem, 5vw, 4rem) clamp(1rem, 4vw, 2.5rem) clamp(1.5rem, 3vw, 2.5rem); display: grid; grid-template-columns: 1fr; gap: 36px; }
+.ft__top { max-width: 1320px; margin: 0 auto; padding: clamp(1.75rem, 5vw, 4rem) clamp(1rem, 4vw, 2.5rem) clamp(1.25rem, 3vw, 2.5rem); display: grid; grid-template-columns: 1fr; gap: 22px; }
 .brand__name--ft { font-size: 20px; }
 .ft__brand p { color: var(--text-muted); font-size: 14px; max-width: 30ch; line-height: 1.6; margin-top: 10px; }
-.ft__cols { display: grid; grid-template-columns: 1fr; gap: 24px; }
-.ft__cols h4 { font-size: 11px; text-transform: uppercase; letter-spacing: .14em; color: var(--text-subtle); margin: 0 0 14px; font-weight: 700; }
-.ft__cols a { display: block; font-size: 14px; color: var(--text-muted); text-decoration: none; padding: 5px 0; transition: color var(--motion-base); }
-.ft__cols a:hover { color: var(--accent-text); }
+.ft__cols { display: grid; grid-template-columns: 1fr; gap: 0; }
+/* phones: each group is a bordered accordion row — the flat three-list scroll was endless */
+.ft__col { border-top: 1px solid var(--border); }
+.ft__col:last-child { border-bottom: 1px solid var(--border); }
+.ft__h { width: 100%; display: flex; align-items: center; justify-content: space-between; gap: 10px; padding: 14px 0; border: 0; background: none; font: inherit; font-size: 12px; text-transform: uppercase; letter-spacing: .14em; color: var(--text); font-weight: 700; cursor: pointer; }
+.ft__h svg { width: 16px; height: 16px; stroke: var(--text-subtle); fill: none; stroke-width: 2; transition: transform var(--motion-base); }
+.ft__col.open .ft__h svg { transform: rotate(180deg); }
+.ft__links { display: none; padding-bottom: 12px; }
+.ft__col.open .ft__links { display: block; }
+.ft__links a { display: block; font-size: 14px; color: var(--text-muted); text-decoration: none; padding: 6px 0; transition: color var(--motion-base); }
+.ft__links a:hover { color: var(--accent-text); }
 .ft__base { border-top: 1px solid var(--border); max-width: 1320px; margin: 0 auto; padding: 18px clamp(1rem, 4vw, 2.5rem); display: flex; align-items: center; justify-content: space-between; gap: 12px; font-size: 12.5px; color: var(--text-subtle); }
 
 @media (min-width: 640px) {
@@ -370,8 +411,13 @@ onBeforeUnmount(() => document.removeEventListener("click", onDocClick));
 @media (min-width: 1024px) {
   .tb__contact { display: flex; }
   .nv { display: block; }
-  .hamburger { display: none; }
-  .ft__cols { grid-template-columns: repeat(3, 1fr); }
-  .ft__top { grid-template-columns: 1.2fr 2fr; }
+  .hamburger, .backbtn { display: none; }
+  .ft__cols { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 24px; }
+  .ft__top { grid-template-columns: 1.2fr 2fr; gap: 36px; }
+  .ft__col, .ft__col:last-child { border: 0; }
+  .ft__h { pointer-events: none; padding: 0 0 14px; font-size: 11px; color: var(--text-subtle); }
+  .ft__h svg { display: none; }
+  .ft__links { display: block; padding-bottom: 0; }
+  .ft__links a { padding: 5px 0; }
 }
 </style>
