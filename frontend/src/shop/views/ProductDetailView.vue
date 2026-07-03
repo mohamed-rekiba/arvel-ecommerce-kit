@@ -305,11 +305,12 @@ watch(() => route.params.slug, load);
 /* same 4:5 ratio as the card grid / hero (ProductCard.vue, HomeView.vue) — the View Transition morph
    animates the box between the old (card) and new (PDP) rects, and a mismatched aspect ratio makes the
    captured image visibly stretch/squish mid-animation. Matching ratios keeps the morph a clean scale. */
-.pdp__main { aspect-ratio: 4 / 5; border-radius: var(--radius-lg); overflow: hidden; background: var(--surface-2); }
+.pdp__main { aspect-ratio: 4 / 5; border-radius: var(--radius-lg); overflow: hidden; background: var(--photo-well); }
 .pdp__main img { width: 100%; height: 100%; object-fit: cover; }
+[data-theme="dark"] .pdp__main img, [data-theme="dark"] .pdp__thumb img { filter: brightness(.88); }
 .pdp__placeholder { width: 100%; height: 100%; background: var(--surface-2); }
 .pdp__thumbs { display: flex; gap: 10px; flex-wrap: wrap; }
-.pdp__thumb { width: 64px; height: 80px; border-radius: var(--radius-md); overflow: hidden; border: 2px solid transparent; padding: 0; cursor: pointer; background: var(--surface-2); transition: border-color var(--motion-base); }
+.pdp__thumb { width: 64px; height: 80px; border-radius: var(--radius-md); overflow: hidden; border: 2px solid transparent; padding: 0; cursor: pointer; background: var(--photo-well); transition: border-color var(--motion-base); }
 .pdp__thumb.on { border-color: var(--accent); }
 .pdp__thumb img { width: 100%; height: 100%; object-fit: cover; }
 .pdp__info { padding-top: var(--space-4); }

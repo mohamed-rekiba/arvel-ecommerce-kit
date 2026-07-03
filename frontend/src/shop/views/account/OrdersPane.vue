@@ -111,8 +111,9 @@ onMounted(load);
 
 .order__body { display: flex; flex-direction: column; gap: 12px; padding: 12px 14px; }
 .thumbs { list-style: none; margin: 0; padding: 0; display: flex; gap: 8px; }
-.thumb { position: relative; width: 52px; height: 52px; border-radius: var(--radius-sm); overflow: hidden; background: var(--surface-2); border: 1px solid var(--border); display: grid; place-items: center; }
+.thumb { position: relative; width: 52px; height: 52px; border-radius: var(--radius-sm); overflow: hidden; background: var(--photo-well); border: 1px solid var(--border); display: grid; place-items: center; }
 .thumb img { width: 100%; height: 100%; object-fit: cover; }
+[data-theme="dark"] .thumb img { filter: brightness(.88); }
 .thumb__ph { width: 100%; height: 100%; background: var(--surface-2); }
 .thumb__n { position: absolute; bottom: 1px; inset-inline-end: 2px; font-style: normal; font-size: 10px; font-weight: 800; background: color-mix(in srgb, var(--nav-bg) 82%, transparent); color: var(--nav-text-hi); padding: 0 4px; border-radius: 4px; }
 .thumb--more { font-size: 12px; font-weight: 700; color: var(--text-muted); }

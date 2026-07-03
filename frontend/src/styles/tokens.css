@@ -17,6 +17,9 @@
 
   /* neutrals (light) — white cards on a cool-neutral canvas */
   --white:#FFFFFF; --bg:#FFFFFF; --canvas:#F5F5F4; --surface:#FFFFFF; --surface-2:#F5F5F4;
+  /* product photography sits in a fixed light tile in BOTH themes — white-background shots
+     read as designed "framed tiles" in dark mode instead of blown-out holes */
+  --photo-well:#F4F4F2;
   --band:var(--peach-100); --hero-band:var(--peach-100);
   --border:#E9E8E4; --border-2:#D8D6D0;
   --text:#18181B; --text-muted:#54555A; --text-subtle:#6E6F75; --text-inverse:#FFFFFF;
@@ -84,7 +87,7 @@
 [data-theme="dark"] {
   /* "night commerce" — cool neutral blacks with clearly-elevated surfaces; the vivid orange and
      the product photography carry the color. No brown, no mud. */
-  --bg:#131417; --canvas:#0E0F12; --surface:#17181C; --surface-2:#1E2025;
+  --bg:#131417; --canvas:#0E0F12; --surface:#1A1C21; --surface-2:#232630;
   --band:#1A1D26; --hero-band:#1A1D26;
   --border:#2A2C33; --border-2:#383B44;
   --text:#F2F3F5; --text-muted:#A6A9B1; --text-subtle:#878B94; --text-inverse:#131417;

@@ -159,9 +159,10 @@ async function clearAll() {
 .ghost { padding: 9px 16px; border: 1px solid var(--border-2); border-radius: var(--radius-full); background: none; color: var(--text-muted); font-size: 12px; font-weight: 700; cursor: pointer; }
 
 .prod { display: flex; align-items: center; gap: 12px; text-decoration: none; color: var(--text); min-width: 0; }
-.prod__img { width: 52px; height: 52px; border-radius: var(--radius-sm); overflow: hidden; background: var(--surface-2); border: 1px solid var(--border); flex-shrink: 0; display: grid; place-items: center; }
+.prod__img { width: 52px; height: 52px; border-radius: var(--radius-sm); overflow: hidden; background: var(--photo-well); border: 1px solid var(--border); flex-shrink: 0; display: grid; place-items: center; }
 .prod__img--lg { width: 64px; height: 64px; }
 .prod__img img { width: 100%; height: 100%; object-fit: cover; }
+[data-theme="dark"] .prod__img img { filter: brightness(.88); }
 .prod__ph { width: 100%; height: 100%; background: var(--surface-2); }
 .prod b { font-size: 13.5px; font-weight: 600; }
 .prod:hover b { color: var(--accent-text); }
