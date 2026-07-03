@@ -176,7 +176,10 @@ watch(() => route.query, load);
 .eyebrow { font-size: 11px; text-transform: uppercase; letter-spacing: .2em; color: var(--accent); font-weight: 600; }
 /* mobile-first: the filter block is two compact rows (chip rail + price line), not a
    wrapped cloud that pushes the products below the fold */
-.filters { position: static; display: flex; flex-direction: column; gap: 10px; }
+/* grid items default to min-width:auto — the nowrap chip rail's intrinsic width (sum of
+   every chip) would inflate the whole column track without these floors */
+.filters { position: static; display: flex; flex-direction: column; gap: 10px; min-width: 0; }
+.results { min-width: 0; }
 .filters__group { min-width: 0; }
 .filters__h { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); }
 .cats { list-style: none; margin: 0; padding: 2px 0 6px; display: flex; flex-wrap: nowrap; gap: 8px; overflow-x: auto; scroll-snap-type: x proximity; scrollbar-width: none; }
