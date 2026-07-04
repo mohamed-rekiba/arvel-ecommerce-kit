@@ -344,7 +344,7 @@ def test_invoice_renders_server_side_html(client) -> None:
 def test_server_side_localization(client) -> None:
     """v6.1 A9 — arvel.localization file catalogs: validation errors localize to the request
     locale; users capture their sign-in locale; notifications render in the RECIPIENT's language."""
-    # a French checkout with a missing address field errors in French (lang/fr/validation.json)
+    # a French checkout with a missing address field errors in French (resources/lang/fr/validation.json)
     cara = _auth(client)
     client.post(
         "/api/cart/items", json={"product_variant_id": 1, "quantity": 1}, headers=cara
