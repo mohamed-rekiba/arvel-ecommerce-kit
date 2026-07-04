@@ -13,6 +13,7 @@ FROM python:3.14-slim-trixie AS backend-builder
 COPY --from=ghcr.io/astral-sh/uv:latest /uv /uvx /usr/local/bin/
 WORKDIR /app
 
+ENV ARVEL_VERSION=0.51.0
 # The best uv production flags
 ENV UV_COMPILE_BYTECODE=1
 ENV UV_LINK_MODE=copy
@@ -20,15 +21,18 @@ ENV UV_SYSTEM_PYTHON=1
 
 COPY pyproject.toml uv.lock ./
 
-# arvel is published on PyPI (0.49.0) — this repo's [tool.uv.sources] override (path = "../arvel",
-# editable) is a local-dev convenience for iterating on the framework alongside the kit; the image
-# doesn't need that sibling repo at all. --frozen and --no-sources can't be combined (uv rejects
-# it), so: export everything else frozen from uv.lock (still fully reproducible), excluding arvel,
-# then install arvel by itself straight from the index. Bump the pin here if arvel cuts a release
-# this kit hasn't picked up in its own lockfile yet.
+# Install the app's dependencies into the system Python site-packages (no virtualenv — this is a
+# single-purpose container, already the isolation boundary a venv would otherwise buy). arvel is
+# published on PyPI (0.51.0), carrying with_public_dir/with_lang_dir/Router.public()/
+# session.driver — the features bootstrap/app.py depends on; bump the pin if arvel cuts a release
+# this kit hasn't picked up in its own lockfile yet. This repo's own [tool.uv.sources] override
+# (path = "../arvel", editable) is a local-dev convenience for iterating on the framework
+# alongside the kit — the image doesn't need that sibling repo at all. --frozen and --no-sources
+# can't be combined (uv rejects it), so: export everything else frozen from uv.lock (still fully
+# reproducible), excluding arvel, then install arvel by itself straight from the index.
 RUN uv export --frozen --no-dev --no-editable --no-emit-package arvel -o requirements.txt && \
     uv pip install --system --no-cache -r requirements.txt && \
-    uv pip install --system --no-cache "arvel[standard,oidc,s3,telemetry,search,queue-amqp]==0.49.0" && \
+    uv pip install --system --no-cache "arvel[standard,oidc,s3,telemetry,search,queue-amqp]==${ARVEL_VERSION}" && \
     rm -f /usr/local/bin/uv /usr/local/bin/uvx requirements.txt
 
 # The built SPA becomes the static doc root with_public_dir(...) (bootstrap/app.py) serves via
@@ -50,8 +54,7 @@ RUN find / -xdev -perm /6000 -type f -exec chmod a-s {} + 2>/dev/null; \
 WORKDIR /app
 COPY --from=backend-builder --chown=app:app /usr/local/lib/python3.14/site-packages /usr/local/lib/python3.14/site-packages
 COPY --from=backend-builder --chown=app:app /app/public ./public
-COPY . /app
-RUN rm -rf /app/frontend
+COPY --exclude=frontend --exclude=public . /app
 
 ENV PYTHONDONTWRITEBYTECODE=1
 ENV PYTHONUNBUFFERED=1

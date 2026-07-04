@@ -11,7 +11,7 @@ arvel REST API.
 # 1. arvel IS on PyPI, but local dev tracks the framework source directly (this kit's own
 #    pyproject.toml points at ../arvel, editable) — clone it as a sibling, then install.
 #    (Docker doesn't need this — the image installs arvel straight from PyPI; see Docker, below.)
-uv sync                              # installs arvel[standard,sqlite,postgres,telemetry,jwt,media] + dev
+uv sync --no-sources                 # installs arvel[standard,sqlite,postgres,telemetry,jwt,media] + dev
 
 # 2. configuration
 cp .env.example .env                 # defaults already match docker-compose.yml

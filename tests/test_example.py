@@ -18,13 +18,16 @@ _INDEX = _PUBLIC / "index.html"
 
 
 def test_home_returns_200() -> None:
-    planted = not _INDEX.exists()
-    if planted:
+    planted_dir = not _PUBLIC.exists()
+    planted_index = not _INDEX.exists()
+    if planted_index:
         _PUBLIC.mkdir(exist_ok=True)
         _INDEX.write_text("<html>placeholder — see make front</html>")
     try:
         with TestClient(app=asgi_app) as client:
             assert client.get("/").status_code == 200
     finally:
-        if planted:
+        if planted_index:
             _INDEX.unlink()
+        if planted_dir:
+            _PUBLIC.rmdir()
