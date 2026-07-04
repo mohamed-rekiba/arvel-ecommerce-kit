@@ -8,8 +8,9 @@ arvel REST API.
 ## Quick start
 
 ```bash
-# 1. arvel isn't on PyPI yet — clone it as a sibling, then install
-#    (this kit's pyproject points at ../arvel)
+# 1. arvel IS on PyPI, but local dev tracks the framework source directly (this kit's own
+#    pyproject.toml points at ../arvel, editable) — clone it as a sibling, then install.
+#    (Docker doesn't need this — the image installs arvel straight from PyPI; see Docker, below.)
 uv sync                              # installs arvel[standard,sqlite,postgres,telemetry,jwt,media] + dev
 
 # 2. configuration
@@ -62,6 +63,23 @@ its retries lands in `failed_jobs`: inspect with `uv run arvel queue:failed`, re
 Walk all of it end to end on the live stack: **[docs/tour.md](docs/tour.md)** (screenshots in
 `docs/screenshots/`). Maintenance mode + scheduling: [docs/operability.md](docs/operability.md).
 
+## Docker
+
+One production image, hardened + nonroot (`python:3.14-slim-trixie`, setuid/setgid stripped,
+dedicated `app` service account — no venv, dependencies install straight into the base Python's
+site-packages since the container is already the isolation boundary):
+
+```bash
+docker build -t arvel-ecommerce-kit .
+docker run --rm -p 8000:8000 --env-file .env arvel-ecommerce-kit
+```
+
+Multi-stage: `frontend` builds the Vue SPA (`npm run build`), `backend-builder` resolves + installs
+Python deps (arvel comes from PyPI, not the local sibling checkout `uv sync` uses for dev — see
+the Dockerfile's own comments), `backend` is the shipped image. The built SPA becomes `./public`,
+served by `Route.public()` (configured via `with_public_dir(...)` in `bootstrap/app.py`) — real
+files served as-is, any other path falls back to `index.html` for vue-router.
+
 ## API docs (OpenAPI)
 
 With the server running, interactive docs are at **http://127.0.0.1:8000/docs** (raw document at
@@ -71,11 +89,15 @@ descriptions (from docstrings) generate automatically. Configure in `config/open
 ## Structure
 
 ```
-bootstrap/        configure + build the app (routing, providers, middlewares, config)
+bootstrap/        configure + build the app (routing, providers, middlewares, config, public/lang dirs)
 config/           configuration (loaded via config("..."))
 routes/           web.py · api.py · console.py
 app/              models · controllers · services · policies · jobs · listeners · mail · events · auth
+resources/        lang/ translations (with_lang_dir(...) in bootstrap/app.py) · views/ (Jinja2)
 database/         migrations · seeders · factories
+storage/app/      the "local" filesystem disk's root; storage/app/public/ is `storage:link`'s target
 frontend/        Vue 3 SPA — storefront + admin (`/admin/*`, lazy chunk); `make front`
+public/           NOT committed — Docker-populated from frontend/dist/, served via Route.public()
 docker-compose.yml  Postgres · Valkey · RabbitMQ · RustFS (S3) · Keycloak (OIDC) · Mailpit
+Dockerfile        production image (see Docker, above)
 ```

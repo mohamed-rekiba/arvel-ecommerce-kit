@@ -1,0 +1,22 @@
+.git/
+.venv/
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.ruff_cache/
+.env
+.env.*
+!.env.example
+*.sqlite
+*.db
+.aios/
+
+frontend/node_modules/
+frontend/dist/
+frontend/.vite/
+tests/
+
+# Docker-build-time output (see Dockerfile) — never an input
+public/
+
+storage/app/
