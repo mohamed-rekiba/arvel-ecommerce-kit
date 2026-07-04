@@ -17,6 +17,8 @@ def create_app() -> Application:
     return (
         Application.configure(str(BASE_PATH))
         .with_config_dir(BASE_PATH / "config")
+        .with_public_dir(BASE_PATH / "public")
+        .with_lang_dir(BASE_PATH / "resources" / "lang")
         .with_providers(BASE_PATH / "bootstrap" / "providers.py")
         .with_middlewares(BASE_PATH / "bootstrap" / "middlewares.py")
         .with_routing(
