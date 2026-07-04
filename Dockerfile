@@ -31,9 +31,9 @@ RUN uv export --frozen --no-dev --no-editable --no-emit-package arvel -o require
     uv pip install --system --no-cache "arvel[standard,oidc,s3,telemetry,search,queue-amqp]==0.49.0" && \
     rm -f /usr/local/bin/uv /usr/local/bin/uvx requirements.txt
 
-# The built SPA becomes the static doc root routes/web.py serves via Route.public() (arvel's
-# Laravel-`public/`-parity static front door) — populated only here, never committed (see
-# .gitignore).
+# The built SPA becomes the static doc root with_public_dir(...) (bootstrap/app.py) serves via
+# arvel's Route.public() (Laravel-`public/`-parity static front door) — populated only here,
+# never committed (see .gitignore).
 COPY --from=frontend /src/dist/. ./public/
 
 # ---- runtime: same Debian trixie/Python lineage as the builder, hardened + nonroot -------------
@@ -49,6 +49,7 @@ RUN find / -xdev -perm /6000 -type f -exec chmod a-s {} + 2>/dev/null; \
 
 WORKDIR /app
 COPY --from=backend-builder --chown=app:app /usr/local/lib/python3.14/site-packages /usr/local/lib/python3.14/site-packages
+COPY --from=backend-builder --chown=app:app /app/public ./public
 COPY . /app
 RUN rm -rf /app/frontend
 

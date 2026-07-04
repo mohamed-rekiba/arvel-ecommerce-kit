@@ -29,7 +29,10 @@ venv = ".venv"
 reportMissingTypeStubs = false  # third-party (faker, …) ship no stubs; our own code stays strict
 
 [tool.uv.sources]
-# arvel is not yet published — the kit is the proof app for the local framework build.
+# arvel IS published (PyPI), but this kit is the proof app for the local framework build, so local
+# dev tracks the framework source directly rather than whatever's currently released — the kit
+# regularly depends on framework changes ahead of a release (Docker installs from PyPI instead;
+# see Dockerfile, which must pin a version that actually carries what this kit needs).
 # Clone the `arvel` repo as a sibling directory (../arvel) before `uv sync`.
 arvel = { path = "../arvel", editable = true }
 
