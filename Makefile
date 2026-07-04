@@ -69,3 +69,7 @@ lint: ## Lint + format check
 	uv run ruff check . && uv run ruff format --check .
 
 check: lint typecheck test ## Lint + types + tests
+
+clean:  ## Remove build/test artifacts
+	rm -rf .site .cache .pytest_cache .mypy_cache .ruff_cache .hypothesis .import_linter_cache .coverage.json dist build
+	find . -type d -name __pycache__ -prune -exec rm -rf {} +
