@@ -1,8 +1,7 @@
 """Product media — admin gallery upload + serving, via arvel's media library.
 
 Admin upload attaches an image to the product's ``images`` collection (conversions auto-generated);
-serving streams a media item (original or a named conversion) from its disk. Showcases the media
-library (HasMedia / add_media / conversions) + the filesystem.
+serving streams a media item (original or a named conversion) from its disk.
 """
 
 from arvel import abort

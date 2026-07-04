@@ -1,7 +1,4 @@
-// Admin auth store. Bearer session (email/password → personal-access token) for the RBAC back-office
-// users. Which admin nav/actions are permitted is enforced server-side by the RBAC Gate (403/404); the
-// SPA just reflects failures. (Keycloak-OIDC is the production login; it resolves the same admin User
-// via the /admin OIDC path and would issue an equivalent bearer session.)
+// RBAC is enforced server-side (403/404 on the Gate) — this store just reflects failures, it doesn't gate nav.
 import { reactive } from "vue";
 import { type User, api, token } from "./api";
 

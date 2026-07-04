@@ -1,7 +1,5 @@
 <script setup lang="ts">
-// The BestShop home: hero carousel (admin-managed banners) → trust strip → popular categories →
-// Deals of the Day (countdown flash sales) → promo grid → Featured Products. Every section
-// handles its empty state (no banners → static slide; no deals → section hides).
+// Every section handles its own empty state: no banners → static fallback slide; no deals → section hides.
 import { computed, onBeforeUnmount, onMounted, ref } from "vue";
 import { type Banner, type Category, type Deal, type Product, api } from "../api";
 import { cacheCategories, cacheList, cacheProducts, getCachedCategories, getCachedList } from "../product-cache";
@@ -17,7 +15,7 @@ const deals = ref<Deal[]>([]);
 const banners = ref<Banner[]>([]);
 const loading = ref(cachedProducts === null);
 
-// --- hero carousel -------------------------------------------------------------------------
+// --- hero carousel ---
 const slide = ref(0);
 const slides = computed<Banner[]>(() =>
   banners.value.length
@@ -86,7 +84,7 @@ const maxDealPct = computed(() =>
   deals.value.reduce((max, d) => Math.max(max, d.percent_off), 0),
 );
 
-// --- categories rail (scroll-snap; arrow nudges on desktop) ---------------------------------
+// --- categories rail ---
 const railEl = ref<HTMLElement | null>(null);
 function nudgeRail(dir: number) {
   const el = railEl.value;
@@ -227,8 +225,7 @@ function nudgeRail(dir: number) {
 .sect { font-family: var(--font-display); font-size: clamp(1.25rem, 2.4vw, 1.65rem); font-weight: 800; margin-bottom: clamp(1rem, 2.5vw, 1.75rem); text-align: center; position: relative; }
 .sect::after { content: ""; display: block; width: 56px; height: 3px; border-radius: 2px; background: var(--accent-bright); margin: 10px auto 0; }
 
-/* hero — fixed-height frame; the image is an absolute cover layer behind a scrim, so slide
-   heights can never differ per image (issue 3) */
+/* fixed-height frame; the image is an absolute cover layer, so slide height never varies per image */
 .hero { padding-top: clamp(1rem, 2.5vw, 1.75rem); }
 .hero__frame { position: relative; border-radius: var(--radius-lg); overflow: hidden; background: var(--hero-band); border: 1px solid var(--border); height: clamp(340px, 42vw, 420px); }
 .hero__slide { position: absolute; inset: 0; }
@@ -256,7 +253,7 @@ function nudgeRail(dir: number) {
 .trust__meta b { font-size: 12.5px; font-weight: 700; }
 .trust__meta i { font-style: normal; font-size: 11px; color: var(--text-subtle); }
 
-/* categories — horizontal scroll-snap rail of compact tiles (issue 2) */
+/* categories — horizontal scroll-snap rail of compact tiles */
 .railhead { display: flex; align-items: center; justify-content: center; position: relative; }
 .sect--rail { margin-bottom: clamp(1rem, 2.5vw, 1.75rem); }
 .rail__arrows { display: none; position: absolute; inset-inline-end: 0; top: 4px; gap: 8px; }

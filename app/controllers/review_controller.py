@@ -1,5 +1,5 @@
-"""Product reviews (S16) — verified purchasers rate + review; admins moderate; the storefront
-shows APPROVED reviews and the denormalized aggregate."""
+"""Product reviews — verified purchasers rate + review; admins moderate; the storefront shows
+APPROVED reviews and the denormalized aggregate."""
 
 from arvel import DB, abort
 from arvel.activitylog import activity

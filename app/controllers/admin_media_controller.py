@@ -34,7 +34,9 @@ async def _owner_labels(rows: list[Media]) -> dict[tuple[str, int], str]:
             translations: dict[str, dict[str, str]] = (
                 cast("dict[str, dict[str, str]]", raw) if isinstance(raw, dict) else {}
             )
-            title: str = (translations.get("en") or {}).get("title") or f"Banner #{b.id}"
+            title: str = (translations.get("en") or {}).get(
+                "title"
+            ) or f"Banner #{b.id}"
             labels[("Banner", b.id)] = title
     if ids.get("User"):
         for u in await User.where_in("id", list(ids["User"])).get():

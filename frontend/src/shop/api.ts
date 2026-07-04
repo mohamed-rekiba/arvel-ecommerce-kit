@@ -1,8 +1,5 @@
-// Thin typed client for the arvel REST API (proxied to the arvel server via vite in dev).
-// Every TYPE here is an alias of the GENERATED contract (src/api/gen — orval over the arvel
-// OpenAPI document); nothing shape-like is hand-written. Regenerate after backend changes:
-//   make openapi && npm run api:generate
-
+// Every type here aliases the generated contract (src/api/gen); regenerate after backend changes
+// with `make openapi && npm run api:generate`.
 import { apiFetch } from "../api/http";
 import type {
   AddressOut,
@@ -60,8 +57,7 @@ export type TimelineStep = OrderTimelineOut;
 export type { PaymentMethod };
 export type PublicSettings = SettingsOutValues;
 
-// arvel's LengthAwarePaginator JSON shape (DR-0022) — generic over the row type (the generated
-// ProductPage is this, fixed to ProductOut).
+// arvel's LengthAwarePaginator JSON shape (DR-0022), generic over the row type.
 export interface Paginated<T> {
   data: T[];
   current_page: number;
@@ -82,8 +78,7 @@ const cartToken = {
   },
 };
 
-// Guest order receipts: order id → access token, kept so a guest can revisit/pay/cancel their
-// own orders (the server issues the token once, at checkout).
+// order id → access token, so a guest can revisit/pay/cancel their own orders after checkout.
 const ORDER_TOKENS_KEY = "arvel_order_tokens";
 export const orderTokens = {
   all(): Record<string, string> {

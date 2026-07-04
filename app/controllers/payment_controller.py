@@ -1,9 +1,6 @@
 """Payments — create a charge against the payment gateway (HTTP client) and process gateway
-webhooks idempotently. Typed end to end.
-
-Exercises arvel's Http client (outbound gateway call), config, the OrderStatus state machine, and
-idempotency: a webhook redelivered with the same event id is processed exactly once (a unique
-idempotency-ledger row dedupes it).
+webhooks idempotently: a webhook redelivered with the same event id is processed exactly once (a
+unique idempotency-ledger row dedupes it).
 """
 
 import hashlib
@@ -91,8 +88,6 @@ async def webhook(request: Request, data: WebhookIn) -> WebhookOut:
     if not data.id or not data.type:
         abort(400, "Malformed webhook.")
 
-    # Idempotency: if this event id is already recorded, it's a redelivery — acknowledge without
-    # re-running the side effects.
     if await WebhookEvent.where("event_id", data.id).first() is not None:
         return WebhookOut(status="already_processed")
 
@@ -120,8 +115,7 @@ async def webhook(request: Request, data: WebhookIn) -> WebhookOut:
 
                         await log_transition(order, current, OrderStatus.PAID)
         elif data.type == "charge.failed":
-            # the charge died at the gateway: mark the payment failed; the order stays PENDING
-            # so the customer can retry payment
+            # order stays PENDING so the customer can retry payment
             charge_id = data.data.get("charge_id")
             payment = await Payment.where("gateway_charge_id", charge_id).first()
             if payment is not None:

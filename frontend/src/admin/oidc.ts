@@ -1,6 +1,4 @@
-// Keycloak browser login (OIDC auth-code + PKCE), then the DR-0030 bridge: exchange the Keycloak
-// token for an arvel bearer PAT that the bearer-guarded admin APIs accept. Dev defaults point at the
-// local Keycloak; override with VITE_KEYCLOAK_URL / VITE_KEYCLOAK_CLIENT if needed.
+// OIDC auth-code + PKCE against Keycloak, then the DR-0030 bridge exchanges it for an arvel bearer PAT.
 import { token } from "./api";
 
 const KEYCLOAK_URL = import.meta.env.VITE_KEYCLOAK_URL ?? "http://localhost:8080/realms/arvel";

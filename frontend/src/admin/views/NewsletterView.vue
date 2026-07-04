@@ -1,5 +1,4 @@
 <script setup lang="ts">
-// Newsletter subscribers (A7 admin side): the signup list with a client-side CSV export.
 import Button from "primevue/button";
 import Column from "primevue/column";
 import DataTable from "primevue/datatable";

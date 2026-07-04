@@ -1,6 +1,5 @@
 <script setup lang="ts">
-// Flash-sale management: create a timed percent-off on one product, flip it live/paused,
-// delete it. The storefront charges the deal price for real, so the LIVE column matters.
+// The storefront charges the deal price for real once live, so the LIVE column isn't just cosmetic.
 import Button from "primevue/button";
 import Column from "primevue/column";
 import DataTable from "primevue/datatable";

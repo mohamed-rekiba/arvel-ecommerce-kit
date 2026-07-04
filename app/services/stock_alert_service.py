@@ -1,4 +1,4 @@
-"""The restock fan-out (S17): on a genuine 0→positive stock edge, every subscriber gets a QUEUED
+"""The restock fan-out: on a genuine 0→positive stock edge, every subscriber gets a QUEUED
 back-in-stock notification (database + mail ride separate worker jobs) and the subscription is
 consumed — one-shot, so a later adjustment can't re-notify."""
 

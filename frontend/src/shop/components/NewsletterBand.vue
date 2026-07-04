@@ -1,6 +1,4 @@
 <script setup lang="ts">
-// Newsletter band (A7) — the charcoal signup strip on home + account pages. Idempotent server
-// endpoint; success and validation errors are announced politely.
 import { ref } from "vue";
 import { api } from "../api";
 import { t } from "../locale";

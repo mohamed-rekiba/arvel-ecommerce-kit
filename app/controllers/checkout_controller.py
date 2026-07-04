@@ -1,9 +1,5 @@
 """Checkout + orders — turn a cart into an order atomically, fire a domain event, and drive the
-order state machine. Typed end to end (request, response schemas).
-
-Exercises arvel's DB transactions (DB.transaction — order + items created and the cart cleared
-atomically; a failure rolls all of it back), events (Event.dispatch('order.placed') → the registered
-listener), telemetry (a checkout span), and the typed OrderStatus state machine (app.enums).
+order state machine.
 """
 
 from typing import Any
@@ -49,8 +45,7 @@ from app.schemas import (
     OrderTimelineOut,
 )
 
-# The shop's documented money rules — server-authoritative, never trusted from the client:
-# flat-rate shipping per order, and a flat sales-tax percentage on the goods subtotal.
+# Server-authoritative money rules (never trusted from the client): flat shipping, flat tax rate.
 SHIPPING_FLAT_CENTS = 500
 TAX_RATE_PERCENT = 10
 
@@ -152,12 +147,9 @@ async def _order_out(
 
 
 async def _reprice_lines(items: list[Any]) -> None:
-    """Re-derive every cart line's unit price at ORDER time (base + variant adjustment, with the
-    deal live right now applied), immediately BEFORE the order transaction opens. The cart
-    snapshot is a quote; the order charges today's price — an expired deal is dropped, a deal
-    that started after carting is honored (deal_service owns the math). A deal flipping in the
-    microseconds between this re-price and the commit keeps the just-quoted price; totals are
-    always server-computed."""
+    """Re-derive every cart line's unit price at ORDER time (base + variant adjustment, with
+    whatever deal is live right now) immediately before the order transaction opens — the cart
+    snapshot is a quote; the order always charges today's price. Totals are server-computed."""
     from app.services import deal_service
 
     variants = {

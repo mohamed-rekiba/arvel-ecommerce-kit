@@ -1,5 +1,4 @@
-// Admin-console message map. The locale choice/state itself lives in the shared core
-// (lib/i18n.ts) — one persisted selection drives both the storefront and the console.
+// Locale state itself lives in lib/i18n.ts — one persisted selection drives both storefront and console.
 import { type Locale as CoreLocale, makeT } from "../lib/i18n";
 
 const MESSAGES = {

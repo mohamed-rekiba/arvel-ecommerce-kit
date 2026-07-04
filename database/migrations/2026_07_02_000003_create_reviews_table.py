@@ -1,4 +1,4 @@
-"""Product reviews (S16) — polymorphic subject (morphs), moderated. One review per customer per
+"""Product reviews — polymorphic subject (morphs), moderated. One review per customer per
 subject; the aggregate (sum + count of APPROVED ratings) is denormalized onto products so listing
 reads take zero extra queries."""
 

@@ -13,7 +13,7 @@ const ssoBusy = ref(false);
 async function signInWithSSO() {
   ssoBusy.value = true;
   try {
-    await startKeycloakLogin(); // redirects to Keycloak
+    await startKeycloakLogin();
   } catch {
     ssoBusy.value = false;
   }

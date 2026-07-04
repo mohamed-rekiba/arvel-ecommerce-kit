@@ -2,10 +2,8 @@
 
 import os
 
-# The suite is infra-independent: force in-process cache/queue regardless of a developer's local
-# .env (which may point at Redis for `arvel serve`). Set before any app boots — arvel's
-# load_dotenv(override=False) then leaves these alone. The production path uses whatever .env /
-# docker-compose provides; tests must not depend on running infra.
+# Force in-process cache/queue before any app boots, so tests don't depend on a dev's .env
+# pointing at real infra — arvel's load_dotenv(override=False) won't clobber these.
 os.environ.setdefault("CACHE_STORE", "array")
 os.environ.setdefault("QUEUE_CONNECTION", "memory")
 os.environ.setdefault("MAIL_MAILER", "log")

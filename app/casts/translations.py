@@ -1,11 +1,8 @@
-"""Custom casts for the single locale-major `translations` jsonb column
-(`{"en": {"name","description"}, "fr": {...}}`).
+"""Casts for the locale-major `translations` jsonb column (`{"en": {...}, "fr": {...}}`).
 
-- `TranslationsCast` — the whole column → `list[Translate]` (one per locale), for the admin.
-- `TranslationCast` — a single locale's object (the `scope_in_locale` projection `translations->'<loc>'`)
-  → a single `Translate`, for the storefront.
-
-Both go through the model cast system (`__casts__`), so controllers never (de)serialize translations by hand.
+`TranslationsCast` maps the whole column to `list[Translate]` (admin); `TranslationCast` maps a
+single locale projection to one `Translate` (storefront). Both go through `__casts__`, so
+controllers never (de)serialize translations by hand.
 """
 
 from __future__ import annotations
@@ -40,20 +37,17 @@ class TranslationsCast:
         return [_translate(locale, fields) for locale, fields in _load(value).items()]
 
     def set(self, model: Any, key: str, value: Any, attributes: dict[str, Any]) -> Any:
-        if isinstance(value, list):  # list[Translate] → locale-major dict
+        if isinstance(value, list):
             return {
                 t.locale: {"name": t.name, "description": t.description}
                 for t in cast("list[Translate]", value)
             }
-        return (
-            value  # a locale-major dict → stored as-is (the jsonb column serializes it)
-        )
+        return value
 
 
 class LocaleMapCast:
-    """A locale-major jsonb map with FREE per-locale fields (e.g. a banner's
-    {locale: {title, subtitle, chip, cta_label}}) ↔ plain dict — handles the PG-dict /
-    sqlite-string asymmetry without imposing the Translate shape."""
+    """A locale-major jsonb map with free-form per-locale fields ↔ plain dict — handles the
+    PG-dict / sqlite-string asymmetry without imposing the Translate shape."""
 
     def get(
         self, model: Any, key: str, value: Any, attributes: dict[str, Any]
@@ -61,7 +55,7 @@ class LocaleMapCast:
         return _load(value)
 
     def set(self, model: Any, key: str, value: Any, attributes: dict[str, Any]) -> Any:
-        return value  # a dict — the jsonb column serializes it
+        return value
 
 
 class TranslationCast:

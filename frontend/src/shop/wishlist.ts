@@ -1,5 +1,4 @@
-// A shared wishlist store (reactive singleton) — the heart on product cards and the account wishlist
-// read the same state. Saved server-side per customer; requires a signed-in bearer session.
+// Reactive singleton — saved server-side per customer; requires a signed-in bearer session.
 import { reactive } from "vue";
 import { type Product, api, authToken } from "./api";
 

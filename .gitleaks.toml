@@ -1,0 +1,23 @@
+title = "Arvel gitleaks configuration"
+
+# Extend the bundled rule set rather than redefining it.
+[extend]
+useDefault = true
+
+[allowlist]
+description = "False positives"
+# Markdown docs reference framework concepts (e.g. example keys/tokens) that
+# trip the generic high-entropy / API-key heuristics but carry no real secret.
+paths = [
+  '''docs/.*\.md$''',
+]
+regexes = [
+  # Azurite's well-known public dev-account key, required verbatim by the storage integration tests.
+  '''Eby8vdM02xNOcqFlqUwJPLlmEtlCDXJ1OUzFT50uSRZ6IFsuFq2UVErCz4I6tq/K1SZFPTOtr/KBHBeksoGMGw==''',
+  # A deliberately-fake base64 blob a storage test uses to exercise generate_blob_sas.
+  '''dGVzdGtleWZvcnNhc2dlbmVyYXRpb24=''',
+  # Docker image version tags (e.g. valkey:9.1.0-alpine3.23) trip the generic-api-key heuristic.
+  '''\d+\.\d+\.\d+-alpine\d+(\.\d+)?''',
+  # `max_bytes=<N>` in the SSRF-guard tests — flagged for the digit/letter mix, not a credential.
+  '''max_bytes=\d+''',
+]

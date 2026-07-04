@@ -25,7 +25,7 @@ const cartTotal = computed(() => {
   return cart.total_cents - (cart.discount_cents ?? 0);
 });
 
-// --- scoped search (the reference's category-dropdown + SEARCH bar) ----------------------------
+// --- scoped search ---
 const categories = ref<Category[]>([]);
 const searchQ = ref(String(route.query.q ?? ""));
 const searchCat = ref("");
@@ -36,14 +36,14 @@ function submitSearch() {
   router.push({ name: "catalog", query });
 }
 
-// --- collection dropdown (charcoal nav) --------------------------------------------------------
+// --- collection dropdown ---
 const collOpen = ref(false);
 const collRef = ref<HTMLElement | null>(null);
 function onDocClick(e: MouseEvent) {
   if (collRef.value && !collRef.value.contains(e.target as Node)) collOpen.value = false;
 }
 
-// --- announcement bar ---------------------------------------------------------------------------
+// --- announcement bar ---
 const announcement = ref<Announcement | null>(null);
 const dismissed = ref(false);
 const DISMISS_KEY = "arvel_announce_dismissed";
@@ -64,9 +64,7 @@ watch(() => route.fullPath, () => {
   collOpen.value = false;
 });
 
-// Where the View Transitions API drives the animation (Chrome/Edge/Safari 18+) we let it own the
-// morph; elsewhere (Firefox / older Safari) we fall back to a plain Vue cross-fade. Keying the view by
-// path also forces a fresh mount per route so the PDP re-reads the product cache in setup().
+// Keying the view by path forces a fresh mount per route, so the PDP re-reads the product cache in setup().
 const vtSupported = "startViewTransition" in Document.prototype;
 
 onMounted(() => {
@@ -363,7 +361,7 @@ onBeforeUnmount(() => document.removeEventListener("click", onDocClick));
 @media (min-width: 640px) {
   .who__meta { display: flex; }
 }
-/* 640-1023: search shares the header row — drop the category select so input + button fit */
+/* search shares the header row here — drop the category select so input + button fit */
 @media (min-width: 640px) and (max-width: 1023.98px) {
   .search__cat { display: none; }
 }

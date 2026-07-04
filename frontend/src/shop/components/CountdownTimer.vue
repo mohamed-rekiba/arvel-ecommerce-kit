@@ -1,6 +1,5 @@
 <script setup lang="ts">
-// Ticks client-side toward an ISO deadline (the deal's ends_at). Emits nothing; parents that
-// need expiry behavior watch the deal list itself (the server is the authority on live deals).
+// Client-side ticker only — the server is the authority on which deals are actually live.
 import { computed, onBeforeUnmount, onMounted, ref } from "vue";
 import { t } from "../locale";
 

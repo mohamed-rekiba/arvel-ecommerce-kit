@@ -1,6 +1,4 @@
 <script setup lang="ts">
-// A "Deals of the Day" card per the reference: image, −N% badge, name, stars, struck + sale
-// price, the available/sold sell-through bar, and a live countdown.
 import { computed } from "vue";
 import { type Deal, formatPrice } from "../api";
 import { t } from "../locale";

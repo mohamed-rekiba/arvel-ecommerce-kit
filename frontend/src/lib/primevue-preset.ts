@@ -1,7 +1,4 @@
-// PrimeVue theme preset mapped to the arvel-ecommerce-kit "Marketplace" palette (see
-// styles/tokens.css / DESIGN.md): amber primary used sparingly, paper neutrals in light, warm
-// graphite in dark. Dark mode follows our own `[data-theme="dark"]` selector so the header
-// toggle drives PrimeVue too.
+// Dark mode follows our own `[data-theme="dark"]` selector so the header toggle drives PrimeVue too.
 import { definePreset } from "@primeuix/themes";
 import Aura from "@primeuix/themes/aura";
 

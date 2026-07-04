@@ -12,8 +12,8 @@ const route = useRoute();
 const router = useRouter();
 const { add } = useCart();
 
-// seed synchronously from the list cache so the image paints on the first frame — the View Transition
-// needs the shared element present on the new page to morph into (else it degrades to a fade).
+// Seeded synchronously so the image paints on frame one — the View Transition morph needs the
+// shared element present on the new page immediately, or it degrades to a plain fade.
 const cached = getCachedProduct(String(route.params.slug));
 const product = ref<Product | null>(cached);
 const status = ref<"loading" | "error" | "ready">(cached ? "ready" : "loading");
@@ -23,7 +23,6 @@ const selectedVariantId = ref<number | null>(
 const adding = ref(false);
 const added = ref(false);
 
-// gallery with a selected image (lead with the sharp `original` 900×1125, preview as the 1x fallback)
 const selected = ref(0);
 const gallery = computed(() => product.value?.gallery ?? []);
 const g = computed(() => gallery.value[selected.value] ?? null);
@@ -32,7 +31,7 @@ const srcset = computed(() => (g.value ? `${g.value.preview_url} 600w, ${g.value
 watch(product, () => (selected.value = 0));
 const variants = computed<Variant[]>(() => product.value?.variants ?? []);
 
-// --- reviews (S16) ---------------------------------------------------------------
+// --- reviews ---
 const reviewData = ref<ReviewList | null>(null);
 const reviewForm = reactive({ rating: 5, title: "", body: "" });
 const reviewBusy = ref(false);
@@ -69,7 +68,6 @@ async function submitReview() {
   }
 }
 
-// back-in-stock (S17)
 const alertState = ref<"idle" | "done" | "auth">("idle");
 
 async function notifyMe() {
@@ -103,9 +101,7 @@ async function load() {
   }
 }
 
-// "Back to shop" should return to wherever the user actually came from (catalog with its filters, a
-// search, home, …) — not always home. `history.state.back` is null only when there's no in-app entry
-// to return to (a fresh load / direct link), so fall back to the catalog in that case.
+// `history.state.back` is null only when there's no in-app entry to return to (fresh load / direct link).
 function goBack() {
   if (window.history.state?.back) router.back();
   else router.push({ name: "catalog" });
@@ -302,9 +298,8 @@ watch(() => route.params.slug, load);
 .pdp__grid, .pdp__skeleton { display: grid; grid-template-columns: 1fr; gap: var(--space-8); align-items: start; }
 @media (min-width: 1024px) { .pdp__grid, .pdp__skeleton { grid-template-columns: 1fr 1fr; gap: var(--space-16); } }
 .pdp__media { display: flex; flex-direction: column; gap: 12px; }
-/* same 4:5 ratio as the card grid / hero (ProductCard.vue, HomeView.vue) — the View Transition morph
-   animates the box between the old (card) and new (PDP) rects, and a mismatched aspect ratio makes the
-   captured image visibly stretch/squish mid-animation. Matching ratios keeps the morph a clean scale. */
+/* Same 4:5 ratio as the card grid (ProductCard.vue) — a mismatch here makes the View Transition
+   morph visibly stretch/squish the image mid-animation. */
 .pdp__main { aspect-ratio: 4 / 5; border-radius: var(--radius-lg); overflow: hidden; background: var(--photo-well); }
 .pdp__main img { width: 100%; height: 100%; object-fit: cover; }
 [data-theme="dark"] .pdp__main img, [data-theme="dark"] .pdp__thumb img { filter: brightness(.88); }

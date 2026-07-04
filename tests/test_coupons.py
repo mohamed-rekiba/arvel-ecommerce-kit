@@ -226,8 +226,7 @@ def test_remove_restores_and_merge_drops_the_guest_coupon(client) -> None:
     assert removed.json()["coupon_code"] is None
     assert removed.json()["discount_cents"] == 0
 
-    # a guest cart with a coupon merges into the user's cart: the USER cart's (absent) coupon
-    # wins — the guest code is deterministically dropped
+    # merge: the user cart's (absent) coupon wins — the guest code is deterministically dropped
     guest_token = client.post(
         "/api/cart/items", json={"product_variant_id": 1, "quantity": 1}
     ).json()["cart_token"]

@@ -100,11 +100,7 @@ def test_review_lifecycle_and_aggregate(client) -> None:
     )
     assert still_denied.status_code == 403  # pending ≠ purchased
 
-    # pay via the gateway webhook path is heavy here; the state machine is the boundary — use
-    # the dev-gateway-free route: order token + pay is mocked elsewhere. Mark paid via checkout's
-    # admin transition using a super-admin seeded through RBAC helper? Simplest: register a
-    # dedicated admin through the API is impossible — so run the transition through the ORM within
-    # the app portal (the admin endpoint path is already covered by checkout tests).
+    # mark paid via the ORM directly — the gateway/webhook path is already covered by the payment tests
     async def _mark_paid() -> None:
         from app.enums import OrderStatus
         from app.models.order import Order

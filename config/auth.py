@@ -1,7 +1,7 @@
 """Authentication config — guards + their drivers.
 
 The `api` guard uses bearer tokens (arvel.auth personal access tokens); the `web` guard uses
-session cookies. Run `arvel new <app> --auth` to scaffold a login + protected route.
+session cookies.
 
 Admins authenticate via OIDC against Keycloak: the Vue admin runs the auth-code flow at Keycloak,
 then sends the issued JWT as `Authorization: Bearer <jwt>`; arvel validates it against the realm's

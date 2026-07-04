@@ -1,7 +1,5 @@
 <script setup lang="ts">
-// Personal info (profile ref 1): avatar with camera-edit overlay + name/email/phone form +
-// the email-verification nudge. The avatar posts multipart to /api/account/avatar (arvel
-// HasMedia on User — replace-on-upload).
+// Avatar upload is replace-on-upload server-side (arvel HasMedia on User).
 import { onMounted, ref } from "vue";
 import { ApiError, api } from "../../api";
 import { useAuth } from "../../auth";

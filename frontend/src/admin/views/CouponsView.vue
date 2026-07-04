@@ -1,6 +1,5 @@
 <script setup lang="ts">
-// Discount codes: create percent/fixed coupons, flip active, and choose which one the storefront
-// ANNOUNCES on its orange bar (newest live announced coupon wins).
+// Only one coupon reaches the storefront's orange bar — the newest live one with announce=true wins.
 import Button from "primevue/button";
 import Column from "primevue/column";
 import DataTable from "primevue/datatable";

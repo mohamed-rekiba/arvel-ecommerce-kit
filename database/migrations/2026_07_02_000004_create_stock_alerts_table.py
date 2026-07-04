@@ -1,4 +1,4 @@
-"""Back-in-stock subscriptions (S17) — one-shot: consumed when the restock notification fans out."""
+"""Back-in-stock subscriptions — one-shot: consumed when the restock notification fans out."""
 
 from arvel.database import Blueprint, Migration, Schema
 

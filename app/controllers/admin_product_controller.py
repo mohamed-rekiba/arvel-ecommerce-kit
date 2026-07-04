@@ -1,8 +1,7 @@
 """Admin product CRUD — authorized via the Gate/ProductPolicy (only admins may mutate the catalog).
 
-Exercises arvel's authorization (policies, user.can / AuthorizationError → 403/404), middleware
-(token auth), and request validation. A denial renders as 403 (create) or 404 (update/delete,
-deny_as_not_found). Typed end to end.
+A denial renders as 403 on create, 404 on update/delete/restore (existence isn't leaked, per
+deny_as_not_found).
 """
 
 from arvel import abort

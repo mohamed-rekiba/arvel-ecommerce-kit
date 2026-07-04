@@ -1,10 +1,8 @@
 """Admin authentication via OIDC (Keycloak).
 
-The Vue admin runs the Keycloak auth-code flow and sends the issued JWT as ``Authorization:
-Bearer <jwt>``. We validate it against the realm JWKS (arvel ``OidcGuard`` + ``jwks_verifier``),
-require the configured Keycloak realm role, and just-in-time provision a local admin ``User`` keyed
-by the stable OIDC subject. The verifier is resolved from the ``admin_oidc_guard`` container binding
-so a test can swap in a fake (no live Keycloak needed).
+Validates the bearer JWT against the realm JWKS, requires the configured admin realm role, and
+JIT-provisions a local admin ``User`` keyed by the OIDC subject. The verifier is resolved from the
+``admin_oidc_guard`` container binding so a test can swap in a fake.
 """
 
 from typing import Any, cast
@@ -44,12 +42,10 @@ def _realm_roles(claims: dict[str, Any]) -> list[str]:
 
 
 async def resolve_admin(request: Request, *, persist_roles: bool = False) -> User:
-    """Authenticate + authorize an admin from the request's OIDC bearer token, JIT-provisioning a
-    local admin User. 401 if the token is missing/invalid; 403 if it lacks the admin realm role.
-
-    The Keycloak realm roles map to arvel RBAC roles (claim_map). By default they're carried as
-    ephemeral, request-scoped grants (DR-0011). With ``persist_roles=True`` (the bearer-bridge, DR-0030)
-    they're written to the user's RBAC membership so an issued bearer PAT carries them."""
+    """Authenticate + authorize an admin from the OIDC bearer token, JIT-provisioning a local admin
+    User. 401 if the token is missing/invalid, 403 if it lacks the admin realm role. With
+    ``persist_roles=True`` the mapped roles are written to RBAC membership instead of being carried
+    as ephemeral, request-scoped grants."""
     guard = app("admin_oidc_guard")
     principal = await guard.verify(request)
     if principal is None:
@@ -60,7 +56,7 @@ async def resolve_admin(request: Request, *, persist_roles: bool = False) -> Use
     if admin_role not in _realm_roles(claims):
         abort(403, "This account is not an administrator.")
 
-    # JIT provisioning: find the local admin by email (Keycloak is the source of truth), else create.
+    # JIT-provision by email; Keycloak is the source of truth.
     email = principal.email or f"{principal.subject}@oidc.local"
     user = await User.where("email", email).first()
     if user is None:
@@ -74,18 +70,15 @@ async def resolve_admin(request: Request, *, persist_roles: bool = False) -> Use
         user.role = UserRole.ADMIN  # promote: Keycloak says they're an admin
         await user.save()
 
-    # Map the Keycloak realm roles → arvel RBAC roles (claim_map). e.g. realm role "catalog-manager"
-    # → arvel role "catalog-manager".
+    # Map Keycloak realm roles → arvel RBAC roles via claim_map.
     from arvel.auth.claim_map import roles_for_claims
 
     idp_roles = roles_for_claims(
         claims, ROLE_CLAIM_MAP, claim_paths=("realm_access.roles",)
     )
     if persist_roles:
-        # DR-0030: write the mapping to RBAC membership so an issued bearer PAT carries the roles.
-        # Reconcile to the *exact* claim set (assign missing AND revoke removed) so a Keycloak
-        # demotion actually deprovisions — Keycloak stays the source of truth. Only the claim-mappable
-        # roles are managed here; any other RBAC role a user holds is left untouched.
+        # Reconcile to the exact claim set so a Keycloak demotion actually revokes access;
+        # other RBAC roles the user holds are left untouched.
         managed = {role_name.value for role_name in RoleName}
         existing = {role.name for role in await user.roles()}
         for role_name in idp_roles - existing:
@@ -93,6 +86,6 @@ async def resolve_admin(request: Request, *, persist_roles: bool = False) -> Use
         for role_name in (existing & managed) - idp_roles:
             await user.remove_role(role_name)
     else:
-        # DR-0011: carry them as ephemeral, request-scoped grants (no membership written).
+        # Ephemeral, request-scoped grants — no membership written.
         user.set_idp_roles(idp_roles)
     return user

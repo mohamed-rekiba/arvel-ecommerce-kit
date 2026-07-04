@@ -21,7 +21,7 @@ class CreateMediaTable(Migration):
             t.big_integer("size")
             # TEXT, not json: arvel's Media model casts these with the "json" cast, which owns
             # serialization (json.dumps/loads) — a native json column double-binds and rejects the
-            # text the cast produces (DR-0031). json-cast field ⇒ text column.
+            # text the cast produces.
             t.text("custom_properties")
             t.text("generated_conversions")
             t.integer("order_column").default(value=0)

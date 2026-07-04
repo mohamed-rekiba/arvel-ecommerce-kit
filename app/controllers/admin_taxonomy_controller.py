@@ -1,7 +1,6 @@
-"""Admin category + vendor management (S11) — the two retrievability dimensions stop being
-seed-only. Categories carry per-locale names and nest; vendors gate every product they own via
-``published``. catalog.* permission surface; every mutation is activity-logged; visibility inputs
-flag the retrievable views dirty (the debounced scheduler refresh recomputes them)."""
+"""Admin category + vendor management. Categories carry per-locale names and nest; vendors gate
+every product they own via ``published``. catalog.* permission surface; every mutation is
+activity-logged; visibility changes flag the retrievable views dirty (debounced refresh)."""
 
 from arvel import abort
 from arvel.activitylog import activity
@@ -66,7 +65,7 @@ async def _slug_taken(
     return existing is not None and existing.id != ignore_id
 
 
-# --- categories ----------------------------------------------------------------------------------
+# --- categories ---
 
 
 async def category_store(request: Request, data: CategoryIn) -> AdminCategoryOut:
@@ -158,7 +157,7 @@ async def category_destroy(request: Request) -> MessageOut:
     return MessageOut(message="Category deleted.")
 
 
-# --- vendors -------------------------------------------------------------------------------------
+# --- vendors ---
 
 
 async def vendors_index(request: Request) -> list[AdminVendorOut]:

@@ -64,7 +64,7 @@ async def index(request: Request) -> list[BannerOut]:
     return [await _public_out(b, locale) for b in banners]
 
 
-# --- admin -----------------------------------------------------------------------
+# --- admin ---
 
 
 def _current_user() -> User:

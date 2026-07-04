@@ -20,3 +20,8 @@ tests/
 public/
 
 storage/app/
+
+/README.md
+/docs/
+/docker-compose.yml
+/Dockerfile

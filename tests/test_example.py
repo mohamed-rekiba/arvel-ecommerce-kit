@@ -1,10 +1,8 @@
 """Example feature test — the app serves its home route (run with ``pytest``).
 
-"/" is served by with_public_dir(...) — the built Vue SPA's index.html, not a route defined in
-this repo's own code — so this test doesn't depend on `make front` having run first (which would
-make it pass only by the accident of a leftover local build; on a fresh clone or CI it would
-otherwise get arvel's clear "public directory has no index.html" error instead of a page): it
-plants a minimal placeholder if the real build isn't there, and only removes what it planted.
+"/" is served by with_public_dir(...) from the built Vue SPA's index.html, so this test doesn't
+depend on `make front` having run first — it plants a placeholder if the real build is missing,
+and cleans up only what it planted.
 """
 
 from pathlib import Path

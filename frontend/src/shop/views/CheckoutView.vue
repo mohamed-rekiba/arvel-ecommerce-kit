@@ -1,7 +1,5 @@
 <script setup lang="ts">
-// Checkout (profile ref 4): summary lines with thumbs → contact → address (saved-address
-// radios for signed-in customers, inline form otherwise/on "new") → payment-method radios
-// (gateway / cash-on-delivery). COD confirmations skip the pay step entirely.
+// COD confirmations skip the pay step entirely — see the `isCod` branch in the template below.
 import { computed, onBeforeUnmount, onMounted, reactive, ref } from "vue";
 import {
   ApiError,
@@ -24,12 +22,12 @@ const order = ref<Order | null>(null);
 const error = ref<string | null>(null);
 const fieldErrors = ref<Record<string, string[]>>({});
 
-// --- saved addresses (A2) ------------------------------------------------------------------
+// --- saved addresses ---
 const saved = ref<SavedAddress[]>([]);
 const selectedAddress = ref<number | "new">("new");
 const useSaved = computed(() => selectedAddress.value !== "new");
 
-// --- payment method (A5) -------------------------------------------------------------------
+// --- payment method ---
 const paymentMethod = ref<"gateway" | "cod">("gateway");
 const isCod = computed(() => order.value?.payment_method === "cod");
 
@@ -205,7 +203,6 @@ onMounted(async () => {
       </div>
 
       <form v-else class="panel" novalidate @submit.prevent="placeOrder">
-        <!-- summary with thumbs (issue 4) -->
         <ul class="lines">
           <li v-for="line in state.cart.items" :key="line.id" class="line">
             <span class="line__img">
@@ -286,7 +283,6 @@ onMounted(async () => {
           </label>
         </fieldset>
 
-        <!-- payment method (ref 4) -->
         <fieldset class="fields">
           <legend>{{ t("checkout.payment_method") }}</legend>
           <div class="radios">

@@ -246,8 +246,7 @@ def kit_app(monkeypatch: pytest.MonkeyPatch, tmp_path: Path):  # noqa: C901
         return TestClient(app=create_app().as_asgi())
 
     yield _boot
-    # clear the global app the boot installed — a later test's raw-resolver seeding must not
-    # resolve THIS test's loop-bound engine (cross-test "attached to a different loop" flakes)
+    # avoid a later test resolving this test's loop-bound engine ("attached to a different loop" flakes)
     from arvel.kernel import set_application
 
     set_application(None)

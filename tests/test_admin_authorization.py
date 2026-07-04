@@ -77,9 +77,7 @@ def _auth(token):
 
 
 def test_unauthenticated_is_rejected(client) -> None:
-    # a guest with an otherwise-valid body is rejected by the Authenticate middleware (401).
-    # (A guest with a malformed body may surface 400 first — body validation precedes route
-    # middleware in litestar — but a guest can never succeed, which is the security property.)
+    # a guest is always rejected — even a malformed body may 400 first (validation precedes auth middleware)
     resp = client.post(
         "/api/admin/products",
         json={

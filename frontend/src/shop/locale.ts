@@ -1,11 +1,9 @@
-// Storefront message map. The locale itself (selection, persistence, <html dir/lang>) lives in
-// the shared core (lib/i18n.ts) so the admin console shares the same choice.
 import { type Locale as CoreLocale, makeT } from "../lib/i18n";
 
 export { LOCALES, type Locale, locale, dir, applyDocumentLocale, setLocale, currentLocale } from "../lib/i18n";
 
-// --- chrome strings (catalog CONTENT comes translated from the API) ------------------------------
-// `satisfies` forces every locale to carry every key — a missing translation is a type error.
+// Chrome strings only — catalog content comes translated from the API.
+// `satisfies` forces every locale to carry every key, so a missing translation is a type error.
 const MESSAGES = {
   en: {
     "a11y.menu": "Menu",

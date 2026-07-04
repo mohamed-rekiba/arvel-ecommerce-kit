@@ -103,8 +103,7 @@ onMounted(refresh);
 .cart__grid { display: grid; grid-template-columns: 1fr; gap: var(--space-8); align-items: start; }
 @media (min-width: 1024px) { .cart__grid { grid-template-columns: 1fr 340px; gap: var(--space-12); } }
 .lines { list-style: none; margin: 0; padding: 0; }
-/* Mobile base: thumb spans both rows in col 1, meta sits above the qty stepper in col 2, price sits in
-   col 3 spanning both rows — avoids cramming a 4-across desktop row into a narrow phone width. */
+/* Mobile: 2-row layout avoids cramming the 4-across desktop row into a narrow phone width. */
 .line {
   display: grid;
   grid-template-columns: 56px 1fr auto;
@@ -136,7 +135,7 @@ onMounted(refresh);
 .qty button:hover { background: var(--color-surface); }
 .line__total { font-weight: var(--weight-medium); min-width: 4rem; text-align: end; }
 .summary { background: var(--color-surface); border-radius: var(--radius-lg); padding: var(--space-8); }
-/* sticky only makes sense once the summary is an actual side column (the ≥1024px 2-col cart__grid) */
+/* sticky only makes sense once the summary is an actual side column */
 @media (min-width: 1024px) { .summary { position: sticky; top: 88px; } }
 .summary__title { font-size: var(--text-xl); margin-bottom: var(--space-5); }
 .summary__row { display: flex; justify-content: space-between; padding: var(--space-2) 0; font-size: var(--text-sm); }

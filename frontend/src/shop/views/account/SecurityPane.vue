@@ -1,5 +1,4 @@
 <script setup lang="ts">
-// Password (profile ref sidebar): the change-password form.
 import { ref } from "vue";
 import { ApiError, api } from "../../api";
 import { t } from "../../locale";

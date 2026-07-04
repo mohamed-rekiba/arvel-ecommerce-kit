@@ -1,5 +1,5 @@
-"""Coupon domain rules (S15) — one place for validation + discount math, shared by the cart
-apply endpoint (fast feedback) and checkout (authoritative re-validation under a row lock).
+"""Coupon domain rules — one place for validation + discount math, shared by the cart apply
+endpoint (fast feedback) and checkout (authoritative re-validation under a row lock).
 
 Every rejection is a distinct, field-keyed 422 so the storefront can say exactly why."""
 

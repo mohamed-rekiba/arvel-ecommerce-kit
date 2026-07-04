@@ -1,7 +1,7 @@
 """Cache config — the default store + its connection.
 
-`array` (in-process, the default) needs nothing. `redis` needs a `url` and the `[redis]` extra; point
-`CACHE_URL` at your Redis. Use the cache via the `Cache` facade (`await Cache.get/put/remember`).
+`array` (in-process, the default) needs nothing; `redis` needs a `url` and the `[redis]` extra —
+point `CACHE_URL` at your Redis.
 """
 
 from arvel import env

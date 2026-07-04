@@ -22,12 +22,9 @@ async def me(request: Request) -> AdminMeOut:
 
 
 async def oidc_exchange(request: Request) -> TokenOut:
-    """Exchange a validated Keycloak token for an arvel bearer PAT (DR-0030). Validates + JIT-provisions
-    the admin (resolve_admin), then **persists** the Keycloak-mapped RBAC roles so the issued bearer
-    carries them into the bearer-guarded admin APIs. The browser admin SPA calls this after its
-    auth-code+PKCE flow, then uses the returned token like any password login."""
-    admin = await resolve_admin(
-        request, persist_roles=True
-    )  # syncs the Keycloak-mapped RBAC roles
+    """Exchange a validated Keycloak token for an arvel bearer PAT. JIT-provisions the admin and
+    persists the Keycloak-mapped RBAC roles so the issued bearer carries them into the
+    bearer-guarded admin APIs."""
+    admin = await resolve_admin(request, persist_roles=True)
     token, _ = await create_token(admin, name="admin-oidc")
     return TokenOut(token=token)

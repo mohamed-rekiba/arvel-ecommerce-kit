@@ -1,6 +1,6 @@
-"""The printable order invoice — server-rendered HTML via **arvel.views** (Jinja), the kit's
-exercise of the views module. Owner-or-token guarded like every order read; strings are shaped
-per the request locale here (the template stays logic-free)."""
+"""The printable order invoice — server-rendered HTML via arvel.views (Jinja). Owner-or-token
+guarded like every order read; strings are shaped per the request locale here (the template stays
+logic-free)."""
 
 from typing import Any
 

@@ -14,15 +14,14 @@ if TYPE_CHECKING:
 
 class AppServiceProvider(ServiceProvider):
     def register(self) -> None:
-        """Bind your services into the container."""
         from app.auth.admin_oidc import build_admin_oidc_guard
         from database.seeders.database_seeder import DatabaseSeeder
 
         def _seeder(_app: Any) -> DatabaseSeeder:
             return DatabaseSeeder()
 
-        # The API guard: resolve the request's user from its bearer token, so
-        # AuthenticateMiddleware can populate `current_user` (Laravel Sanctum guard).
+        # Resolves the request's user from its bearer token so AuthenticateMiddleware can
+        # populate `current_user`.
         async def _resolve_user(request: Request) -> User | None:
             from arvel.auth.tokens import TokenGuard
 
@@ -63,9 +62,9 @@ class AppServiceProvider(ServiceProvider):
 
             gate.before(_super_admin_first)
 
-            # Standalone (non-model) abilities → the matching RBAC permission, for EVERY
-            # permission (categories/vendors/variants check catalog.* directly; the ProductPolicy
-            # still governs Product-model checks — gate.define and policies coexist).
+            # Standalone (non-model) abilities → the matching RBAC permission, for every
+            # permission (gate.define and the ProductPolicy coexist: the policy still governs
+            # Product-model checks).
             def _define(permission: Permission) -> None:
                 async def _check(user: Any, *_: Any) -> bool:
                     return user is not None and await user.has_permission_to(

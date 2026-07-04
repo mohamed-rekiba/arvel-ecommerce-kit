@@ -34,8 +34,7 @@ const isNew = computed(() => {
   return Date.now() - created < 14 * 24 * 3600 * 1000;
 });
 
-// serve all three conversions via srcset so the browser picks the suitable one per viewport/DPR:
-// thumb 256w (small/2-up on phones), preview 600w (cards), original 900w (retina). `src` = preview fallback.
+// srcset lets the browser pick per viewport/DPR; `src` is the preview-size fallback.
 const g = computed(() => props.product.gallery[0] ?? null);
 const image = computed(() => g.value?.preview_url ?? g.value?.url ?? null);
 const srcset = computed(() =>
@@ -112,8 +111,7 @@ async function addToBag() {
 .card:hover { box-shadow: var(--shadow-2); }
 .card--out { opacity: .75; }
 .media { position: relative; display: block; aspect-ratio: 1 / 1; overflow: hidden; background: var(--photo-well); }
-/* dark: the well becomes an inset "framed tile" — card surface visible around it — and a cool
-   veil pulls warm photo whites toward the neutral register */
+/* dark: inset "framed tile" look, plus a cool veil so warm photo whites don't clash */
 [data-theme="dark"] .media { margin: 8px 8px 0; aspect-ratio: auto; height: 0; padding-bottom: calc(100% - 16px); border-radius: var(--radius-md); }
 [data-theme="dark"] .media::after { content: ""; position: absolute; inset: 0; background: color-mix(in srgb, var(--bg) 5%, transparent); pointer-events: none; }
 [data-theme="dark"] .media img { position: absolute; inset: 0; }

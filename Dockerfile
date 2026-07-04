@@ -1,51 +1,40 @@
-# ---- frontend: vue-tsc + vite build ----------------------------------------
+# ---- frontend ----
 FROM node:26-alpine AS frontend
 WORKDIR /src
 COPY frontend/package.json frontend/package-lock.json ./
 RUN npm ci
 COPY frontend/ ./
 RUN npm run build
-# -> /src/dist: index.html + fingerprinted assets/* + favicon.ico/robots.txt/logo.* (Vite copies
-# frontend/public/* verbatim into the build root) — becomes ./public in the runtime image below.
+# /src/dist becomes ./public in the runtime image below.
 
-# ---- backend builder: compiles/installs deps — none of this ships -----------------------------
+# ---- backend builder (nothing here ships) ----
 FROM python:3.14-slim-trixie AS backend-builder
 COPY --from=ghcr.io/astral-sh/uv:latest /uv /uvx /usr/local/bin/
 WORKDIR /app
 
 ENV ARVEL_VERSION=0.51.0
-# The best uv production flags
 ENV UV_COMPILE_BYTECODE=1
 ENV UV_LINK_MODE=copy
 ENV UV_SYSTEM_PYTHON=1
 
 COPY pyproject.toml uv.lock ./
 
-# Install the app's dependencies into the system Python site-packages (no virtualenv — this is a
-# single-purpose container, already the isolation boundary a venv would otherwise buy). arvel is
-# published on PyPI (0.51.0), carrying with_public_dir/with_lang_dir/Router.public()/
-# session.driver — the features bootstrap/app.py depends on; bump the pin if arvel cuts a release
-# this kit hasn't picked up in its own lockfile yet. This repo's own [tool.uv.sources] override
-# (path = "../arvel", editable) is a local-dev convenience for iterating on the framework
-# alongside the kit — the image doesn't need that sibling repo at all. --frozen and --no-sources
-# can't be combined (uv rejects it), so: export everything else frozen from uv.lock (still fully
-# reproducible), excluding arvel, then install arvel by itself straight from the index.
+# No venv — single-purpose container already is the isolation boundary. arvel installs from
+# PyPI, not the editable ../arvel sibling this repo's [tool.uv.sources] points dev at; --frozen
+# and --no-sources can't be combined, so export everything but arvel from the lockfile, then
+# install arvel by itself from the index.
 RUN uv export --frozen --no-dev --no-editable --no-emit-package arvel -o requirements.txt && \
     uv pip install --system --no-cache -r requirements.txt && \
     uv pip install --system --no-cache "arvel[standard,oidc,s3,telemetry,search,queue-amqp]==${ARVEL_VERSION}" && \
     rm -f /usr/local/bin/uv /usr/local/bin/uvx requirements.txt
 
-# The built SPA becomes the static doc root with_public_dir(...) (bootstrap/app.py) serves via
-# arvel's Route.public() (Laravel-`public/`-parity static front door) — populated only here,
-# never committed (see .gitignore).
+# with_public_dir(...) (bootstrap/app.py) serves this via arvel's Route.public() — never committed.
 COPY --from=frontend /src/dist/. ./public/
 
-# ---- runtime: same Debian trixie/Python lineage as the builder, hardened + nonroot -------------
+# ---- runtime (hardened, nonroot) ----
 FROM python:3.14-slim-trixie AS backend
 
-# Strip setuid/setgid bits (no interactive/login tooling is needed by a service container), drop
-# apt's package-list cache (this stage never installs anything else), add a dedicated low-
-# privilege account — a fixed, predictable uid/gid, not a real login user.
+# Strip setuid/setgid bits, drop apt's package-list cache, add a fixed-uid nonroot account.
 RUN find / -xdev -perm /6000 -type f -exec chmod a-s {} + 2>/dev/null; \
     rm -rf /var/lib/apt/lists/* /var/cache/apt/archives/* && \
     groupadd --gid 10001 app && \

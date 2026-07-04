@@ -1,5 +1,4 @@
-// Storefront customer auth — a bearer session (Sanctum-style personal-access token). Guest checkout
-// still works via the cart token; signing in additionally unlocks order history.
+// Guest checkout still works via the cart token; signing in additionally unlocks order history.
 import { reactive } from "vue";
 import { type Customer, api, authToken } from "./api";
 

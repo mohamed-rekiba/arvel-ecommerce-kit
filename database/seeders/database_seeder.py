@@ -75,7 +75,7 @@ class DatabaseSeeder(Seeder):
         for email in ("fan@example.com", "amie@example.fr"):
             await NewsletterSubscriber.create(email=email, locale="en")
 
-        # --- vendors (brands) -------------------------------------------------
+        # --- vendors (brands) ---
         vendors: dict[str, Vendor] = {}
         for name, slug in [
             ("Nordic Audio", "nordic-audio"),
@@ -89,7 +89,7 @@ class DatabaseSeeder(Seeder):
             name="Shady Imports", slug="shady", published=False
         )  # unpublished vendor
 
-        # --- category tree (parents + published children) ---------------------
+        # --- category tree (parents + published children) ---
         audio = await self._cat("Audio", "audio", fr="Audio", ar="صوتيات")
         headphones = await self._cat(
             "Headphones", "headphones", parent=audio.id, fr="Casques", ar="سماعات رأس"
@@ -124,7 +124,7 @@ class DatabaseSeeder(Seeder):
             "Accessories", "accessories", fr="Accessoires", ar="إكسسوارات"
         )
 
-        # --- catalog: (category, vendor, price_cents, image keyword, name) ----
+        # --- catalog: (category, vendor, price_cents, image keyword, name) ---
         catalog = [
             (
                 headphones,
@@ -255,7 +255,7 @@ class DatabaseSeeder(Seeder):
                         break
                     await asyncio.sleep(0.4)
 
-        # --- deals of the day (2 live + 1 expired for realism) ---------------
+        # --- deals of the day (2 live + 1 expired for realism) ---
         now = Date.now()
         for name, pct, hours in (
             ("Aurora Phone", 25, 23),
@@ -277,7 +277,7 @@ class DatabaseSeeder(Seeder):
             active=True,
         )
 
-        # --- the announced welcome coupon -------------------------------------
+        # --- the announced welcome coupon ---
         await Coupon.create(
             code="WELCOME10",
             type=CouponType.PERCENT,
@@ -287,7 +287,7 @@ class DatabaseSeeder(Seeder):
             announce=True,
         )
 
-        # --- hero banners (admin-managed carousel) -----------------------------
+        # --- hero banners (admin-managed carousel) ---
         banners = [
             (
                 {
@@ -377,7 +377,7 @@ class DatabaseSeeder(Seeder):
                     break
                 await asyncio.sleep(0.4)
 
-        # --- retrievability edge cases (hidden; no galleries needed) ----------
+        # --- retrievability edge cases (hidden; no galleries needed) ---
         await self._cat("Gift Cards", "gift-cards")  # empty published category → hidden
         coming = await self._cat(
             "Coming Soon", "coming-soon", published=False

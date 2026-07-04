@@ -49,9 +49,7 @@ def test_archive_drops_from_search_and_restore_returns(
     asyncio.run(_index())
 
     with kit_app(**env) as client:
-        # the admin-endpoint archive path is covered by the fast suite; here the archive runs
-        # through the model layer inside the served app's portal — the LIVE-services focus is
-        # search + retrievability, not authz
+        # archiving via the model layer here — authz over the admin endpoint is covered elsewhere
         def _search(q: str) -> list[str]:
             deadline = time.time() + 30
             while time.time() < deadline:
@@ -100,6 +98,5 @@ def test_archive_drops_from_search_and_restore_returns(
 
             portal.call(_restore)
             assert client.get("/api/products/aurora-lamp").status_code == 200
-            # restore fires the saved hook -> searchable(); Meilisearch indexes the doc
-            # ASYNCHRONOUSLY, so poll like the initial-index search above does
+            # Meilisearch indexes asynchronously, so poll like the initial-index search above
             assert _search("Aurora") == ["aurora-lamp"]

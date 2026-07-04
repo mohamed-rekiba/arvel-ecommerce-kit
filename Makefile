@@ -1,6 +1,6 @@
 # arvel-ecommerce-kit — common tasks. `make help` lists them.
 .DEFAULT_GOAL := help
-.PHONY: help install env up down setup migrate fresh seed bucket serve front front-build worker schedule openapi test test-integration typecheck lint check
+.PHONY: help install env up down setup migrate fresh seed bucket serve front front-build worker schedule openapi test test-integration typecheck lint check hooks pre-commit clean
 
 help: ## Show this help
 	@grep -hE '^[a-zA-Z_-]+:.*?## ' $(MAKEFILE_LIST) | awk 'BEGIN{FS=":.*?## "}{printf "  \033[36m%-12s\033[0m %s\n", $$1, $$2}'
@@ -69,6 +69,12 @@ lint: ## Lint + format check
 	uv run ruff check . && uv run ruff format --check .
 
 check: lint typecheck test ## Lint + types + tests
+
+hooks:  ## Install pre-commit git hooks
+	$(RUN) pre-commit install
+
+pre-commit:  ## Run pre-commit checks (lint, format, typecheck, imports, security)
+	$(RUN) pre-commit run --all-files
 
 clean:  ## Remove build/test artifacts
 	rm -rf .site .cache .pytest_cache .mypy_cache .ruff_cache .hypothesis .import_linter_cache .coverage.json dist build

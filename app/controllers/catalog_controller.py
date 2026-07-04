@@ -1,9 +1,4 @@
-"""Catalog read API — categories + product browsing (search, filter, pagination).
-
-Exercises arvel's ORM (query builder, eager-loading, enum casts) + pagination. Models are mapped to
-typed response schemas (app.schemas), so the API is strict-typed and its OpenAPI request/response
-schemas are generated.
-"""
+"""Catalog read API — categories + product browsing (search, filter, pagination)."""
 
 from typing import Any
 
@@ -32,7 +27,7 @@ def in_locale_relation(query: Any) -> Any:
     return query.in_locale()
 
 
-_in_locale = in_locale_relation  # module-internal alias
+_in_locale = in_locale_relation
 
 
 async def _apply_search(query: Any, q: str) -> Any:
@@ -65,10 +60,9 @@ def category_out(c: Category) -> CategoryOut:
 def gallery_image_out(media: Media) -> GalleryImageOut:
     """A media-library item → its serving URLs (original + thumb/preview conversions).
 
-    Product images are **public**: ``media.get_url(conversion)`` returns the disk's configured public
-    ``url`` base + the path (config/filesystems → s3 ``url``), so the browser loads straight from the
-    public RustFS/S3 bucket — no signing, no app round-trip. The ``local`` disk has no ``url`` base
-    (``get_url`` yields a bare path), so we fall back to the app-streamed ``/api/media`` route there."""
+    Product images are public: ``get_url`` returns a public bucket/CDN URL when the disk has one
+    configured (config/filesystems → s3 ``url``); the ``local`` disk has no url base, so we fall
+    back to the app-streamed ``/api/media`` route."""
     mid = media.id
 
     def _url(conversion: str | None) -> str:

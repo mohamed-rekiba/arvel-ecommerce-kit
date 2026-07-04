@@ -2,7 +2,7 @@
 
 `log` (the default) records messages without sending — ideal for dev/tests. `smtp` sends via a real
 aiosmtplib connection; fill in the host/credentials (and `encryption`: "tls" = STARTTLS, "ssl" =
-implicit TLS, "" = none). Send via the `Mail` facade (`await Mail.to(user).send(MyMailable())`).
+implicit TLS, "" = none).
 """
 
 from arvel import env

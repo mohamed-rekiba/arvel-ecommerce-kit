@@ -106,8 +106,7 @@ def test_restock_edge_notifies_subscribers_exactly_once(client) -> None:
     assert client.post("/api/variants/1/stock-alert", headers=noah).status_code == 200
     assert client.post("/api/variants/1/stock-alert").status_code == 401
 
-    # restock 0→7 (the memory broker runs queued jobs inline) → BOTH subscribers get the
-    # database notification (the mail leg is proven over real SMTP in the integration tier)
+    # restock 0→7 → both subscribers get the database notification (mail leg covered in integration)
     client.post(
         "/api/admin/variants/1/stock",
         json={"set": 7, "reason": "restock"},

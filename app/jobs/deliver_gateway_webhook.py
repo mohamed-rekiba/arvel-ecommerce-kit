@@ -1,9 +1,8 @@
 """Deliver a (dev-gateway) webhook back to the shop — the gateway→merchant leg, simulated.
 
-The dev gateway stub (routes/api.py, debug-only) dispatches this job when a charge is created, the
-way a real PSP notifies asynchronously: through a real HTTP POST, HMAC-signed over the exact raw
-body, arriving on the same ``/api/webhooks/payment`` endpoint a real gateway would hit. Runs on
-the queue → the worker exercises outbound Http + signing + the inbound idempotent webhook path.
+Dispatched by the dev gateway stub when a charge is created, the way a real PSP notifies
+asynchronously: an HMAC-signed HTTP POST to the same ``/api/webhooks/payment`` endpoint a real
+gateway would hit.
 """
 
 import hashlib

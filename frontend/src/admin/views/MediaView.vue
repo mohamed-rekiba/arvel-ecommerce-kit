@@ -1,7 +1,5 @@
 <script setup lang="ts">
-// The media library (retires the "SOON" tile): every stored file across product galleries,
-// banner slides and customer avatars — thumb grid with owner links + file facts. Read-only;
-// deletion lives with the owning resource (product editor / banners / avatar replace).
+// Read-only: deletion lives with the owning resource (product editor / banners / avatar replace).
 import { computed, onMounted, ref } from "vue";
 import { type MediaItem, ApiError, api } from "../api";
 import { type MessageKey, t } from "../locale";

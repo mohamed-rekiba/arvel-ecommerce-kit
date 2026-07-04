@@ -53,8 +53,7 @@ async def _seed_catalog(url: str) -> None:
             stock=5,
         )
         if url.startswith("postgresql"):
-            # on PG the retrievable_* views are MATERIALIZED — recompute after seeding (the same
-            # refresh db:seed / the debounced scheduler perform; sqlite degrades to live views)
+            # on PG the retrievable_* views are MATERIALIZED — recompute after seeding; sqlite degrades to live views
             import sqlalchemy as sa
             from sqlalchemy.ext.asyncio import create_async_engine
 
@@ -284,8 +283,7 @@ async def test_mailpit_receives_smtp(
     )  # register providers + config the way the server/worker entrypoints do
     await app.boot()
     try:
-        # OrderShipped is a plain (non-ShouldQueue) mailable → a direct SMTP round-trip; the
-        # queued-mail path is covered end-to-end by test_queue_rail
+        # non-ShouldQueue → direct SMTP round-trip; queued mail is covered by test_queue_rail
         await Mail.to("smoke@example.com").send(OrderShipped(7))
     finally:
         set_application(None)

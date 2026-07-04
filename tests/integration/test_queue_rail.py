@@ -76,8 +76,7 @@ async def _seed_shop(url: str) -> None:
             price_adjustment_cents=0,
             stock=100,
         )
-        # on PG the retrievable_* views are MATERIALIZED — recompute so the storefront read
-        # paths (PDP, catalog) see the seeded rows
+        # on PG the retrievable_* views are MATERIALIZED — recompute so storefront reads see the seed
         import sqlalchemy as sa
         from sqlalchemy.ext.asyncio import create_async_engine
 

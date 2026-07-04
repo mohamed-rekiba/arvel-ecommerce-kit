@@ -1,9 +1,7 @@
-"""Admin variant + stock management (S9) — variants stop being seed-only data.
-
-Nested under the admin product resource; guarded by the same catalog permissions as product
-mutations (deny-as-not-found). Stock changes are an EXPLICIT operation (set or delta, with an
-optional reason) so the audit trail shows who changed stock and why; the row is adjusted under
-SELECT..FOR UPDATE so concurrent adjustments serialize deterministically.
+"""Admin variant + stock management, nested under the admin product resource; guarded by the same
+catalog permissions as product mutations (deny-as-not-found). Stock changes are an explicit
+operation (set or delta, with a reason) so the audit trail shows why; adjustments run under
+SELECT..FOR UPDATE so concurrent changes serialize deterministically.
 """
 
 from arvel import DB, abort

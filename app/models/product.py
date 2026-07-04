@@ -87,9 +87,8 @@ class Product(HasMedia, Searchable, Model, SoftDeletes):
         )
 
     def register_media_conversions(self) -> list[MediaConversion]:
-        """Derived versions generated for every gallery image (Spatie conversions). WebP — the modern
-        web format: ~25–35% smaller than JPEG at equal quality, and it keeps alpha (no RGBA flatten).
-        Universally supported by current browsers."""
+        """Derived versions generated for every gallery image. WebP: smaller than JPEG at equal
+        quality and keeps alpha, with universal browser support."""
         return [
             MediaConversion("thumb", width=256, height=320, fmt="WEBP"),
             MediaConversion("preview", width=600, height=750, fmt="WEBP"),

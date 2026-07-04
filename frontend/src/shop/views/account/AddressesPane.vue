@@ -1,6 +1,4 @@
 <script setup lang="ts">
-// Manage Address (profile ref 1): saved-address cards with a single-default rule + an inline
-// add/edit form. Checkout consumes these by id (A2).
 import { onMounted, reactive, ref } from "vue";
 import {
   ApiError,

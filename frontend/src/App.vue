@@ -1,5 +1,4 @@
 <script setup lang="ts">
-// The shell is chosen by the route (ShopLayout for `/`, AdminLayout for `/admin/*`).
 // A 503 from any API call (arvel down) swaps in the maintenance screen until a retry succeeds.
 import { onMounted, ref } from "vue";
 

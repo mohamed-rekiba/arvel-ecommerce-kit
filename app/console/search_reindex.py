@@ -1,8 +1,6 @@
-"""Console command: rebuild the product search index.
+"""Console command: rebuild the product search index (`arvel search:reindex`).
 
-`arvel search:reindex` — (re)indexes every product into the configured search engine (Meilisearch in
-production; the in-process array engine otherwise). This is the parity of Laravel Scout's
-`scout:import`, and the reliable way to (re)populate the index after a bulk load or `db:seed`.
+Use after a bulk load or `db:seed` to (re)populate the configured search engine.
 """
 
 from app.models.product import Product

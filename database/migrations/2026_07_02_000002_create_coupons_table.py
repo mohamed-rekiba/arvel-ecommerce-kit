@@ -1,4 +1,4 @@
-"""Coupons + redemptions (S15). A coupon discounts the ORDER (one per order, order-level only);
+"""Coupons + redemptions. A coupon discounts the ORDER (one per order, order-level only);
 redemptions record who used it (user id or guest email) so per-customer limits hold."""
 
 from arvel.database import Blueprint, Migration, Schema

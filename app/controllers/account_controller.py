@@ -1,8 +1,7 @@
-"""Account self-service — profile updates, password change, and email verification (S6).
+"""Account self-service — profile updates, password change, and email verification.
 
-Exercises arvel's auth flows (signed, expiring, purpose-bound email-verification tokens), the
-`encrypted` model cast (phone is ciphertext at rest), the `hashed` cast + Hasher (current-password
-confirmation), and the queued mail rail (verification mail).
+Phone is stored via the `encrypted` cast (ciphertext at rest); password checks go through the
+`hashed` cast + Hasher.
 """
 
 from arvel import abort

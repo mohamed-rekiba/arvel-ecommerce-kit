@@ -1,8 +1,5 @@
 <script setup lang="ts">
-// My Orders (profile ref 5): order cards — header band (id · placed date · total · payment
-// method) + status chip, product thumbs, and per-order actions: Track / Invoice / Cancel /
-// Add review. Invoice opens the server-rendered print view in a new tab (receipt token in
-// the URL — a browser tab can't send bearer headers).
+// Invoice opens in a new tab with the receipt token in the URL — a browser tab can't send bearer headers.
 import { onMounted, ref } from "vue";
 import { type Order, api, formatPrice } from "../../api";
 import { type MessageKey, t } from "../../locale";

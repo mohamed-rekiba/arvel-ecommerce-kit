@@ -44,8 +44,8 @@ const activeName = computed(
   () => categories.value.find((c) => c.slug === activeCategory.value)?.translation.name ?? t("catalog.all"),
 );
 
-// a cache key for THIS exact query, so a back-nav can repaint the same card set synchronously (the
-// morph target for the reverse PDP → catalog transition) instead of refetching a frame too late.
+// Keyed by the exact query, so a back-nav repaints the same card set synchronously instead of
+// refetching a frame too late for the morph.
 const listKey = () =>
   `catalog:${JSON.stringify({ q: q.value, category: activeCategory.value, sort: sort.value, page: page.value, min: minPrice.value, max: maxPrice.value })}`;
 const seeded = getCachedList(listKey());

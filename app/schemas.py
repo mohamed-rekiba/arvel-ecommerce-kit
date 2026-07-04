@@ -1,9 +1,7 @@
 """API request + response schemas (arvel.Schema = msgspec.Struct).
 
-These are the typed boundary of the HTTP API: request bodies are parsed + validated into the *In
-schemas, and handlers return the *Out schemas — which gives both strict type-safety AND generated
-OpenAPI request/response schemas. Models are mapped to these DTOs (never returned raw), so the wire
-contract is explicit and decoupled from the storage shape.
+Request bodies parse into *In schemas; handlers return *Out schemas. Models are always mapped to
+these DTOs (never returned raw), so the wire contract is explicit and decoupled from storage shape.
 """
 
 from __future__ import annotations
@@ -22,7 +20,7 @@ from app.enums import (
     PaymentMethod,
 )
 
-# --- shared / catalog ---------------------------------------------------------
+# --- shared / catalog ---
 
 
 class Translate(Schema):
@@ -79,7 +77,7 @@ class ProductOut(Schema, omit_defaults=True):
     status: str
     featured: bool
     created_at: str | None  # ISO — the storefront derives its NEW badge from recency
-    deal: ProductDealOut | None  # the live deal, if any
+    deal: ProductDealOut | None
     gallery: list[GalleryImageOut]  # always present (possibly empty)
     category: CategoryOut | None = None
     variants: list[VariantOut] | None = None
@@ -133,7 +131,7 @@ class ProductPage(Schema):
     total: int
 
 
-# --- admin views (all rows, incl. hidden, each annotated with is_visible) ------
+# --- admin views (all rows, incl. hidden, each annotated with is_visible) ---
 
 
 class AdminProductOut(Schema):
@@ -174,7 +172,7 @@ class AdminCategoryPage(Schema):
     total: int
 
 
-# --- auth ---------------------------------------------------------------------
+# --- auth ---
 
 
 class RegisterIn(Schema):
@@ -233,7 +231,7 @@ class NotificationOut(Schema):
     created_at: str | None
 
 
-# --- RBAC / audit (admin) -----------------------------------------------------
+# --- RBAC / audit (admin) ---
 
 
 class RoleOut(Schema):
@@ -280,7 +278,7 @@ class ResetPasswordIn(Schema):
     password: str
 
 
-# --- cart ---------------------------------------------------------------------
+# --- cart ---
 
 
 class AddItemIn(Schema):
@@ -441,7 +439,7 @@ class AnnouncementOut(Schema):
     value: int  # percent points or cents, per type
 
 
-# --- admin products -----------------------------------------------------------
+# --- admin products ---
 
 
 class TranslationFieldsIn(Schema):
@@ -468,7 +466,7 @@ class UpdateProductIn(Schema):
     translations: dict[str, TranslationFieldsIn] | None = None
 
 
-# --- checkout / orders / payments ---------------------------------------------
+# --- checkout / orders / payments ---
 
 
 class OrderTimelineOut(Schema):
@@ -777,7 +775,7 @@ class WebhookOut(Schema):
     status: str
 
 
-# --- admin (OIDC) -------------------------------------------------------------
+# --- admin (OIDC) ---
 
 
 class AdminMeOut(Schema):

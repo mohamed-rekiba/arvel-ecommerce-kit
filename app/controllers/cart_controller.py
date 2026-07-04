@@ -1,9 +1,7 @@
 """Cart API — guest (by cart token) or authenticated (by user) carts.
 
-Exercises arvel's ORM (relations, eager-load) + the Cache facade (the cart subtotal is cached and
-invalidated on every mutation). Typed end to end: typed request bodies + a CartOut response schema.
-A guest gets a cart token back on first add (echo it in `X-Cart-Token` next time); an authenticated
-user's cart follows them.
+The cart subtotal is cached and invalidated on every mutation. A guest gets a cart token back on
+first add (echo it in `X-Cart-Token` next time); an authenticated user's cart follows them.
 """
 
 from arvel import Cache, abort
@@ -197,7 +195,7 @@ async def add_item(request: Request, data: AddItemIn) -> CartOut:
             quantity=data.quantity,
             unit_price_cents=unit_price,
         )
-    await Cache.forget(_cart_total_key(cart.id))  # invalidate the cached subtotal
+    await Cache.forget(_cart_total_key(cart.id))
     return await _serialize(cart, new_token)
 
 

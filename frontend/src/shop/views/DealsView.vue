@@ -1,6 +1,5 @@
 <script setup lang="ts">
-// All live flash sales — the SPECIAL OFFER destination. Server-authoritative: only deals inside
-// their window arrive here; the countdowns tick client-side.
+// Server-authoritative: only deals inside their window arrive here; countdowns just tick client-side.
 import { onMounted, ref } from "vue";
 import { type Deal, api } from "../api";
 import DealCard from "../components/DealCard.vue";

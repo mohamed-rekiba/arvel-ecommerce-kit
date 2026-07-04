@@ -2,7 +2,7 @@
 
 The ``security`` bearer scheme gives the docs UI an 'Authorize' button so you can paste an access token
 and call protected endpoints. Routes that require it are marked with ``.secure("bearer")`` (see
-routes/api.py — GET /api/user). See app/config/openapi.py comments for the full set of options.
+routes/api.py — GET /api/user).
 """
 
 from arvel import env

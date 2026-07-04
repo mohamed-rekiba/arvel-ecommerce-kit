@@ -6,13 +6,11 @@ import { t } from "../locale";
 const props = defineProps<{ open: boolean; categories?: Category[] }>();
 const emit = defineEmits<{ close: [] }>();
 
-// a template ref on <RouterLink> yields the component instance, not the DOM node — its root element
-// is reachable via `$el` (a Vue-exposed property on every component instance).
+// A template ref on <RouterLink> yields the component instance, not the DOM node — reach the element via `$el`.
 const firstLink = ref<{ $el: HTMLAnchorElement } | null>(null);
 const showCats = ref(false);
 
-// move focus into the drawer on open — a lightweight a11y baseline (not a full focus trap; returning
-// focus to the trigger button on close is the parent's job, since it owns that button's ref).
+// Not a full focus trap; returning focus to the trigger button on close is the parent's job (it owns that ref).
 watch(
   () => props.open,
   (isOpen) => {

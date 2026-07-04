@@ -1,7 +1,7 @@
 """Scheduled task: sweep abandoned guest carts.
 
-A guest cart (no user) untouched for longer than the threshold is abandoned — delete it and its
-items. Authenticated users keep their carts. Returns the number of carts swept.
+A guest cart untouched past the threshold is deleted along with its items; authenticated users'
+carts are never swept. Returns the number of carts swept.
 """
 
 from arvel import Date

@@ -1,5 +1,5 @@
-"""Back-in-stock subscriptions (S17) — 'notify me' on a sold-out variant; the restock fan-out
-lives in stock_alert_service (invoked by the admin stock adjustment on the 0→positive edge)."""
+"""Back-in-stock subscriptions — 'notify me' on a sold-out variant; the restock fan-out lives in
+stock_alert_service (invoked by the admin stock adjustment on the 0→positive edge)."""
 
 from arvel import abort
 from arvel.http import Request

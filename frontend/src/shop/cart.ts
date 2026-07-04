@@ -1,5 +1,4 @@
-// A tiny shared cart store (reactive singleton) — the header badge and the cart/checkout views all
-// read the same state. The guest cart token is handled inside api.ts (localStorage + X-Cart-Token).
+// Reactive singleton — the header badge and cart/checkout views all read the same state.
 import { computed, reactive } from "vue";
 import { type Cart, type CheckoutPayload, api } from "./api";
 

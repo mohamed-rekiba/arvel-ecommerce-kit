@@ -1,7 +1,5 @@
 <script setup lang="ts">
-// The account shell (profile refs 1/5): breadcrumb band + sidebar (avatar card + section nav)
-// with child routes rendered beside it. Guests get the sign-in / register pane instead.
-// Mobile-first: the sidebar collapses to a horizontal chip scroller above the pane.
+// Guests get the sign-in / register pane instead of the sidebar + child routes.
 import { onMounted, ref } from "vue";
 import { useRouter } from "vue-router";
 import { ApiError } from "../../api";

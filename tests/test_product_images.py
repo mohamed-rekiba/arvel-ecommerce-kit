@@ -38,8 +38,7 @@ async def _seed(url: str, *, handler) -> None:
     set_application(app)
     bootstrap_app(app)
     await app.boot()
-    # rebind AFTER boot — the client provider binds "http" during bootstrap, so a fake set earlier
-    # would be overwritten. This is the offline image provider for the test.
+    # rebind AFTER boot — the client provider binds "http" during bootstrap, overwriting an earlier fake
     app.instance("http", Client(transport=httpx.MockTransport(handler)))
     db = ConnectionResolver({"default": {"url": url}})
     await Migrator(db).run(discover_migrations(["database/migrations"]))

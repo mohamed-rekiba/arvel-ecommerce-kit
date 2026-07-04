@@ -1,7 +1,5 @@
 <script setup lang="ts">
-// Store settings (retires the "SOON" tile): the cache-backed KV pairs the storefront reads —
-// contact email/phone, topbar welcome line, free-shipping threshold. Saves invalidate the
-// server cache, so the storefront reflects an edit on the next load.
+// Saves invalidate the server cache, so the storefront reflects an edit on its next load.
 import Button from "primevue/button";
 import InputText from "primevue/inputtext";
 import { onMounted, reactive, ref } from "vue";

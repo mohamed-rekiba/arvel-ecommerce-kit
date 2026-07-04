@@ -1,5 +1,5 @@
-"""Admin coupon management (S15) — create/adjust/deactivate discount codes. catalog.* permission
-surface (marketing rides the catalog taxonomy); every mutation activity-logged."""
+"""Admin coupon management — create/adjust/deactivate discount codes. Uses the catalog.*
+permission surface (marketing rides the catalog taxonomy); every mutation activity-logged."""
 
 from arvel import abort
 from arvel.activitylog import activity

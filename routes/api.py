@@ -91,7 +91,7 @@ Route.get("/user", me, name="api.user").secure(
     "bearer"
 )  # shows the lock + 'Authorize' in API docs
 
-# --- Customer auth ------------------------------------------------------------
+# --- Customer auth ---
 Route.post("/register", auth.register, name="api.register")  # creates a user → 201
 Route.post("/logout", auth.logout, name="api.logout").status(200).secure("bearer")
 Route.post("/forgot-password", auth.forgot_password, name="api.password.forgot").status(
@@ -101,7 +101,7 @@ Route.post("/reset-password", auth.reset_password, name="api.password.reset").st
     200
 )
 
-# --- Account self-service (profile, password, email verification) --------------
+# --- Account self-service (profile, password, email verification) ---
 Route.patch("/user", account.update_profile, name="api.user.update").middleware(
     Authenticate
 ).secure("bearer")
@@ -116,7 +116,7 @@ Route.post(
 # the link target is public — the signed token IS the credential
 Route.post("/email/verify", account.verify_email, name="api.email.verify").status(200)
 
-# --- Catalog (public read API) ------------------------------------------------
+# --- Catalog (public read API) ---
 Route.get("/categories", catalog.categories_index, name="api.categories.index")
 Route.get("/products", catalog.products_index, name="api.products.index")
 Route.get("/products/{slug:str}", catalog.products_show, name="api.products.show")
@@ -136,7 +136,7 @@ Route.delete(
     name="api.admin.products.media.destroy",
 ).status(200).middleware(Authenticate).secure("bearer")
 
-# --- Admin product CRUD (auth-guarded by middleware; policy-guarded in the controller) --------
+# --- Admin product CRUD (auth-guarded by middleware; policy-guarded in the controller) ---
 # Authenticate (401 if guest) runs as route middleware BEFORE body parsing — Laravel ordering; the
 # ProductPolicy then decides admin-vs-customer (403/404) inside the controller.
 # Admin listings return EVERY row (incl. hidden) with an is_visible flag — vs the storefront, which
@@ -169,7 +169,7 @@ Route.post(
     name="api.admin.products.restore",
 ).status(200).middleware(Authenticate).secure("bearer")
 
-# --- Admin categories + vendors (the retrievability dimensions; catalog.* authority) -----------
+# --- Admin categories + vendors (the retrievability dimensions; catalog.* authority) ---
 Route.post(
     "/admin/categories", taxonomy.category_store, name="api.admin.categories.store"
 ).middleware(Authenticate).secure("bearer")
@@ -193,7 +193,7 @@ Route.put(
     "/admin/vendors/{id:int}", taxonomy.vendor_update, name="api.admin.vendors.update"
 ).middleware(Authenticate).secure("bearer")
 
-# --- Admin variants + stock (nested under the product; catalog.update authority) ---------------
+# --- Admin variants + stock (nested under the product; catalog.update authority) ---
 Route.get(
     "/admin/products/{id:int}/variants",
     admin_variants.index,
@@ -218,7 +218,7 @@ Route.delete(
     name="api.admin.variants.destroy",
 ).status(200).middleware(Authenticate).secure("bearer")
 
-# --- Admin user directory (users.view; role mutations stay on roles.manage) --------------------
+# --- Admin user directory (users.view; role mutations stay on roles.manage) ---
 Route.get("/admin/users", admin_users.index, name="api.admin.users.index").middleware(
     Authenticate
 ).secure("bearer")
@@ -226,7 +226,7 @@ Route.get(
     "/admin/users/{id:int}", admin_users.show, name="api.admin.users.show"
 ).middleware(Authenticate).secure("bearer")
 
-# --- Admin RBAC + audit (roles.manage / audit.view; super-admin bypasses) -----
+# --- Admin RBAC + audit (roles.manage / audit.view; super-admin bypasses) ---
 Route.get("/admin/roles", rbac.roles_index, name="api.admin.roles.index").middleware(
     Authenticate
 ).secure("bearer")
@@ -248,14 +248,14 @@ Route.get("/admin/audit", rbac.audit_index, name="api.admin.audit.index").middle
     Authenticate
 ).secure("bearer")
 
-# --- Admin (OIDC / Keycloak) --------------------------------------------------
+# --- Admin (OIDC / Keycloak) ---
 Route.get("/admin/me", admin.me, name="api.admin.me").secure("oidc")
-# Exchange a Keycloak token (from the SPA's auth-code+PKCE flow) for an arvel bearer PAT (DR-0030).
+# Exchange a Keycloak token (from the SPA's auth-code+PKCE flow) for an arvel bearer PAT.
 Route.post(
     "/admin/oidc/token", admin.oidc_exchange, name="api.admin.oidc.token"
 ).status(200).secure("oidc")
 
-# --- Product reviews (verified purchasers; moderated) ---------------------------
+# --- Product reviews (verified purchasers; moderated) ---
 Route.get(
     "/products/{slug:str}/reviews", reviews.index, name="api.products.reviews.index"
 )
@@ -271,7 +271,7 @@ Route.post(
     name="api.admin.reviews.moderate",
 ).status(200).middleware(Authenticate).secure("bearer")
 
-# --- Back-in-stock alerts (signed-in customers) ----------------------------------
+# --- Back-in-stock alerts (signed-in customers) ---
 Route.post(
     "/variants/{id:int}/stock-alert",
     stock_alerts.subscribe,
@@ -283,19 +283,19 @@ Route.delete(
     name="api.variants.stock_alert.unsubscribe",
 ).status(200).middleware(Authenticate).secure("bearer")
 
-# --- Cart (guest by X-Cart-Token, or the authenticated user's cart) -----------
+# --- Cart (guest by X-Cart-Token, or the authenticated user's cart) ---
 Route.get("/cart", cart.show, name="api.cart.show")
 Route.post("/cart/items", cart.add_item, name="api.cart.items.add")
 Route.patch("/cart/items/{id:int}", cart.update_item, name="api.cart.items.update")
 Route.delete("/cart/items/{id:int}", cart.remove_item, name="api.cart.items.remove")
 
-# --- Cart coupon (guest or signed-in) -------------------------------------------
+# --- Cart coupon (guest or signed-in) ---
 Route.post("/cart/coupon", cart.apply_coupon, name="api.cart.coupon.apply").status(200)
 Route.delete("/cart/coupon", cart.remove_coupon, name="api.cart.coupon.remove").status(
     200
 )
 
-# --- Address book (signed-in customers) --------------------------------------------
+# --- Address book (signed-in customers) ---
 Route.post(
     "/account/avatar", account.upload_avatar, name="api.account.avatar"
 ).middleware(Authenticate).secure("bearer")
@@ -314,11 +314,11 @@ Route.delete(
     name="api.account.addresses.destroy",
 ).middleware(Authenticate).secure("bearer")
 
-# --- Deals (flash sales) ----------------------------------------------------------
+# --- Deals (flash sales) ---
 Route.get("/deals", deals.index, name="api.deals.index")
 Route.get("/announcement", announcement.show, name="api.announcement")
 
-# --- Settings + newsletter ----------------------------------------------------------
+# --- Settings + newsletter ---
 Route.get("/settings", settings.public_settings, name="api.settings")
 Route.post("/newsletter", settings.subscribe, name="api.newsletter").status(200)
 Route.get(
@@ -327,14 +327,14 @@ Route.get(
 Route.patch(
     "/admin/settings", settings.update_settings, name="api.admin.settings.update"
 ).middleware(Authenticate).secure("bearer")
-Route.get(
-    "/admin/media", media_library.index, name="api.admin.media"
-).middleware(Authenticate).secure("bearer")
+Route.get("/admin/media", media_library.index, name="api.admin.media").middleware(
+    Authenticate
+).secure("bearer")
 Route.get(
     "/admin/newsletter", settings.newsletter_index, name="api.admin.newsletter"
 ).middleware(Authenticate).secure("bearer")
 
-# --- Hero banners -----------------------------------------------------------------
+# --- Hero banners ---
 Route.get("/banners", banners.index, name="api.banners.index")
 Route.get(
     "/admin/banners", banners.admin_index, name="api.admin.banners.index"
@@ -366,7 +366,7 @@ Route.delete(
     "/admin/deals/{id:int}", admin_deals.destroy, name="api.admin.deals.destroy"
 ).middleware(Authenticate).secure("bearer")
 
-# --- Admin coupons (catalog authority) ------------------------------------------
+# --- Admin coupons (catalog authority) ---
 Route.get(
     "/admin/coupons", admin_coupons.index, name="api.admin.coupons.index"
 ).middleware(Authenticate).secure("bearer")
@@ -377,7 +377,7 @@ Route.patch(
     "/admin/coupons/{id:int}", admin_coupons.update, name="api.admin.coupons.update"
 ).middleware(Authenticate).secure("bearer")
 
-# --- Checkout & orders --------------------------------------------------------
+# --- Checkout & orders ---
 Route.post("/checkout", checkout.checkout, name="api.checkout")
 Route.get(
     "/metrics/orders-placed",
@@ -394,7 +394,7 @@ Route.get("/orders/{id:int}/invoice", invoice.show, name="api.orders.invoice")
 Route.post("/orders/{id:int}/cancel", checkout.cancel, name="api.orders.cancel").status(
     200
 )  # a transition, not a creation
-# --- Customer notifications (database channel of the notification system) ------
+# --- Customer notifications (database channel of the notification system) ---
 Route.get(
     "/notifications", notifications.index, name="api.notifications.index"
 ).middleware(Authenticate).secure("bearer")
@@ -402,7 +402,7 @@ Route.post(
     "/notifications/read", notifications.mark_read, name="api.notifications.read"
 ).status(200).middleware(Authenticate).secure("bearer")
 
-# --- Customer wishlist (saved products) ---------------------------------------
+# --- Customer wishlist (saved products) ---
 Route.get("/wishlist", wishlist.index, name="api.wishlist.index").middleware(
     Authenticate
 ).secure("bearer")
@@ -421,7 +421,7 @@ Route.post(
     name="api.admin.orders.status",
 ).status(200).middleware(Authenticate).secure("bearer")  # a transition, not a creation
 
-# --- Payments -----------------------------------------------------------------
+# --- Payments ---
 # Pay: signed-in owner OR guest order-token holder (guests must be able to pay) — the ownership
 # check lives in the controller (resolve_owned_order), not a bearer-only middleware.
 Route.post("/orders/{id:int}/pay", payment.pay, name="api.orders.pay")
@@ -429,7 +429,7 @@ Route.post(
     "/webhooks/payment", payment.webhook, name="api.webhooks.payment"
 )  # gateway → us
 
-# --- Dev payment gateway (debug builds only) -----------------------------------
+# --- Dev payment gateway (debug builds only) ---
 # A stand-in PSP so the payment loop runs live with no external account: charges succeed and the
 # signed webhook arrives asynchronously via the queue. Never registered when app.debug is off.
 if config("app.debug", False):

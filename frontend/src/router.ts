@@ -19,8 +19,7 @@ import WishlistPane from "./shop/views/account/WishlistPane.vue";
 import SecurityPane from "./shop/views/account/SecurityPane.vue";
 import NotificationsPane from "./shop/views/account/NotificationsPane.vue";
 
-// The admin section is lazy-loaded — a separate chunk (with its Keycloak/OIDC client) that a storefront
-// visitor never downloads. `manualChunks` in vite.config groups all of src/admin/* into one `admin` chunk.
+// Lazy-loaded so a storefront visitor never downloads the admin chunk (Keycloak/OIDC client included).
 const admin = {
   layout: () => import("./admin/AdminLayout.vue"),
   login: () => import("./admin/views/LoginView.vue"),
@@ -46,8 +45,7 @@ const admin = {
 
 const router = createRouter({
   history: createWebHistory(),
-  // On browser back/forward, Vue Router passes the position the page was scrolled to when it was left
-  // (savedPosition) — restore that instead of forcing the top, or every back-nav loses your place.
+  // Restore scroll on back/forward, or every back-nav loses your place.
   scrollBehavior: (_to, _from, savedPosition) => savedPosition ?? { top: 0 },
   routes: [
     {
@@ -109,8 +107,7 @@ const router = createRouter({
   ],
 });
 
-// Bearer guard for the console. Read the token key directly (no admin import) so the admin bundle stays
-// out of the main chunk; the server still enforces RBAC on every /api/admin call.
+// Reads the token key directly (no admin import) so the admin bundle stays out of the main chunk.
 router.beforeEach((to) => {
   const isAdminApp = to.path.startsWith("/admin");
   const isPublic = to.path === "/admin/login" || to.path === "/admin/callback";
@@ -120,6 +117,6 @@ router.beforeEach((to) => {
   return true;
 });
 
-installViewTransitions(router); // cross-fade + shared-element morphs between routes
+installViewTransitions(router);
 
 export default router;

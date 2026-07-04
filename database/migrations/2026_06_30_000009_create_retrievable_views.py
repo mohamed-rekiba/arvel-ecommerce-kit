@@ -1,4 +1,4 @@
-"""Retrievability materialized views (Module C).
+"""Retrievability materialized views.
 
 A product is **retrievable** only when it is published AND its vendor is published AND its category is
 *effective-published* — i.e. the category and **every ancestor** up the tree are published (a recursive

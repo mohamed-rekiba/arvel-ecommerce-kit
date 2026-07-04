@@ -1,6 +1,4 @@
 <script setup lang="ts">
-// Hero-carousel management: per-locale copy (en required, fr/ar optional), a CTA route, ordering,
-// live switch, and the slide image (media library upload; one image per slide).
 import Button from "primevue/button";
 import Column from "primevue/column";
 import DataTable from "primevue/datatable";

@@ -1,5 +1,4 @@
 <script setup lang="ts">
-// Notifications: the database-channel notification feed + mark-all-read.
 import { computed, onMounted, ref } from "vue";
 import { type Notification, api } from "../../api";
 import { t } from "../../locale";

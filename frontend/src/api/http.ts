@@ -1,7 +1,4 @@
-// The one HTTP seam every generated endpoint goes through (orval mutator): attaches the
-// bearer/cart-token headers, raises a typed ApiError with the server's field errors, and
-// parses JSON. Per-call headers (e.g. X-Order-Token) ride in the options argument.
-
+// The orval mutator — every generated endpoint funnels through here for auth headers + error shaping.
 export class ApiError extends Error {
   constructor(
     public status: number,

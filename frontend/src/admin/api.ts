@@ -1,7 +1,4 @@
-// Typed admin API client. Auth is a bearer personal-access token (the RBAC back-office users log in
-// with email/password); the token is attached to every request. Keycloak-OIDC login is the production
-// alternative — it resolves to the same bearer session via the /admin path (see auth.ts note).
-
+// Keycloak-OIDC login (auth.ts) resolves to this same bearer session, not a separate auth mode.
 const TOKEN_KEY = "arvel_admin_token";
 export const token = {
   get: () => localStorage.getItem(TOKEN_KEY),
@@ -9,8 +6,7 @@ export const token = {
   clear: () => localStorage.removeItem(TOKEN_KEY),
 };
 
-// Every TYPE is an alias of the GENERATED contract (src/api/gen — orval over the arvel OpenAPI
-// document). Regenerate after backend changes: make openapi && npm run api:generate.
+// Aliases of the generated contract (src/api/gen); regenerate after backend changes with `make openapi && npm run api:generate`.
 import type {
   ActivityOut,
   AdminCategoryOut,

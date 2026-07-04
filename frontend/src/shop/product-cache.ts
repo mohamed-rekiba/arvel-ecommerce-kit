@@ -1,9 +1,5 @@
-// In-memory caches that let a view render its product images on the *first frame* — which is what
-// gives the View Transition a `view-transition-name` morph target on BOTH directions:
-//   • forward (list → PDP): the PDP seeds its product synchronously from `getCachedProduct`.
-//   • back (PDP → list): the list seeds its cards synchronously from `getCachedList` (the `:key`
-//     remount would otherwise refetch and render the cards a frame too late — no morph target).
-// An async fetch always renders too late, so the morph would degrade to a plain fade.
+// An async fetch always renders a frame too late for the View Transition morph to catch — these
+// caches let the PDP and list seed synchronously on first frame, in both nav directions.
 import type { Category, Product } from "./api";
 
 const bySlug = new Map<string, Product>();
@@ -18,8 +14,6 @@ export function getCachedProduct(slug: string): Product | null {
   return bySlug.get(slug) ?? null;
 }
 
-// A whole list payload, keyed by the caller (e.g. "home" or a catalog query signature), so the list
-// view can repaint its exact card set synchronously on remount.
 export function cacheList(key: string, products: Product[]): void {
   lists.set(key, products);
 }

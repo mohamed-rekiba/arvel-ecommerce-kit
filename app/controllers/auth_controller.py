@@ -1,6 +1,5 @@
 """Customer authentication — registration, login (token issue), logout (token revoke), and the
-password-reset flow. Exercises arvel's auth (tokens + abilities + TokenGuard), hashing, request
-validation, and the signed password-reset tokens. Typed end to end.
+password-reset flow.
 """
 
 from arvel import abort

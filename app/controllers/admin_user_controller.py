@@ -1,4 +1,4 @@
-"""Admin user directory (S13) — find any user, see who they are, manage their roles.
+"""Admin user directory — find any user, see who they are, manage their roles.
 
 ``users.view`` gates the directory (support + order-manager have it; catalog-manager does NOT);
 role mutations stay on the existing ``roles.manage`` endpoints. Responses expose ONLY the defined

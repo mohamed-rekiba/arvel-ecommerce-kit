@@ -1,7 +1,5 @@
 <script setup lang="ts">
-// Wishlist (profile ref 2): a table on desktop / cards on mobile — thumb, price, stock,
-// add-to-cart + remove per row, plus add-all and clear. Adding picks the first in-stock
-// variant (the card's own quick-add rule).
+// Adding always picks the first in-stock variant — same quick-add rule as the product card.
 import { computed, ref } from "vue";
 import { type Product, api, formatPrice } from "../../api";
 import { useCart } from "../../cart";

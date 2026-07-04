@@ -1,8 +1,5 @@
 <script setup lang="ts">
-// Order detail + Track Your Order (profile ref 3): the stepper renders the server-derived
-// timeline (A4 — created_at + the activity trail; COD orders have no "paid" step), then the
-// lines with thumbs, totals, delivery address, payment method, and actions (pay / cancel /
-// invoice). Cancelled is a terminal branch: the trail collapses to placed → cancelled.
+// Cancelled is a terminal branch: the timeline collapses to placed → cancelled, skipping the rest.
 import { computed, onBeforeUnmount, onMounted, ref } from "vue";
 import { useRoute } from "vue-router";
 import { type Order, api, formatPrice, orderTokens } from "../api";

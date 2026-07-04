@@ -1,6 +1,4 @@
-// Shared public-settings store (A8) — admin-managed store contact/welcome/threshold, fetched
-// once per session and read by the topbar, footer, and trust strip. Server defaults mean the
-// values are always present; the fallbacks here only cover a failed fetch.
+// Server defaults mean values are always present; the fallbacks here only cover a failed fetch.
 import { reactive } from "vue";
 import { api } from "./api";
 
