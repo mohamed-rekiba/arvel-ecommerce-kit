@@ -5,8 +5,8 @@
  * The arvel-ecommerce-kit API.
  * OpenAPI spec version: 0.1.0
  */
-import type { SettingsInValues } from './settingsInValues';
+import type { SettingsInValues } from './settingsInValues'
 
 export interface SettingsIn {
-  values: SettingsInValues;
+  values: SettingsInValues
 }

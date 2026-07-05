@@ -5,10 +5,10 @@
  * The arvel-ecommerce-kit API.
  * OpenAPI spec version: 0.1.0
  */
-import type { ProductInTranslations } from './productInTranslations';
+import type { ProductInTranslations } from './productInTranslations'
 
 export interface ProductIn {
-  category_id: number;
-  price_cents: number;
-  translations: ProductInTranslations;
+  category_id: number
+  price_cents: number
+  translations: ProductInTranslations
 }

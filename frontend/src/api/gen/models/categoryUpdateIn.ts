@@ -5,10 +5,10 @@
  * The arvel-ecommerce-kit API.
  * OpenAPI spec version: 0.1.0
  */
-import type { CategoryUpdateInTranslations } from './categoryUpdateInTranslations';
+import type { CategoryUpdateInTranslations } from './categoryUpdateInTranslations'
 
 export interface CategoryUpdateIn {
-  translations?: CategoryUpdateInTranslations;
-  parent_id?: number | null;
-  published?: boolean | null;
+  translations?: CategoryUpdateInTranslations
+  parent_id?: number | null
+  published?: boolean | null
 }

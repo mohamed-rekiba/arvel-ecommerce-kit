@@ -5,13 +5,13 @@
  * The arvel-ecommerce-kit API.
  * OpenAPI spec version: 0.1.0
  */
-import type { QueuedCookie } from './queuedCookie';
-import type { ResponseHeaders } from './responseHeaders';
+import type { QueuedCookie } from './queuedCookie'
+import type { ResponseHeaders } from './responseHeaders'
 
 export interface Response {
-  content?: unknown;
-  status?: number;
-  headers?: ResponseHeaders;
-  cookies?: QueuedCookie[];
-  forgotten_cookies?: string[];
+  content?: unknown
+  status?: number
+  headers?: ResponseHeaders
+  cookies?: QueuedCookie[]
+  forgotten_cookies?: string[]
 }

@@ -146,11 +146,7 @@ watch(() => route.query, load)
         <button
           v-if="minPrice != null || maxPrice != null"
           class="pricef__clear"
-          @click="
-            priceMinInput = '',
-            priceMaxInput = '',
-            applyPrice()
-          "
+          @click="((priceMinInput = ''), (priceMaxInput = ''), applyPrice())"
         >
           {{ t('catalog.clear_filters') }}
         </button>

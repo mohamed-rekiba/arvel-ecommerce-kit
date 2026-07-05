@@ -7,6 +7,6 @@
  */
 
 export interface DevChargeOut {
-  id: string;
-  client_secret: string;
+  id: string
+  client_secret: string
 }

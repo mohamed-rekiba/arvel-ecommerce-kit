@@ -5,14 +5,14 @@
  * The arvel-ecommerce-kit API.
  * OpenAPI spec version: 0.1.0
  */
-import type { ReviewStatus } from './reviewStatus';
+import type { ReviewStatus } from './reviewStatus'
 
 export interface AdminReviewOut {
-  id: number;
-  product_slug: string;
-  author: string;
-  rating: number;
-  title: string | null;
-  body: string;
-  status: ReviewStatus;
+  id: number
+  product_slug: string
+  author: string
+  rating: number
+  title: string | null
+  body: string
+  status: ReviewStatus
 }

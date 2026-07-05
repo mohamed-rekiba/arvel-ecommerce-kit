@@ -7,5 +7,5 @@
  */
 
 export interface AssignRoleIn {
-  role: string;
+  role: string
 }

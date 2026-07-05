@@ -5,30 +5,30 @@
  * The arvel-ecommerce-kit API.
  * OpenAPI spec version: 0.1.0
  */
-import type { AddressOut } from './addressOut';
-import type { Currency } from './currency';
-import type { OrderLineOut } from './orderLineOut';
-import type { OrderStatus } from './orderStatus';
-import type { OrderTimelineOut } from './orderTimelineOut';
-import type { PaymentMethod } from './paymentMethod';
-import type { PaymentStatus } from './paymentStatus';
+import type { AddressOut } from './addressOut'
+import type { Currency } from './currency'
+import type { OrderLineOut } from './orderLineOut'
+import type { OrderStatus } from './orderStatus'
+import type { OrderTimelineOut } from './orderTimelineOut'
+import type { PaymentMethod } from './paymentMethod'
+import type { PaymentStatus } from './paymentStatus'
 
 export interface OrderOut {
-  id: number;
-  status: OrderStatus;
-  token: string;
-  contact_email: string;
-  address: AddressOut;
-  subtotal_cents: number;
-  shipping_cents: number;
-  tax_cents: number;
-  coupon_code: string | null;
-  discount_cents: number;
-  total_cents: number;
-  currency: Currency;
-  payment_method: PaymentMethod;
-  payment_status: PaymentStatus | null;
-  items: OrderLineOut[];
-  placed_at?: string | null;
-  timeline?: OrderTimelineOut[] | null;
+  id: number
+  status: OrderStatus
+  token: string
+  contact_email: string
+  address: AddressOut
+  subtotal_cents: number
+  shipping_cents: number
+  tax_cents: number
+  coupon_code: string | null
+  discount_cents: number
+  total_cents: number
+  currency: Currency
+  payment_method: PaymentMethod
+  payment_status: PaymentStatus | null
+  items: OrderLineOut[]
+  placed_at?: string | null
+  timeline?: OrderTimelineOut[] | null
 }

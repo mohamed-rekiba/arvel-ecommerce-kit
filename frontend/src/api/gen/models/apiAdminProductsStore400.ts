@@ -5,14 +5,14 @@
  * The arvel-ecommerce-kit API.
  * OpenAPI spec version: 0.1.0
  */
-import type { ApiAdminProductsStore400Extra } from './apiAdminProductsStore400Extra';
+import type { ApiAdminProductsStore400Extra } from './apiAdminProductsStore400Extra'
 
 /**
  * Validation Exception
  */
 export type ApiAdminProductsStore400 = {
-  status_code: number;
-  detail: string;
+  status_code: number
+  detail: string
   /** @nullable */
-  extra?: ApiAdminProductsStore400Extra;
-};
+  extra?: ApiAdminProductsStore400Extra
+}

@@ -94,18 +94,11 @@
                     },
                     "extra": {
                       "additionalProperties": {},
-                      "type": [
-                        "null",
-                        "object",
-                        "array"
-                      ]
+                      "type": ["null", "object", "array"]
                     }
                   },
                   "type": "object",
-                  "required": [
-                    "detail",
-                    "status_code"
-                  ],
+                  "required": ["detail", "status_code"],
                   "description": "Validation Exception",
                   "examples": [
                     {
@@ -187,18 +180,11 @@
                     },
                     "extra": {
                       "additionalProperties": {},
-                      "type": [
-                        "null",
-                        "object",
-                        "array"
-                      ]
+                      "type": ["null", "object", "array"]
                     }
                   },
                   "type": "object",
-                  "required": [
-                    "detail",
-                    "status_code"
-                  ],
+                  "required": ["detail", "status_code"],
                   "description": "Validation Exception",
                   "examples": [
                     {
@@ -261,18 +247,11 @@
                     },
                     "extra": {
                       "additionalProperties": {},
-                      "type": [
-                        "null",
-                        "object",
-                        "array"
-                      ]
+                      "type": ["null", "object", "array"]
                     }
                   },
                   "type": "object",
-                  "required": [
-                    "detail",
-                    "status_code"
-                  ],
+                  "required": ["detail", "status_code"],
                   "description": "Validation Exception",
                   "examples": [
                     {
@@ -356,18 +335,11 @@
                     },
                     "extra": {
                       "additionalProperties": {},
-                      "type": [
-                        "null",
-                        "object",
-                        "array"
-                      ]
+                      "type": ["null", "object", "array"]
                     }
                   },
                   "type": "object",
-                  "required": [
-                    "detail",
-                    "status_code"
-                  ],
+                  "required": ["detail", "status_code"],
                   "description": "Validation Exception",
                   "examples": [
                     {
@@ -425,18 +397,11 @@
                     },
                     "extra": {
                       "additionalProperties": {},
-                      "type": [
-                        "null",
-                        "object",
-                        "array"
-                      ]
+                      "type": ["null", "object", "array"]
                     }
                   },
                   "type": "object",
-                  "required": [
-                    "detail",
-                    "status_code"
-                  ],
+                  "required": ["detail", "status_code"],
                   "description": "Validation Exception",
                   "examples": [
                     {
@@ -494,18 +459,11 @@
                     },
                     "extra": {
                       "additionalProperties": {},
-                      "type": [
-                        "null",
-                        "object",
-                        "array"
-                      ]
+                      "type": ["null", "object", "array"]
                     }
                   },
                   "type": "object",
-                  "required": [
-                    "detail",
-                    "status_code"
-                  ],
+                  "required": ["detail", "status_code"],
                   "description": "Validation Exception",
                   "examples": [
                     {
@@ -594,18 +552,11 @@
                     },
                     "extra": {
                       "additionalProperties": {},
-                      "type": [
-                        "null",
-                        "object",
-                        "array"
-                      ]
+                      "type": ["null", "object", "array"]
                     }
                   },
                   "type": "object",
-                  "required": [
-                    "detail",
-                    "status_code"
-                  ],
+                  "required": ["detail", "status_code"],
                   "description": "Validation Exception",
                   "examples": [
                     {
@@ -805,18 +756,11 @@
                     },
                     "extra": {
                       "additionalProperties": {},
-                      "type": [
-                        "null",
-                        "object",
-                        "array"
-                      ]
+                      "type": ["null", "object", "array"]
                     }
                   },
                   "type": "object",
-                  "required": [
-                    "detail",
-                    "status_code"
-                  ],
+                  "required": ["detail", "status_code"],
                   "description": "Validation Exception",
                   "examples": [
                     {
@@ -875,18 +819,11 @@
                     },
                     "extra": {
                       "additionalProperties": {},
-                      "type": [
-                        "null",
-                        "object",
-                        "array"
-                      ]
+                      "type": ["null", "object", "array"]
                     }
                   },
                   "type": "object",
-                  "required": [
-                    "detail",
-                    "status_code"
-                  ],
+                  "required": ["detail", "status_code"],
                   "description": "Validation Exception",
                   "examples": [
                     {
@@ -945,18 +882,11 @@
                     },
                     "extra": {
                       "additionalProperties": {},
-                      "type": [
-                        "null",
-                        "object",
-                        "array"
-                      ]
+                      "type": ["null", "object", "array"]
                     }
                   },
                   "type": "object",
-                  "required": [
-                    "detail",
-                    "status_code"
-                  ],
+                  "required": ["detail", "status_code"],
                   "description": "Validation Exception",
                   "examples": [
                     {
@@ -1024,18 +954,11 @@
                     },
                     "extra": {
                       "additionalProperties": {},
-                      "type": [
-                        "null",
-                        "object",
-                        "array"
-                      ]
+                      "type": ["null", "object", "array"]
                     }
                   },
                   "type": "object",
-                  "required": [
-                    "detail",
-                    "status_code"
-                  ],
+                  "required": ["detail", "status_code"],
                   "description": "Validation Exception",
                   "examples": [
                     {
@@ -1097,18 +1020,11 @@
                     },
                     "extra": {
                       "additionalProperties": {},
-                      "type": [
-                        "null",
-                        "object",
-                        "array"
-                      ]
+                      "type": ["null", "object", "array"]
                     }
                   },
                   "type": "object",
-                  "required": [
-                    "detail",
-                    "status_code"
-                  ],
+                  "required": ["detail", "status_code"],
                   "description": "Validation Exception",
                   "examples": [
                     {
@@ -1184,18 +1100,11 @@
                     },
                     "extra": {
                       "additionalProperties": {},
-                      "type": [
-                        "null",
-                        "object",
-                        "array"
-                      ]
+                      "type": ["null", "object", "array"]
                     }
                   },
                   "type": "object",
-                  "required": [
-                    "detail",
-                    "status_code"
-                  ],
+                  "required": ["detail", "status_code"],
                   "description": "Validation Exception",
                   "examples": [
                     {
@@ -1286,18 +1195,11 @@
                     },
                     "extra": {
                       "additionalProperties": {},
-                      "type": [
-                        "null",
-                        "object",
-                        "array"
-                      ]
+                      "type": ["null", "object", "array"]
                     }
                   },
                   "type": "object",
-                  "required": [
-                    "detail",
-                    "status_code"
-                  ],
+                  "required": ["detail", "status_code"],
                   "description": "Validation Exception",
                   "examples": [
                     {
@@ -1358,18 +1260,11 @@
                     },
                     "extra": {
                       "additionalProperties": {},
-                      "type": [
-                        "null",
-                        "object",
-                        "array"
-                      ]
+                      "type": ["null", "object", "array"]
                     }
                   },
                   "type": "object",
-                  "required": [
-                    "detail",
-                    "status_code"
-                  ],
+                  "required": ["detail", "status_code"],
                   "description": "Validation Exception",
                   "examples": [
                     {
@@ -1448,18 +1343,11 @@
                     },
                     "extra": {
                       "additionalProperties": {},
-                      "type": [
-                        "null",
-                        "object",
-                        "array"
-                      ]
+                      "type": ["null", "object", "array"]
                     }
                   },
                   "type": "object",
-                  "required": [
-                    "detail",
-                    "status_code"
-                  ],
+                  "required": ["detail", "status_code"],
                   "description": "Validation Exception",
                   "examples": [
                     {
@@ -1519,18 +1407,11 @@
                     },
                     "extra": {
                       "additionalProperties": {},
-                      "type": [
-                        "null",
-                        "object",
-                        "array"
-                      ]
+                      "type": ["null", "object", "array"]
                     }
                   },
                   "type": "object",
-                  "required": [
-                    "detail",
-                    "status_code"
-                  ],
+                  "required": ["detail", "status_code"],
                   "description": "Validation Exception",
                   "examples": [
                     {
@@ -1594,18 +1475,11 @@
                     },
                     "extra": {
                       "additionalProperties": {},
-                      "type": [
-                        "null",
-                        "object",
-                        "array"
-                      ]
+                      "type": ["null", "object", "array"]
                     }
                   },
                   "type": "object",
-                  "required": [
-                    "detail",
-                    "status_code"
-                  ],
+                  "required": ["detail", "status_code"],
                   "description": "Validation Exception",
                   "examples": [
                     {
@@ -1677,18 +1551,11 @@
                     },
                     "extra": {
                       "additionalProperties": {},
-                      "type": [
-                        "null",
-                        "object",
-                        "array"
-                      ]
+                      "type": ["null", "object", "array"]
                     }
                   },
                   "type": "object",
-                  "required": [
-                    "detail",
-                    "status_code"
-                  ],
+                  "required": ["detail", "status_code"],
                   "description": "Validation Exception",
                   "examples": [
                     {
@@ -1750,18 +1617,11 @@
                     },
                     "extra": {
                       "additionalProperties": {},
-                      "type": [
-                        "null",
-                        "object",
-                        "array"
-                      ]
+                      "type": ["null", "object", "array"]
                     }
                   },
                   "type": "object",
-                  "required": [
-                    "detail",
-                    "status_code"
-                  ],
+                  "required": ["detail", "status_code"],
                   "description": "Validation Exception",
                   "examples": [
                     {
@@ -1825,18 +1685,11 @@
                     },
                     "extra": {
                       "additionalProperties": {},
-                      "type": [
-                        "null",
-                        "object",
-                        "array"
-                      ]
+                      "type": ["null", "object", "array"]
                     }
                   },
                   "type": "object",
-                  "required": [
-                    "detail",
-                    "status_code"
-                  ],
+                  "required": ["detail", "status_code"],
                   "description": "Validation Exception",
                   "examples": [
                     {
@@ -1909,18 +1762,11 @@
                     },
                     "extra": {
                       "additionalProperties": {},
-                      "type": [
-                        "null",
-                        "object",
-                        "array"
-                      ]
+                      "type": ["null", "object", "array"]
                     }
                   },
                   "type": "object",
-                  "required": [
-                    "detail",
-                    "status_code"
-                  ],
+                  "required": ["detail", "status_code"],
                   "description": "Validation Exception",
                   "examples": [
                     {
@@ -1981,18 +1827,11 @@
                     },
                     "extra": {
                       "additionalProperties": {},
-                      "type": [
-                        "null",
-                        "object",
-                        "array"
-                      ]
+                      "type": ["null", "object", "array"]
                     }
                   },
                   "type": "object",
-                  "required": [
-                    "detail",
-                    "status_code"
-                  ],
+                  "required": ["detail", "status_code"],
                   "description": "Validation Exception",
                   "examples": [
                     {
@@ -2080,18 +1919,11 @@
                     },
                     "extra": {
                       "additionalProperties": {},
-                      "type": [
-                        "null",
-                        "object",
-                        "array"
-                      ]
+                      "type": ["null", "object", "array"]
                     }
                   },
                   "type": "object",
-                  "required": [
-                    "detail",
-                    "status_code"
-                  ],
+                  "required": ["detail", "status_code"],
                   "description": "Validation Exception",
                   "examples": [
                     {
@@ -2165,18 +1997,11 @@
                     },
                     "extra": {
                       "additionalProperties": {},
-                      "type": [
-                        "null",
-                        "object",
-                        "array"
-                      ]
+                      "type": ["null", "object", "array"]
                     }
                   },
                   "type": "object",
-                  "required": [
-                    "detail",
-                    "status_code"
-                  ],
+                  "required": ["detail", "status_code"],
                   "description": "Validation Exception",
                   "examples": [
                     {
@@ -2242,18 +2067,11 @@
                     },
                     "extra": {
                       "additionalProperties": {},
-                      "type": [
-                        "null",
-                        "object",
-                        "array"
-                      ]
+                      "type": ["null", "object", "array"]
                     }
                   },
                   "type": "object",
-                  "required": [
-                    "detail",
-                    "status_code"
-                  ],
+                  "required": ["detail", "status_code"],
                   "description": "Validation Exception",
                   "examples": [
                     {
@@ -2324,18 +2142,11 @@
                     },
                     "extra": {
                       "additionalProperties": {},
-                      "type": [
-                        "null",
-                        "object",
-                        "array"
-                      ]
+                      "type": ["null", "object", "array"]
                     }
                   },
                   "type": "object",
-                  "required": [
-                    "detail",
-                    "status_code"
-                  ],
+                  "required": ["detail", "status_code"],
                   "description": "Validation Exception",
                   "examples": [
                     {
@@ -2399,18 +2210,11 @@
                     },
                     "extra": {
                       "additionalProperties": {},
-                      "type": [
-                        "null",
-                        "object",
-                        "array"
-                      ]
+                      "type": ["null", "object", "array"]
                     }
                   },
                   "type": "object",
-                  "required": [
-                    "detail",
-                    "status_code"
-                  ],
+                  "required": ["detail", "status_code"],
                   "description": "Validation Exception",
                   "examples": [
                     {
@@ -2481,18 +2285,11 @@
                     },
                     "extra": {
                       "additionalProperties": {},
-                      "type": [
-                        "null",
-                        "object",
-                        "array"
-                      ]
+                      "type": ["null", "object", "array"]
                     }
                   },
                   "type": "object",
-                  "required": [
-                    "detail",
-                    "status_code"
-                  ],
+                  "required": ["detail", "status_code"],
                   "description": "Validation Exception",
                   "examples": [
                     {
@@ -2566,18 +2363,11 @@
                     },
                     "extra": {
                       "additionalProperties": {},
-                      "type": [
-                        "null",
-                        "object",
-                        "array"
-                      ]
+                      "type": ["null", "object", "array"]
                     }
                   },
                   "type": "object",
-                  "required": [
-                    "detail",
-                    "status_code"
-                  ],
+                  "required": ["detail", "status_code"],
                   "description": "Validation Exception",
                   "examples": [
                     {
@@ -2668,18 +2458,11 @@
                     },
                     "extra": {
                       "additionalProperties": {},
-                      "type": [
-                        "null",
-                        "object",
-                        "array"
-                      ]
+                      "type": ["null", "object", "array"]
                     }
                   },
                   "type": "object",
-                  "required": [
-                    "detail",
-                    "status_code"
-                  ],
+                  "required": ["detail", "status_code"],
                   "description": "Validation Exception",
                   "examples": [
                     {
@@ -2743,18 +2526,11 @@
                     },
                     "extra": {
                       "additionalProperties": {},
-                      "type": [
-                        "null",
-                        "object",
-                        "array"
-                      ]
+                      "type": ["null", "object", "array"]
                     }
                   },
                   "type": "object",
-                  "required": [
-                    "detail",
-                    "status_code"
-                  ],
+                  "required": ["detail", "status_code"],
                   "description": "Validation Exception",
                   "examples": [
                     {
@@ -2876,18 +2652,11 @@
                     },
                     "extra": {
                       "additionalProperties": {},
-                      "type": [
-                        "null",
-                        "object",
-                        "array"
-                      ]
+                      "type": ["null", "object", "array"]
                     }
                   },
                   "type": "object",
-                  "required": [
-                    "detail",
-                    "status_code"
-                  ],
+                  "required": ["detail", "status_code"],
                   "description": "Validation Exception",
                   "examples": [
                     {
@@ -2959,18 +2728,11 @@
                     },
                     "extra": {
                       "additionalProperties": {},
-                      "type": [
-                        "null",
-                        "object",
-                        "array"
-                      ]
+                      "type": ["null", "object", "array"]
                     }
                   },
                   "type": "object",
-                  "required": [
-                    "detail",
-                    "status_code"
-                  ],
+                  "required": ["detail", "status_code"],
                   "description": "Validation Exception",
                   "examples": [
                     {
@@ -3043,18 +2805,11 @@
                     },
                     "extra": {
                       "additionalProperties": {},
-                      "type": [
-                        "null",
-                        "object",
-                        "array"
-                      ]
+                      "type": ["null", "object", "array"]
                     }
                   },
                   "type": "object",
-                  "required": [
-                    "detail",
-                    "status_code"
-                  ],
+                  "required": ["detail", "status_code"],
                   "description": "Validation Exception",
                   "examples": [
                     {
@@ -3199,18 +2954,11 @@
                     },
                     "extra": {
                       "additionalProperties": {},
-                      "type": [
-                        "null",
-                        "object",
-                        "array"
-                      ]
+                      "type": ["null", "object", "array"]
                     }
                   },
                   "type": "object",
-                  "required": [
-                    "detail",
-                    "status_code"
-                  ],
+                  "required": ["detail", "status_code"],
                   "description": "Validation Exception",
                   "examples": [
                     {
@@ -3277,18 +3025,11 @@
                     },
                     "extra": {
                       "additionalProperties": {},
-                      "type": [
-                        "null",
-                        "object",
-                        "array"
-                      ]
+                      "type": ["null", "object", "array"]
                     }
                   },
                   "type": "object",
-                  "required": [
-                    "detail",
-                    "status_code"
-                  ],
+                  "required": ["detail", "status_code"],
                   "description": "Validation Exception",
                   "examples": [
                     {
@@ -3357,18 +3098,11 @@
                     },
                     "extra": {
                       "additionalProperties": {},
-                      "type": [
-                        "null",
-                        "object",
-                        "array"
-                      ]
+                      "type": ["null", "object", "array"]
                     }
                   },
                   "type": "object",
-                  "required": [
-                    "detail",
-                    "status_code"
-                  ],
+                  "required": ["detail", "status_code"],
                   "description": "Validation Exception",
                   "examples": [
                     {
@@ -3441,18 +3175,11 @@
                     },
                     "extra": {
                       "additionalProperties": {},
-                      "type": [
-                        "null",
-                        "object",
-                        "array"
-                      ]
+                      "type": ["null", "object", "array"]
                     }
                   },
                   "type": "object",
-                  "required": [
-                    "detail",
-                    "status_code"
-                  ],
+                  "required": ["detail", "status_code"],
                   "description": "Validation Exception",
                   "examples": [
                     {
@@ -3516,18 +3243,11 @@
                     },
                     "extra": {
                       "additionalProperties": {},
-                      "type": [
-                        "null",
-                        "object",
-                        "array"
-                      ]
+                      "type": ["null", "object", "array"]
                     }
                   },
                   "type": "object",
-                  "required": [
-                    "detail",
-                    "status_code"
-                  ],
+                  "required": ["detail", "status_code"],
                   "description": "Validation Exception",
                   "examples": [
                     {
@@ -3588,18 +3308,11 @@
                     },
                     "extra": {
                       "additionalProperties": {},
-                      "type": [
-                        "null",
-                        "object",
-                        "array"
-                      ]
+                      "type": ["null", "object", "array"]
                     }
                   },
                   "type": "object",
-                  "required": [
-                    "detail",
-                    "status_code"
-                  ],
+                  "required": ["detail", "status_code"],
                   "description": "Validation Exception",
                   "examples": [
                     {
@@ -3683,18 +3396,11 @@
                     },
                     "extra": {
                       "additionalProperties": {},
-                      "type": [
-                        "null",
-                        "object",
-                        "array"
-                      ]
+                      "type": ["null", "object", "array"]
                     }
                   },
                   "type": "object",
-                  "required": [
-                    "detail",
-                    "status_code"
-                  ],
+                  "required": ["detail", "status_code"],
                   "description": "Validation Exception",
                   "examples": [
                     {
@@ -3753,18 +3459,11 @@
                     },
                     "extra": {
                       "additionalProperties": {},
-                      "type": [
-                        "null",
-                        "object",
-                        "array"
-                      ]
+                      "type": ["null", "object", "array"]
                     }
                   },
                   "type": "object",
-                  "required": [
-                    "detail",
-                    "status_code"
-                  ],
+                  "required": ["detail", "status_code"],
                   "description": "Validation Exception",
                   "examples": [
                     {
@@ -3831,18 +3530,11 @@
                     },
                     "extra": {
                       "additionalProperties": {},
-                      "type": [
-                        "null",
-                        "object",
-                        "array"
-                      ]
+                      "type": ["null", "object", "array"]
                     }
                   },
                   "type": "object",
-                  "required": [
-                    "detail",
-                    "status_code"
-                  ],
+                  "required": ["detail", "status_code"],
                   "description": "Validation Exception",
                   "examples": [
                     {
@@ -3900,18 +3592,11 @@
                     },
                     "extra": {
                       "additionalProperties": {},
-                      "type": [
-                        "null",
-                        "object",
-                        "array"
-                      ]
+                      "type": ["null", "object", "array"]
                     }
                   },
                   "type": "object",
-                  "required": [
-                    "detail",
-                    "status_code"
-                  ],
+                  "required": ["detail", "status_code"],
                   "description": "Validation Exception",
                   "examples": [
                     {
@@ -4038,18 +3723,11 @@
                     },
                     "extra": {
                       "additionalProperties": {},
-                      "type": [
-                        "null",
-                        "object",
-                        "array"
-                      ]
+                      "type": ["null", "object", "array"]
                     }
                   },
                   "type": "object",
-                  "required": [
-                    "detail",
-                    "status_code"
-                  ],
+                  "required": ["detail", "status_code"],
                   "description": "Validation Exception",
                   "examples": [
                     {
@@ -4115,18 +3793,11 @@
                     },
                     "extra": {
                       "additionalProperties": {},
-                      "type": [
-                        "null",
-                        "object",
-                        "array"
-                      ]
+                      "type": ["null", "object", "array"]
                     }
                   },
                   "type": "object",
-                  "required": [
-                    "detail",
-                    "status_code"
-                  ],
+                  "required": ["detail", "status_code"],
                   "description": "Validation Exception",
                   "examples": [
                     {
@@ -4197,18 +3868,11 @@
                     },
                     "extra": {
                       "additionalProperties": {},
-                      "type": [
-                        "null",
-                        "object",
-                        "array"
-                      ]
+                      "type": ["null", "object", "array"]
                     }
                   },
                   "type": "object",
-                  "required": [
-                    "detail",
-                    "status_code"
-                  ],
+                  "required": ["detail", "status_code"],
                   "description": "Validation Exception",
                   "examples": [
                     {
@@ -4334,18 +3998,11 @@
                     },
                     "extra": {
                       "additionalProperties": {},
-                      "type": [
-                        "null",
-                        "object",
-                        "array"
-                      ]
+                      "type": ["null", "object", "array"]
                     }
                   },
                   "type": "object",
-                  "required": [
-                    "detail",
-                    "status_code"
-                  ],
+                  "required": ["detail", "status_code"],
                   "description": "Validation Exception",
                   "examples": [
                     {
@@ -4425,18 +4082,11 @@
                     },
                     "extra": {
                       "additionalProperties": {},
-                      "type": [
-                        "null",
-                        "object",
-                        "array"
-                      ]
+                      "type": ["null", "object", "array"]
                     }
                   },
                   "type": "object",
-                  "required": [
-                    "detail",
-                    "status_code"
-                  ],
+                  "required": ["detail", "status_code"],
                   "description": "Validation Exception",
                   "examples": [
                     {
@@ -4603,18 +4253,11 @@
                     },
                     "extra": {
                       "additionalProperties": {},
-                      "type": [
-                        "null",
-                        "object",
-                        "array"
-                      ]
+                      "type": ["null", "object", "array"]
                     }
                   },
                   "type": "object",
-                  "required": [
-                    "detail",
-                    "status_code"
-                  ],
+                  "required": ["detail", "status_code"],
                   "description": "Validation Exception",
                   "examples": [
                     {
@@ -4680,18 +4323,11 @@
                     },
                     "extra": {
                       "additionalProperties": {},
-                      "type": [
-                        "null",
-                        "object",
-                        "array"
-                      ]
+                      "type": ["null", "object", "array"]
                     }
                   },
                   "type": "object",
-                  "required": [
-                    "detail",
-                    "status_code"
-                  ],
+                  "required": ["detail", "status_code"],
                   "description": "Validation Exception",
                   "examples": [
                     {
@@ -4762,18 +4398,11 @@
                     },
                     "extra": {
                       "additionalProperties": {},
-                      "type": [
-                        "null",
-                        "object",
-                        "array"
-                      ]
+                      "type": ["null", "object", "array"]
                     }
                   },
                   "type": "object",
-                  "required": [
-                    "detail",
-                    "status_code"
-                  ],
+                  "required": ["detail", "status_code"],
                   "description": "Validation Exception",
                   "examples": [
                     {
@@ -4837,18 +4466,11 @@
                     },
                     "extra": {
                       "additionalProperties": {},
-                      "type": [
-                        "null",
-                        "object",
-                        "array"
-                      ]
+                      "type": ["null", "object", "array"]
                     }
                   },
                   "type": "object",
-                  "required": [
-                    "detail",
-                    "status_code"
-                  ],
+                  "required": ["detail", "status_code"],
                   "description": "Validation Exception",
                   "examples": [
                     {
@@ -4936,18 +4558,11 @@
                     },
                     "extra": {
                       "additionalProperties": {},
-                      "type": [
-                        "null",
-                        "object",
-                        "array"
-                      ]
+                      "type": ["null", "object", "array"]
                     }
                   },
                   "type": "object",
-                  "required": [
-                    "detail",
-                    "status_code"
-                  ],
+                  "required": ["detail", "status_code"],
                   "description": "Validation Exception",
                   "examples": [
                     {
@@ -5013,18 +4628,11 @@
                     },
                     "extra": {
                       "additionalProperties": {},
-                      "type": [
-                        "null",
-                        "object",
-                        "array"
-                      ]
+                      "type": ["null", "object", "array"]
                     }
                   },
                   "type": "object",
-                  "required": [
-                    "detail",
-                    "status_code"
-                  ],
+                  "required": ["detail", "status_code"],
                   "description": "Validation Exception",
                   "examples": [
                     {
@@ -5095,18 +4703,11 @@
                     },
                     "extra": {
                       "additionalProperties": {},
-                      "type": [
-                        "null",
-                        "object",
-                        "array"
-                      ]
+                      "type": ["null", "object", "array"]
                     }
                   },
                   "type": "object",
-                  "required": [
-                    "detail",
-                    "status_code"
-                  ],
+                  "required": ["detail", "status_code"],
                   "description": "Validation Exception",
                   "examples": [
                     {
@@ -5194,18 +4795,11 @@
                     },
                     "extra": {
                       "additionalProperties": {},
-                      "type": [
-                        "null",
-                        "object",
-                        "array"
-                      ]
+                      "type": ["null", "object", "array"]
                     }
                   },
                   "type": "object",
-                  "required": [
-                    "detail",
-                    "status_code"
-                  ],
+                  "required": ["detail", "status_code"],
                   "description": "Validation Exception",
                   "examples": [
                     {
@@ -5279,18 +4873,11 @@
                     },
                     "extra": {
                       "additionalProperties": {},
-                      "type": [
-                        "null",
-                        "object",
-                        "array"
-                      ]
+                      "type": ["null", "object", "array"]
                     }
                   },
                   "type": "object",
-                  "required": [
-                    "detail",
-                    "status_code"
-                  ],
+                  "required": ["detail", "status_code"],
                   "description": "Validation Exception",
                   "examples": [
                     {
@@ -5353,18 +4940,11 @@
                     },
                     "extra": {
                       "additionalProperties": {},
-                      "type": [
-                        "null",
-                        "object",
-                        "array"
-                      ]
+                      "type": ["null", "object", "array"]
                     }
                   },
                   "type": "object",
-                  "required": [
-                    "detail",
-                    "status_code"
-                  ],
+                  "required": ["detail", "status_code"],
                   "description": "Validation Exception",
                   "examples": [
                     {
@@ -5473,18 +5053,11 @@
                     },
                     "extra": {
                       "additionalProperties": {},
-                      "type": [
-                        "null",
-                        "object",
-                        "array"
-                      ]
+                      "type": ["null", "object", "array"]
                     }
                   },
                   "type": "object",
-                  "required": [
-                    "detail",
-                    "status_code"
-                  ],
+                  "required": ["detail", "status_code"],
                   "description": "Validation Exception",
                   "examples": [
                     {
@@ -5542,18 +5115,11 @@
                     },
                     "extra": {
                       "additionalProperties": {},
-                      "type": [
-                        "null",
-                        "object",
-                        "array"
-                      ]
+                      "type": ["null", "object", "array"]
                     }
                   },
                   "type": "object",
-                  "required": [
-                    "detail",
-                    "status_code"
-                  ],
+                  "required": ["detail", "status_code"],
                   "description": "Validation Exception",
                   "examples": [
                     {
@@ -5612,18 +5178,11 @@
                     },
                     "extra": {
                       "additionalProperties": {},
-                      "type": [
-                        "null",
-                        "object",
-                        "array"
-                      ]
+                      "type": ["null", "object", "array"]
                     }
                   },
                   "type": "object",
-                  "required": [
-                    "detail",
-                    "status_code"
-                  ],
+                  "required": ["detail", "status_code"],
                   "description": "Validation Exception",
                   "examples": [
                     {
@@ -5766,18 +5325,11 @@
                     },
                     "extra": {
                       "additionalProperties": {},
-                      "type": [
-                        "null",
-                        "object",
-                        "array"
-                      ]
+                      "type": ["null", "object", "array"]
                     }
                   },
                   "type": "object",
-                  "required": [
-                    "detail",
-                    "status_code"
-                  ],
+                  "required": ["detail", "status_code"],
                   "description": "Validation Exception",
                   "examples": [
                     {
@@ -5870,18 +5422,11 @@
                     },
                     "extra": {
                       "additionalProperties": {},
-                      "type": [
-                        "null",
-                        "object",
-                        "array"
-                      ]
+                      "type": ["null", "object", "array"]
                     }
                   },
                   "type": "object",
-                  "required": [
-                    "detail",
-                    "status_code"
-                  ],
+                  "required": ["detail", "status_code"],
                   "description": "Validation Exception",
                   "examples": [
                     {
@@ -5955,18 +5500,11 @@
                     },
                     "extra": {
                       "additionalProperties": {},
-                      "type": [
-                        "null",
-                        "object",
-                        "array"
-                      ]
+                      "type": ["null", "object", "array"]
                     }
                   },
                   "type": "object",
-                  "required": [
-                    "detail",
-                    "status_code"
-                  ],
+                  "required": ["detail", "status_code"],
                   "description": "Validation Exception",
                   "examples": [
                     {
@@ -6030,18 +5568,11 @@
                     },
                     "extra": {
                       "additionalProperties": {},
-                      "type": [
-                        "null",
-                        "object",
-                        "array"
-                      ]
+                      "type": ["null", "object", "array"]
                     }
                   },
                   "type": "object",
-                  "required": [
-                    "detail",
-                    "status_code"
-                  ],
+                  "required": ["detail", "status_code"],
                   "description": "Validation Exception",
                   "examples": [
                     {
@@ -6099,18 +5630,11 @@
                     },
                     "extra": {
                       "additionalProperties": {},
-                      "type": [
-                        "null",
-                        "object",
-                        "array"
-                      ]
+                      "type": ["null", "object", "array"]
                     }
                   },
                   "type": "object",
-                  "required": [
-                    "detail",
-                    "status_code"
-                  ],
+                  "required": ["detail", "status_code"],
                   "description": "Validation Exception",
                   "examples": [
                     {
@@ -6168,18 +5692,11 @@
                     },
                     "extra": {
                       "additionalProperties": {},
-                      "type": [
-                        "null",
-                        "object",
-                        "array"
-                      ]
+                      "type": ["null", "object", "array"]
                     }
                   },
                   "type": "object",
-                  "required": [
-                    "detail",
-                    "status_code"
-                  ],
+                  "required": ["detail", "status_code"],
                   "description": "Validation Exception",
                   "examples": [
                     {
@@ -6254,18 +5771,11 @@
                     },
                     "extra": {
                       "additionalProperties": {},
-                      "type": [
-                        "null",
-                        "object",
-                        "array"
-                      ]
+                      "type": ["null", "object", "array"]
                     }
                   },
                   "type": "object",
-                  "required": [
-                    "detail",
-                    "status_code"
-                  ],
+                  "required": ["detail", "status_code"],
                   "description": "Validation Exception",
                   "examples": [
                     {
@@ -6372,9 +5882,7 @@
           }
         },
         "type": "object",
-        "required": [
-          "product_variant_id"
-        ],
+        "required": ["product_variant_id"],
         "title": "AddItemIn"
       },
       "AddressIn": {
@@ -6473,14 +5981,7 @@
           }
         },
         "type": "object",
-        "required": [
-          "city",
-          "country",
-          "line1",
-          "line2",
-          "name",
-          "postal_code"
-        ],
+        "required": ["city", "country", "line1", "line2", "name", "postal_code"],
         "title": "AddressOut"
       },
       "AdminBannerOut": {
@@ -6515,14 +6016,7 @@
           }
         },
         "type": "object",
-        "required": [
-          "active",
-          "cta_to",
-          "id",
-          "image_url",
-          "sort",
-          "translations"
-        ],
+        "required": ["active", "cta_to", "id", "image_url", "sort", "translations"],
         "title": "AdminBannerOut"
       },
       "AdminCategoryOut": {
@@ -6559,11 +6053,7 @@
           }
         },
         "type": "object",
-        "required": [
-          "id",
-          "slug",
-          "translations"
-        ],
+        "required": ["id", "slug", "translations"],
         "title": "AdminCategoryOut"
       },
       "AdminCategoryPage": {
@@ -6588,13 +6078,7 @@
           }
         },
         "type": "object",
-        "required": [
-          "current_page",
-          "data",
-          "last_page",
-          "per_page",
-          "total"
-        ],
+        "required": ["current_page", "data", "last_page", "per_page", "total"],
         "title": "AdminCategoryPage"
       },
       "AdminCouponOut": {
@@ -6751,12 +6235,7 @@
           }
         },
         "type": "object",
-        "required": [
-          "email",
-          "id",
-          "name",
-          "role"
-        ],
+        "required": ["email", "id", "name", "role"],
         "title": "AdminMeOut"
       },
       "AdminOrderCustomerOut": {
@@ -6772,11 +6251,7 @@
           }
         },
         "type": "object",
-        "required": [
-          "email",
-          "id",
-          "name"
-        ],
+        "required": ["email", "id", "name"],
         "title": "AdminOrderCustomerOut"
       },
       "AdminOrderDetailOut": {
@@ -6907,12 +6382,7 @@
           }
         },
         "type": "object",
-        "required": [
-          "causer_id",
-          "created_at",
-          "description",
-          "properties"
-        ],
+        "required": ["causer_id", "created_at", "description", "properties"],
         "title": "AdminOrderEventOut"
       },
       "AdminOrderPaymentOut": {
@@ -6941,13 +6411,7 @@
           }
         },
         "type": "object",
-        "required": [
-          "amount_cents",
-          "charge_id",
-          "created_at",
-          "id",
-          "status"
-        ],
+        "required": ["amount_cents", "charge_id", "created_at", "id", "status"],
         "title": "AdminOrderPaymentOut"
       },
       "AdminProductDetailOut": {
@@ -7039,15 +6503,7 @@
           }
         },
         "type": "object",
-        "required": [
-          "featured",
-          "id",
-          "is_visible",
-          "published",
-          "slug",
-          "status",
-          "translations"
-        ],
+        "required": ["featured", "id", "is_visible", "published", "slug", "status", "translations"],
         "title": "AdminProductOut"
       },
       "AdminProductPage": {
@@ -7072,13 +6528,7 @@
           }
         },
         "type": "object",
-        "required": [
-          "current_page",
-          "data",
-          "last_page",
-          "per_page",
-          "total"
-        ],
+        "required": ["current_page", "data", "last_page", "per_page", "total"],
         "title": "AdminProductPage"
       },
       "AdminReviewOut": {
@@ -7113,15 +6563,7 @@
           }
         },
         "type": "object",
-        "required": [
-          "author",
-          "body",
-          "id",
-          "product_slug",
-          "rating",
-          "status",
-          "title"
-        ],
+        "required": ["author", "body", "id", "product_slug", "rating", "status", "title"],
         "title": "AdminReviewOut"
       },
       "AdminUserDetailOut": {
@@ -7209,13 +6651,7 @@
           }
         },
         "type": "object",
-        "required": [
-          "email",
-          "email_verified",
-          "id",
-          "name",
-          "roles"
-        ],
+        "required": ["email", "email_verified", "id", "name", "roles"],
         "title": "AdminUserOut"
       },
       "AdminUserPage": {
@@ -7240,13 +6676,7 @@
           }
         },
         "type": "object",
-        "required": [
-          "current_page",
-          "data",
-          "last_page",
-          "per_page",
-          "total"
-        ],
+        "required": ["current_page", "data", "last_page", "per_page", "total"],
         "title": "AdminUserPage"
       },
       "AdminVendorOut": {
@@ -7265,12 +6695,7 @@
           }
         },
         "type": "object",
-        "required": [
-          "id",
-          "name",
-          "published",
-          "slug"
-        ],
+        "required": ["id", "name", "published", "slug"],
         "title": "AdminVendorOut"
       },
       "AnnouncementOut": {
@@ -7286,11 +6711,7 @@
           }
         },
         "type": "object",
-        "required": [
-          "code",
-          "type",
-          "value"
-        ],
+        "required": ["code", "type", "value"],
         "title": "AnnouncementOut"
       },
       "ApplyCouponIn": {
@@ -7300,9 +6721,7 @@
           }
         },
         "type": "object",
-        "required": [
-          "code"
-        ],
+        "required": ["code"],
         "title": "ApplyCouponIn"
       },
       "AssignRoleIn": {
@@ -7312,9 +6731,7 @@
           }
         },
         "type": "object",
-        "required": [
-          "role"
-        ],
+        "required": ["role"],
         "title": "AssignRoleIn"
       },
       "BannerIn": {
@@ -7339,9 +6756,7 @@
           }
         },
         "type": "object",
-        "required": [
-          "translations"
-        ],
+        "required": ["translations"],
         "title": "BannerIn"
       },
       "BannerOut": {
@@ -7456,9 +6871,7 @@
           }
         },
         "type": "object",
-        "required": [
-          "title"
-        ],
+        "required": ["title"],
         "title": "BannerTextIn"
       },
       "BannerUpdateIn": {
@@ -7604,13 +7017,7 @@
           }
         },
         "type": "object",
-        "required": [
-          "coupon_code",
-          "discount_cents",
-          "id",
-          "items",
-          "total_cents"
-        ],
+        "required": ["coupon_code", "discount_cents", "id", "items", "total_cents"],
         "title": "CartOut"
       },
       "CategoryIn": {
@@ -7637,9 +7044,7 @@
           }
         },
         "type": "object",
-        "required": [
-          "translations"
-        ],
+        "required": ["translations"],
         "title": "CategoryIn"
       },
       "CategoryOut": {
@@ -7665,11 +7070,7 @@
           }
         },
         "type": "object",
-        "required": [
-          "id",
-          "slug",
-          "translation"
-        ],
+        "required": ["id", "slug", "translation"],
         "title": "CategoryOut"
       },
       "CategoryUpdateIn": {
@@ -7722,10 +7123,7 @@
           }
         },
         "type": "object",
-        "required": [
-          "current_password",
-          "password"
-        ],
+        "required": ["current_password", "password"],
         "title": "ChangePasswordIn"
       },
       "CheckoutIn": {
@@ -7770,14 +7168,7 @@
       },
       "CountryCode": {
         "type": "string",
-        "enum": [
-          "US",
-          "CA",
-          "GB",
-          "DE",
-          "FR",
-          "EG"
-        ],
+        "enum": ["US", "CA", "GB", "DE", "FR", "EG"],
         "title": "CountryCode",
         "description": "Countries the shop ships to (ISO 3166-1 alpha-2) \u2014 a closed, validated set."
       },
@@ -7822,19 +7213,12 @@
           }
         },
         "type": "object",
-        "required": [
-          "code",
-          "type",
-          "value"
-        ],
+        "required": ["code", "type", "value"],
         "title": "CouponIn"
       },
       "CouponType": {
         "type": "string",
-        "enum": [
-          "percent",
-          "fixed"
-        ],
+        "enum": ["percent", "fixed"],
         "title": "CouponType",
         "description": "How a coupon discounts the order."
       },
@@ -7905,17 +7289,12 @@
           }
         },
         "type": "object",
-        "required": [
-          "email",
-          "password"
-        ],
+        "required": ["email", "password"],
         "title": "CredentialsIn"
       },
       "Currency": {
         "type": "string",
-        "enum": [
-          "USD"
-        ],
+        "enum": ["USD"],
         "title": "Currency",
         "description": "Settlement currencies the shop can charge in (the catalog prices in USD today)."
       },
@@ -7939,12 +7318,7 @@
           }
         },
         "type": "object",
-        "required": [
-          "ends_at",
-          "percent_off",
-          "product_id",
-          "starts_at"
-        ],
+        "required": ["ends_at", "percent_off", "product_id", "starts_at"],
         "title": "DealIn"
       },
       "DealOut": {
@@ -8043,11 +7417,7 @@
           }
         },
         "type": "object",
-        "required": [
-          "amount",
-          "currency",
-          "order_id"
-        ],
+        "required": ["amount", "currency", "order_id"],
         "title": "DevChargeIn"
       },
       "DevChargeOut": {
@@ -8060,10 +7430,7 @@
           }
         },
         "type": "object",
-        "required": [
-          "client_secret",
-          "id"
-        ],
+        "required": ["client_secret", "id"],
         "title": "DevChargeOut"
       },
       "ForgotPasswordIn": {
@@ -8073,9 +7440,7 @@
           }
         },
         "type": "object",
-        "required": [
-          "email"
-        ],
+        "required": ["email"],
         "title": "ForgotPasswordIn"
       },
       "ForgotPasswordOut": {
@@ -8085,9 +7450,7 @@
           }
         },
         "type": "object",
-        "required": [
-          "message"
-        ],
+        "required": ["message"],
         "title": "ForgotPasswordOut"
       },
       "GalleryImageOut": {
@@ -8106,12 +7469,7 @@
           }
         },
         "type": "object",
-        "required": [
-          "id",
-          "preview_url",
-          "thumb_url",
-          "url"
-        ],
+        "required": ["id", "preview_url", "thumb_url", "url"],
         "title": "GalleryImageOut"
       },
       "HealthStatus": {
@@ -8121,9 +7479,7 @@
           }
         },
         "type": "object",
-        "required": [
-          "status"
-        ],
+        "required": ["status"],
         "title": "HealthStatus"
       },
       "MediaItemOut": {
@@ -8199,9 +7555,7 @@
           }
         },
         "type": "object",
-        "required": [
-          "message"
-        ],
+        "required": ["message"],
         "title": "MessageOut"
       },
       "MetricsOut": {
@@ -8214,10 +7568,7 @@
           }
         },
         "type": "object",
-        "required": [
-          "orders_fulfilled",
-          "orders_placed"
-        ],
+        "required": ["orders_fulfilled", "orders_placed"],
         "title": "MetricsOut"
       },
       "NewsletterIn": {
@@ -8227,9 +7578,7 @@
           }
         },
         "type": "object",
-        "required": [
-          "email"
-        ],
+        "required": ["email"],
         "title": "NewsletterIn"
       },
       "NewsletterSubscriberOut": {
@@ -8255,12 +7604,7 @@
           }
         },
         "type": "object",
-        "required": [
-          "created_at",
-          "email",
-          "id",
-          "locale"
-        ],
+        "required": ["created_at", "email", "id", "locale"],
         "title": "NewsletterSubscriberOut"
       },
       "NotificationOut": {
@@ -8289,13 +7633,7 @@
           }
         },
         "type": "object",
-        "required": [
-          "created_at",
-          "id",
-          "message",
-          "read",
-          "type"
-        ],
+        "required": ["created_at", "id", "message", "read", "type"],
         "title": "NotificationOut"
       },
       "OrderLineOut": {
@@ -8447,13 +7785,7 @@
       },
       "OrderStatus": {
         "type": "string",
-        "enum": [
-          "pending",
-          "paid",
-          "shipped",
-          "delivered",
-          "cancelled"
-        ],
+        "enum": ["pending", "paid", "shipped", "delivered", "cancelled"],
         "title": "OrderStatus",
         "description": "An order's lifecycle state."
       },
@@ -8464,9 +7796,7 @@
           }
         },
         "type": "object",
-        "required": [
-          "status"
-        ],
+        "required": ["status"],
         "title": "OrderStatusIn"
       },
       "OrderTimelineOut": {
@@ -8486,18 +7816,12 @@
           }
         },
         "type": "object",
-        "required": [
-          "at",
-          "status"
-        ],
+        "required": ["at", "status"],
         "title": "OrderTimelineOut"
       },
       "PaymentMethod": {
         "type": "string",
-        "enum": [
-          "gateway",
-          "cod"
-        ],
+        "enum": ["gateway", "cod"],
         "title": "PaymentMethod",
         "description": "How the order is settled: the payment gateway after placing, or cash on delivery.",
         "default": "gateway"
@@ -8525,21 +7849,12 @@
           }
         },
         "type": "object",
-        "required": [
-          "charge_id",
-          "client_secret",
-          "payment_id",
-          "status"
-        ],
+        "required": ["charge_id", "client_secret", "payment_id", "status"],
         "title": "PaymentOut"
       },
       "PaymentStatus": {
         "type": "string",
-        "enum": [
-          "pending",
-          "succeeded",
-          "failed"
-        ],
+        "enum": ["pending", "succeeded", "failed"],
         "title": "PaymentStatus",
         "description": "A payment's state, mirrored from the gateway."
       },
@@ -8553,10 +7868,7 @@
           }
         },
         "type": "object",
-        "required": [
-          "id",
-          "name"
-        ],
+        "required": ["id", "name"],
         "title": "PermissionOut"
       },
       "ProductDealOut": {
@@ -8575,12 +7887,7 @@
           }
         },
         "type": "object",
-        "required": [
-          "deal_price_cents",
-          "ends_at",
-          "id",
-          "percent_off"
-        ],
+        "required": ["deal_price_cents", "ends_at", "id", "percent_off"],
         "title": "ProductDealOut"
       },
       "ProductIn": {
@@ -8599,11 +7906,7 @@
           }
         },
         "type": "object",
-        "required": [
-          "category_id",
-          "price_cents",
-          "translations"
-        ],
+        "required": ["category_id", "price_cents", "translations"],
         "title": "ProductIn"
       },
       "ProductOut": {
@@ -8731,13 +8034,7 @@
           }
         },
         "type": "object",
-        "required": [
-          "current_page",
-          "data",
-          "last_page",
-          "per_page",
-          "total"
-        ],
+        "required": ["current_page", "data", "last_page", "per_page", "total"],
         "title": "ProductPage"
       },
       "ProfileIn": {
@@ -8829,10 +8126,7 @@
           }
         },
         "type": "object",
-        "required": [
-          "name",
-          "value"
-        ],
+        "required": ["name", "value"],
         "title": "QueuedCookie"
       },
       "RegisterIn": {
@@ -8848,11 +8142,7 @@
           }
         },
         "type": "object",
-        "required": [
-          "email",
-          "name",
-          "password"
-        ],
+        "required": ["email", "name", "password"],
         "title": "RegisterIn"
       },
       "ResetPasswordIn": {
@@ -8868,11 +8158,7 @@
           }
         },
         "type": "object",
-        "required": [
-          "email",
-          "password",
-          "token"
-        ],
+        "required": ["email", "password", "token"],
         "title": "ResetPasswordIn"
       },
       "Response": {
@@ -8925,10 +8211,7 @@
           }
         },
         "type": "object",
-        "required": [
-          "body",
-          "rating"
-        ],
+        "required": ["body", "rating"],
         "title": "ReviewIn"
       },
       "ReviewListOut": {
@@ -8964,12 +8247,7 @@
           }
         },
         "type": "object",
-        "required": [
-          "mine",
-          "rating_avg",
-          "rating_count",
-          "reviews"
-        ],
+        "required": ["mine", "rating_avg", "rating_count", "reviews"],
         "title": "ReviewListOut"
       },
       "ReviewOut": {
@@ -9018,24 +8296,12 @@
           }
         },
         "type": "object",
-        "required": [
-          "author",
-          "body",
-          "created_at",
-          "id",
-          "rating",
-          "status",
-          "title"
-        ],
+        "required": ["author", "body", "created_at", "id", "rating", "status", "title"],
         "title": "ReviewOut"
       },
       "ReviewStatus": {
         "type": "string",
-        "enum": [
-          "pending",
-          "approved",
-          "rejected"
-        ],
+        "enum": ["pending", "approved", "rejected"],
         "title": "ReviewStatus",
         "description": "Moderation state of a product review."
       },
@@ -9055,11 +8321,7 @@
           }
         },
         "type": "object",
-        "required": [
-          "id",
-          "name",
-          "permissions"
-        ],
+        "required": ["id", "name", "permissions"],
         "title": "RoleOut"
       },
       "SavedAddressIn": {
@@ -9115,13 +8377,7 @@
           }
         },
         "type": "object",
-        "required": [
-          "city",
-          "country",
-          "line1",
-          "name",
-          "postal_code"
-        ],
+        "required": ["city", "country", "line1", "name", "postal_code"],
         "title": "SavedAddressIn"
       },
       "SavedAddressOut": {
@@ -9203,9 +8459,7 @@
           }
         },
         "type": "object",
-        "required": [
-          "values"
-        ],
+        "required": ["values"],
         "title": "SettingsIn"
       },
       "SettingsOut": {
@@ -9218,9 +8472,7 @@
           }
         },
         "type": "object",
-        "required": [
-          "values"
-        ],
+        "required": ["values"],
         "title": "SettingsOut"
       },
       "StockAdjustIn": {
@@ -9267,9 +8519,7 @@
           }
         },
         "type": "object",
-        "required": [
-          "token"
-        ],
+        "required": ["token"],
         "title": "TokenOut"
       },
       "Translate": {
@@ -9293,9 +8543,7 @@
           }
         },
         "type": "object",
-        "required": [
-          "name"
-        ],
+        "required": ["name"],
         "title": "Translate"
       },
       "TranslationFieldsIn": {
@@ -9315,9 +8563,7 @@
           }
         },
         "type": "object",
-        "required": [
-          "name"
-        ],
+        "required": ["name"],
         "title": "TranslationFieldsIn"
       },
       "UpdateItemIn": {
@@ -9327,9 +8573,7 @@
           }
         },
         "type": "object",
-        "required": [
-          "quantity"
-        ],
+        "required": ["quantity"],
         "title": "UpdateItemIn"
       },
       "UpdateProductIn": {
@@ -9441,15 +8685,7 @@
           }
         },
         "type": "object",
-        "required": [
-          "avatar_url",
-          "email",
-          "email_verified",
-          "id",
-          "locale",
-          "name",
-          "phone"
-        ],
+        "required": ["avatar_url", "email", "email_verified", "id", "locale", "name", "phone"],
         "title": "UserOut"
       },
       "UserRolesOut": {
@@ -9465,10 +8701,7 @@
           }
         },
         "type": "object",
-        "required": [
-          "roles",
-          "user_id"
-        ],
+        "required": ["roles", "user_id"],
         "title": "UserRolesOut"
       },
       "VariantIn": {
@@ -9489,10 +8722,7 @@
           }
         },
         "type": "object",
-        "required": [
-          "name",
-          "sku"
-        ],
+        "required": ["name", "sku"],
         "title": "VariantIn"
       },
       "VariantOut": {
@@ -9514,13 +8744,7 @@
           }
         },
         "type": "object",
-        "required": [
-          "id",
-          "name",
-          "price_adjustment_cents",
-          "sku",
-          "stock"
-        ],
+        "required": ["id", "name", "price_adjustment_cents", "sku", "stock"],
         "title": "VariantOut"
       },
       "VariantUpdateIn": {
@@ -9571,9 +8795,7 @@
           }
         },
         "type": "object",
-        "required": [
-          "name"
-        ],
+        "required": ["name"],
         "title": "VendorIn"
       },
       "VendorUpdateIn": {
@@ -9613,10 +8835,7 @@
           }
         },
         "type": "object",
-        "required": [
-          "id",
-          "token"
-        ],
+        "required": ["id", "token"],
         "title": "VerifyEmailIn"
       },
       "WebhookIn": {
@@ -9633,10 +8852,7 @@
           }
         },
         "type": "object",
-        "required": [
-          "id",
-          "type"
-        ],
+        "required": ["id", "type"],
         "title": "WebhookIn"
       },
       "WebhookOut": {
@@ -9646,9 +8862,7 @@
           }
         },
         "type": "object",
-        "required": [
-          "status"
-        ],
+        "required": ["status"],
         "title": "WebhookOut"
       },
       "WishlistToggleOut": {
@@ -9658,9 +8872,7 @@
           }
         },
         "type": "object",
-        "required": [
-          "saved"
-        ],
+        "required": ["saved"],
         "title": "WishlistToggleOut"
       }
     },

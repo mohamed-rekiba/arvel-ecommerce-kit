@@ -7,5 +7,5 @@
  */
 
 export interface MessageOut {
-  message: string;
+  message: string
 }

@@ -9,4 +9,4 @@
 /**
  * @nullable
  */
-export type ApiCartItemsAdd400Extra = {[key: string]: unknown} | unknown[] | null;
+export type ApiCartItemsAdd400Extra = { [key: string]: unknown } | unknown[] | null

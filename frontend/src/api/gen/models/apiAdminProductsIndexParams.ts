@@ -7,7 +7,7 @@
  */
 
 export type ApiAdminProductsIndexParams = {
-per_page?: number;
-page?: number;
-archived?: boolean;
-};
+  per_page?: number
+  page?: number
+  archived?: boolean
+}

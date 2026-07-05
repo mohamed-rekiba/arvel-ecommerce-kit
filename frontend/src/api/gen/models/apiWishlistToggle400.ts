@@ -5,14 +5,14 @@
  * The arvel-ecommerce-kit API.
  * OpenAPI spec version: 0.1.0
  */
-import type { ApiWishlistToggle400Extra } from './apiWishlistToggle400Extra';
+import type { ApiWishlistToggle400Extra } from './apiWishlistToggle400Extra'
 
 /**
  * Validation Exception
  */
 export type ApiWishlistToggle400 = {
-  status_code: number;
-  detail: string;
+  status_code: number
+  detail: string
   /** @nullable */
-  extra?: ApiWishlistToggle400Extra;
-};
+  extra?: ApiWishlistToggle400Extra
+}

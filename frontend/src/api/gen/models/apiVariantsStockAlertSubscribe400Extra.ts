@@ -9,4 +9,4 @@
 /**
  * @nullable
  */
-export type ApiVariantsStockAlertSubscribe400Extra = {[key: string]: unknown} | unknown[] | null;
+export type ApiVariantsStockAlertSubscribe400Extra = { [key: string]: unknown } | unknown[] | null

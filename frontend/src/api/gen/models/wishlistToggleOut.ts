@@ -7,5 +7,5 @@
  */
 
 export interface WishlistToggleOut {
-  saved: boolean;
+  saved: boolean
 }
