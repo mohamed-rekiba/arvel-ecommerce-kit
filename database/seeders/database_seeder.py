@@ -8,15 +8,22 @@ branch, an unpublished vendor, and a draft product — so the retrievable_* view
 """
 
 import asyncio
+import itertools
+import random
 
 from arvel.database import Seeder
+from arvel.support import Str
 
-from app.enums import CouponType
+from app.enums import CouponType, Currency, OrderStatus, ReviewStatus
 from app.models.banner import HERO, Banner
 from app.models.category import Category
 from app.models.coupon import Coupon
 from app.models.deal import Deal
+from app.models.order import Order
+from app.models.order_item import OrderItem
 from app.models.product import Product
+from app.models.product_variant import ProductVariant
+from app.models.review import Review
 from app.models.vendor import Vendor
 from arvel.dates import Date
 from app.services.catalog_visibility_service import CatalogVisibilityService
@@ -25,14 +32,14 @@ from database.factories.product_variant_factory import ProductVariantFactory
 from database.factories.user_factory import UserFactory
 from database.seeders.roles_permissions_seeder import RolesPermissionsSeeder
 
-# curated, clean PRODUCT photos (Unsplash) per product type — a real studio shot of the actual item,
-# not a keyword-tagged random photo. Fetched via the Http client + stored through the media library.
-_UNSPLASH = {
+# One clean, curated hero shot (Unsplash CDN) per product type — claimed once, by the first product of
+# that type. Every other gallery image is a loremflickr photo with a globally-unique `lock`, so no two
+# products (or banners) ever share an image while staying category-matched. Values are unique.
+_HERO = {
     "headphones": "1505740420928-5e560c06d30e",
     "earbuds": "1590658268037-6bf12165a8df",
     "speaker": "1608043152269-423dbba4e7e1",
     "smartphone": "1511707171634-5f897ff02aa9",
-    "phone": "1511707171634-5f897ff02aa9",
     "laptop": "1496181133206-80ce9b88a853",
     "monitor": "1527443224154-c4a3942d3acf",
     "smartwatch": "1523275335684-37898b6baf30",
@@ -42,12 +49,34 @@ _UNSPLASH = {
     "charger": "1588872657578-7efd1f1555ed",
     "bag": "1553062407-98eeb64c6a62",
 }
-# two crops of the shot → a small gallery (test_product_images asserts the first product has 2 images)
-_IMG_PARAMS = [
-    "?w=900&h=1125&fit=crop&q=80",
-    "?w=900&h=1125&fit=crop&crop=entropy&q=80",
-]
 _GALLERY_SIZE = 2
+# a monotonic counter → a unique loremflickr `lock` for every non-hero image the seed ever requests
+_lock = itertools.count(1)
+_used_hero: set[str] = set()
+
+
+def _gallery(keyword: str, slug: str) -> list[tuple[str, str]]:
+    """Up to `_GALLERY_SIZE` (url, file_name) for a product — every URL globally unique. The first image
+    is the type's curated hero (once); the rest are unique loremflickr keyword photos."""
+    kw = keyword.split(",")[0]
+    out: list[tuple[str, str]] = []
+    hero = _HERO.get(kw)
+    if hero and hero not in _used_hero:
+        _used_hero.add(hero)
+        out.append(
+            (
+                f"https://images.unsplash.com/photo-{hero}?w=900&h=1125&fit=crop&q=80",
+                f"{slug}-0.jpg",
+            )
+        )
+    while len(out) < _GALLERY_SIZE:
+        out.append(
+            (
+                f"https://loremflickr.com/900/1125/{kw}?lock={next(_lock)}",
+                f"{slug}-{len(out)}.jpg",
+            )
+        )
+    return out
 
 
 class DatabaseSeeder(Seeder):
@@ -171,6 +200,19 @@ class DatabaseSeeder(Seeder):
             (accessories, "cobalt", 7900, "mouse,computer", "Cobalt Wireless Mouse"),
             (accessories, "verge", 5900, "charger,dock", "Verge Charging Dock"),
             (accessories, "verge", 8900, "bag", "Verge Leather Sleeve"),
+            # --- a fuller catalog (en-only names; storefront falls back to en for fr/ar) ---
+            (headphones, "nordic-audio", 19900, "headphones", "Halo Wireless Headphones"),
+            (headphones, "verge", 25900, "headphones", "Aria Noise-Cancel Headphones"),
+            (earbuds, "nordic-audio", 11900, "earbuds", "Mist Earbuds"),
+            (speakers, "cobalt", 17900, "speaker", "Echo Mini Speaker"),
+            (phones, "lumen", 69900, "smartphone", "Nimbus Lite"),
+            (phones, "verge", 109900, "smartphone", "Vertex Pro Max"),
+            (laptops, "cobalt", 179900, "laptop", "Photon 15 Air"),
+            (monitors, "lumen", 44900, "monitor", "Lumen 24 Monitor"),
+            (wearables, "verge", 24900, "smartwatch", "Orbit Lite"),
+            (cameras, "aperture", 99900, "camera", "Aperture V60 Camera"),
+            (accessories, "cobalt", 4900, "mouse", "Cobalt Travel Mouse"),
+            (accessories, "verge", 6900, "keyboard", "Verge Compact Keyboard"),
         ]
         fr_names = {
             "Eclipse Studio Headphones": "Casque Studio Eclipse",
@@ -243,14 +285,10 @@ class DatabaseSeeder(Seeder):
                 await product.save()
             for _ in range(2):
                 await ProductVariantFactory().create(product_id=product.id)
-            photo_id = _UNSPLASH.get(keyword.split(",")[0])
-            for n in range(_GALLERY_SIZE):
-                if not photo_id:
-                    break
-                url = f"https://images.unsplash.com/photo-{photo_id}{_IMG_PARAMS[n % len(_IMG_PARAMS)]}"
+            for url, fname in _gallery(keyword, product.slug):
                 for _attempt in range(3):
                     if await images.download_and_attach(
-                        product, url, file_name=f"{product.slug}-{n}.jpg"
+                        product, url, file_name=fname
                     ):
                         break
                     await asyncio.sleep(0.4)
@@ -276,6 +314,100 @@ class DatabaseSeeder(Seeder):
             ends_at=now.subtract(days=1),
             active=True,
         )
+
+        # --- orders (varied statuses, backdated across ~75 days → real revenue trend + admin data) ---
+        rng = random.Random(1789)
+        prod_by_id = {p.id: (name, p.price_cents) for name, p in products_by_name.items()}
+        products_by_id = {p.id: p for p in products_by_name.values()}
+        variant_pool = [
+            v for v in await ProductVariant.all() if v.product_id in prod_by_id
+        ]
+        status_bag = (
+            [OrderStatus.DELIVERED] * 8
+            + [OrderStatus.PAID] * 4
+            + [OrderStatus.SHIPPED] * 3
+            + [OrderStatus.PENDING] * 3
+            + [OrderStatus.CANCELLED] * 2
+        )
+        delivered_products: set[int] = set()
+        for _ in range(28):
+            status = rng.choice(status_bag)
+            picks = rng.sample(variant_pool, k=min(rng.randint(1, 3), len(variant_pool)))
+            lines: list[tuple[ProductVariant, str, int, int]] = []
+            subtotal = 0
+            for v in picks:
+                name, base = prod_by_id[v.product_id]
+                qty = rng.randint(1, 2)
+                unit = base + (v.price_adjustment_cents or 0)
+                subtotal += unit * qty
+                lines.append((v, name, qty, unit))
+            shipping = 0 if subtotal >= 50000 else 1500
+            tax = round(subtotal * 0.08)
+            guest = rng.random() < 0.3
+            order = await Order.create(
+                user_id=None if guest else test_user.id,
+                status=status,
+                payment_method="gateway",
+                token=Str.random(40),
+                contact_email="guest@example.com" if guest else test_user.email,
+                ship_name="Test User",
+                ship_line1="12 Sample Street",
+                ship_line2="",
+                ship_city="Cairo",
+                ship_postal_code="11511",
+                ship_country="EG",
+                coupon_code=None,
+                discount_cents=0,
+                subtotal_cents=subtotal,
+                shipping_cents=shipping,
+                tax_cents=tax,
+                total_cents=subtotal + shipping + tax,
+                currency=Currency.USD,
+            )
+            for v, name, qty, unit in lines:
+                await OrderItem.create(
+                    order_id=order.id,
+                    product_variant_id=v.id,
+                    product_name=name,
+                    variant_name=v.name,
+                    quantity=qty,
+                    unit_price_cents=unit,
+                )
+                if status is OrderStatus.DELIVERED:
+                    delivered_products.add(v.product_id)
+            # placed_at derives from created_at — backdate via the model query (schema-aware, so it
+            # knows the created_at/updated_at columns) to spread the revenue trend over time
+            placed = now.subtract(days=rng.randint(0, 74), hours=rng.randint(0, 23))
+            await Order.where("id", order.id).update(
+                {"created_at": placed, "updated_at": placed}
+            )
+
+        # --- reviews on delivered products (approved → they count toward the product rating) ---
+        review_texts = [
+            ("Excellent", "Exactly as described — great build quality."),
+            ("Very happy", "Works flawlessly, would buy again."),
+            ("Solid value", "Does everything I needed, no complaints."),
+            ("Love it", "Beautiful design and completely reliable."),
+            ("Recommended", "Fast delivery and top-notch quality."),
+        ]
+        for pid in list(delivered_products)[:16]:
+            product = products_by_id.get(pid)
+            if product is None:
+                continue
+            rating = rng.choice([5, 5, 4, 5, 4, 3])
+            title, body = rng.choice(review_texts)
+            await Review.create(
+                subject_type="Product",
+                subject_id=pid,
+                user_id=test_user.id,
+                rating=rating,
+                title=title,
+                body=body,
+                status=ReviewStatus.APPROVED,
+            )
+            product.rating_sum = (getattr(product, "rating_sum", 0) or 0) + rating
+            product.rating_count = (getattr(product, "rating_count", 0) or 0) + 1
+            await product.save()
 
         # --- the announced welcome coupon ---
         await Coupon.create(
@@ -365,11 +497,15 @@ class DatabaseSeeder(Seeder):
                 "1496181133206-80ce9b88a853",
             ),
         ]
-        for translations, cta_to, sort, photo_id in banners:
+        # banners get their own unique hero images (loremflickr, keyword per theme) — never a photo a
+        # product also uses
+        _banner_kw = {0: "headphones", 1: "smartphone", 2: "laptop"}
+        for translations, cta_to, sort, _photo_id in banners:
             banner = await Banner.create(
                 translations=translations, cta_to=cta_to, sort=sort, active=True
             )
-            url = f"https://images.unsplash.com/photo-{photo_id}?w=1600&h=700&fit=crop&q=80"
+            kw = _banner_kw.get(sort, "electronics")
+            url = f"https://loremflickr.com/1600/700/{kw}?lock={next(_lock)}"
             for _attempt in range(3):
                 if await images.download_and_attach(
                     banner, url, file_name=f"banner-{sort}.jpg", collection=HERO

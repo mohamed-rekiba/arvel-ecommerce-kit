@@ -48,6 +48,17 @@ def _thumb_conversion(model_type: str) -> str:
     return {"Product": "thumb", "Banner": "mobile", "User": "chip"}.get(model_type, "")
 
 
+def _media_url(media: Media, conversion: str | None) -> str:
+    """Serving URL for a media row — the public storage/CDN URL when the disk exposes one (s3/RustFS),
+    else the app-streamed /api/media fallback. Same rule the storefront/banner/avatar serializers use;
+    the library must not force the proxy on top of an already-public bucket URL."""
+    url: str | None = media.get_url(conversion)
+    if url and url.startswith(("http://", "https://")):
+        return url
+    suffix = f"/{conversion}" if conversion else ""
+    return f"/api/media/{media.id}{suffix}"
+
+
 async def index() -> list[MediaItemOut]:
     user = current_user.get()
     if user is None or not await user.can(Permission.CATALOG_VIEW.value):
@@ -69,9 +80,9 @@ async def index() -> list[MediaItemOut]:
                 file_name=m.file_name,
                 mime_type=m.mime_type,
                 size=m.size,
-                url=f"/api/media/{m.id}",
+                url=_media_url(m, None),
                 thumb_url=(
-                    f"/api/media/{m.id}/{conversion}"
+                    _media_url(m, conversion)
                     if conversion and m.has_generated_conversion(conversion)
                     else None
                 ),
