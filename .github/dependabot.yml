@@ -1,0 +1,50 @@
+version: 2
+updates:
+  # Python (backend) — resolved via uv. Note: arvel is a dev-only path source (../arvel), so
+  # dependabot tracks the *published* arvel and the rest of the lock.
+  - package-ecosystem: uv
+    directory: "/"
+    schedule:
+      interval: weekly
+      day: monday
+    open-pull-requests-limit: 10
+    # Wait 7 days before proposing an update to a newly published version — a
+    # newly released package can be malicious or unstable (supply-chain window).
+    cooldown:
+      default-days: 7
+    labels:
+      - dependencies
+    commit-message:
+      prefix: "chore(deps):"
+    groups:
+      dev-tooling:
+        patterns: ["ruff", "mypy", "pyright", "pytest*", "bandit", "pip-audit", "pre-commit"]
+
+  # GitHub Actions — pins the action tags in workflows to SHAs and keeps them current.
+  - package-ecosystem: github-actions
+    directory: "/"
+    schedule:
+      interval: weekly
+      day: monday
+    open-pull-requests-limit: 5
+    cooldown:
+      default-days: 7
+    labels:
+      - ci
+    commit-message:
+      prefix: "ci(deps):"
+
+  # Frontend (Vue SPA) — npm.
+  - package-ecosystem: npm
+    directory: "/frontend"
+    schedule:
+      interval: weekly
+      day: monday
+    open-pull-requests-limit: 10
+    cooldown:
+      default-days: 7
+    labels:
+      - dependencies
+      - frontend
+    commit-message:
+      prefix: "chore(deps):"

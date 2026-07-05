@@ -1,0 +1,117 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+# Least-privilege token — CI only needs to read the repo.
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  PYTHON_VERSION: "3.14"
+
+# arvel is a *dev-only* local path dependency (pyproject `[tool.uv.sources]` → ../arvel). CI resolves
+# it from PyPI instead by passing `uv sync --no-sources`, so the checkout needs no sibling arvel clone.
+# PREREQUISITE: the published arvel must expose the APIs this kit uses (DB.table,
+# DB.refresh_materialized_view, DB.dialect, Request.body, ClientResponse.content). Cut an arvel
+# release with those and pin `arvel[...] >= <that version>` in pyproject, or these jobs install an
+# older arvel and fail. The `--no-sources` install is what keeps the ../arvel override dev-only.
+
+jobs:
+  lint:
+    name: Lint & Format
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7
+      - uses: astral-sh/setup-uv@fac544c07dec837d0ccb6301d7b5580bf5edae39 # v8.2.0
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+          enable-cache: true
+      - run: uv sync --no-sources --all-extras
+      - name: ruff check
+        run: uv run ruff check .
+      - name: ruff format --check
+        run: uv run ruff format --check .
+
+  typecheck:
+    name: Type Check (mypy + pyright, strict)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7
+      - uses: astral-sh/setup-uv@fac544c07dec837d0ccb6301d7b5580bf5edae39 # v8.2.0
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+          enable-cache: true
+      - run: uv sync --no-sources --all-extras
+      - name: mypy --strict
+        run: uv run mypy
+      - name: pyright --strict
+        run: uv run pyright
+
+  security:
+    name: Security (bandit + pip-audit)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7
+      - uses: astral-sh/setup-uv@fac544c07dec837d0ccb6301d7b5580bf5edae39 # v8.2.0
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+          enable-cache: true
+      - run: uv sync --no-sources --all-extras
+      - name: bandit
+        run: uv run bandit -q -c pyproject.toml -r .
+      # pip-audit scans installed deps for known CVEs. If it flags an accepted-risk advisory,
+      # add `--ignore-vuln <GHSA-id>` rather than disabling the job.
+      - name: pip-audit
+        run: uv run pip-audit
+
+  test:
+    name: Unit Tests (in-process sqlite; no infra)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7
+      - uses: astral-sh/setup-uv@fac544c07dec837d0ccb6301d7b5580bf5edae39 # v8.2.0
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+          enable-cache: true
+      - run: uv sync --no-sources --all-extras
+      - name: pytest
+        run: uv run pytest
+
+  integration:
+    name: Integration Tests (testcontainers / Docker)
+    runs-on: ubuntu-latest # Docker is preinstalled on GitHub-hosted ubuntu runners
+    steps:
+      - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7
+      - uses: astral-sh/setup-uv@fac544c07dec837d0ccb6301d7b5580bf5edae39 # v8.2.0
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+          enable-cache: true
+      - run: uv sync --no-sources --all-extras
+      - name: pytest -m integration
+        run: uv run pytest tests/integration -m integration --tb=short
+
+  frontend:
+    name: Frontend (vue-tsc + vite build)
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: frontend
+    steps:
+      - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7
+      - uses: actions/setup-node@v4 # dependabot pins this to a SHA (see .github/dependabot.yml)
+        with:
+          node-version: "22"
+          cache: npm
+          cache-dependency-path: frontend/package-lock.json
+      - run: npm ci
+      - name: prettier --check
+        run: npx prettier . --check
+      - name: build (vue-tsc + vite)
+        run: npm run build
