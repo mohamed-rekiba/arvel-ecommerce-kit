@@ -12,7 +12,6 @@ FROM python:3.14-slim-trixie AS backend-builder
 COPY --from=ghcr.io/astral-sh/uv:latest /uv /uvx /usr/local/bin/
 WORKDIR /app
 
-ENV ARVEL_VERSION=0.51.0
 ENV UV_COMPILE_BYTECODE=1
 ENV UV_LINK_MODE=copy
 ENV UV_SYSTEM_PYTHON=1
@@ -25,7 +24,7 @@ COPY pyproject.toml uv.lock ./
 # install arvel by itself from the index.
 RUN uv export --frozen --no-dev --no-editable --no-emit-package arvel -o requirements.txt && \
     uv pip install --system --no-cache -r requirements.txt && \
-    uv pip install --system --no-cache "arvel[standard,oidc,s3,telemetry,search,queue-amqp]==${ARVEL_VERSION}" && \
+    uv pip install --system --no-cache "arvel[standard,oidc,s3,telemetry,search,queue-amqp]" && \
     rm -f /usr/local/bin/uv /usr/local/bin/uvx requirements.txt
 
 # with_public_dir(...) (bootstrap/app.py) serves this via arvel's Route.public() — never committed.
