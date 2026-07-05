@@ -3,10 +3,13 @@ endpoint (fast feedback) and checkout (authoritative re-validation under a row l
 
 Every rejection is a distinct, field-keyed 422 so the storefront can say exactly why."""
 
+from decimal import Decimal
+
 from arvel.dates import Date
+from arvel.support import Money
 from arvel.validation import ValidationException
 
-from app.enums import CouponType
+from app.enums import CouponType, Currency
 from app.models.coupon import Coupon
 from app.models.coupon_redemption import CouponRedemption
 
@@ -51,13 +54,16 @@ async def enforce_per_customer_limit(
 
 
 def discount_cents(coupon: Coupon, subtotal_cents: int) -> int:
-    """The discount this coupon takes off ``subtotal_cents`` — never below zero overall."""
+    """The discount this coupon takes off ``subtotal_cents`` — never more than the subtotal itself.
+    Computed with Money (half-up rounding on the percentage) rather than integer floor math."""
     kind = (
         coupon.type if isinstance(coupon.type, CouponType) else CouponType(coupon.type)
     )
+    subtotal = Money(subtotal_cents, Currency.USD.value)
     if kind is CouponType.PERCENT:
-        return int(min(subtotal_cents * coupon.value // 100, subtotal_cents))
-    return int(min(coupon.value, subtotal_cents))
+        off = subtotal.times(Decimal(coupon.value) / Decimal(100))
+        return min(off, subtotal).amount  # a percentage can't exceed the subtotal
+    return min(Money(coupon.value, Currency.USD.value), subtotal).amount  # fixed, capped
 
 
 def normalize_code(code: str) -> str:

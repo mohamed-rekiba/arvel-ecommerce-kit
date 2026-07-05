@@ -2,11 +2,12 @@
 order state machine.
 """
 
+from decimal import Decimal
 from typing import Any
 
 from arvel import DB, Cache, Event, abort
 from arvel.http import Request
-from arvel.support import Str, current_user
+from arvel.support import Money, Str, current_user
 from arvel.telemetry import span
 from arvel.validation import ValidationException, Validator
 
@@ -55,7 +56,9 @@ def _shipping_cents(subtotal_cents: int) -> int:
 
 
 def _tax_cents(subtotal_cents: int) -> int:
-    return subtotal_cents * TAX_RATE_PERCENT // 100
+    # Money.times rounds the minor units half-up (currency-correct) vs the old integer floor.
+    rate = Decimal(TAX_RATE_PERCENT) / Decimal(100)
+    return Money(subtotal_cents, Currency.USD.value).times(rate).amount
 
 
 def _status_value(order: Order) -> OrderStatus:

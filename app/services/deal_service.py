@@ -3,10 +3,13 @@ the storefront payloads (display), the cart (price snapshot at add time), and ch
 authoritative re-price inside the order transaction). Current-price-wins: an expired deal never
 leaks into an order, a deal that started after the item was carted is honored."""
 
+from decimal import Decimal
 from typing import cast
 
 from arvel.dates import Date
+from arvel.support import Money
 
+from app.enums import Currency
 from app.models.deal import Deal
 
 
@@ -41,8 +44,10 @@ async def active_deals_for(product_ids: list[int]) -> dict[int, Deal]:
 
 
 def deal_price_cents(base_cents: int, deal: Deal) -> int:
-    """The discounted unit price: percent off the FULL unit price (base + variant adjustment)."""
-    return int(base_cents * (100 - deal.percent_off) // 100)
+    """The discounted unit price: percent off the FULL unit price (base + variant adjustment).
+    Money.times rounds the minor units half-up (vs the old floor), so the discount is currency-correct."""
+    keep = Decimal(100 - deal.percent_off) / Decimal(100)
+    return Money(base_cents, Currency.USD.value).times(keep).amount
 
 
 async def current_unit_price_cents(
