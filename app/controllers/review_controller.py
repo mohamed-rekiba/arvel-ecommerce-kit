@@ -17,7 +17,8 @@ from app.models.review import Review
 from app.models.user import User
 from app.schemas import AdminReviewOut, ReviewIn, ReviewListOut, ReviewOut
 
-_PURCHASED_STATUSES = {OrderStatus.PAID, OrderStatus.SHIPPED, OrderStatus.DELIVERED}
+# Only a delivered purchase earns a review — the customer has actually received the product.
+_REVIEWABLE_STATUSES = {OrderStatus.DELIVERED}
 
 
 def _current_user() -> User:
@@ -48,8 +49,8 @@ def _out(review: Review, author: str | None = None) -> ReviewOut:
 
 
 async def _has_purchased(user: User, product: Product) -> bool:
-    """A qualifying purchase: an order line for any of the product's variants on a paid/shipped/
-    delivered order owned by the user."""
+    """A qualifying purchase: an order line for any of the product's variants on a **delivered**
+    order owned by the user (received, not merely paid/shipped)."""
     variants = await ProductVariant.where("product_id", product.id).get()
     variant_ids = [v.id for v in variants]
     if not variant_ids:
@@ -59,7 +60,7 @@ async def _has_purchased(user: User, product: Product) -> bool:
         o.id
         for o in orders
         if (o.status if isinstance(o.status, OrderStatus) else OrderStatus(o.status))
-        in _PURCHASED_STATUSES
+        in _REVIEWABLE_STATUSES
     }
     if not eligible:
         return False

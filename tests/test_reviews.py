@@ -100,17 +100,18 @@ def test_review_lifecycle_and_aggregate(client) -> None:
     )
     assert still_denied.status_code == 403  # pending ≠ purchased
 
-    # mark paid via the ORM directly — the gateway/webhook path is already covered by the payment tests
-    async def _mark_paid() -> None:
+    # mark delivered via the ORM directly — only a *received* order earns a review (the gateway/
+    # webhook path is already covered by the payment tests)
+    async def _mark_delivered() -> None:
         from app.enums import OrderStatus
         from app.models.order import Order
 
         row = await Order.find_or_fail(order["id"])
-        row.status = OrderStatus.PAID
+        row.status = OrderStatus.DELIVERED
         await row.save()
 
     with client.portal() as portal:
-        portal.call(_mark_paid)
+        portal.call(_mark_delivered)
 
         # rating bounds + empty body are 422s
         assert (
