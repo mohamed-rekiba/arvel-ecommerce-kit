@@ -145,6 +145,11 @@ class AdminProductOut(Schema):
     published: bool
     featured: bool
     is_visible: bool
+    price_cents: int = 0
+    currency: str = "USD"
+    image_url: str | None = None  # first gallery image's thumb (admin list rows)
+    stock: int = 0  # summed across the product's variants
+    variant_count: int = 0
 
 
 class AdminProductPage(Schema):

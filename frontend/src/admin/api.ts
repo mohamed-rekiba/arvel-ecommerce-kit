@@ -131,8 +131,30 @@ export const api = {
     return res.token
   },
   me: () => request<User>('GET', '/user'),
-  products: (page = 1, archived = false) =>
-    request<Paginated<AdminProduct>>('GET', `/admin/products?page=${page}&archived=${archived}`),
+  products: (
+    opts: {
+      page?: number
+      archived?: boolean
+      q?: string
+      category_id?: number
+      vendor_id?: number
+      price_min?: number
+      price_max?: number
+      active?: 'active' | 'inactive'
+      sort?: string
+    } = {}
+  ) => {
+    const qs = new URLSearchParams({ page: String(opts.page ?? 1) })
+    if (opts.archived) qs.set('archived', 'true')
+    if (opts.q) qs.set('q', opts.q)
+    if (opts.category_id) qs.set('category_id', String(opts.category_id))
+    if (opts.vendor_id) qs.set('vendor_id', String(opts.vendor_id))
+    if (opts.price_min != null) qs.set('price_min', String(opts.price_min))
+    if (opts.price_max != null) qs.set('price_max', String(opts.price_max))
+    if (opts.active) qs.set('active', opts.active)
+    if (opts.sort) qs.set('sort', opts.sort)
+    return request<Paginated<AdminProduct>>('GET', `/admin/products?${qs.toString()}`)
+  },
   restoreProduct: (id: number) => request<AdminProduct>('POST', `/admin/products/${id}/restore`),
   productDetail: (id: number) => request<AdminProductDetailOut>('GET', `/admin/products/${id}`),
   categories: () =>

@@ -4,17 +4,21 @@ A denial renders as 403 on create, 404 on update/delete/restore (existence isn't
 deny_as_not_found).
 """
 
+from typing import Any
+
 from arvel import abort
 from arvel.http import Request
+from arvel.media import Media
 from arvel.support import Str, current_user
 from arvel.validation import ValidationException, Validator
 
 from arvel.activitylog import activity
 
 from app.enums import Permission, ProductStatus
+from app.i18n import SUPPORTED_LOCALES, active_locale
 from app.models.category import Category
-from app.i18n import SUPPORTED_LOCALES
-from app.models.product import Product
+from app.models.product import IMAGES, Product
+from app.models.product_variant import ProductVariant
 from app.models.user import User
 from app.schemas import (
     AdminCategoryOut,
@@ -46,32 +50,68 @@ async def _require_admin() -> User:
     return user
 
 
+_SORTS: dict[str, tuple[str, str]] = {
+    "price_asc": ("price_cents", "asc"),
+    "price_desc": ("price_cents", "desc"),
+    "oldest": ("id", "asc"),
+    "newest": ("id", "desc"),
+}
+
+
 async def products_index(
-    request: Request, per_page: int = 20, page: int = 1, archived: bool = False
+    request: Request,
+    per_page: int = 20,
+    page: int = 1,
+    archived: bool = False,
+    q: str | None = None,
+    category_id: int | None = None,
+    vendor_id: int | None = None,
+    price_min: int | None = None,
+    price_max: int | None = None,
+    active: str | None = None,
+    sort: str = "newest",
 ) -> AdminProductPage:
-    """List **all** products (admin) — including hidden ones — each annotated with `is_visible`.
-    ``archived=true`` lists the soft-deleted (recoverable) rows instead."""
+    """List products (admin) — hidden ones included, each row carrying price/thumb/stock and
+    `is_visible`. Filterable by ``q`` (name), ``category_id`` and ``active`` (published yes/no),
+    sortable by ``sort``. ``archived=true`` lists the soft-deleted (recoverable) rows instead."""
     await _require_admin()
     if archived:
         result = await Product.only_trashed().order_by("id").paginate(per_page, page)
-        return AdminProductPage(
-            data=[_admin_product_out(p, is_visible=False) for p in result.items()],
-            current_page=result.current_page(),
-            last_page=result.last_page(),
-            per_page=result.per_page(),
-            total=result.total(),
+        extras = await _list_extras([p.id for p in result.items()])
+        return _page(result, is_visible=False, extras=extras)
+
+    query = Product.with_visibility()
+    if q:
+        query = query.where_json_like(
+            "translations", f"{active_locale()}->name", f"%{q}%"
         )
-    result = await Product.with_visibility().order_by("id").paginate(per_page, page)
+    if category_id is not None:
+        query = query.where("category_id", category_id)
+    if vendor_id is not None:
+        query = query.where("vendor_id", vendor_id)
+    if price_min is not None:
+        query = query.where("price_cents", ">=", price_min)
+    if price_max is not None:
+        query = query.where("price_cents", "<=", price_max)
+    if active == "active":
+        query = query.where("published", True)
+    elif active == "inactive":
+        query = query.where("published", False)
+    column, direction = _SORTS.get(sort, _SORTS["newest"])
+    result = await query.order_by(column, direction).paginate(per_page, page)
+    extras = await _list_extras([p.id for p in result.items()])
+    return _page(result, extras=extras)
+
+
+def _page(result: Any, *, is_visible: bool | None = None, extras: dict[int, Any]) -> AdminProductPage:
     return AdminProductPage(
         data=[
-            AdminProductOut(
-                id=p.id,
-                slug=p.slug,
-                translations=p.translations,
-                status=ProductStatus(p.status).value,
-                published=bool(p.published),
-                featured=bool(getattr(p, "featured", False)),
-                is_visible=bool(getattr(p, "is_visible", False)),
+            _admin_product_out(
+                p,
+                is_visible=is_visible
+                if is_visible is not None
+                else bool(getattr(p, "is_visible", False)),
+                extras=extras,
             )
             for p in result.items()
         ],
@@ -80,6 +120,45 @@ async def products_index(
         per_page=result.per_page(),
         total=result.total(),
     )
+
+
+def _media_url(media: Media, conversion: str | None) -> str:
+    """Public storage/CDN URL when the disk exposes one, else the /api/media proxy fallback."""
+    url: str | None = media.get_url(conversion)
+    if url and url.startswith(("http://", "https://")):
+        return url
+    suffix = f"/{conversion}" if conversion else ""
+    return f"/api/media/{media.id}{suffix}"
+
+
+async def _list_extras(ids: list[int]) -> dict[int, dict[str, Any]]:
+    """Batch the per-row list extras (one query each): summed stock, variant count, first thumb URL."""
+    extras: dict[int, dict[str, Any]] = {
+        pid: {"stock": 0, "variants": 0, "thumb": None} for pid in ids
+    }
+    if not ids:
+        return extras
+    for v in await ProductVariant.where_in("product_id", ids).get():
+        row = extras.get(v.product_id)
+        if row is not None:
+            row["stock"] += int(v.stock or 0)
+            row["variants"] += 1
+    seen: set[int] = set()
+    media = (
+        await Media.where("model_type", "Product")
+        .where_in("model_id", ids)
+        .where("collection_name", IMAGES)
+        .order_by("id")
+        .get()
+    )
+    for m in media:
+        if m.model_id in seen:
+            continue
+        seen.add(m.model_id)
+        row = extras.get(m.model_id)
+        if row is not None:
+            row["thumb"] = _media_url(m, "thumb")
+    return extras
 
 
 async def categories_index(
@@ -107,7 +186,10 @@ async def categories_index(
     )
 
 
-def _admin_product_out(product: Product, *, is_visible: bool) -> AdminProductOut:
+def _admin_product_out(
+    product: Product, *, is_visible: bool, extras: dict[int, Any] | None = None
+) -> AdminProductOut:
+    row = (extras or {}).get(product.id, {})
     return AdminProductOut(
         id=product.id,
         slug=product.slug,
@@ -116,6 +198,11 @@ def _admin_product_out(product: Product, *, is_visible: bool) -> AdminProductOut
         published=bool(product.published),
         featured=bool(getattr(product, "featured", False)),
         is_visible=is_visible,
+        price_cents=int(getattr(product, "price_cents", 0) or 0),
+        currency=str(getattr(product, "currency", "USD") or "USD"),
+        image_url=row.get("thumb"),
+        stock=int(row.get("stock", 0)),
+        variant_count=int(row.get("variants", 0)),
     )
 
 
