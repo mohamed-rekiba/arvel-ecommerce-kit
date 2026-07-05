@@ -11,6 +11,7 @@ from __future__ import annotations
 import sqlalchemy as sa
 
 from arvel import DB, Cache
+from arvel.cache import LockAcquireFailed
 
 _VIEWS = ("retrievable_products", "retrievable_categories")
 _DIRTY = "catalog:visibility:dirty"
@@ -47,8 +48,13 @@ class CatalogVisibilityService:
         where the framework degraded the materialized views to live plain views."""
         if DB.engine().dialect.name != "postgresql":
             return
-        async with Cache.lock(_LOCK, ttl=120):
-            for view in _VIEWS:
-                await DB.execute(
-                    sa.text(f"REFRESH MATERIALIZED VIEW CONCURRENTLY {view}")
-                )  # noqa: S608 # nosec B608
+        # single-flight: the lock ctx-mgr acquires once and raises if another refresh already holds
+        # it — that refresh covers this one, so skip rather than overlap or error.
+        try:
+            async with Cache.lock(_LOCK, seconds=120):
+                for view in _VIEWS:
+                    await DB.execute(
+                        sa.text(f"REFRESH MATERIALIZED VIEW CONCURRENTLY {view}")
+                    )  # noqa: S608 # nosec B608
+        except LockAcquireFailed:
+            return

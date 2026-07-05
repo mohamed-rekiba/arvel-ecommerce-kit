@@ -15,7 +15,7 @@ class VerifyEmail(Mailable, ShouldQueue):
         frontend = str(
             Config.get("app.frontend_url") or "http://localhost:5173"
         ).rstrip("/")
-        link = f"{frontend}/verify-email?token={self.token}"
+        link = f"{frontend}/verify-email?id={self.user_id}&token={self.token}"
         self.subject("Verify your email address")
         self.html(
             "<h1>Almost there</h1>"

@@ -2,19 +2,17 @@
 password-reset flow.
 """
 
+from typing import Any
+
 from arvel import abort
-from arvel.auth.flows import (
-    email_verification_token,
-    password_reset_token,
-    verify_password_reset_token,
-)
+from arvel.auth.flows import email_verification_token
+from arvel.auth.password_reset import PasswordBroker, PasswordResetStatus
 from arvel.auth.tokens import TokenGuard, create_token
 from arvel.http import Request
 from arvel.support.facades import Config, Mail
 from arvel.validation import ValidationException, Validator
 
 from app.controllers.cart_controller import merge_guest_cart
-from app.mail.password_reset import PasswordReset
 from app.mail.verify_email import VerifyEmail
 from app.models.user import User
 from app.schemas import (
@@ -28,6 +26,17 @@ from app.schemas import (
 
 # Customer tokens are scoped to the "customer" ability (admins authenticate via OIDC, not here).
 CUSTOMER_ABILITY = "customer"
+
+
+def _password_broker() -> PasswordBroker:
+    """The stored, single-use password-reset broker keyed by email. ``send_reset_link`` stores a
+    hashed token and fires ``PasswordResetRequested`` — the app's listener (registered in
+    ``AppServiceProvider.boot``) sends the actual email."""
+
+    async def _lookup(email: str) -> Any:
+        return await User.where("email", email).first()
+
+    return PasswordBroker(_lookup)
 
 
 async def register(request: Request, data: RegisterIn) -> TokenOut:
@@ -56,7 +65,9 @@ async def register(request: Request, data: RegisterIn) -> TokenOut:
     await merge_guest_cart(
         request, user
     )  # a guest's cart follows them into the new account
-    verification = email_verification_token(user.id, str(Config.get("app.key", "")))
+    verification = email_verification_token(
+        user.id, user.email, str(Config.get("app.key", ""))
+    )
     await Mail.to(user.email).send(VerifyEmail(user.id, verification))
     token, _ = await create_token(user, name="customer", abilities=[CUSTOMER_ABILITY])
     return TokenOut(token=token)
@@ -74,32 +85,33 @@ async def logout(request: Request) -> MessageOut:
 async def forgot_password(
     request: Request, data: ForgotPasswordIn
 ) -> ForgotPasswordOut:
-    """Issue a signed password-reset token. Always 200 (non-enumerating); a real app emails it."""
-    user = await User.where("email", data.email).first()
-    if user is not None:
-        token = password_reset_token(user.id, str(Config.get("app.key", "")))
-        await Mail.to(user.email).send(PasswordReset(user.email, token))
-    # identical response either way — the endpoint never reveals whether the email exists
+    """Store a single-use reset token and email its link. Always 200 (non-enumerating)."""
+    # the broker stores a hashed token + fires PasswordResetRequested (the listener emails the link);
+    # its INVALID_USER/RESET_THROTTLED status stays internal — the response never reveals it (DR-0033).
+    await _password_broker().send_reset_link(data.email)
     return ForgotPasswordOut(
         message="If that email exists, a reset link has been sent."
     )
 
 
+async def _set_password(user: Any, new_password: str) -> None:
+    user.password = (
+        new_password  # the User model's `hashed` cast argon2-hashes on assignment
+    )
+    await user.save()
+
+
 async def reset_password(request: Request, data: ResetPasswordIn) -> MessageOut:
-    """Verify the signed reset token and set the new (hashed) password."""
+    """Consume the single-use reset token and set the new (hashed) password."""
     if len(data.password) < 8:
         raise ValidationException(
             {"password": ["The password must be at least 8 characters."]}
         )
-    secret = Config.get("app.key", "")
-    user_id = verify_password_reset_token(data.token, secret)
-    user = await User.find(user_id) if user_id is not None else None
-    if user is None:
+    status = await _password_broker().reset(
+        data.email, data.token, data.password, _set_password
+    )
+    if status is not PasswordResetStatus.RESET_SUCCESS:
         raise ValidationException(
             {"token": ["This password reset token is invalid or has expired."]}
         )
-    user.password = (
-        data.password
-    )  # the User model's `hashed` cast argon2-hashes on assignment
-    await user.save()
     return MessageOut(message="Password has been reset.")

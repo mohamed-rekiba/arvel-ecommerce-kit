@@ -36,7 +36,9 @@ async def _apply_search(query: Any, q: str) -> Any:
     retrievable set. Otherwise (the in-process array engine / tests) fall back to a locale-aware SQL
     match on `translations->'<loc>'->>'name'`, which needs no separately-populated index."""
     if config("search.driver", "array") == "meilisearch":
-        hits = await Product.search(q)
+        hits = await Product.search(
+            q
+        ).get()  # search() returns a SearchBuilder; .get() runs it
         return query.where_in(
             "id", [h.id for h in hits] or [0]
         )  # empty hits → match nothing

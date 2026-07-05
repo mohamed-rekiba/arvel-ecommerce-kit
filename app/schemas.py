@@ -212,6 +212,7 @@ class ChangePasswordIn(Schema):
 
 
 class VerifyEmailIn(Schema):
+    id: int  # the user the link is for (in the mailed URL); the token is verified against their email
     token: str
 
 
@@ -274,6 +275,7 @@ class ForgotPasswordOut(Schema):
 
 
 class ResetPasswordIn(Schema):
+    email: str  # the account being reset (the broker keys the stored token by email)
     token: str
     password: str
 

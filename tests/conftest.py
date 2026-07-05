@@ -15,7 +15,7 @@ os.environ.setdefault("PAYMENT_GATEWAY_SECRET", "kit-test-webhook-secret")
 os.environ.setdefault("APP_URL", "http://testserver.local")
 os.environ.setdefault(
     "APP_KEY", "YXJ2ZWwta2l0LXRlc3Qta2V5LTAxMjM0NTY3ODlhYmM="
-)  # a fixed Fernet key for signing/crypto in tests
+)  # a fixed 32-byte app key for signing/crypto (AES-256-GCM) in tests
 
 import pytest
 

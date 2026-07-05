@@ -108,9 +108,14 @@ def test_password_reset_flow(client, faked_mail) -> None:
     assert faked_mail.recipients[-1] == ["ada@example.com"]
     reset_token = faked_mail.sent[-1].token
 
-    # reset to a new password
+    # reset to a new password (the broker keys the stored token by email → the body carries it)
     reset = client.post(
-        "/api/reset-password", json={"token": reset_token, "password": "brandnewpass"}
+        "/api/reset-password",
+        json={
+            "email": "ada@example.com",
+            "token": reset_token,
+            "password": "brandnewpass",
+        },
     )
     assert reset.status_code == 200
 

@@ -88,11 +88,15 @@ class AppServiceProvider(ServiceProvider):
 
         # Register event listeners (Laravel EventServiceProvider).
         if self.app.bound("events"):
+            from arvel.auth.password_reset import PasswordResetRequested
+
             from app.listeners.dispatch_fulfillment import dispatch_fulfillment
             from app.listeners.record_order_metrics import record_order_metrics
             from app.listeners.send_order_confirmation import send_order_confirmation
+            from app.listeners.send_password_reset import send_password_reset
 
             events = self.app.make("events")
             events.listen("order.placed", record_order_metrics)
             events.listen("order.placed", send_order_confirmation)
             events.listen("order.placed", dispatch_fulfillment)
+            events.listen(PasswordResetRequested, send_password_reset)

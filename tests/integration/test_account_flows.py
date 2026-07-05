@@ -26,6 +26,13 @@ def _link_from_mail(api: str, subject_part: str) -> str:
     return href.group(1)
 
 
+def _link_query(link: str) -> dict[str, str]:
+    """The query params of a mailed link (id/token/email) as a flat dict."""
+    from urllib.parse import parse_qs, urlparse
+
+    return {k: v[0] for k, v in parse_qs(urlparse(link).query).items()}
+
+
 def test_reset_and_verification_round_trips_on_real_mail(
     postgres_url: str,
     rabbitmq_url: str,
@@ -75,23 +82,28 @@ def test_reset_and_verification_round_trips_on_real_mail(
 
     asyncio.run(_run_worker(30.0, until=_both_delivered))
 
-    verify_link = _link_from_mail(mailpit["api"], "Verify")
-    verify_token = verify_link.split("token=")[1]
-    reset_link = _link_from_mail(mailpit["api"], "Reset")
-    reset_token = reset_link.split("token=")[1].split("&")[0]
+    verify_q = _link_query(_link_from_mail(mailpit["api"], "Verify"))
+    reset_q = _link_query(_link_from_mail(mailpit["api"], "Reset"))
 
     with kit_app(**env) as client:
-        # the emailed verification link verifies the account
+        # the emailed verification link (id + token) verifies the account
         assert (
-            client.post("/api/email/verify", json={"token": verify_token}).status_code
+            client.post(
+                "/api/email/verify",
+                json={"id": int(verify_q["id"]), "token": verify_q["token"]},
+            ).status_code
             == 200
         )
 
-        # the emailed reset link sets a new password; the old one stops working
+        # the emailed reset link (email + token) sets a new password; the old one stops working
         assert (
             client.post(
                 "/api/reset-password",
-                json={"token": reset_token, "password": "a-new-password"},
+                json={
+                    "email": reset_q["email"],
+                    "token": reset_q["token"],
+                    "password": "a-new-password",
+                },
             ).status_code
             == 200
         )

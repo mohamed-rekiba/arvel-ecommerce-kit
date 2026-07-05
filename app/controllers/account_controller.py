@@ -58,7 +58,9 @@ async def user_out(user: User) -> UserOut:
 
 
 async def _send_verification(user: User) -> None:
-    token = email_verification_token(user.id, str(Config.get("app.key", "")))
+    token = email_verification_token(
+        user.id, user.email, str(Config.get("app.key", ""))
+    )
     await Mail.to(user.email).send(VerifyEmail(user.id, token))
 
 
@@ -121,10 +123,16 @@ async def send_verification(request: Request) -> MessageOut:
 
 
 async def verify_email(request: Request, data: VerifyEmailIn) -> MessageOut:
-    """Mark the account verified from a signed token (purpose-bound: a reset token won't pass)."""
-    user_id = verify_email_token(data.token, str(Config.get("app.key", "")))
-    user = await User.find(user_id) if user_id is not None else None
-    if user is None:
+    """Mark the account verified from a signed token (purpose-bound: a reset token won't pass).
+    The token is bound to the email it was issued for, so it stops verifying once the address
+    changes — we load the user the link names, then check the token against their current email."""
+    user = await User.find(data.id)
+    verified_id = (
+        verify_email_token(data.token, user.email, str(Config.get("app.key", "")))
+        if user is not None
+        else None
+    )
+    if user is None or verified_id != user.id:
         raise ValidationException(
             {"token": ["This verification link is invalid or has expired."]}
         )

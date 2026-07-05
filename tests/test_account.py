@@ -3,11 +3,11 @@ confirmation, email verification via signed purpose-bound tokens, and the encryp
 all through the real served path."""
 
 import asyncio
+import secrets
 
 import pytest
 from litestar.testing import TestClient
 
-from arvel.auth.flows import password_reset_token
 from arvel.database import ConnectionResolver, Migrator, discover_migrations
 from arvel.support.facades import Mail
 from arvel.testing import fake, reset_fakes
@@ -54,32 +54,41 @@ def test_registration_sends_verification_and_the_link_verifies(
     faked_mail.assert_sent(VerifyEmail)
     assert client.get("/api/user", headers=headers).json()["email_verified"] is False
 
-    token = faked_mail.sent[-1].token
-    assert client.post("/api/email/verify", json={"token": token}).status_code == 200
+    mail = faked_mail.sent[-1]
+    assert (
+        client.post(
+            "/api/email/verify", json={"id": mail.user_id, "token": mail.token}
+        ).status_code
+        == 200
+    )
     assert client.get("/api/user", headers=headers).json()["email_verified"] is True
 
 
-def test_tampered_or_cross_purpose_tokens_are_rejected(client, faked_mail) -> None:
-    """A doctored link fails; a RESET token can't be replayed as a VERIFICATION token."""
+def test_tampered_or_foreign_tokens_are_rejected(client, faked_mail) -> None:
+    """A doctored link fails; an opaque non-verification token (e.g. a broker reset token) can't verify."""
     headers = _register(client)
-    token = faked_mail.sent[-1].token
+    mail = faked_mail.sent[-1]
 
-    tampered = client.post("/api/email/verify", json={"token": token[:-2] + "xx"})
+    tampered = client.post(
+        "/api/email/verify", json={"id": mail.user_id, "token": mail.token[:-2] + "xx"}
+    )
     assert tampered.status_code == 422
 
-    # purpose isolation: a genuine password-reset token is NOT a verification token
-    user_id = client.get("/api/user", headers=headers).json()["id"]
-    from arvel.support.facades import Config
-
-    reset = password_reset_token(user_id, str(Config.get("app.key", "")))
-    assert client.post("/api/email/verify", json={"token": reset}).status_code == 422
+    # purpose isolation: an opaque token that isn't a signed verification token is rejected
+    foreign = secrets.token_urlsafe(32)
+    assert (
+        client.post(
+            "/api/email/verify", json={"id": mail.user_id, "token": foreign}
+        ).status_code
+        == 422
+    )
     assert client.get("/api/user", headers=headers).json()["email_verified"] is False
 
 
 def test_profile_update_and_email_change_reverifies(client, faked_mail) -> None:
     headers = _register(client)
-    token = faked_mail.sent[-1].token
-    client.post("/api/email/verify", json={"token": token})
+    mail = faked_mail.sent[-1]
+    client.post("/api/email/verify", json={"id": mail.user_id, "token": mail.token})
 
     # name + phone update; email untouched → stays verified
     updated = client.patch(

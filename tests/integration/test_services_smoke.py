@@ -216,7 +216,7 @@ async def test_meilisearch_indexes_and_searches(
             60
         ):  # Meilisearch indexes asynchronously (search 404s until the task lands)
             try:
-                hits = await Product.search("Aurora")
+                hits = await Product.search("Aurora").get()
             except Exception:
                 hits = []
             if hits:
