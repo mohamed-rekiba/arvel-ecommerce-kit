@@ -16,7 +16,7 @@ from app.schemas import AdminUserDetailOut, AdminUserOut, AdminUserPage
 
 
 def _current_user() -> User:
-    user = current_user.get()
+    user: User | None = current_user.get()
     if user is None:
         abort(401, "Unauthenticated")
     return user

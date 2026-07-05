@@ -122,19 +122,16 @@ async def product_out(p: Product, deal: Any | None = None) -> ProductOut:
 async def _category_tile_images(categories: list[Any]) -> dict[int, str]:
     """One representative product thumb per category (subtree roll-up) for the category tiles.
     Two queries total: the retrievable product→category map, then media for the chosen products."""
-    from arvel import DB
-
-    rows = await DB.select(
-        "SELECT id, category_id FROM retrievable_products ORDER BY id"
-    )
+    # the retrievable set via the same visibility scope the storefront uses (EXISTS against the view)
+    retrievable = await Product.with_visibility(only_visible=True).order_by("id").get()
     children: dict[int | None, list[int]] = {}
     all_cats = await Category.all()
     for c in all_cats:
         children.setdefault(c.parent_id, []).append(c.id)
 
     direct: dict[int, int] = {}
-    for r in rows:
-        direct.setdefault(int(r["category_id"]), int(r["id"]))
+    for p in retrievable:
+        direct.setdefault(int(p.category_id), int(p.id))
 
     def subtree_first(cat_id: int) -> int | None:
         stack = [cat_id]

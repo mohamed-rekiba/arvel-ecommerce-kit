@@ -9,7 +9,11 @@ dependencies = ["arvel[standard,oidc,s3,telemetry,search,queue-amqp]"]
 # arvel's nested `standard` self-extra under an editable path dep, so depend on it directly.
 dev = [
     "aiosqlite>=0.22.1",
+    "bandit>=1.9.4",
     "faker>=40.26.0",
+    "mypy>=2.1.0",
+    "pip-audit>=2.10.1",
+    "pre-commit>=4.6.0",
     "pyright>=1.1.411",
     "pytest>=9.1.1",
     "pytest-asyncio>=1.4.0",
@@ -18,15 +22,32 @@ dev = [
     "testcontainers>=4.14.2",
 ]
 
+# --- Types (G3) -----------------------------------------------------------
+[tool.mypy]
+strict = true
+files = ["app", "routes", "database", "bootstrap"]
+namespace_packages = true
+explicit_package_bases = true
+mypy_path = "."
+# Pyright narrows Any to Unknown more aggressively than mypy, so casts that satisfy pyright
+# read as redundant to mypy — disable this one check rather than fight the two checkers.
+warn_redundant_casts = false
+
+[[tool.mypy.overrides]]
+module = ["babel", "babel.*", "fsspec", "fsspec.*", "av", "av.*"]
+ignore_missing_imports = true
+
 [tool.pyright]
-# the application code is strict-typed (mirrors arvel's own `include = ["src"]` stance — tests use
-# the untyped litestar TestClient, so strict-typing them is noise, not signal).
 include = ["app", "routes", "database", "bootstrap"]
 typeCheckingMode = "strict"
 pythonVersion = "3.14"
 venvPath = "."
 venv = ".venv"
-reportMissingTypeStubs = false  # third-party (faker, …) ship no stubs; our own code stays strict
+# Third-party engines (fsspec, av, …) ship no stubs; reportUnknown* stays on for our own code.
+reportMissingTypeStubs = false
+
+[tool.bandit]
+exclude_dirs = ["node_modules", ".venv", "tests", "database"]
 
 [tool.uv.sources]
 # Local dev tracks framework source directly (clone `arvel` as a sibling dir before `uv sync`) since

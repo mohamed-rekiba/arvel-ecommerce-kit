@@ -35,7 +35,7 @@ class User(HasMedia, Authenticatable, HasRoles, Notifiable, Model):
     __hidden__: ClassVar[list[str]] = ["password"]
     __casts__: ClassVar[dict[str, Any]] = {
         "email_verified_at": "datetime",
-        "password": "hashed",
+        "password": "hashed",  # nosec B105
         "phone": "encrypted",  # PII — ciphertext at rest, transparent in the app
         "role": UserRole,
     }

@@ -26,7 +26,7 @@ from app.services.product_image_service import ProductImageService
 def _image_url(media: Any, conversion: str | None) -> str | None:
     if media is None:
         return None
-    url = media.get_url(conversion)
+    url: str | None = media.get_url(conversion)
     if url and url.startswith(("http://", "https://")):
         return url
     suffix = f"/{conversion}" if conversion else ""
@@ -68,7 +68,7 @@ async def index(request: Request) -> list[BannerOut]:
 
 
 def _current_user() -> User:
-    user = current_user.get()
+    user: User | None = current_user.get()
     if user is None:
         abort(401, "Unauthenticated")
     return user

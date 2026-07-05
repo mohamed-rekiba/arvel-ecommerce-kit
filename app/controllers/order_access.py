@@ -16,7 +16,7 @@ from arvel.support import current_user
 
 from app.models.order import Order
 
-ORDER_TOKEN_HEADER = "X-Order-Token"
+ORDER_TOKEN_HEADER = "X-Order-Token"  # nosec B105
 
 
 async def resolve_owned_order(

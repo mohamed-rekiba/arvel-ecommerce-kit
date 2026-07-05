@@ -284,7 +284,8 @@ async def checkout(request: Request, data: CheckoutIn) -> OrderOut:
                     .first()
                 )
                 validate_window_and_state(coupon, subtotal)
-                assert coupon is not None
+                if coupon is None:
+                    abort(500, "Coupon unexpectedly missing.")
                 await enforce_per_customer_limit(
                     coupon,
                     user_id=user.id if user is not None else None,
@@ -599,8 +600,7 @@ async def admin_order_show(request: Request) -> AdminOrderDetailOut:
                 description=e.description,
                 causer_id=e.causer_id,
                 properties={
-                    str(k): str(v)
-                    for k, v in dict(e.properties or {}).items()  # type: ignore[arg-type]
+                    str(k): str(v) for k, v in dict(e.properties or {}).items()
                 },
                 created_at=_iso(e.created_at),
             )

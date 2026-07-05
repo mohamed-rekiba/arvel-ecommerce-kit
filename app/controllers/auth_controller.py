@@ -47,7 +47,7 @@ async def register(request: Request, data: RegisterIn) -> TokenOut:
         {
             "name": "required|string",
             "email": "required|email",
-            "password": "required|string|min:8",
+            "password": "required|string|min:8",  # nosec B105
         },
     )
     if validator.fails():

@@ -21,7 +21,7 @@ from app.schemas import ActivityOut, AssignRoleIn, PermissionOut, RoleOut, UserR
 
 
 async def _require(permission: Permission) -> User:
-    user = current_user.get()
+    user: User | None = current_user.get()
     if user is None:
         abort(401, "Unauthenticated")
     if not await user.can(permission.value):

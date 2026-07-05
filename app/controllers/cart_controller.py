@@ -63,7 +63,8 @@ async def merge_guest_cart(request: Request, user: User) -> None:
     if cart is None and guest_items:
         cart = await Cart.create(user_id=user.id)
     for item in guest_items:
-        assert cart is not None  # created above when there are items
+        if cart is None:  # created above when there are items
+            abort(500, "Cart unexpectedly missing.")
         existing = (
             await CartItem.where("cart_id", cart.id)
             .where("product_variant_id", item.product_variant_id)
@@ -181,7 +182,8 @@ async def add_item(request: Request, data: AddItemIn) -> CartOut:
     )
 
     cart, new_token = await resolve_cart(request, create=True)
-    assert cart is not None  # create=True always yields a cart
+    if cart is None:  # create=True always yields a cart
+        abort(500, "Cart unexpectedly missing.")
     existing = (
         await cart.items().where("product_variant_id", data.product_variant_id).first()
     )
@@ -235,7 +237,8 @@ async def apply_coupon(request: Request, data: ApplyCouponIn) -> CartOut:
     from app.services.coupon_service import normalize_code, validate_window_and_state
 
     cart, new_token = await resolve_cart(request, create=True)
-    assert cart is not None
+    if cart is None:
+        abort(500, "Cart unexpectedly missing.")
     items = await cart.items().get()
     subtotal = sum(i.unit_price_cents * i.quantity for i in items)
     code = normalize_code(data.code)

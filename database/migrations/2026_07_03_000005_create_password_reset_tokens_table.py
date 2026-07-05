@@ -7,9 +7,15 @@ from arvel.database import Blueprint, Migration, Schema
 class CreatePasswordResetTokensTable(Migration):
     def up(self, schema: Schema) -> None:
         def define(t: Blueprint) -> None:
-            t.string("email").primary()  # one active token per email; a new send replaces it
-            t.string("token_hash")  # Hasher hash of the reset token — never the plaintext
-            t.datetime("created_at")  # drives both the per-email throttle and the TTL expiry
+            t.string(
+                "email"
+            ).primary()  # one active token per email; a new send replaces it
+            t.string(
+                "token_hash"
+            )  # Hasher hash of the reset token — never the plaintext
+            t.datetime(
+                "created_at"
+            )  # drives both the per-email throttle and the TTL expiry
 
         schema.create("password_reset_tokens", define)
 

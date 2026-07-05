@@ -27,7 +27,7 @@ from app.services.catalog_visibility_service import CatalogVisibilityService
 
 
 def _current_user() -> User:
-    user = current_user.get()
+    user: User | None = current_user.get()
     if user is None:
         abort(401, "Unauthenticated")
     return user
@@ -72,7 +72,8 @@ async def category_store(request: Request, data: CategoryIn) -> AdminCategoryOut
     user = _current_user()
     await _require(user, Permission.CATALOG_CREATE)
     translations = validated_translations(data.translations)
-    assert translations is not None
+    if translations is None:
+        abort(500, "Category translations missing after validation.")
     slug = Str.slug(translations["en"]["name"] or "")
     if await _slug_taken(Category, slug):
         raise ValidationException(

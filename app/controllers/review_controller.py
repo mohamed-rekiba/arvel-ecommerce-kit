@@ -21,7 +21,7 @@ _PURCHASED_STATUSES = {OrderStatus.PAID, OrderStatus.SHIPPED, OrderStatus.DELIVE
 
 
 def _current_user() -> User:
-    user = current_user.get()
+    user: User | None = current_user.get()
     if user is None:
         abort(401, "Unauthenticated")
     return user
@@ -86,7 +86,7 @@ async def index(request: Request) -> ReviewListOut:
         else {}
     )
     mine = None
-    user = current_user.get()
+    user: User | None = current_user.get()
     if user is not None:
         own = (
             await Review.where("subject_type", "Product")

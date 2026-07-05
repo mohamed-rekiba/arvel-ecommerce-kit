@@ -56,8 +56,8 @@ def discount_cents(coupon: Coupon, subtotal_cents: int) -> int:
         coupon.type if isinstance(coupon.type, CouponType) else CouponType(coupon.type)
     )
     if kind is CouponType.PERCENT:
-        return min(subtotal_cents * coupon.value // 100, subtotal_cents)
-    return min(coupon.value, subtotal_cents)
+        return int(min(subtotal_cents * coupon.value // 100, subtotal_cents))
+    return int(min(coupon.value, subtotal_cents))
 
 
 def normalize_code(code: str) -> str:

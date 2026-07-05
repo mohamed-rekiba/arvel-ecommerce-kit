@@ -9,26 +9,42 @@ from arvel.http import Request
 
 from app.controllers.catalog_controller import in_locale_relation, product_out
 from app.controllers.serializers import iso as _iso
+from app.enums import OrderStatus
 from app.models.deal import Deal
 from app.models.product import Product
 from app.schemas import DealOut
 from app.services import deal_service
 
+_SOLD_STATUSES = [
+    OrderStatus.PAID.value,
+    OrderStatus.SHIPPED.value,
+    OrderStatus.DELIVERED.value,
+]
+
 
 async def _sold_counts(product_ids: list[int]) -> dict[int, int]:
-    """One aggregate query: units sold per product on orders that actually completed."""
+    """Units sold per product on orders that actually completed."""
     if not product_ids:
         return {}
-    placeholders = ", ".join(str(int(pid)) for pid in product_ids)
-    rows = await DB.select(
-        "SELECT pv.product_id AS product_id, COALESCE(SUM(oi.quantity), 0) AS sold "
-        "FROM order_items oi "
-        "JOIN product_variants pv ON pv.id = oi.product_variant_id "
-        "JOIN orders o ON o.id = oi.order_id "
-        f"WHERE o.status IN ('paid', 'shipped', 'delivered') AND pv.product_id IN ({placeholders}) "
-        "GROUP BY pv.product_id"
+    counts = await (
+        DB.table("order_items")
+        .join(
+            "product_variants",
+            "product_variants.id",
+            "=",
+            "order_items.product_variant_id",
+        )
+        .join("orders", "orders.id", "=", "order_items.order_id")
+        .where_in("orders.status", _SOLD_STATUSES)
+        .where_in("product_variants.product_id", product_ids)
+        .group_by("product_variants.product_id")
+        .select_raw(
+            "product_variants.product_id AS product_id, "
+            "COALESCE(SUM(order_items.quantity), 0) AS sold"
+        )
+        .pluck("sold", "product_id")
     )
-    return {int(r["product_id"]): int(r["sold"]) for r in rows}
+    return {int(pid): int(sold) for pid, sold in counts.items()}
 
 
 async def index(request: Request) -> list[DealOut]:

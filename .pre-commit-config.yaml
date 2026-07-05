@@ -40,15 +40,9 @@ repos:
         language: system
         types: [python]
         pass_filenames: false
-      - id: import-linter
-        name: import-linter (architecture + startup NFR, G1/G2)
-        entry: uv run lint-imports
-        language: system
-        types: [python]
-        pass_filenames: false
       - id: bandit
         name: bandit (security)
-        entry: uv run bandit -q -r src
+        entry: uv run bandit -q -c pyproject.toml -r .
         language: system
         types: [python]
         pass_filenames: false

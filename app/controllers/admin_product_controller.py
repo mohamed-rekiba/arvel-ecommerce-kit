@@ -32,7 +32,7 @@ from app.schemas import (
 
 def _current_user() -> User:
     # The Authenticate route middleware guarantees a user is present (401'd otherwise).
-    user = current_user.get()
+    user: User | None = current_user.get()
     if user is None:
         abort(401, "Unauthenticated")
     return user
@@ -157,7 +157,7 @@ async def show(request: Request) -> AdminProductDetailOut:
         .first_or_fail()
     )
     variants = await ProductVariant.where("product_id", product.id).order_by("id").get()
-    from app.controllers.media_controller import IMAGES
+    from app.models.product import IMAGES
 
     gallery = [gallery_image_out(m) for m in await product.get_media(IMAGES)]
     return AdminProductDetailOut(
@@ -196,7 +196,8 @@ async def store(request: Request, data: ProductIn) -> AdminProductOut:
     if validator.fails():
         raise ValidationException(validator.errors())
     translations = validated_translations(data.translations)
-    assert translations is not None  # ProductIn.translations is required
+    if translations is None:  # ProductIn.translations is required
+        abort(500, "Product translations missing after validation.")
     slug = Str.slug(translations["en"]["name"] or "")
     if await Product.with_trashed().where("slug", slug).first() is not None:
         raise ValidationException(

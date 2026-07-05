@@ -27,7 +27,7 @@ def _out(row: Any) -> NotificationOut:
 
 
 def _customer() -> User:
-    user = current_user.get()
+    user: User | None = current_user.get()
     if user is None:
         abort(401, "Unauthenticated")
     return user

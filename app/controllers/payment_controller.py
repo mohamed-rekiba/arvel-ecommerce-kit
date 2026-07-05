@@ -29,11 +29,11 @@ async def _verify_signature(request: Request) -> None:
     secret = Config.get("services.payment_gateway.secret") or ""
     # fail closed outside debug: the shipped "test-secret" default is publicly known, so a deploy
     # that forgot to set PAYMENT_GATEWAY_SECRET must not verify forged webhooks against it
-    if secret == "test-secret" and not Config.get("app.debug", False):
+    if secret == "test-secret" and not Config.get("app.debug", False):  # nosec B105
         abort(401, "Invalid webhook signature.")
     provided = request.header(SIGNATURE_HEADER, "") or ""
     expected = hmac.new(
-        secret.encode(), await request.raw.body(), hashlib.sha256
+        secret.encode(), await request.body(), hashlib.sha256
     ).hexdigest()
     if not secret or not hmac.compare_digest(provided, expected):
         abort(401, "Invalid webhook signature.")
@@ -63,7 +63,7 @@ async def pay(request: Request) -> PaymentOut:
         f"{gateway}/charges",
         json={"amount": order.total_cents, "currency": "usd", "order_id": order.id},
     )
-    if response.status_code >= 400:
+    if not response.ok():
         abort(502, "Payment gateway error.")
     charge: dict[str, Any] = response.json()
 

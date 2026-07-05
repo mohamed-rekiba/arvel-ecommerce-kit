@@ -16,7 +16,7 @@ from app.models.product import IMAGES
 def _disk() -> str:
     """The configured default storage disk (config/filesystems.py → FILESYSTEM_DISK): `local` in
     dev/tests, `s3` for RustFS. Resolved at call time so it honours the running config, not a hardcode."""
-    return Config.get("filesystems.default", "local")
+    return str(Config.get("filesystems.default", "local"))
 
 
 class ProductImageService:
@@ -46,12 +46,12 @@ class ProductImageService:
         try:
             # follow_redirects: image CDNs (Picsum, etc.) 302 to the actual file
             response = await Http.timeout(15).get(url, follow_redirects=True)
-            if response.status_code >= 400 or not response.content:
+            if not response.ok() or not response.content():
                 return False
             await model.add_media(
-                response.content,
+                response.content(),
                 file_name=file_name,
-                mime_type=response.headers.get("content-type"),
+                mime_type=response.header("content-type"),
             ).to_media_collection(collection, disk=_disk())
         except Exception:  # noqa: BLE001 — offline / bad image → seed without it, don't crash
             return False
