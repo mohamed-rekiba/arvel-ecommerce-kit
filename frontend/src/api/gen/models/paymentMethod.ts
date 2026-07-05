@@ -9,9 +9,10 @@
 /**
  * How the order is settled: the payment gateway after placing, or cash on delivery.
  */
-export type PaymentMethod = (typeof PaymentMethod)[keyof typeof PaymentMethod]
+export type PaymentMethod = typeof PaymentMethod[keyof typeof PaymentMethod];
+
 
 export const PaymentMethod = {
   gateway: 'gateway',
-  cod: 'cod'
-} as const
+  cod: 'cod',
+} as const;

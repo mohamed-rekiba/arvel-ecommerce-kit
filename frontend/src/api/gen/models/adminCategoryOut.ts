@@ -5,13 +5,13 @@
  * The arvel-ecommerce-kit API.
  * OpenAPI spec version: 0.1.0
  */
-import type { Translate } from './translate'
+import type { Translate } from './translate';
 
 export interface AdminCategoryOut {
-  id: number
-  slug: string
-  translations: Translate[]
-  parent_id?: number | null
-  published?: boolean
-  is_visible?: boolean
+  id: number;
+  slug: string;
+  translations: Translate[];
+  parent_id?: number | null;
+  published?: boolean;
+  is_visible?: boolean;
 }

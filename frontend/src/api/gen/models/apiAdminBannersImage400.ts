@@ -5,14 +5,14 @@
  * The arvel-ecommerce-kit API.
  * OpenAPI spec version: 0.1.0
  */
-import type { ApiAdminBannersImage400Extra } from './apiAdminBannersImage400Extra'
+import type { ApiAdminBannersImage400Extra } from './apiAdminBannersImage400Extra';
 
 /**
  * Validation Exception
  */
 export type ApiAdminBannersImage400 = {
-  status_code: number
-  detail: string
+  status_code: number;
+  detail: string;
   /** @nullable */
-  extra?: ApiAdminBannersImage400Extra
-}
+  extra?: ApiAdminBannersImage400Extra;
+};

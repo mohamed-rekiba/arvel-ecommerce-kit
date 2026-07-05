@@ -7,5 +7,5 @@
  */
 
 export interface TokenOut {
-  token: string
+  token: string;
 }

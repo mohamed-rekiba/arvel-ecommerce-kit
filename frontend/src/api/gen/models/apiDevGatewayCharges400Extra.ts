@@ -9,4 +9,4 @@
 /**
  * @nullable
  */
-export type ApiDevGatewayCharges400Extra = { [key: string]: unknown } | unknown[] | null
+export type ApiDevGatewayCharges400Extra = {[key: string]: unknown} | unknown[] | null;

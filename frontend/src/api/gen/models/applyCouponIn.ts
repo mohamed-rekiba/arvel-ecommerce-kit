@@ -7,5 +7,5 @@
  */
 
 export interface ApplyCouponIn {
-  code: string
+  code: string;
 }

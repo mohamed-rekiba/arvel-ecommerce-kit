@@ -5,14 +5,14 @@
  * The arvel-ecommerce-kit API.
  * OpenAPI spec version: 0.1.0
  */
-import type { ApiVariantsStockAlertUnsubscribe400Extra } from './apiVariantsStockAlertUnsubscribe400Extra'
+import type { ApiVariantsStockAlertUnsubscribe400Extra } from './apiVariantsStockAlertUnsubscribe400Extra';
 
 /**
  * Validation Exception
  */
 export type ApiVariantsStockAlertUnsubscribe400 = {
-  status_code: number
-  detail: string
+  status_code: number;
+  detail: string;
   /** @nullable */
-  extra?: ApiVariantsStockAlertUnsubscribe400Extra
-}
+  extra?: ApiVariantsStockAlertUnsubscribe400Extra;
+};

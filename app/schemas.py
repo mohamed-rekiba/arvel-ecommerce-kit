@@ -486,7 +486,9 @@ class OrderTimelineOut(Schema):
 class OrderLineOut(Schema):
     product_variant_id: int
     product_name: str
-    product_slug: str | None  # links the line back to the product page (None if since-deleted)
+    product_slug: (
+        str | None
+    )  # links the line back to the product page (None if since-deleted)
     variant_name: str
     image_url: str | None  # resolved at read time via variant→product media
     quantity: int

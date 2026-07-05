@@ -7,7 +7,7 @@
  */
 
 export type ApiAdminUsersIndexParams = {
-  q?: string
-  per_page?: number
-  page?: number
-}
+q?: string;
+per_page?: number;
+page?: number;
+};

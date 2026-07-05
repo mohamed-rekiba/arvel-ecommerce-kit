@@ -34,7 +34,11 @@ const sort = ref('newest')
 const archived = ref(false)
 
 const PRICES = [
-  { label: t('products.price_any'), min: undefined as number | undefined, max: undefined as number | undefined },
+  {
+    label: t('products.price_any'),
+    min: undefined as number | undefined,
+    max: undefined as number | undefined
+  },
   { label: '< $50', min: 0, max: 4999 },
   { label: '$50 – $100', min: 5000, max: 10000 },
   { label: '$100 – $200', min: 10001, max: 20000 },
@@ -56,8 +60,12 @@ const STATUSES = [
   { label: t('products.inactive_only'), value: 'inactive' }
 ]
 
-const categories = ref<{ label: string; value: number | null }[]>([{ label: t('products.all_categories'), value: null }])
-const vendors = ref<{ label: string; value: number | null }[]>([{ label: t('products.all_stores'), value: null }])
+const categories = ref<{ label: string; value: number | null }[]>([
+  { label: t('products.all_categories'), value: null }
+])
+const vendors = ref<{ label: string; value: number | null }[]>([
+  { label: t('products.all_stores'), value: null }
+])
 const showVal = computed({
   get: () => (archived.value ? 'archived' : 'active_view'),
   set: (v: string) => (archived.value = v === 'archived')
@@ -270,10 +278,18 @@ async function save() {
     <!-- toolbar -->
     <div class="toolbar">
       <div class="viewtog" role="group" :aria-label="t('products.view')">
-        <button :class="{ on: view === 'list' }" :aria-label="t('products.list_view')" @click="view = 'list'">
+        <button
+          :class="{ on: view === 'list' }"
+          :aria-label="t('products.list_view')"
+          @click="view = 'list'"
+        >
           <i class="pi pi-bars" />
         </button>
-        <button :class="{ on: view === 'grid' }" :aria-label="t('products.grid_view')" @click="view = 'grid'">
+        <button
+          :class="{ on: view === 'grid' }"
+          :aria-label="t('products.grid_view')"
+          @click="view = 'grid'"
+        >
           <i class="pi pi-th-large" />
         </button>
       </div>
@@ -281,8 +297,20 @@ async function save() {
         <i class="pi pi-search" />
         <InputText v-model="q" :placeholder="t('products.search_ph')" />
       </span>
-      <Select v-model="showVal" :options="SHOWS" option-label="label" option-value="value" class="tsel" />
-      <Select v-model="sort" :options="SORTS" option-label="label" option-value="value" class="tsel" />
+      <Select
+        v-model="showVal"
+        :options="SHOWS"
+        option-label="label"
+        option-value="value"
+        class="tsel"
+      />
+      <Select
+        v-model="sort"
+        :options="SORTS"
+        option-label="label"
+        option-value="value"
+        class="tsel"
+      />
       <Button
         :label="t('products.filter')"
         icon="pi pi-filter"
@@ -297,11 +325,22 @@ async function save() {
     <div v-show="filtersOpen && !archived" class="filters">
       <label>
         <span>{{ t('products.f_category') }}</span>
-        <Select v-model="categoryId" :options="categories" option-label="label" option-value="value" :placeholder="t('products.all_categories')" />
+        <Select
+          v-model="categoryId"
+          :options="categories"
+          option-label="label"
+          option-value="value"
+          :placeholder="t('products.all_categories')"
+        />
       </label>
       <label>
         <span>{{ t('products.f_price') }}</span>
-        <Select v-model="priceIdx" :options="PRICES.map((p, i) => ({ label: p.label, value: i }))" option-label="label" option-value="value" />
+        <Select
+          v-model="priceIdx"
+          :options="PRICES.map((p, i) => ({ label: p.label, value: i }))"
+          option-label="label"
+          option-value="value"
+        />
       </label>
       <label>
         <span>{{ t('products.f_status') }}</span>
@@ -309,7 +348,13 @@ async function save() {
       </label>
       <label>
         <span>{{ t('products.f_store') }}</span>
-        <Select v-model="vendorId" :options="vendors" option-label="label" option-value="value" :placeholder="t('products.all_stores')" />
+        <Select
+          v-model="vendorId"
+          :options="vendors"
+          option-label="label"
+          option-value="value"
+          :placeholder="t('products.all_stores')"
+        />
       </label>
     </div>
 
@@ -318,7 +363,13 @@ async function save() {
     <!-- bulk action bar -->
     <div v-if="selected.length" class="bulk">
       <span>{{ t('products.selected', { n: selected.length }) }}</span>
-      <Button :label="t('products.archive_selected')" icon="pi pi-trash" severity="danger" text @click="archiveSelected" />
+      <Button
+        :label="t('products.archive_selected')"
+        icon="pi pi-trash"
+        severity="danger"
+        text
+        @click="archiveSelected"
+      />
     </div>
 
     <!-- LIST view -->
@@ -331,12 +382,19 @@ async function save() {
         size="small"
         striped-rows
       >
-        <template #empty><p class="empty">{{ t('products.none') }}</p></template>
+        <template #empty
+          ><p class="empty">{{ t('products.none') }}</p></template
+        >
         <Column selection-mode="multiple" header-style="width:3rem" />
         <Column :header="t('products.product')">
           <template #body="{ data }">
             <div class="prod">
-              <div class="thumb"><img v-if="data.image_url" :src="data.image_url" alt="" /><i v-else class="pi pi-image" /></div>
+              <div class="thumb">
+                <img v-if="data.image_url" :src="data.image_url" alt="" /><i
+                  v-else
+                  class="pi pi-image"
+                />
+              </div>
               <div>
                 <div class="pname">{{ name(data) }}</div>
                 <div class="pid">ID: {{ data.slug }}</div>
@@ -345,19 +403,32 @@ async function save() {
           </template>
         </Column>
         <Column :header="t('products.price')">
-          <template #body="{ data }"><span class="price">{{ formatPrice(data.price_cents ?? 0) }}</span></template>
+          <template #body="{ data }"
+            ><span class="price">{{ formatPrice(data.price_cents ?? 0) }}</span></template
+          >
         </Column>
         <Column :header="t('products.stock')">
           <template #body="{ data }">
             <div class="stock">
-              <div class="stock__bar"><span :class="`s-${stockTone(data.stock ?? 0)}`" :style="{ width: `${stockPct(data.stock ?? 0)}%` }" /></div>
-              <span class="stock__n">{{ data.stock ?? 0 }}<small>/{{ STOCK_CAP }}</small></span>
+              <div class="stock__bar">
+                <span
+                  :class="`s-${stockTone(data.stock ?? 0)}`"
+                  :style="{ width: `${stockPct(data.stock ?? 0)}%` }"
+                />
+              </div>
+              <span class="stock__n"
+                >{{ data.stock ?? 0 }}<small>/{{ STOCK_CAP }}</small></span
+              >
             </div>
           </template>
         </Column>
         <Column :header="t('products.col_active')" header-style="width:6rem">
           <template #body="{ data }">
-            <ToggleSwitch v-if="!archived" :model-value="!!data.published" @update:model-value="(v: boolean) => toggleActive(data, v)" />
+            <ToggleSwitch
+              v-if="!archived"
+              :model-value="!!data.published"
+              @update:model-value="(v: boolean) => toggleActive(data, v)"
+            />
             <Tag v-else :value="t('products.archived')" severity="secondary" />
           </template>
         </Column>
@@ -367,8 +438,21 @@ async function save() {
               <Button :label="t('products.restore')" size="small" outlined @click="restore(data)" />
             </template>
             <template v-else>
-              <Button icon="pi pi-pencil" text rounded :aria-label="t('common.edit')" @click="openEdit(data)" />
-              <Button icon="pi pi-trash" text rounded severity="danger" :aria-label="t('products.archive')" @click="removeOne(data)" />
+              <Button
+                icon="pi pi-pencil"
+                text
+                rounded
+                :aria-label="t('common.edit')"
+                @click="openEdit(data)"
+              />
+              <Button
+                icon="pi pi-trash"
+                text
+                rounded
+                severity="danger"
+                :aria-label="t('products.archive')"
+                @click="removeOne(data)"
+              />
             </template>
           </template>
         </Column>
@@ -378,21 +462,45 @@ async function save() {
     <!-- GRID view -->
     <div v-else class="grid">
       <article v-for="p in products" :key="p.id" class="card">
-        <div class="card__img"><img v-if="p.image_url" :src="p.image_url" alt="" /><i v-else class="pi pi-image" /></div>
+        <div class="card__img">
+          <img v-if="p.image_url" :src="p.image_url" alt="" /><i v-else class="pi pi-image" />
+        </div>
         <div class="card__body">
           <div class="pname">{{ name(p) }}</div>
           <div class="pid">ID: {{ p.slug }}</div>
           <div class="card__row">
             <span class="price">{{ formatPrice(p.price_cents ?? 0) }}</span>
-            <ToggleSwitch v-if="!archived" :model-value="!!p.published" @update:model-value="(v: boolean) => toggleActive(p, v)" />
+            <ToggleSwitch
+              v-if="!archived"
+              :model-value="!!p.published"
+              @update:model-value="(v: boolean) => toggleActive(p, v)"
+            />
           </div>
           <div class="stock">
-            <div class="stock__bar"><span :class="`s-${stockTone(p.stock ?? 0)}`" :style="{ width: `${stockPct(p.stock ?? 0)}%` }" /></div>
+            <div class="stock__bar">
+              <span
+                :class="`s-${stockTone(p.stock ?? 0)}`"
+                :style="{ width: `${stockPct(p.stock ?? 0)}%` }"
+              />
+            </div>
             <span class="stock__n">{{ p.stock ?? 0 }}</span>
           </div>
           <div class="card__act">
-            <Button icon="pi pi-pencil" text rounded :aria-label="t('common.edit')" @click="openEdit(p)" />
-            <Button icon="pi pi-trash" text rounded severity="danger" :aria-label="t('products.archive')" @click="removeOne(p)" />
+            <Button
+              icon="pi pi-pencil"
+              text
+              rounded
+              :aria-label="t('common.edit')"
+              @click="openEdit(p)"
+            />
+            <Button
+              icon="pi pi-trash"
+              text
+              rounded
+              severity="danger"
+              :aria-label="t('products.archive')"
+              @click="removeOne(p)"
+            />
           </div>
         </div>
       </article>
@@ -406,7 +514,12 @@ async function save() {
     </nav>
 
     <!-- create / edit drawer -->
-    <Drawer v-model:visible="drawerOpen" position="right" class="pdrawer" :header="editingId == null ? t('products.new_title') : t('products.edit_title')">
+    <Drawer
+      v-model:visible="drawerOpen"
+      position="right"
+      class="pdrawer"
+      :header="editingId == null ? t('products.new_title') : t('products.edit_title')"
+    >
       <div class="form">
         <label class="fld">
           <span>{{ t('products.name') }}</span>
@@ -441,7 +554,12 @@ async function save() {
       </div>
       <template #footer>
         <div class="drawer__foot">
-          <Button :label="t('common.cancel')" severity="secondary" text @click="drawerOpen = false" />
+          <Button
+            :label="t('common.cancel')"
+            severity="secondary"
+            text
+            @click="drawerOpen = false"
+          />
           <Button :label="t('common.save')" icon="pi pi-check" :loading="saving" @click="save" />
         </div>
       </template>

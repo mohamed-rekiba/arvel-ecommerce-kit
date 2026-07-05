@@ -5,14 +5,14 @@
  * The arvel-ecommerce-kit API.
  * OpenAPI spec version: 0.1.0
  */
-import type { ApiMediaConversion400Extra } from './apiMediaConversion400Extra'
+import type { ApiMediaConversion400Extra } from './apiMediaConversion400Extra';
 
 /**
  * Validation Exception
  */
 export type ApiMediaConversion400 = {
-  status_code: number
-  detail: string
+  status_code: number;
+  detail: string;
   /** @nullable */
-  extra?: ApiMediaConversion400Extra
-}
+  extra?: ApiMediaConversion400Extra;
+};

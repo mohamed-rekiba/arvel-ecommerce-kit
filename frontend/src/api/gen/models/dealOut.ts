@@ -5,14 +5,14 @@
  * The arvel-ecommerce-kit API.
  * OpenAPI spec version: 0.1.0
  */
-import type { ProductOut } from './productOut'
+import type { ProductOut } from './productOut';
 
 export interface DealOut {
-  id: number
-  percent_off: number
-  deal_price_cents: number
-  ends_at: string
-  available: number
-  sold: number
-  product: ProductOut
+  id: number;
+  percent_off: number;
+  deal_price_cents: number;
+  ends_at: string;
+  available: number;
+  sold: number;
+  product: ProductOut;
 }

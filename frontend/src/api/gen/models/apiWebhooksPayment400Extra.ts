@@ -9,4 +9,4 @@
 /**
  * @nullable
  */
-export type ApiWebhooksPayment400Extra = { [key: string]: unknown } | unknown[] | null
+export type ApiWebhooksPayment400Extra = {[key: string]: unknown} | unknown[] | null;

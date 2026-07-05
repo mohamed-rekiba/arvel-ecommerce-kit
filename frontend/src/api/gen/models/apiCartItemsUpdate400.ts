@@ -5,14 +5,14 @@
  * The arvel-ecommerce-kit API.
  * OpenAPI spec version: 0.1.0
  */
-import type { ApiCartItemsUpdate400Extra } from './apiCartItemsUpdate400Extra'
+import type { ApiCartItemsUpdate400Extra } from './apiCartItemsUpdate400Extra';
 
 /**
  * Validation Exception
  */
 export type ApiCartItemsUpdate400 = {
-  status_code: number
-  detail: string
+  status_code: number;
+  detail: string;
   /** @nullable */
-  extra?: ApiCartItemsUpdate400Extra
-}
+  extra?: ApiCartItemsUpdate400Extra;
+};

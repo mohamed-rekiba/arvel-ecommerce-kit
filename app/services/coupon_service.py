@@ -63,7 +63,9 @@ def discount_cents(coupon: Coupon, subtotal_cents: int) -> int:
     if kind is CouponType.PERCENT:
         off = subtotal.times(Decimal(coupon.value) / Decimal(100))
         return min(off, subtotal).amount  # a percentage can't exceed the subtotal
-    return min(Money(coupon.value, Currency.USD.value), subtotal).amount  # fixed, capped
+    return min(
+        Money(coupon.value, Currency.USD.value), subtotal
+    ).amount  # fixed, capped
 
 
 def normalize_code(code: str) -> str:

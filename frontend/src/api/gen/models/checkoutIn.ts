@@ -5,12 +5,12 @@
  * The arvel-ecommerce-kit API.
  * OpenAPI spec version: 0.1.0
  */
-import type { AddressIn } from './addressIn'
-import type { PaymentMethod } from './paymentMethod'
+import type { AddressIn } from './addressIn';
+import type { PaymentMethod } from './paymentMethod';
 
 export interface CheckoutIn {
-  email?: string | null
-  address?: AddressIn | null
-  address_id?: number | null
-  payment_method?: PaymentMethod
+  email?: string | null;
+  address?: AddressIn | null;
+  address_id?: number | null;
+  payment_method?: PaymentMethod;
 }

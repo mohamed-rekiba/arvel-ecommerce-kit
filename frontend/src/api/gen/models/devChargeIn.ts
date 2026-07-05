@@ -7,7 +7,7 @@
  */
 
 export interface DevChargeIn {
-  amount: number
-  currency: string
-  order_id: number
+  amount: number;
+  currency: string;
+  order_id: number;
 }

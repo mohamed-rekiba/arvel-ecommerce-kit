@@ -103,7 +103,9 @@ async def products_index(
     return _page(result, extras=extras)
 
 
-def _page(result: Any, *, is_visible: bool | None = None, extras: dict[int, Any]) -> AdminProductPage:
+def _page(
+    result: Any, *, is_visible: bool | None = None, extras: dict[int, Any]
+) -> AdminProductPage:
     return AdminProductPage(
         data=[
             _admin_product_out(

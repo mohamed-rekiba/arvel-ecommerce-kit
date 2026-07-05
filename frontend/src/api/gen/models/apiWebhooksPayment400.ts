@@ -5,14 +5,14 @@
  * The arvel-ecommerce-kit API.
  * OpenAPI spec version: 0.1.0
  */
-import type { ApiWebhooksPayment400Extra } from './apiWebhooksPayment400Extra'
+import type { ApiWebhooksPayment400Extra } from './apiWebhooksPayment400Extra';
 
 /**
  * Validation Exception
  */
 export type ApiWebhooksPayment400 = {
-  status_code: number
-  detail: string
+  status_code: number;
+  detail: string;
   /** @nullable */
-  extra?: ApiWebhooksPayment400Extra
-}
+  extra?: ApiWebhooksPayment400Extra;
+};

@@ -5,10 +5,10 @@
  * The arvel-ecommerce-kit API.
  * OpenAPI spec version: 0.1.0
  */
-import type { WebhookInData } from './webhookInData'
+import type { WebhookInData } from './webhookInData';
 
 export interface WebhookIn {
-  id: string
-  type: string
-  data?: WebhookInData
+  id: string;
+  type: string;
+  data?: WebhookInData;
 }

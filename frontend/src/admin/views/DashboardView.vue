@@ -102,7 +102,7 @@ const ordWave = computed(() => {
   const max = Math.max(1, ...vals)
   const n = vals.length
   const pts = vals.map(
-    (v, i) => [(n <= 1 ? 0 : (i / (n - 1)) * 100), 30 - (v / max) * 24 - 3] as [number, number]
+    (v, i) => [n <= 1 ? 0 : (i / (n - 1)) * 100, 30 - (v / max) * 24 - 3] as [number, number]
   )
   const line = smooth(pts)
   return { line, area: line ? `${line} L100,34 L0,34 Z` : '' }
@@ -182,9 +182,19 @@ const kpis = computed(() => [
 
 // ── stat chips under the hero ──
 const chips = computed(() => [
-  { icon: 'pi-chart-line', tone: 'a', label: t('dash.chip_avg'), value: formatPrice(avgOrder.value) },
+  {
+    icon: 'pi-chart-line',
+    tone: 'a',
+    label: t('dash.chip_avg'),
+    value: formatPrice(avgOrder.value)
+  },
   { icon: 'pi-clock', tone: 'b', label: t('dash.chip_awaiting'), value: String(awaiting.value) },
-  { icon: 'pi-check-circle', tone: 'c', label: t('dash.chip_delivered'), value: String(delivered.value) },
+  {
+    icon: 'pi-check-circle',
+    tone: 'c',
+    label: t('dash.chip_delivered'),
+    value: String(delivered.value)
+  },
   { icon: 'pi-eye', tone: 'd', label: t('dash.live'), value: `${visible.value}` }
 ])
 
@@ -286,7 +296,12 @@ onMounted(async () => {
         </div>
 
         <div class="chart">
-          <svg class="chart__svg" viewBox="0 0 620 190" preserveAspectRatio="none" aria-hidden="true">
+          <svg
+            class="chart__svg"
+            viewBox="0 0 620 190"
+            preserveAspectRatio="none"
+            aria-hidden="true"
+          >
             <defs>
               <linearGradient id="gRev" x1="0" y1="0" x2="0" y2="1">
                 <stop offset="0" stop-color="var(--accent)" stop-opacity="0.30" />
@@ -322,11 +337,17 @@ onMounted(async () => {
           <template v-if="chart.hasData">
             <span
               class="dot dot--rev"
-              :style="{ left: `${(chart.rev.mark[0] / CW) * 100}%`, top: `${(chart.rev.mark[1] / CH) * 100}%` }"
+              :style="{
+                left: `${(chart.rev.mark[0] / CW) * 100}%`,
+                top: `${(chart.rev.mark[1] / CH) * 100}%`
+              }"
             />
             <span
               class="dot dot--ord"
-              :style="{ left: `${(chart.ord.mark[0] / CW) * 100}%`, top: `${(chart.ord.mark[1] / CH) * 100}%` }"
+              :style="{
+                left: `${(chart.ord.mark[0] / CW) * 100}%`,
+                top: `${(chart.ord.mark[1] / CH) * 100}%`
+              }"
             />
           </template>
           <p v-if="!loading && !chart.hasData" class="chart__empty">
@@ -396,11 +417,24 @@ onMounted(async () => {
         <div v-if="k.kind === 'bars'" class="kpi__spark">
           <span v-for="(h, i) in revSpark" :key="i" class="kpi__bar" :style="{ height: `${h}%` }" />
         </div>
-        <svg v-else-if="k.kind === 'wave'" class="kpi__wave" viewBox="0 0 100 34" preserveAspectRatio="none">
+        <svg
+          v-else-if="k.kind === 'wave'"
+          class="kpi__wave"
+          viewBox="0 0 100 34"
+          preserveAspectRatio="none"
+        >
           <path :d="ordWave.area" fill="rgba(255,255,255,0.25)" />
-          <path :d="ordWave.line" fill="none" stroke="#fff" stroke-width="2" vector-effect="non-scaling-stroke" />
+          <path
+            :d="ordWave.line"
+            fill="none"
+            stroke="#fff"
+            stroke-width="2"
+            vector-effect="non-scaling-stroke"
+          />
         </svg>
-        <div v-else class="kpi__meter"><span :style="{ width: `${Math.round((k.bar ?? 0) * 100)}%` }" /></div>
+        <div v-else class="kpi__meter">
+          <span :style="{ width: `${Math.round((k.bar ?? 0) * 100)}%` }" />
+        </div>
       </article>
     </div>
 

@@ -7,5 +7,5 @@
  */
 
 export interface NewsletterIn {
-  email: string
+  email: string;
 }

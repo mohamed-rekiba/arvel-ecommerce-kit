@@ -13,7 +13,10 @@ onMounted(restore)
 
 // Mobile drawer: closed by default; any navigation closes it (covers every nav link at once).
 const drawer = ref(false)
-watch(() => route.fullPath, () => (drawer.value = false))
+watch(
+  () => route.fullPath,
+  () => (drawer.value = false)
+)
 
 const initial = computed(() =>
   (state.user?.name ?? state.user?.email ?? '?').charAt(0).toUpperCase()

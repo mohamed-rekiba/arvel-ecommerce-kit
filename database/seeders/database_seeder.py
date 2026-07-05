@@ -201,7 +201,13 @@ class DatabaseSeeder(Seeder):
             (accessories, "verge", 5900, "charger,dock", "Verge Charging Dock"),
             (accessories, "verge", 8900, "bag", "Verge Leather Sleeve"),
             # --- a fuller catalog (en-only names; storefront falls back to en for fr/ar) ---
-            (headphones, "nordic-audio", 19900, "headphones", "Halo Wireless Headphones"),
+            (
+                headphones,
+                "nordic-audio",
+                19900,
+                "headphones",
+                "Halo Wireless Headphones",
+            ),
             (headphones, "verge", 25900, "headphones", "Aria Noise-Cancel Headphones"),
             (earbuds, "nordic-audio", 11900, "earbuds", "Mist Earbuds"),
             (speakers, "cobalt", 17900, "speaker", "Echo Mini Speaker"),
@@ -287,9 +293,7 @@ class DatabaseSeeder(Seeder):
                 await ProductVariantFactory().create(product_id=product.id)
             for url, fname in _gallery(keyword, product.slug):
                 for _attempt in range(3):
-                    if await images.download_and_attach(
-                        product, url, file_name=fname
-                    ):
+                    if await images.download_and_attach(product, url, file_name=fname):
                         break
                     await asyncio.sleep(0.4)
 
@@ -317,7 +321,9 @@ class DatabaseSeeder(Seeder):
 
         # --- orders (varied statuses, backdated across ~75 days → real revenue trend + admin data) ---
         rng = random.Random(1789)
-        prod_by_id = {p.id: (name, p.price_cents) for name, p in products_by_name.items()}
+        prod_by_id = {
+            p.id: (name, p.price_cents) for name, p in products_by_name.items()
+        }
         products_by_id = {p.id: p for p in products_by_name.values()}
         variant_pool = [
             v for v in await ProductVariant.all() if v.product_id in prod_by_id
@@ -332,7 +338,9 @@ class DatabaseSeeder(Seeder):
         delivered_products: set[int] = set()
         for _ in range(28):
             status = rng.choice(status_bag)
-            picks = rng.sample(variant_pool, k=min(rng.randint(1, 3), len(variant_pool)))
+            picks = rng.sample(
+                variant_pool, k=min(rng.randint(1, 3), len(variant_pool))
+            )
             lines: list[tuple[ProductVariant, str, int, int]] = []
             subtotal = 0
             for v in picks:
