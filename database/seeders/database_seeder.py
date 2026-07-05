@@ -399,8 +399,8 @@ class DatabaseSeeder(Seeder):
             ("Recommended", "Fast delivery and top-notch quality."),
         ]
         for pid in list(delivered_products)[:16]:
-            product = products_by_id.get(pid)
-            if product is None:
+            reviewed = products_by_id.get(pid)
+            if reviewed is None:
                 continue
             rating = rng.choice([5, 5, 4, 5, 4, 3])
             title, body = rng.choice(review_texts)
@@ -413,9 +413,9 @@ class DatabaseSeeder(Seeder):
                 body=body,
                 status=ReviewStatus.APPROVED,
             )
-            product.rating_sum = (getattr(product, "rating_sum", 0) or 0) + rating
-            product.rating_count = (getattr(product, "rating_count", 0) or 0) + 1
-            await product.save()
+            reviewed.rating_sum = (getattr(reviewed, "rating_sum", 0) or 0) + rating
+            reviewed.rating_count = (getattr(reviewed, "rating_count", 0) or 0) + 1
+            await reviewed.save()
 
         # --- the announced welcome coupon ---
         await Coupon.create(
