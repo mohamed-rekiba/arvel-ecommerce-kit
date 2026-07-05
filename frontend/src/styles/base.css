@@ -1,6 +1,12 @@
 /* global base — everything else is component-scoped and token-driven */
-*,*::before,*::after { box-sizing: border-box; }
-html { -webkit-text-size-adjust: 100%; }
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+html {
+  -webkit-text-size-adjust: 100%;
+}
 body {
   margin: 0;
   font-family: var(--font-text);
@@ -11,53 +17,115 @@ body {
   -webkit-font-smoothing: antialiased;
   text-rendering: optimizeLegibility;
 }
-h1,h2,h3,h4 { font-family: var(--font-display); letter-spacing: var(--tracking-tight); line-height: var(--leading-tight); margin: 0; }
+h1,
+h2,
+h3,
+h4 {
+  font-family: var(--font-display);
+  letter-spacing: var(--tracking-tight);
+  line-height: var(--leading-tight);
+  margin: 0;
+}
 /* Arabic is a connected script — tracking breaks the letter joins, so under RTL no element may
    carry letter-spacing (scoped view styles set it too, hence the !important). The Latin-only brand
    wordmark is the one deliberate exception. */
-[dir="rtl"] :not(.word) { letter-spacing: 0 !important; }
-a { color: inherit; }
-img,svg { display: block; max-width: 100%; }
-button { font: inherit; }
-:where(a,button,input,select,textarea,[tabindex]):focus-visible {
-  outline: 2px solid var(--focus); outline-offset: 2px; border-radius: 4px;
+[dir='rtl'] :not(.word) {
+  letter-spacing: 0 !important;
 }
-.tnum { font-variant-numeric: tabular-nums; }
-::selection { background: color-mix(in srgb, var(--accent) 30%, transparent); }
+a {
+  color: inherit;
+}
+img,
+svg {
+  display: block;
+  max-width: 100%;
+}
+button {
+  font: inherit;
+}
+:where(a, button, input, select, textarea, [tabindex]):focus-visible {
+  outline: 2px solid var(--focus);
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+.tnum {
+  font-variant-numeric: tabular-nums;
+}
+::selection {
+  background: color-mix(in srgb, var(--accent) 30%, transparent);
+}
 
 /* form controls — explicit color + surface so text stays legible in BOTH themes
    (native inputs/selects otherwise fall back to UA colors → invisible text on dark) */
-input, select, textarea { font: inherit; color: var(--text); }
-input:not([type="checkbox"]):not([type="radio"]):not([type="range"]),
-select, textarea {
+input,
+select,
+textarea {
+  font: inherit;
+  color: var(--text);
+}
+input:not([type='checkbox']):not([type='radio']):not([type='range']),
+select,
+textarea {
   background-color: var(--surface-2);
   color: var(--text);
   border: 1px solid var(--border-2);
   border-radius: var(--radius-md);
   accent-color: var(--accent);
 }
-input::placeholder, textarea::placeholder { color: var(--text-subtle); }
-option { background: var(--surface); color: var(--text); }
-select { color-scheme: light dark; }
-input:disabled, select:disabled, textarea:disabled { opacity: .6; cursor: not-allowed; }
+input::placeholder,
+textarea::placeholder {
+  color: var(--text-subtle);
+}
+option {
+  background: var(--surface);
+  color: var(--text);
+}
+select {
+  color-scheme: light dark;
+}
+input:disabled,
+select:disabled,
+textarea:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
 @media (prefers-reduced-motion: reduce) {
-  *,*::before,*::after { animation-duration: .01ms !important; animation-iteration-count: 1 !important; transition-duration: .01ms !important; }
-  ::view-transition-group(*),::view-transition-old(*),::view-transition-new(*) { animation: none !important; }
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+  ::view-transition-group(*),
+  ::view-transition-old(*),
+  ::view-transition-new(*) {
+    animation: none !important;
+  }
 }
 
 /* Fallback route transition for browsers without the View Transitions API (Firefox / older Safari):
    a plain Vue <transition name="fade" mode="out-in"> cross-fade. Where the VT API IS supported the
    view uses name="vt" (no CSS here) so the API owns the morph and these rules never fire. */
-.fade-enter-active, .fade-leave-active { transition: opacity 220ms var(--ease-out); }
-.fade-enter-from, .fade-leave-to { opacity: 0; }
+.fade-enter-active,
+.fade-leave-active {
+  transition: opacity 220ms var(--ease-out);
+}
+.fade-enter-from,
+.fade-leave-to {
+  opacity: 0;
+}
 
 /* View Transitions (lib/transitions.ts): a soft cross-fade between routes + a container-transform
    morph for shared elements (product image grid → PDP). */
 @media (prefers-reduced-motion: no-preference) {
-  ::view-transition-old(root),::view-transition-new(root) {
-    animation-duration: 240ms; animation-timing-function: var(--ease-out);
+  ::view-transition-old(root),
+  ::view-transition-new(root) {
+    animation-duration: 240ms;
+    animation-timing-function: var(--ease-out);
   }
   ::view-transition-group(*) {
-    animation-duration: 380ms; animation-timing-function: var(--ease-out);
+    animation-duration: 380ms;
+    animation-timing-function: var(--ease-out);
   }
 }

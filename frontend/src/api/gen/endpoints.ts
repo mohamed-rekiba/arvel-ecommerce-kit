@@ -162,40 +162,43 @@ import type {
   VerifyEmailIn,
   WebhookIn,
   WebhookOut,
-  WishlistToggleOut
+  WishlistToggleOut,
+  _Public400
 } from './models';
 
 import { apiFetch } from '../http';
-export type homeResponse200 = {
-  data: unknown
-  status: 200
+export type broadcastingAuthResponse201 = {
+  data: Response
+  status: 201
 }
 
-export type homeResponseSuccess = (homeResponse200) & {
+export type broadcastingAuthResponseSuccess = (broadcastingAuthResponse201) & {
   headers: Headers;
 };
 ;
 
-export type homeResponse = (homeResponseSuccess)
+export type broadcastingAuthResponse = (broadcastingAuthResponseSuccess)
 
-export const getHomeUrl = () => {
-
-
+export const getBroadcastingAuthUrl = () => {
 
 
-  return `/`
+
+
+  return `/broadcasting/auth`
 }
 
 /**
- * The welcome page.
- * @summary Home
+ * Resolve ``request``'s authenticated user + the requested channel, run its registered
+ * authorization callback, and return the auth signature (private) or member data (presence).
+ * 403 when the callback denies or no pattern matches.
+ * @summary BroadcastingAuth
  */
-export const home = async ( options?: RequestInit): Promise<homeResponse> => {
+export const broadcastingAuth = async ( options?: RequestInit): Promise<broadcastingAuthResponse> => {
 
-  return apiFetch<homeResponse>(getHomeUrl(),
+  return apiFetch<broadcastingAuthResponse>(getBroadcastingAuthUrl(),
   {
     ...options,
-    method: 'GET'
+    method: 'POST'
 
 
   }
@@ -476,7 +479,7 @@ export const getApiPasswordForgotUrl = () => {
 }
 
 /**
- * Issue a signed password-reset token. Always 200 (non-enumerating); a real app emails it.
+ * Store a single-use reset token and email its link. Always 200 (non-enumerating).
  * @summary ApiPasswordForgot
  */
 export const apiPasswordForgot = async (forgotPasswordIn: ForgotPasswordIn, options?: RequestInit): Promise<apiPasswordForgotResponse> => {
@@ -520,7 +523,7 @@ export const getApiPasswordResetUrl = () => {
 }
 
 /**
- * Verify the signed reset token and set the new (hashed) password.
+ * Consume the single-use reset token and set the new (hashed) password.
  * @summary ApiPasswordReset
  */
 export const apiPasswordReset = async (resetPasswordIn: ResetPasswordIn, options?: RequestInit): Promise<apiPasswordResetResponse> => {
@@ -646,6 +649,8 @@ export const getApiEmailVerifyUrl = () => {
 
 /**
  * Mark the account verified from a signed token (purpose-bound: a reset token won't pass).
+ * The token is bound to the email it was issued for, so it stops verifying once the address
+ * changes — we load the user the link names, then check the token against their current email.
  * @summary ApiEmailVerify
  */
 export const apiEmailVerify = async (verifyEmailIn: VerifyEmailIn, options?: RequestInit): Promise<apiEmailVerifyResponse> => {
@@ -2182,10 +2187,9 @@ export const getApiAdminOidcTokenUrl = () => {
 }
 
 /**
- * Exchange a validated Keycloak token for an arvel bearer PAT (DR-0030). Validates + JIT-provisions
- * the admin (resolve_admin), then **persists** the Keycloak-mapped RBAC roles so the issued bearer
- * carries them into the bearer-guarded admin APIs. The browser admin SPA calls this after its
- * auth-code+PKCE flow, then uses the returned token like any password login.
+ * Exchange a validated Keycloak token for an arvel bearer PAT. JIT-provisions the admin and
+ * persists the Keycloak-mapped RBAC roles so the issued bearer carries them into the
+ * bearer-guarded admin APIs.
  * @summary ApiAdminOidcToken
  */
 export const apiAdminOidcToken = async ( options?: RequestInit): Promise<apiAdminOidcTokenResponse> => {
@@ -4434,5 +4438,84 @@ export const apiDevGatewayCharges = async (devChargeIn: DevChargeIn, options?: R
     method: 'POST',
     headers: { 'Content-Type': 'application/json', ...options?.headers },
     body: JSON.stringify(devChargeIn)
+  }
+);}
+
+
+
+export type publicRootResponse200 = {
+  data: unknown
+  status: 200
+}
+
+export type publicRootResponseSuccess = (publicRootResponse200) & {
+  headers: Headers;
+};
+;
+
+export type publicRootResponse = (publicRootResponseSuccess)
+
+export const getPublicRootUrl = () => {
+
+
+
+
+  return `/`
+}
+
+/**
+ * @summary PublicRoot
+ */
+export const publicRoot = async ( options?: RequestInit): Promise<publicRootResponse> => {
+
+  return apiFetch<publicRootResponse>(getPublicRootUrl(),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+export type _publicResponse200 = {
+  data: unknown
+  status: 200
+}
+
+export type _publicResponse400 = {
+  data: _Public400
+  status: 400
+}
+
+export type _publicResponseSuccess = (_publicResponse200) & {
+  headers: Headers;
+};
+export type _publicResponseError = (_publicResponse400) & {
+  headers: Headers;
+};
+
+export type _publicResponse = (_publicResponseSuccess | _publicResponseError)
+
+export const getPublicUrl = (path: string,) => {
+
+
+
+
+  return `/${path}`
+}
+
+/**
+ * @summary Public
+ */
+export const _public = async (path: string, options?: RequestInit): Promise<_publicResponse> => {
+
+  return apiFetch<_publicResponse>(getPublicUrl(path),
+  {
+    ...options,
+    method: 'GET'
+
+
   }
 );}

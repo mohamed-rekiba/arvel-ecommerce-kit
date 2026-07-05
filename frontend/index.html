@@ -9,14 +9,14 @@
     <link rel="apple-touch-icon" href="/logo.png" />
     <!-- no-flash theme: set data-theme before first paint -->
     <script>
-      (function () {
+      ;(function () {
         try {
-          var t = localStorage.getItem("arvel_theme");
-          if (t !== "light" && t !== "dark")
-            t = matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
-          document.documentElement.setAttribute("data-theme", t);
+          var t = localStorage.getItem('arvel_theme')
+          if (t !== 'light' && t !== 'dark')
+            t = matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light'
+          document.documentElement.setAttribute('data-theme', t)
         } catch (e) {}
-      })();
+      })()
     </script>
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />

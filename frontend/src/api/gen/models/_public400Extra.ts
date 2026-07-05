@@ -6,8 +6,7 @@
  * OpenAPI spec version: 0.1.0
  */
 
-export interface ResetPasswordIn {
-  email: string;
-  token: string;
-  password: string;
-}
+/**
+ * @nullable
+ */
+export type _Public400Extra = {[key: string]: unknown} | unknown[] | null;

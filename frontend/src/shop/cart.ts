@@ -1,43 +1,54 @@
 // Reactive singleton — the header badge and cart/checkout views all read the same state.
-import { computed, reactive } from "vue";
-import { type Cart, type CheckoutPayload, api } from "./api";
+import { computed, reactive } from 'vue'
+import { type Cart, type CheckoutPayload, api } from './api'
 
-const state = reactive<{ cart: Cart | null; loading: boolean }>({ cart: null, loading: false });
+const state = reactive<{ cart: Cart | null; loading: boolean }>({
+  cart: null,
+  loading: false
+})
 
-const count = computed(() =>
-  (state.cart?.items ?? []).reduce((n, line) => n + line.quantity, 0),
-);
+const count = computed(() => (state.cart?.items ?? []).reduce((n, line) => n + line.quantity, 0))
 
 export function useCart() {
   async function refresh() {
-    state.loading = true;
+    state.loading = true
     try {
-      state.cart = await api.cart();
+      state.cart = await api.cart()
     } finally {
-      state.loading = false;
+      state.loading = false
     }
   }
   async function add(variantId: number, qty = 1) {
-    state.cart = await api.addToCart(variantId, qty);
+    state.cart = await api.addToCart(variantId, qty)
   }
   async function update(id: number, qty: number) {
-    state.cart = await api.updateCartItem(id, qty);
+    state.cart = await api.updateCartItem(id, qty)
   }
   async function remove(id: number) {
-    state.cart = await api.removeCartItem(id);
+    state.cart = await api.removeCartItem(id)
   }
   async function checkout(payload: CheckoutPayload) {
-    const order = await api.checkout(payload);
-    state.cart = null;
-    return order;
+    const order = await api.checkout(payload)
+    state.cart = null
+    return order
   }
   async function applyCoupon(code: string) {
-    state.cart = await api.applyCoupon(code);
+    state.cart = await api.applyCoupon(code)
   }
 
   async function removeCoupon() {
-    state.cart = await api.removeCoupon();
+    state.cart = await api.removeCoupon()
   }
 
-  return { state, count, refresh, add, update, remove, checkout, applyCoupon, removeCoupon };
+  return {
+    state,
+    count,
+    refresh,
+    add,
+    update,
+    remove,
+    checkout,
+    applyCoupon,
+    removeCoupon
+  }
 }

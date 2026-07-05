@@ -1,47 +1,47 @@
-import { createRouter, createWebHistory } from "vue-router";
-import { installViewTransitions } from "./lib/transitions";
-import ShopLayout from "./shop/ShopLayout.vue";
-import DealsView from "./shop/views/DealsView.vue";
-import HomeView from "./shop/views/HomeView.vue";
-import CatalogView from "./shop/views/CatalogView.vue";
-import ProductDetailView from "./shop/views/ProductDetailView.vue";
-import CartView from "./shop/views/CartView.vue";
-import CheckoutView from "./shop/views/CheckoutView.vue";
-import OrderDetailView from "./shop/views/OrderDetailView.vue";
-import ForgotPasswordView from "./shop/views/ForgotPasswordView.vue";
-import ResetPasswordView from "./shop/views/ResetPasswordView.vue";
-import VerifyEmailView from "./shop/views/VerifyEmailView.vue";
-import AccountLayout from "./shop/views/account/AccountLayout.vue";
-import ProfilePane from "./shop/views/account/ProfilePane.vue";
-import OrdersPane from "./shop/views/account/OrdersPane.vue";
-import AddressesPane from "./shop/views/account/AddressesPane.vue";
-import WishlistPane from "./shop/views/account/WishlistPane.vue";
-import SecurityPane from "./shop/views/account/SecurityPane.vue";
-import NotificationsPane from "./shop/views/account/NotificationsPane.vue";
+import { createRouter, createWebHistory } from 'vue-router'
+import { installViewTransitions } from './lib/transitions'
+import ShopLayout from './shop/ShopLayout.vue'
+import DealsView from './shop/views/DealsView.vue'
+import HomeView from './shop/views/HomeView.vue'
+import CatalogView from './shop/views/CatalogView.vue'
+import ProductDetailView from './shop/views/ProductDetailView.vue'
+import CartView from './shop/views/CartView.vue'
+import CheckoutView from './shop/views/CheckoutView.vue'
+import OrderDetailView from './shop/views/OrderDetailView.vue'
+import ForgotPasswordView from './shop/views/ForgotPasswordView.vue'
+import ResetPasswordView from './shop/views/ResetPasswordView.vue'
+import VerifyEmailView from './shop/views/VerifyEmailView.vue'
+import AccountLayout from './shop/views/account/AccountLayout.vue'
+import ProfilePane from './shop/views/account/ProfilePane.vue'
+import OrdersPane from './shop/views/account/OrdersPane.vue'
+import AddressesPane from './shop/views/account/AddressesPane.vue'
+import WishlistPane from './shop/views/account/WishlistPane.vue'
+import SecurityPane from './shop/views/account/SecurityPane.vue'
+import NotificationsPane from './shop/views/account/NotificationsPane.vue'
 
 // Lazy-loaded so a storefront visitor never downloads the admin chunk (Keycloak/OIDC client included).
 const admin = {
-  layout: () => import("./admin/AdminLayout.vue"),
-  login: () => import("./admin/views/LoginView.vue"),
-  callback: () => import("./admin/views/CallbackView.vue"),
-  dashboard: () => import("./admin/views/DashboardView.vue"),
-  products: () => import("./admin/views/ProductsView.vue"),
-  deals: () => import("./admin/views/DealsView.vue"),
-  banners: () => import("./admin/views/BannersView.vue"),
-  coupons: () => import("./admin/views/CouponsView.vue"),
-  productEdit: () => import("./admin/views/ProductEditView.vue"),
-  categories: () => import("./admin/views/CategoriesView.vue"),
-  vendors: () => import("./admin/views/VendorsView.vue"),
-  users: () => import("./admin/views/UsersView.vue"),
-  orderDetail: () => import("./admin/views/OrderDetailView.vue"),
-  reviews: () => import("./admin/views/ReviewsView.vue"),
-  orders: () => import("./admin/views/OrdersView.vue"),
-  roles: () => import("./admin/views/RolesView.vue"),
-  audit: () => import("./admin/views/AuditView.vue"),
-  media: () => import("./admin/views/MediaView.vue"),
-  settings: () => import("./admin/views/SettingsView.vue"),
-  newsletter: () => import("./admin/views/NewsletterView.vue"),
-};
+  layout: () => import('./admin/AdminLayout.vue'),
+  login: () => import('./admin/views/LoginView.vue'),
+  callback: () => import('./admin/views/CallbackView.vue'),
+  dashboard: () => import('./admin/views/DashboardView.vue'),
+  products: () => import('./admin/views/ProductsView.vue'),
+  deals: () => import('./admin/views/DealsView.vue'),
+  banners: () => import('./admin/views/BannersView.vue'),
+  coupons: () => import('./admin/views/CouponsView.vue'),
+  productEdit: () => import('./admin/views/ProductEditView.vue'),
+  categories: () => import('./admin/views/CategoriesView.vue'),
+  vendors: () => import('./admin/views/VendorsView.vue'),
+  users: () => import('./admin/views/UsersView.vue'),
+  orderDetail: () => import('./admin/views/OrderDetailView.vue'),
+  reviews: () => import('./admin/views/ReviewsView.vue'),
+  orders: () => import('./admin/views/OrdersView.vue'),
+  roles: () => import('./admin/views/RolesView.vue'),
+  audit: () => import('./admin/views/AuditView.vue'),
+  media: () => import('./admin/views/MediaView.vue'),
+  settings: () => import('./admin/views/SettingsView.vue'),
+  newsletter: () => import('./admin/views/NewsletterView.vue')
+}
 
 const router = createRouter({
   history: createWebHistory(),
@@ -49,74 +49,114 @@ const router = createRouter({
   scrollBehavior: (_to, _from, savedPosition) => savedPosition ?? { top: 0 },
   routes: [
     {
-      path: "/",
+      path: '/',
       component: ShopLayout,
       children: [
-        { path: "", name: "home", component: HomeView },
-        { path: "catalog", name: "catalog", component: CatalogView },
-        { path: "deals", name: "deals", component: DealsView },
-        { path: "products/:slug", name: "product", component: ProductDetailView },
-        { path: "cart", name: "cart", component: CartView },
-        { path: "checkout", name: "checkout", component: CheckoutView },
-        { path: "orders/:id", name: "order", component: OrderDetailView },
+        { path: '', name: 'home', component: HomeView },
+        { path: 'catalog', name: 'catalog', component: CatalogView },
+        { path: 'deals', name: 'deals', component: DealsView },
         {
-          path: "account",
+          path: 'products/:slug',
+          name: 'product',
+          component: ProductDetailView
+        },
+        { path: 'cart', name: 'cart', component: CartView },
+        { path: 'checkout', name: 'checkout', component: CheckoutView },
+        { path: 'orders/:id', name: 'order', component: OrderDetailView },
+        {
+          path: 'account',
           component: AccountLayout,
           children: [
-            { path: "", name: "account", redirect: { path: "/account/profile" } },
-            { path: "profile", name: "account-profile", component: ProfilePane },
-            { path: "orders", name: "account-orders", component: OrdersPane },
-            { path: "addresses", name: "account-addresses", component: AddressesPane },
-            { path: "wishlist", name: "account-wishlist", component: WishlistPane },
-            { path: "security", name: "account-security", component: SecurityPane },
-            { path: "notifications", name: "account-notifications", component: NotificationsPane },
-          ],
+            {
+              path: '',
+              name: 'account',
+              redirect: { path: '/account/profile' }
+            },
+            {
+              path: 'profile',
+              name: 'account-profile',
+              component: ProfilePane
+            },
+            { path: 'orders', name: 'account-orders', component: OrdersPane },
+            {
+              path: 'addresses',
+              name: 'account-addresses',
+              component: AddressesPane
+            },
+            {
+              path: 'wishlist',
+              name: 'account-wishlist',
+              component: WishlistPane
+            },
+            {
+              path: 'security',
+              name: 'account-security',
+              component: SecurityPane
+            },
+            {
+              path: 'notifications',
+              name: 'account-notifications',
+              component: NotificationsPane
+            }
+          ]
         },
-        { path: "forgot-password", name: "forgot-password", component: ForgotPasswordView },
-        { path: "reset-password", name: "reset-password", component: ResetPasswordView },
-        { path: "verify-email", name: "verify-email", component: VerifyEmailView },
-      ],
+        {
+          path: 'forgot-password',
+          name: 'forgot-password',
+          component: ForgotPasswordView
+        },
+        {
+          path: 'reset-password',
+          name: 'reset-password',
+          component: ResetPasswordView
+        },
+        {
+          path: 'verify-email',
+          name: 'verify-email',
+          component: VerifyEmailView
+        }
+      ]
     },
     // pre-auth admin routes live outside the AdminLayout shell
-    { path: "/admin/login", component: admin.login },
-    { path: "/admin/callback", component: admin.callback },
+    { path: '/admin/login', component: admin.login },
+    { path: '/admin/callback', component: admin.callback },
     {
-      path: "/admin",
+      path: '/admin',
       component: admin.layout,
       children: [
-        { path: "", redirect: "/admin/dashboard" },
-        { path: "dashboard", component: admin.dashboard },
-        { path: "products", component: admin.products },
-      { path: "deals", component: admin.deals },
-      { path: "banners", component: admin.banners },
-      { path: "coupons", component: admin.coupons },
-        { path: "products/:id", component: admin.productEdit },
-        { path: "categories", component: admin.categories },
-        { path: "vendors", component: admin.vendors },
-        { path: "users", component: admin.users },
-        { path: "reviews", component: admin.reviews },
-        { path: "orders", component: admin.orders },
-        { path: "orders/:id", component: admin.orderDetail },
-        { path: "media", component: admin.media },
-        { path: "settings", component: admin.settings },
-        { path: "newsletter", component: admin.newsletter },
-        { path: "roles", component: admin.roles },
-        { path: "audit", component: admin.audit },
-      ],
-    },
-  ],
-});
+        { path: '', redirect: '/admin/dashboard' },
+        { path: 'dashboard', component: admin.dashboard },
+        { path: 'products', component: admin.products },
+        { path: 'deals', component: admin.deals },
+        { path: 'banners', component: admin.banners },
+        { path: 'coupons', component: admin.coupons },
+        { path: 'products/:id', component: admin.productEdit },
+        { path: 'categories', component: admin.categories },
+        { path: 'vendors', component: admin.vendors },
+        { path: 'users', component: admin.users },
+        { path: 'reviews', component: admin.reviews },
+        { path: 'orders', component: admin.orders },
+        { path: 'orders/:id', component: admin.orderDetail },
+        { path: 'media', component: admin.media },
+        { path: 'settings', component: admin.settings },
+        { path: 'newsletter', component: admin.newsletter },
+        { path: 'roles', component: admin.roles },
+        { path: 'audit', component: admin.audit }
+      ]
+    }
+  ]
+})
 
 // Reads the token key directly (no admin import) so the admin bundle stays out of the main chunk.
 router.beforeEach((to) => {
-  const isAdminApp = to.path.startsWith("/admin");
-  const isPublic = to.path === "/admin/login" || to.path === "/admin/callback";
-  if (isAdminApp && !isPublic && !localStorage.getItem("arvel_admin_token")) {
-    return { path: "/admin/login" };
+  const isAdminApp = to.path.startsWith('/admin')
+  const isPublic = to.path === '/admin/login' || to.path === '/admin/callback'
+  if (isAdminApp && !isPublic && !localStorage.getItem('arvel_admin_token')) {
+    return { path: '/admin/login' }
   }
-  return true;
-});
+  return true
+})
 
-installViewTransitions(router);
+installViewTransitions(router)
 
-export default router;
+export default router

@@ -11,18 +11,20 @@
     }
   ],
   "paths": {
-    "/": {
-      "get": {
-        "summary": "Home",
-        "description": "The welcome page.",
-        "operationId": "home",
+    "/broadcasting/auth": {
+      "post": {
+        "summary": "BroadcastingAuth",
+        "description": "Resolve ``request``'s authenticated user + the requested channel, run its registered\nauthorization callback, and return the auth signature (private) or member data (presence).\n403 when the callback denies or no pattern matches.",
+        "operationId": "broadcasting.auth",
         "responses": {
-          "200": {
-            "description": "Request fulfilled, document follows",
+          "201": {
+            "description": "Document created, URL follows",
             "headers": {},
             "content": {
               "application/json": {
-                "schema": {}
+                "schema": {
+                  "$ref": "#/components/schemas/Response"
+                }
               }
             }
           }
@@ -316,7 +318,7 @@
     "/api/forgot-password": {
       "post": {
         "summary": "ApiPasswordForgot",
-        "description": "Issue a signed password-reset token. Always 200 (non-enumerating); a real app emails it.",
+        "description": "Store a single-use reset token and email its link. Always 200 (non-enumerating).",
         "operationId": "api.password.forgot",
         "requestBody": {
           "content": {
@@ -385,7 +387,7 @@
     "/api/reset-password": {
       "post": {
         "summary": "ApiPasswordReset",
-        "description": "Verify the signed reset token and set the new (hashed) password.",
+        "description": "Consume the single-use reset token and set the new (hashed) password.",
         "operationId": "api.password.reset",
         "requestBody": {
           "content": {
@@ -554,7 +556,7 @@
     "/api/email/verify": {
       "post": {
         "summary": "ApiEmailVerify",
-        "description": "Mark the account verified from a signed token (purpose-bound: a reset token won't pass).",
+        "description": "Mark the account verified from a signed token (purpose-bound: a reset token won't pass).\nThe token is bound to the email it was issued for, so it stops verifying once the address\nchanges \u2014 we load the user the link names, then check the token against their current email.",
         "operationId": "api.email.verify",
         "requestBody": {
           "content": {
@@ -3132,7 +3134,7 @@
     "/api/admin/oidc/token": {
       "post": {
         "summary": "ApiAdminOidcToken",
-        "description": "Exchange a validated Keycloak token for an arvel bearer PAT (DR-0030). Validates + JIT-provisions\nthe admin (resolve_admin), then **persists** the Keycloak-mapped RBAC roles so the issued bearer\ncarries them into the bearer-guarded admin APIs. The browser admin SPA calls this after its\nauth-code+PKCE flow, then uses the returned token like any password login.",
+        "description": "Exchange a validated Keycloak token for an arvel bearer PAT. JIT-provisions the admin and\npersists the Keycloak-mapped RBAC roles so the issued bearer carries them into the\nbearer-guarded admin APIs.",
         "operationId": "api.admin.oidc.token",
         "responses": {
           "200": {
@@ -6193,6 +6195,92 @@
         },
         "deprecated": false
       }
+    },
+    "/": {
+      "get": {
+        "summary": "PublicRoot",
+        "operationId": "public.root",
+        "responses": {
+          "200": {
+            "description": "Request fulfilled, document follows",
+            "headers": {},
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          }
+        },
+        "deprecated": false
+      }
+    },
+    "/{path}": {
+      "get": {
+        "summary": "Public",
+        "operationId": "public",
+        "parameters": [
+          {
+            "name": "path",
+            "in": "path",
+            "schema": {
+              "type": "string",
+              "format": "uri"
+            },
+            "required": true,
+            "deprecated": false
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Request fulfilled, document follows",
+            "headers": {},
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request syntax or unsupported method",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "status_code": {
+                      "type": "integer"
+                    },
+                    "detail": {
+                      "type": "string"
+                    },
+                    "extra": {
+                      "additionalProperties": {},
+                      "type": [
+                        "null",
+                        "object",
+                        "array"
+                      ]
+                    }
+                  },
+                  "type": "object",
+                  "required": [
+                    "detail",
+                    "status_code"
+                  ],
+                  "description": "Validation Exception",
+                  "examples": [
+                    {
+                      "status_code": 400,
+                      "detail": "Bad Request",
+                      "extra": {}
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        },
+        "deprecated": false
+      }
     }
   },
   "components": {
@@ -8689,6 +8777,64 @@
         "required": [],
         "title": "ProfileIn"
       },
+      "QueuedCookie": {
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "value": {
+            "type": "string"
+          },
+          "max_age": {
+            "oneOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "path": {
+            "type": "string",
+            "default": "/"
+          },
+          "domain": {
+            "oneOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "secure": {
+            "oneOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "http_only": {
+            "type": "boolean",
+            "default": true
+          },
+          "same_site": {
+            "type": "string",
+            "default": "lax"
+          }
+        },
+        "type": "object",
+        "required": [
+          "name",
+          "value"
+        ],
+        "title": "QueuedCookie"
+      },
       "RegisterIn": {
         "properties": {
           "name": {
@@ -8711,6 +8857,9 @@
       },
       "ResetPasswordIn": {
         "properties": {
+          "email": {
+            "type": "string"
+          },
           "token": {
             "type": "string"
           },
@@ -8720,6 +8869,7 @@
         },
         "type": "object",
         "required": [
+          "email",
           "password",
           "token"
         ],
@@ -8737,6 +8887,18 @@
               "type": "string"
             },
             "type": "object"
+          },
+          "cookies": {
+            "items": {
+              "$ref": "#/components/schemas/QueuedCookie"
+            },
+            "type": "array"
+          },
+          "forgotten_cookies": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
           }
         },
         "type": "object",
@@ -9443,12 +9605,16 @@
       },
       "VerifyEmailIn": {
         "properties": {
+          "id": {
+            "type": "integer"
+          },
           "token": {
             "type": "string"
           }
         },
         "type": "object",
         "required": [
+          "id",
           "token"
         ],
         "title": "VerifyEmailIn"
