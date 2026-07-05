@@ -5,16 +5,16 @@
  * The arvel-ecommerce-kit API.
  * OpenAPI spec version: 0.1.0
  */
-import type { CountryCode } from './countryCode';
+import type { CountryCode } from './countryCode'
 
 export interface SavedAddressIn {
-  name: string;
-  line1: string;
-  city: string;
-  postal_code: string;
-  country: CountryCode;
-  label?: string | null;
-  line2?: string | null;
-  phone?: string | null;
-  is_default?: boolean;
+  name: string
+  line1: string
+  city: string
+  postal_code: string
+  country: CountryCode
+  label?: string | null
+  line2?: string | null
+  phone?: string | null
+  is_default?: boolean
 }

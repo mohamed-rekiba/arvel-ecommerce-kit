@@ -5,12 +5,12 @@
  * The arvel-ecommerce-kit API.
  * OpenAPI spec version: 0.1.0
  */
-import type { PaymentStatus } from './paymentStatus';
+import type { PaymentStatus } from './paymentStatus'
 
 export interface AdminOrderPaymentOut {
-  id: number;
-  charge_id: string;
-  amount_cents: number;
-  status: PaymentStatus;
-  created_at: string | null;
+  id: number
+  charge_id: string
+  amount_cents: number
+  status: PaymentStatus
+  created_at: string | null
 }

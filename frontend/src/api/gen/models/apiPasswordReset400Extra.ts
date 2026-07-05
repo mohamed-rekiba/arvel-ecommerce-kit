@@ -9,4 +9,4 @@
 /**
  * @nullable
  */
-export type ApiPasswordReset400Extra = {[key: string]: unknown} | unknown[] | null;
+export type ApiPasswordReset400Extra = { [key: string]: unknown } | unknown[] | null

@@ -7,6 +7,6 @@
  */
 
 export interface VerifyEmailIn {
-  id: number;
-  token: string;
+  id: number
+  token: string
 }

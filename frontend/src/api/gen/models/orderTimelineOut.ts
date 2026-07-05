@@ -5,9 +5,9 @@
  * The arvel-ecommerce-kit API.
  * OpenAPI spec version: 0.1.0
  */
-import type { OrderStatus } from './orderStatus';
+import type { OrderStatus } from './orderStatus'
 
 export interface OrderTimelineOut {
-  status: OrderStatus;
-  at: string | null;
+  status: OrderStatus
+  at: string | null
 }

@@ -5,12 +5,12 @@
  * The arvel-ecommerce-kit API.
  * OpenAPI spec version: 0.1.0
  */
-import type { AdminUserOut } from './adminUserOut';
+import type { AdminUserOut } from './adminUserOut'
 
 export interface AdminUserPage {
-  data: AdminUserOut[];
-  current_page: number;
-  last_page: number;
-  per_page: number;
-  total: number;
+  data: AdminUserOut[]
+  current_page: number
+  last_page: number
+  per_page: number
+  total: number
 }

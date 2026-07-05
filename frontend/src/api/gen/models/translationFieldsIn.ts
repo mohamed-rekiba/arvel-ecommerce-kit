@@ -7,6 +7,6 @@
  */
 
 export interface TranslationFieldsIn {
-  name: string;
-  description?: string | null;
+  name: string
+  description?: string | null
 }

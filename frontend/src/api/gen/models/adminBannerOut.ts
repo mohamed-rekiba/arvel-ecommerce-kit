@@ -5,13 +5,13 @@
  * The arvel-ecommerce-kit API.
  * OpenAPI spec version: 0.1.0
  */
-import type { AdminBannerOutTranslations } from './adminBannerOutTranslations';
+import type { AdminBannerOutTranslations } from './adminBannerOutTranslations'
 
 export interface AdminBannerOut {
-  id: number;
-  translations: AdminBannerOutTranslations;
-  cta_to: string;
-  sort: number;
-  active: boolean;
-  image_url: string | null;
+  id: number
+  translations: AdminBannerOutTranslations
+  cta_to: string
+  sort: number
+  active: boolean
+  image_url: string | null
 }

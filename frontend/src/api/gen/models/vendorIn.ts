@@ -7,6 +7,6 @@
  */
 
 export interface VendorIn {
-  name: string;
-  published?: boolean;
+  name: string
+  published?: boolean
 }

@@ -7,10 +7,10 @@
  */
 
 export interface AddressIn {
-  name?: string | null;
-  line1?: string | null;
-  line2?: string | null;
-  city?: string | null;
-  postal_code?: string | null;
-  country?: string | null;
+  name?: string | null
+  line1?: string | null
+  line2?: string | null
+  city?: string | null
+  postal_code?: string | null
+  country?: string | null
 }

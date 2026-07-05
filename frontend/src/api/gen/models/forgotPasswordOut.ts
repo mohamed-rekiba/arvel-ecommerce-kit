@@ -7,5 +7,5 @@
  */
 
 export interface ForgotPasswordOut {
-  message: string;
+  message: string
 }

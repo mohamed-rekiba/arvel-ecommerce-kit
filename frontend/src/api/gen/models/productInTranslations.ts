@@ -5,6 +5,6 @@
  * The arvel-ecommerce-kit API.
  * OpenAPI spec version: 0.1.0
  */
-import type { TranslationFieldsIn } from './translationFieldsIn';
+import type { TranslationFieldsIn } from './translationFieldsIn'
 
-export type ProductInTranslations = {[key: string]: TranslationFieldsIn};
+export type ProductInTranslations = { [key: string]: TranslationFieldsIn }

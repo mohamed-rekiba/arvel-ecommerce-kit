@@ -5,13 +5,13 @@
  * The arvel-ecommerce-kit API.
  * OpenAPI spec version: 0.1.0
  */
-import type { CartLineOut } from './cartLineOut';
+import type { CartLineOut } from './cartLineOut'
 
 export interface CartOut {
-  id: number | null;
-  items: CartLineOut[];
-  total_cents: number;
-  coupon_code: string | null;
-  discount_cents: number;
-  cart_token?: string | null;
+  id: number | null
+  items: CartLineOut[]
+  total_cents: number
+  coupon_code: string | null
+  discount_cents: number
+  cart_token?: string | null
 }

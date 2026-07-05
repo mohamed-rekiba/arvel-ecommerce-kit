@@ -7,6 +7,6 @@
  */
 
 export interface ChangePasswordIn {
-  current_password: string;
-  password: string;
+  current_password: string
+  password: string
 }

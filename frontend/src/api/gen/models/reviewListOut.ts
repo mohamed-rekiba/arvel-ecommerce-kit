@@ -5,11 +5,11 @@
  * The arvel-ecommerce-kit API.
  * OpenAPI spec version: 0.1.0
  */
-import type { ReviewOut } from './reviewOut';
+import type { ReviewOut } from './reviewOut'
 
 export interface ReviewListOut {
-  reviews: ReviewOut[];
-  mine: ReviewOut | null;
-  rating_count: number;
-  rating_avg: number | null;
+  reviews: ReviewOut[]
+  mine: ReviewOut | null
+  rating_count: number
+  rating_avg: number | null
 }

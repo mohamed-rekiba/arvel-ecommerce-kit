@@ -7,15 +7,15 @@
  */
 
 export interface MediaItemOut {
-  id: number;
-  owner_type: string;
-  owner_id: number;
-  owner_label: string;
-  collection: string;
-  file_name: string;
-  mime_type: string;
-  size: number;
-  url: string;
-  thumb_url: string | null;
-  created_at: string | null;
+  id: number
+  owner_type: string
+  owner_id: number
+  owner_label: string
+  collection: string
+  file_name: string
+  mime_type: string
+  size: number
+  url: string
+  thumb_url: string | null
+  created_at: string | null
 }
