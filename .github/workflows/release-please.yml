@@ -1,0 +1,30 @@
+name: Release Please
+
+# Opens/updates a release PR on every push to `main` (Conventional Commits drive
+# the version bump in pyproject.toml + CHANGELOG). When the release PR merges,
+# release-please tags `v<version>` and creates a GitHub Release. This kit is a
+# deployable app (Docker), not a published package, so there's no PyPI step —
+# the default GITHUB_TOKEN is enough (no downstream workflow to trigger off the tag).
+
+on:
+  push:
+    branches: [main]
+
+permissions:
+  contents: write
+  pull-requests: write
+
+concurrency:
+  group: release-please-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  release-please:
+    name: Open / update release PR
+    runs-on: ubuntu-latest
+    steps:
+      - uses: googleapis/release-please-action@45996ed1f6d02564a971a2fa1b5860e934307cf7 # v5.0.0
+        with:
+          token: ${{ github.token }}
+          config-file: .github/release-please-config.json
+          manifest-file: .github/release-please-manifest.json
