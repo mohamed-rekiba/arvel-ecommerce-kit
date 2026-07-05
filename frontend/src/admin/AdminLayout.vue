@@ -1,6 +1,6 @@
 <script setup lang="ts">
-import { computed, onMounted } from 'vue'
-import { useRouter } from 'vue-router'
+import { computed, onMounted, ref, watch } from 'vue'
+import { useRoute, useRouter } from 'vue-router'
 import { useAuth } from './auth'
 import { theme, toggleTheme } from '../lib/theme'
 import { LOCALES, locale, setLocale } from '../lib/i18n'
@@ -8,7 +8,12 @@ import { t } from './locale'
 
 const { state, restore, logout } = useAuth()
 const router = useRouter()
+const route = useRoute()
 onMounted(restore)
+
+// Mobile drawer: closed by default; any navigation closes it (covers every nav link at once).
+const drawer = ref(false)
+watch(() => route.fullPath, () => (drawer.value = false))
 
 const initial = computed(() =>
   (state.user?.name ?? state.user?.email ?? '?').charAt(0).toUpperCase()
@@ -22,7 +27,8 @@ function signOut() {
 
 <template>
   <div class="console">
-    <aside class="side">
+    <div v-if="drawer" class="scrim" @click="drawer = false" />
+    <aside class="side" :class="{ 'side--open': drawer }">
       <div class="brand"><span class="mk">A</span>Arvel Console</div>
       <div class="store">Odama Electronics Store</div>
 
@@ -126,6 +132,16 @@ function signOut() {
 
     <div class="main">
       <div class="top">
+        <button
+          class="burger"
+          :aria-label="t('nav.menu')"
+          :aria-expanded="drawer"
+          @click="drawer = !drawer"
+        >
+          <svg viewBox="0 0 24 24" class="ic">
+            <path d="M4 7h16M4 12h16M4 17h16" />
+          </svg>
+        </button>
         <div class="cmdk">
           <svg viewBox="0 0 24 24" class="ic ic--sm">
             <circle cx="11" cy="11" r="7" />
@@ -375,17 +391,61 @@ function signOut() {
 .content {
   padding: 24px;
 }
+/* Desktop: no hamburger, no scrim — the sidebar is always docked. */
+.burger {
+  display: none;
+}
+.scrim {
+  display: none;
+}
 @media (max-width: 860px) {
-  .side {
-    width: 64px;
+  /* Mobile: the sidebar becomes an off-canvas drawer behind a hamburger. */
+  .burger {
+    display: inline-grid;
+    place-items: center;
+    width: 40px;
+    height: 40px;
+    border: 0;
+    background: transparent;
+    color: var(--text);
+    cursor: pointer;
+    margin-inline-start: -6px;
   }
-  .brand,
-  .store,
-  .lbl,
-  .item span:not(.n),
-  .item i,
+  .cmdk {
+    display: none;
+  }
+  .top {
+    padding: 0 14px;
+  }
   .me__meta {
     display: none;
+  }
+  .side {
+    position: fixed;
+    inset-block: 0;
+    inset-inline-start: 0;
+    width: min(284px, 82vw);
+    height: 100%;
+    transform: translateX(-100%);
+    transition: transform var(--motion-base);
+    z-index: calc(var(--z-header) + 2);
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+  }
+  [dir='rtl'] .side {
+    transform: translateX(100%);
+  }
+  .side--open {
+    transform: translateX(0);
+  }
+  .scrim {
+    display: block;
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.45);
+    z-index: calc(var(--z-header) + 1);
+  }
+  .content {
+    padding: 16px;
   }
 }
 .lang {
