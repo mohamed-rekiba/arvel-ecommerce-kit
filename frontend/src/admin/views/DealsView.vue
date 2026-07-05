@@ -3,67 +3,36 @@
 import Button from 'primevue/button'
 import Column from 'primevue/column'
 import DataTable from 'primevue/datatable'
-import Dialog from 'primevue/dialog'
-import InputNumber from 'primevue/inputnumber'
-import Select from 'primevue/select'
+import InputText from 'primevue/inputtext'
 import Tag from 'primevue/tag'
-import { computed, onMounted, reactive, ref } from 'vue'
-import { type AdminDeal, type AdminProduct, ApiError, api, name } from '../api'
+import { computed, onMounted, ref } from 'vue'
+import { useRouter } from 'vue-router'
+import { type AdminDeal, ApiError, api } from '../api'
 import { currentLocale } from '../../lib/i18n'
 import { t } from '../locale'
 
+const router = useRouter()
 const deals = ref<AdminDeal[]>([])
-const products = ref<AdminProduct[]>([])
 const loading = ref(true)
 const notice = ref<string | null>(null)
-const dialogOpen = ref(false)
-const saving = ref(false)
+const q = ref('')
 
-const form = reactive({
-  product_id: null as number | null,
-  percent_off: 10,
-  hours: 24
+const filtered = computed(() => {
+  const term = q.value.trim().toLowerCase()
+  if (!term) return deals.value
+  return deals.value.filter((d) => (d.product_name ?? '').toLowerCase().includes(term))
 })
-const productOptions = computed(() => products.value.map((p) => ({ id: p.id, label: name(p) })))
 
 async function load() {
   loading.value = true
   notice.value = null
   try {
     deals.value = await api.adminDeals()
-    if (!products.value.length) products.value = (await api.products()).data
   } catch (e) {
     notice.value =
       e instanceof ApiError && e.status === 403 ? t('common.no_catalog') : t('common.load_error')
   } finally {
     loading.value = false
-  }
-}
-
-async function create() {
-  if (form.product_id == null) return
-  saving.value = true
-  notice.value = null
-  try {
-    const now = new Date()
-    const ends = new Date(now.getTime() + form.hours * 3600 * 1000)
-    await api.createDeal({
-      product_id: form.product_id,
-      percent_off: form.percent_off,
-      starts_at: now.toISOString(),
-      ends_at: ends.toISOString(),
-      active: true
-    })
-    dialogOpen.value = false
-    Object.assign(form, { product_id: null, percent_off: 10, hours: 24 })
-    await load()
-  } catch (e) {
-    notice.value =
-      e instanceof ApiError
-        ? (Object.values(e.errors)[0]?.[0] ?? t('common.save_error'))
-        : t('common.save_error')
-  } finally {
-    saving.value = false
   }
 }
 
@@ -92,39 +61,51 @@ onMounted(load)
 </script>
 
 <template>
-  <section class="page">
+  <section class="apage">
     <header class="head">
       <div>
         <p class="eyebrow">{{ t('nav.catalog') }}</p>
         <h1>{{ t('nav.deals') }}</h1>
         <p class="sub">{{ t('deals.sub') }}</p>
       </div>
-      <Button :label="t('deals.new')" icon="pi pi-plus" @click="dialogOpen = true" />
     </header>
+
+    <div class="toolbar">
+      <span class="search">
+        <i class="pi pi-search" />
+        <InputText v-model="q" :placeholder="t('deals.search_ph')" />
+      </span>
+      <Button
+        class="add"
+        :label="t('deals.new')"
+        icon="pi pi-plus"
+        @click="router.push('/admin/deals/new')"
+      />
+    </div>
 
     <p v-if="notice" class="notice" role="alert">{{ notice }}</p>
 
     <div class="panel">
-      <DataTable :value="deals" :loading="loading" data-key="id" size="small" striped-rows>
-        <template #empty
-          ><p class="empty">{{ t('deals.none') }}</p></template
-        >
+      <DataTable :value="filtered" :loading="loading" data-key="id" size="small" striped-rows>
+        <template #empty>
+          <p class="empty">{{ t('deals.none') }}</p>
+        </template>
         <Column :header="t('products.product')">
-          <template #body="{ data }"
-            ><span class="pname">{{ data.product_name }}</span></template
-          >
+          <template #body="{ data }">
+            <span class="pname">{{ data.product_name }}</span>
+          </template>
         </Column>
         <Column :header="t('deals.percent')">
-          <template #body="{ data }"
-            ><Tag :value="`−${data.percent_off}%`" severity="warn"
-          /></template>
+          <template #body="{ data }">
+            <Tag :value="`−${data.percent_off}%`" severity="warn" />
+          </template>
         </Column>
         <Column :header="t('deals.window')">
           <template #body="{ data }">
             <span class="muted">{{ when(data.starts_at) }} → {{ when(data.ends_at) }}</span>
           </template>
         </Column>
-        <Column :header="t('common.status')" style="width: 8rem">
+        <Column :header="t('common.status')" header-style="width: 8rem">
           <template #body="{ data }">
             <Tag
               :value="
@@ -134,7 +115,7 @@ onMounted(load)
             />
           </template>
         </Column>
-        <Column header="" style="width: 12rem">
+        <Column header="" header-style="width: 12rem">
           <template #body="{ data }">
             <Button
               size="small"
@@ -142,6 +123,13 @@ onMounted(load)
               severity="secondary"
               :label="data.active ? t('deals.pause') : t('deals.resume')"
               @click="toggleActive(data)"
+            />
+            <Button
+              icon="pi pi-pencil"
+              text
+              rounded
+              :aria-label="t('common.edit')"
+              @click="router.push(`/admin/deals/${data.id}`)"
             />
             <Button
               size="small"
@@ -154,102 +142,12 @@ onMounted(load)
         </Column>
       </DataTable>
     </div>
-
-    <Dialog v-model:visible="dialogOpen" modal :header="t('deals.new')" :style="{ width: '26rem' }">
-      <form class="form" @submit.prevent="create">
-        <label class="field"
-          ><span>{{ t('products.product') }}</span>
-          <Select
-            v-model="form.product_id"
-            :options="productOptions"
-            optionLabel="label"
-            optionValue="id"
-            filter
-          />
-        </label>
-        <label class="field"
-          ><span>{{ t('deals.percent') }}</span>
-          <InputNumber v-model="form.percent_off" :min="1" :max="90" suffix="%" />
-        </label>
-        <label class="field"
-          ><span>{{ t('deals.duration') }}</span>
-          <InputNumber v-model="form.hours" :min="1" :max="720" :suffix="` ${t('deal.hrs')}`" />
-        </label>
-        <Button
-          type="submit"
-          :label="saving ? t('common.saving') : t('common.save')"
-          :disabled="saving || form.product_id == null"
-        />
-      </form>
-    </Dialog>
   </section>
 </template>
 
 <style scoped>
-.eyebrow {
-  font-size: 11px;
-  text-transform: uppercase;
-  letter-spacing: 0.16em;
-  color: var(--accent-text);
-  font-weight: 600;
-}
-.head {
-  display: flex;
-  align-items: flex-start;
-  justify-content: space-between;
-  gap: 16px;
-  margin-bottom: 20px;
-}
-.head h1 {
-  font-family: var(--font-display);
-  font-size: 26px;
-  font-weight: 700;
-  margin: 6px 0 2px;
-}
-.sub {
-  color: var(--text-muted);
-  font-size: 13px;
-  margin: 0;
-}
-.notice {
-  background: var(--danger-bg);
-  color: var(--danger-fg);
-  padding: 10px 14px;
-  border-radius: var(--radius-md);
-  font-size: 13px;
-  margin-bottom: 16px;
-}
-.panel {
-  background: var(--surface);
-  border: 1px solid var(--border);
-  border-radius: var(--radius-lg);
-  box-shadow: var(--shadow-1);
-  overflow: hidden;
-}
 .pname {
   font-weight: 600;
   font-size: 13.5px;
-}
-.muted {
-  color: var(--text-muted);
-  font-size: 12.5px;
-}
-.empty {
-  text-align: center;
-  color: var(--text-subtle);
-  padding: 24px 0;
-}
-.form .field {
-  display: block;
-  margin-bottom: var(--space-4);
-}
-.field span {
-  display: block;
-  font-size: var(--text-sm);
-  margin-bottom: var(--space-1);
-}
-.field :deep(input),
-.field :deep(.p-select) {
-  width: 100%;
 }
 </style>

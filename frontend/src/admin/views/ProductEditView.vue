@@ -12,6 +12,7 @@ import { computed, onMounted, reactive, ref } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { ApiError, type GalleryImage, type Translate, type Variant, api, formatPrice } from '../api'
 import { type MessageKey, t } from '../locale'
+import EditorPage from '../components/EditorPage.vue'
 
 const route = useRoute()
 const router = useRouter()
@@ -241,17 +242,17 @@ onMounted(load)
 </script>
 
 <template>
-  <section class="edit">
-    <header class="edit__head">
-      <div>
-        <RouterLink class="edit__back" to="/admin/products"
-          >{{ t('common.back') }} {{ t('nav.products') }}</RouterLink
-        >
-        <h1>
-          {{ isCreate ? t('products.new') : form.translations.en.name || slug }}
-        </h1>
-      </div>
-      <div class="edit__badges" v-if="!isCreate">
+  <EditorPage
+    :title="isCreate ? t('products.new') : form.translations.en.name || slug"
+    back-to="/admin/products"
+    :back-label="t('nav.products')"
+    :save-label="saving ? t('common.saving') : isCreate ? t('pedit.create') : t('pedit.save_changes')"
+    :saving="saving"
+    :disabled="saving || !form.translations.en.name.trim()"
+    @save="save"
+  >
+    <template #badges>
+      <template v-if="!isCreate">
         <Tag
           :value="t(`pstatus.${form.status}` as MessageKey)"
           :severity="form.status === 'active' ? 'success' : 'secondary'"
@@ -260,334 +261,269 @@ onMounted(load)
           :value="isVisible ? t('pedit.visible') : t('pedit.hidden')"
           :severity="isVisible ? 'success' : 'warn'"
         />
-      </div>
-    </header>
+      </template>
+    </template>
 
-    <p v-if="loading">{{ t('common.loading') }}</p>
+    <p v-if="loading" class="ehint">{{ t('common.loading') }}</p>
 
     <template v-else>
-      <form class="card" @submit.prevent="save">
+      <!-- details -->
+      <div class="ecard">
         <h2>{{ t('pedit.details') }}</h2>
+        <p v-if="error" class="notice" role="alert">{{ error }}</p>
+        <p v-if="notice" class="eok" role="status">{{ notice }}</p>
 
-        <div class="locales" role="tablist" :aria-label="t('pedit.content_lang')">
+        <div class="locs" role="tablist" :aria-label="t('pedit.content_lang')">
           <button
             v-for="code in LOCALES"
             :key="code"
             type="button"
             role="tab"
-            class="locales__tab"
+            class="locs__tab"
             :class="{ on: activeLocale === code }"
             :aria-selected="activeLocale === code"
             @click="activeLocale = code"
           >
             {{ code.toUpperCase() }}
-            <span v-if="code !== 'en' && !form.translations[code].name" class="locales__todo"
-              >·</span
-            >
+            <span v-if="code !== 'en' && !form.translations[code].name" class="locs__todo">·</span>
           </button>
         </div>
 
-        <label class="field">
-          <span>{{ t('pedit.name') }} ({{ activeLocale }})</span>
-          <InputText
-            v-model="form.translations[activeLocale].name"
-            :dir="activeLocale === 'ar' ? 'rtl' : 'ltr'"
-            :invalid="!!firstError('translations')"
-          />
-        </label>
-        <label class="field">
-          <span>{{ t('pedit.description') }} ({{ activeLocale }})</span>
-          <Textarea
-            v-model="form.translations[activeLocale].description"
-            :dir="activeLocale === 'ar' ? 'rtl' : 'ltr'"
-            rows="3"
-            autoResize
-          />
-        </label>
-        <small v-if="firstError('translations')" class="err" role="alert">{{
-          firstError('translations')
-        }}</small>
+        <div class="form">
+          <label class="fld">
+            <span>{{ t('pedit.name') }} ({{ activeLocale }})</span>
+            <InputText
+              v-model="form.translations[activeLocale].name"
+              :dir="activeLocale === 'ar' ? 'rtl' : 'ltr'"
+              :invalid="!!firstError('translations')"
+            />
+          </label>
+          <label class="fld">
+            <span>{{ t('pedit.description') }} ({{ activeLocale }})</span>
+            <Textarea
+              v-model="form.translations[activeLocale].description"
+              :dir="activeLocale === 'ar' ? 'rtl' : 'ltr'"
+              rows="3"
+              auto-resize
+            />
+          </label>
+          <small v-if="firstError('translations')" class="err" role="alert">{{
+            firstError('translations')
+          }}</small>
 
-        <div class="row">
-          <label class="field">
-            <span>{{ t('pedit.price') }}</span>
-            <InputNumber
-              v-model="form.price_cents"
-              :useGrouping="false"
-              :min="0"
-              :invalid="!!firstError('price_cents')"
-            />
-          </label>
-          <label class="field">
-            <span>{{ t('categories.category') }}</span>
-            <Select
-              v-model="form.category_id"
-              :options="categories"
-              optionLabel="label"
-              optionValue="id"
-            />
-          </label>
-          <label class="field" v-if="!isCreate">
-            <span>{{ t('common.status') }}</span>
-            <Select
-              v-model="form.status"
-              :options="STATUSES"
-              optionLabel="label"
-              optionValue="value"
-            />
-          </label>
-          <label class="field field--switch" v-if="!isCreate">
-            <span>{{ t('categories.published') }}</span>
-            <ToggleSwitch v-model="form.published" />
-          </label>
-          <label class="field field--switch" v-if="!isCreate">
-            <span>{{ t('pedit.featured') }}</span>
-            <ToggleSwitch v-model="form.featured" />
-          </label>
+          <div class="frow">
+            <label class="fld">
+              <span>{{ t('pedit.price') }}</span>
+              <InputNumber
+                v-model="form.price_cents"
+                :use-grouping="false"
+                :min="0"
+                :invalid="!!firstError('price_cents')"
+              />
+            </label>
+            <label class="fld">
+              <span>{{ t('categories.category') }}</span>
+              <Select
+                v-model="form.category_id"
+                :options="categories"
+                option-label="label"
+                option-value="id"
+              />
+            </label>
+          </div>
+
+          <div class="frow">
+            <label class="fld">
+              <span>{{ t('common.status') }}</span>
+              <Select
+                v-model="form.status"
+                :options="STATUSES"
+                option-label="label"
+                option-value="value"
+                :disabled="isCreate"
+              />
+            </label>
+            <div class="switches">
+              <label class="fld fld--row">
+                <span>{{ t('categories.published') }}</span>
+                <ToggleSwitch v-model="form.published" :disabled="isCreate" />
+              </label>
+              <label class="fld fld--row">
+                <span>{{ t('pedit.featured') }}</span>
+                <ToggleSwitch v-model="form.featured" :disabled="isCreate" />
+              </label>
+            </div>
+          </div>
+          <p v-if="isCreate" class="ehint">{{ t('pedit.after_save_hint') }}</p>
         </div>
+      </div>
 
-        <p v-if="error" class="err" role="alert">{{ error }}</p>
-        <p v-if="notice" class="ok" role="status">{{ notice }}</p>
-        <Button
-          type="submit"
-          :label="
-            saving ? t('common.saving') : isCreate ? t('pedit.create') : t('pedit.save_changes')
-          "
-          :disabled="saving"
-        />
-      </form>
-
-      <section v-if="!isCreate" class="card">
+      <!-- variants -->
+      <div class="ecard">
         <h2>{{ t('pedit.variants') }}</h2>
-        <DataTable :value="variants" dataKey="id" size="small">
-          <Column field="sku" :header="t('pedit.sku')" />
-          <Column field="name" :header="t('pedit.name')" />
-          <Column :header="t('pedit.price_adj')">
-            <template #body="{ data }">{{ formatPrice(data.price_adjustment_cents) }}</template>
-          </Column>
-          <Column :header="t('pedit.stock')">
-            <template #body="{ data }">
-              <div class="stock">
-                <InputNumber
-                  v-model="stockDrafts[data.id]"
-                  :useGrouping="false"
-                  :min="0"
-                  size="small"
-                />
+        <p v-if="isCreate" class="ehint">{{ t('pedit.variants_after_save') }}</p>
+        <template v-else>
+          <DataTable :value="variants" data-key="id" size="small">
+            <template #empty>
+              <p class="empty">{{ t('pedit.no_variants') }}</p>
+            </template>
+            <Column field="sku" :header="t('pedit.sku')" />
+            <Column field="name" :header="t('pedit.name')" />
+            <Column :header="t('pedit.price_adj')">
+              <template #body="{ data }">{{ formatPrice(data.price_adjustment_cents) }}</template>
+            </Column>
+            <Column :header="t('pedit.stock')">
+              <template #body="{ data }">
+                <div class="stockset">
+                  <InputNumber
+                    v-model="stockDrafts[data.id]"
+                    :use-grouping="false"
+                    :min="0"
+                    size="small"
+                  />
+                  <Button
+                    size="small"
+                    severity="secondary"
+                    outlined
+                    :label="t('pedit.set')"
+                    :disabled="stockDrafts[data.id] === data.stock"
+                    @click="setStock(data)"
+                  />
+                </div>
+              </template>
+            </Column>
+            <Column header="">
+              <template #body="{ data }">
                 <Button
                   size="small"
-                  severity="secondary"
-                  outlined
-                  :label="t('pedit.set')"
-                  :disabled="stockDrafts[data.id] === data.stock"
-                  @click="setStock(data)"
+                  severity="danger"
+                  text
+                  :label="t('common.delete')"
+                  @click="removeVariant(data)"
                 />
-              </div>
-            </template>
-          </Column>
-          <Column header="">
-            <template #body="{ data }">
+              </template>
+            </Column>
+          </DataTable>
+          <small v-if="firstError('sku', 'stock', 'variant')" class="err" role="alert">
+            {{ firstError('sku', 'stock', 'variant') }}
+          </small>
+          <form class="variant-add" @submit.prevent="addVariant">
+            <InputText v-model="newVariant.sku" :placeholder="t('pedit.sku')" />
+            <InputText v-model="newVariant.name" :placeholder="t('pedit.name')" />
+            <InputNumber
+              v-model="newVariant.price_adjustment_cents"
+              :use-grouping="false"
+              :placeholder="t('pedit.adj_ph')"
+            />
+            <InputNumber
+              v-model="newVariant.stock"
+              :use-grouping="false"
+              :min="0"
+              :placeholder="t('pedit.stock')"
+            />
+            <Button
+              type="submit"
+              size="small"
+              :label="t('pedit.add_variant')"
+              :disabled="!newVariant.sku || !newVariant.name"
+            />
+          </form>
+        </template>
+      </div>
+
+      <!-- gallery -->
+      <div class="ecard">
+        <h2>{{ t('pedit.gallery') }}</h2>
+        <p v-if="isCreate" class="ehint">{{ t('pedit.gallery_after_save') }}</p>
+        <template v-else>
+          <div class="gallery">
+            <figure v-for="image in gallery" :key="image.id" class="gallery__item">
+              <img :src="image.thumb_url" alt="" />
               <Button
                 size="small"
                 severity="danger"
                 text
-                :label="t('common.delete')"
-                @click="removeVariant(data)"
+                :label="t('pedit.remove')"
+                @click="removeImage(image)"
               />
-            </template>
-          </Column>
-        </DataTable>
-        <small v-if="firstError('sku', 'stock', 'variant')" class="err" role="alert">
-          {{ firstError('sku', 'stock', 'variant') }}
-        </small>
-        <form class="variant-add" @submit.prevent="addVariant">
-          <InputText v-model="newVariant.sku" :placeholder="t('pedit.sku')" />
-          <InputText v-model="newVariant.name" :placeholder="t('pedit.name')" />
-          <InputNumber
-            v-model="newVariant.price_adjustment_cents"
-            :useGrouping="false"
-            :placeholder="t('pedit.adj_ph')"
-          />
-          <InputNumber
-            v-model="newVariant.stock"
-            :useGrouping="false"
-            :min="0"
-            :placeholder="t('pedit.stock')"
-          />
-          <Button
-            type="submit"
-            size="small"
-            :label="t('pedit.add_variant')"
-            :disabled="!newVariant.sku || !newVariant.name"
-          />
-        </form>
-      </section>
-
-      <section v-if="!isCreate" class="card">
-        <h2>{{ t('pedit.gallery') }}</h2>
-        <div class="gallery">
-          <figure v-for="image in gallery" :key="image.id" class="gallery__item">
-            <img :src="image.thumb_url" alt="" />
-            <Button
-              size="small"
-              severity="danger"
-              text
-              :label="t('pedit.remove')"
-              @click="removeImage(image)"
-            />
-          </figure>
-          <label class="gallery__add">
-            <input type="file" accept="image/*" @change="onUpload" />
-            <span>+ {{ t('pedit.upload') }}</span>
-          </label>
-        </div>
-        <small v-if="firstError('image')" class="err" role="alert">{{ firstError('image') }}</small>
-      </section>
+            </figure>
+            <label class="gallery__add">
+              <input type="file" accept="image/*" @change="onUpload" />
+              <span>+ {{ t('pedit.upload') }}</span>
+            </label>
+          </div>
+          <small v-if="firstError('image')" class="err" role="alert">{{ firstError('image') }}</small>
+        </template>
+      </div>
     </template>
-  </section>
+  </EditorPage>
 </template>
 
 <style scoped>
-.edit__head {
+.switches {
   display: flex;
-  justify-content: space-between;
-  align-items: start;
-  margin-bottom: var(--space-6);
-  gap: var(--space-4);
-}
-.edit__back {
-  font-size: var(--text-sm);
-  color: var(--color-text-muted);
-  text-decoration: none;
-}
-.edit__head h1 {
-  margin: var(--space-2) 0 0;
-  font-size: var(--text-2xl);
-}
-.edit__badges {
-  display: flex;
-  gap: var(--space-2);
-}
-.card {
-  background: var(--color-surface);
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius-lg);
-  padding: var(--space-6);
-  margin-bottom: var(--space-6);
-}
-.card h2 {
-  font-size: var(--text-sm);
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
-  color: var(--color-text-muted);
-  margin: 0 0 var(--space-4);
-}
-.locales {
-  display: inline-flex;
-  gap: var(--space-1);
-  margin-bottom: var(--space-4);
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius-md);
-  padding: 2px;
-}
-.locales__tab {
-  border: 0;
-  background: none;
-  font: inherit;
-  padding: var(--space-1) var(--space-3);
-  border-radius: var(--radius-sm);
-  cursor: pointer;
-  color: var(--color-text-muted);
-}
-.locales__tab.on {
-  background: var(--color-text);
-  color: var(--color-bg);
-}
-.locales__todo {
-  color: var(--color-warning, #b45309);
-  font-weight: 700;
-}
-.field {
-  display: block;
-  margin-bottom: var(--space-4);
-}
-.field span {
-  display: block;
-  font-size: var(--text-sm);
-  margin-bottom: var(--space-1);
-}
-.field :deep(input),
-.field :deep(textarea) {
-  width: 100%;
-}
-.field--switch {
-  display: flex;
-  align-items: center;
-  gap: var(--space-3);
-}
-.field--switch span {
-  margin: 0;
-}
-.row {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
-  gap: var(--space-4);
-  align-items: end;
+  flex-direction: column;
+  gap: 8px;
+  justify-content: center;
 }
 .err {
-  color: var(--color-danger);
-  font-size: var(--text-sm);
+  color: var(--danger-fg);
+  font-size: 12.5px;
   display: block;
-  margin: var(--space-2) 0;
+  margin: 6px 0;
 }
-.ok {
-  color: var(--color-success, #2e7d32);
-  font-size: var(--text-sm);
-}
-.stock {
+.stockset {
   display: flex;
-  gap: var(--space-2);
+  gap: 8px;
   align-items: center;
 }
-.stock :deep(input) {
+.stockset :deep(input) {
   width: 90px;
 }
 .variant-add {
   display: grid;
-  grid-template-columns: 1fr 1fr 110px 110px auto;
-  gap: var(--space-2);
-  margin-top: var(--space-4);
+  grid-template-columns: 1fr 1fr 120px 120px auto;
+  gap: 8px;
+  margin-top: 14px;
+}
+.variant-add :deep(input) {
+  width: 100%;
 }
 .gallery {
   display: flex;
   flex-wrap: wrap;
-  gap: var(--space-4);
+  gap: 14px;
 }
 .gallery__item {
   margin: 0;
   display: flex;
   flex-direction: column;
-  gap: var(--space-1);
+  gap: 4px;
 }
 .gallery__item img {
   width: 96px;
   height: 96px;
   object-fit: cover;
   border-radius: var(--radius-md);
-  border: 1px solid var(--color-border);
+  border: 1px solid var(--border);
 }
 .gallery__add {
   display: grid;
   place-items: center;
   width: 96px;
   height: 96px;
-  border: 1px dashed var(--color-border);
+  border: 1px dashed var(--border-2);
   border-radius: var(--radius-md);
   cursor: pointer;
-  font-size: var(--text-xs);
-  color: var(--color-text-muted);
+  font-size: 12px;
+  color: var(--text-muted);
 }
 .gallery__add input {
   display: none;
+}
+@media (max-width: 720px) {
+  .variant-add {
+    grid-template-columns: 1fr 1fr;
+  }
 }
 </style>

@@ -1,0 +1,439 @@
+/* Shared admin-list design system — the rich toolbar / filter / panel / drawer look first
+ * shipped in ProductsView, lifted here so every admin list renders as one system.
+ * Every rule is gated behind `.apage` so it only touches views that opt in (`<section class="apage">`)
+ * — the storefront reuses classnames like .toolbar/.panel/.filters and must not be affected. */
+
+/* header */
+.apage .eyebrow {
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.16em;
+  color: var(--accent);
+  font-weight: 600;
+}
+.apage .head {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 16px;
+  margin-bottom: 18px;
+}
+.apage .head h1 {
+  font-family: var(--font-display);
+  font-size: 26px;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  margin: 6px 0 2px;
+}
+.apage .sub {
+  color: var(--text-muted);
+  font-size: 13px;
+  margin: 0;
+}
+
+/* toolbar */
+.apage .toolbar {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+  margin-bottom: 14px;
+}
+.apage .viewtog {
+  display: inline-flex;
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  padding: 3px;
+}
+.apage .viewtog button {
+  width: 34px;
+  height: 30px;
+  border: 0;
+  background: none;
+  border-radius: 999px;
+  color: var(--text-muted);
+  cursor: pointer;
+}
+.apage .viewtog button.on {
+  background: var(--surface);
+  color: var(--text);
+  box-shadow: var(--shadow-1);
+}
+.apage .search {
+  position: relative;
+  flex: 1;
+  min-width: 200px;
+}
+.apage .search > .pi {
+  position: absolute;
+  inset-inline-start: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--text-subtle);
+  font-size: 14px;
+}
+.apage .search input {
+  width: 100%;
+  padding-inline-start: 34px;
+  border-radius: 999px;
+}
+.apage .tsel {
+  min-width: 150px;
+}
+.apage .add {
+  margin-inline-start: auto;
+}
+
+/* filter row */
+.apage .filters {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 14px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: 16px;
+  margin-bottom: 16px;
+  box-shadow: var(--shadow-1);
+}
+.apage .filters label {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.apage .filters label > span {
+  font-size: 12px;
+  color: var(--text-subtle);
+  font-weight: 600;
+}
+
+/* notices + bulk bar */
+.apage .notice {
+  background: var(--danger-bg);
+  color: var(--danger-fg);
+  padding: 10px 14px;
+  border-radius: var(--radius-md);
+  font-size: 13px;
+  margin-bottom: 14px;
+}
+.apage .bulk {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  background: color-mix(in srgb, var(--accent) 10%, transparent);
+  border: 1px solid color-mix(in srgb, var(--accent) 30%, transparent);
+  border-radius: var(--radius-md);
+  padding: 8px 14px;
+  margin-bottom: 12px;
+  font-size: 13px;
+  font-weight: 600;
+}
+
+/* table panel */
+.apage .panel {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-1);
+  overflow: hidden;
+}
+
+/* rich name/thumbnail cell */
+.apage .prod {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.apage .thumb {
+  width: 44px;
+  height: 44px;
+  border-radius: var(--radius-md);
+  background: var(--surface-2);
+  display: grid;
+  place-items: center;
+  overflow: hidden;
+  flex: none;
+  color: var(--text-subtle);
+}
+.apage .thumb img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+.apage .thumb--wide {
+  width: 72px;
+}
+.apage .pname {
+  font-weight: 600;
+  font-size: 13.5px;
+}
+.apage .pid,
+.apage .pslug {
+  color: var(--text-subtle);
+  font-size: 11.5px;
+  font-family: var(--font-mono);
+}
+.apage .muted {
+  color: var(--text-muted);
+}
+.apage .price {
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+
+/* stock bar */
+.apage .stock {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-width: 130px;
+}
+.apage .stock__bar {
+  flex: 1;
+  height: 5px;
+  border-radius: 999px;
+  background: var(--surface-2);
+  overflow: hidden;
+}
+.apage .stock__bar span {
+  display: block;
+  height: 100%;
+  border-radius: 999px;
+}
+.apage .s-green {
+  background: #22c55e;
+}
+.apage .s-amber {
+  background: #f59e0b;
+}
+.apage .s-red {
+  background: #ef4444;
+}
+.apage .stock__n {
+  font-size: 12px;
+  font-variant-numeric: tabular-nums;
+  color: var(--text-muted);
+  white-space: nowrap;
+}
+.apage .stock__n small {
+  color: var(--text-subtle);
+}
+
+/* card grid */
+.apage .grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(210px, 1fr));
+  gap: 16px;
+  align-items: start;
+}
+.apage .card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-1);
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+.apage .card__img {
+  aspect-ratio: 4 / 3;
+  background: var(--surface-2);
+  display: grid;
+  place-items: center;
+  color: var(--text-subtle);
+  font-size: 22px;
+}
+.apage .card__img img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+.apage .card__body {
+  padding: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.apage .card__row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: 2px;
+}
+.apage .card__act {
+  display: flex;
+  justify-content: flex-end;
+  gap: 2px;
+}
+
+/* pager + empty */
+.apage .pager {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  margin-top: 18px;
+  font-size: 13px;
+  color: var(--text-muted);
+}
+.apage .empty {
+  text-align: center;
+  color: var(--text-subtle);
+  padding: 28px 0;
+}
+
+/* drawer / dialog form */
+.apage .form {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  padding-top: 4px;
+}
+.apage .fld {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.apage .fld > span {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text-subtle);
+}
+.apage .fld input,
+.apage .fld textarea,
+.apage .fld .p-select,
+.apage .fld .p-inputnumber {
+  width: 100%;
+}
+.apage .fld--row {
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-between;
+}
+.apage .drawer__foot {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+}
+
+/* ── full-page editor (shared by every admin entity editor) ───────────────── */
+.apage .ehead {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-bottom: 18px;
+}
+.apage .eback {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12.5px;
+  font-weight: 600;
+  color: var(--text-muted);
+  text-decoration: none;
+  width: fit-content;
+}
+.apage .eback:hover {
+  color: var(--accent-text);
+}
+.apage .ehead__row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+.apage .ehead__row h1 {
+  font-family: var(--font-display);
+  font-size: 24px;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  margin: 0;
+}
+
+/* an editor card = padded panel with a section label */
+.apage .ecard {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-1);
+  padding: 18px 20px;
+  margin-bottom: 16px;
+}
+.apage .ecard > h2 {
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--text-subtle);
+  font-weight: 700;
+  margin: 0 0 14px;
+}
+.apage .ehint {
+  color: var(--text-subtle);
+  font-size: 13px;
+  margin: 0;
+}
+.apage .eok {
+  color: var(--success-fg);
+  font-size: 13px;
+  margin: 0;
+}
+
+/* two-up field row */
+.apage .frow {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px;
+}
+
+/* sticky save bar */
+.apage .ebar {
+  position: sticky;
+  bottom: 0;
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+  padding: 14px 0 4px;
+  background: linear-gradient(to top, var(--bg) 70%, transparent);
+}
+
+/* locale tabs (product + banner + category editors) */
+.apage .locs {
+  display: inline-flex;
+  gap: 4px;
+  margin-bottom: 14px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  padding: 2px;
+}
+.apage .locs__tab {
+  border: 0;
+  background: none;
+  font: inherit;
+  padding: 5px 14px;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  color: var(--text-muted);
+  font-weight: 600;
+}
+.apage .locs__tab.on {
+  background: var(--text);
+  color: var(--bg);
+}
+.apage .locs__todo {
+  color: var(--warn);
+  font-weight: 700;
+}
+
+/* responsive */
+@media (max-width: 720px) {
+  .apage .filters {
+    grid-template-columns: 1fr 1fr;
+  }
+  .apage .add {
+    margin-inline-start: 0;
+  }
+  .apage .frow {
+    grid-template-columns: 1fr;
+  }
+}

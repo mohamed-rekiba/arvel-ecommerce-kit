@@ -44,50 +44,51 @@ onMounted(load)
 </script>
 
 <template>
-  <section class="page">
+  <section class="apage">
     <header class="head">
       <div>
         <p class="eyebrow">{{ t('reviews.eyebrow') }}</p>
         <h1>{{ t('nav.reviews') }}</h1>
         <p class="sub">{{ t('reviews.sub') }}</p>
       </div>
-      <div class="filters">
-        <Button
+    </header>
+
+    <div class="toolbar">
+      <div class="segs" role="group" :aria-label="t('common.status')">
+        <button
           v-for="s in ['pending', 'approved', 'rejected'] as const"
           :key="s"
-          :label="t(`review.${s}` as MessageKey)"
-          size="small"
-          :severity="status === s ? undefined : 'secondary'"
-          :outlined="status !== s"
+          class="seg"
+          :class="{ on: status === s }"
           @click="setStatus(s)"
-        />
+        >
+          {{ t(`review.${s}` as MessageKey) }}
+        </button>
       </div>
-    </header>
+    </div>
 
     <p v-if="notice" class="notice" role="alert">{{ notice }}</p>
 
     <div class="panel">
       <DataTable :value="reviews" :loading="loading" data-key="id" size="small" striped-rows>
-        <template #empty
-          ><p class="empty">
+        <template #empty>
+          <p class="empty">
             {{ t('reviews.none', { status: t(`review.${status}` as MessageKey) }) }}
-          </p></template
-        >
+          </p>
+        </template>
         <Column :header="t('products.product')">
-          <template #body="{ data }"
-            ><span class="pslug">/{{ data.product_slug }}</span></template
-          >
+          <template #body="{ data }">
+            <span class="pslug">/{{ data.product_slug }}</span>
+          </template>
         </Column>
         <Column :header="t('reviews.review')">
           <template #body="{ data }">
-            <div class="pname">{{ '★'.repeat(data.rating) }} {{ data.title ?? '' }}</div>
+            <div class="stars">{{ '★'.repeat(data.rating) }}<span class="pname"> {{ data.title ?? '' }}</span></div>
             <div class="body">{{ data.body }}</div>
-            <div class="pslug">
-              {{ t('reviews.by', { author: data.author }) }}
-            </div>
+            <div class="pslug">{{ t('reviews.by', { author: data.author }) }}</div>
           </template>
         </Column>
-        <Column :header="t('common.status')" style="width: 7rem">
+        <Column :header="t('common.status')" header-style="width: 7rem">
           <template #body="{ data }">
             <Tag
               :value="t(`review.${data.status}` as MessageKey)"
@@ -101,7 +102,7 @@ onMounted(load)
             />
           </template>
         </Column>
-        <Column header="" style="width: 11rem">
+        <Column header="" header-style="width: 11rem">
           <template #body="{ data }">
             <Button
               v-if="data.status !== 'approved'"
@@ -127,38 +128,35 @@ onMounted(load)
 </template>
 
 <style scoped>
-.head {
-  display: flex;
-  justify-content: space-between;
-  align-items: start;
-  margin-bottom: var(--space-6);
+.segs {
+  display: inline-flex;
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  padding: 3px;
 }
-.filters {
-  display: flex;
-  gap: var(--space-2);
-}
-.panel {
-  background: var(--color-surface);
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius-lg);
-}
-.notice {
-  color: var(--color-danger);
-  margin-bottom: var(--space-4);
-}
-.pname {
+.seg {
+  border: 0;
+  background: none;
+  border-radius: 999px;
+  padding: 6px 16px;
+  font-size: 13px;
   font-weight: 600;
+  color: var(--text-muted);
+  cursor: pointer;
+}
+.seg.on {
+  background: var(--surface);
+  color: var(--text);
+  box-shadow: var(--shadow-1);
+}
+.stars {
+  font-weight: 600;
+  color: var(--star);
 }
 .body {
-  font-size: var(--text-sm);
-  margin: var(--space-1) 0;
-}
-.pslug {
-  font-size: var(--text-xs);
-  color: var(--color-text-muted);
-}
-.empty {
-  padding: var(--space-4);
-  color: var(--color-text-muted);
+  font-size: 13px;
+  color: var(--text-muted);
+  margin: 3px 0;
 }
 </style>

@@ -5,15 +5,24 @@ import DataTable from 'primevue/datatable'
 import InputText from 'primevue/inputtext'
 import Tag from 'primevue/tag'
 import ToggleSwitch from 'primevue/toggleswitch'
-import { onMounted, ref } from 'vue'
+import { computed, onMounted, ref } from 'vue'
+import { useRouter } from 'vue-router'
 import { ApiError, type Vendor, api } from '../api'
 import { t } from '../locale'
 
+const router = useRouter()
 const vendors = ref<Vendor[]>([])
 const loading = ref(true)
 const notice = ref<string | null>(null)
-const newName = ref('')
-const creating = ref(false)
+const q = ref('')
+
+const filtered = computed(() => {
+  const term = q.value.trim().toLowerCase()
+  if (!term) return vendors.value
+  return vendors.value.filter(
+    (v) => v.name.toLowerCase().includes(term) || v.slug.toLowerCase().includes(term)
+  )
+})
 
 async function load() {
   loading.value = true
@@ -24,23 +33,6 @@ async function load() {
       e instanceof ApiError && e.status === 403 ? t('common.no_catalog') : t('common.load_error')
   } finally {
     loading.value = false
-  }
-}
-
-async function create() {
-  creating.value = true
-  notice.value = null
-  try {
-    await api.createVendor({ name: newName.value })
-    newName.value = ''
-    await load()
-  } catch (e) {
-    notice.value =
-      e instanceof ApiError
-        ? (Object.values(e.errors)[0]?.[0] ?? t('vendors.create_error'))
-        : t('vendors.create_error')
-  } finally {
-    creating.value = false
   }
 }
 
@@ -62,7 +54,7 @@ onMounted(load)
 </script>
 
 <template>
-  <section class="page">
+  <section class="apage">
     <header class="head">
       <div>
         <p class="eyebrow">{{ t('nav.catalog') }}</p>
@@ -71,27 +63,36 @@ onMounted(load)
       </div>
     </header>
 
+    <div class="toolbar">
+      <span class="search">
+        <i class="pi pi-search" />
+        <InputText v-model="q" :placeholder="t('vendors.search_ph')" />
+      </span>
+      <Button
+        class="add"
+        :label="t('vendors.new_title')"
+        icon="pi pi-plus"
+        @click="router.push('/admin/vendors/new')"
+      />
+    </div>
+
     <p v-if="notice" class="notice" role="alert">{{ notice }}</p>
 
-    <form class="create" @submit.prevent="create">
-      <InputText v-model="newName" :placeholder="t('vendors.name')" class="grow" />
-      <Button
-        type="submit"
-        :label="creating ? t('vendors.adding') : t('vendors.add')"
-        :disabled="creating || !newName"
-      />
-    </form>
-
     <div class="panel">
-      <DataTable :value="vendors" :loading="loading" data-key="id" size="small" striped-rows>
-        <template #empty
-          ><p class="empty">{{ t('vendors.none') }}</p></template
-        >
-        <Column field="name" :header="t('vendors.vendor')" />
-        <Column field="slug" :header="t('vendors.slug')">
-          <template #body="{ data }"
-            ><span class="pslug">/{{ data.slug }}</span></template
-          >
+      <DataTable :value="filtered" :loading="loading" data-key="id" size="small" striped-rows>
+        <template #empty>
+          <p class="empty">{{ t('vendors.none') }}</p>
+        </template>
+        <Column :header="t('vendors.vendor')">
+          <template #body="{ data }">
+            <div class="prod">
+              <div class="thumb"><i class="pi pi-shop" /></div>
+              <div>
+                <div class="pname">{{ data.name }}</div>
+                <div class="pslug">/{{ data.slug }}</div>
+              </div>
+            </div>
+          </template>
         </Column>
         <Column :header="t('common.status')">
           <template #body="{ data }">
@@ -101,12 +102,23 @@ onMounted(load)
             />
           </template>
         </Column>
-        <Column :header="t('categories.published')" style="width: 7rem">
+        <Column :header="t('categories.published')" header-style="width: 7rem">
           <template #body="{ data }">
             <ToggleSwitch
-              :modelValue="data.published"
-              @update:modelValue="togglePublished(data)"
+              :model-value="data.published"
               :aria-label="t('vendors.toggle', { name: data.name })"
+              @update:model-value="togglePublished(data)"
+            />
+          </template>
+        </Column>
+        <Column header="" header-style="width: 5rem">
+          <template #body="{ data }">
+            <Button
+              icon="pi pi-pencil"
+              text
+              rounded
+              :aria-label="t('common.edit')"
+              @click="router.push(`/admin/vendors/${data.id}`)"
             />
           </template>
         </Column>
@@ -114,37 +126,3 @@ onMounted(load)
     </div>
   </section>
 </template>
-
-<style scoped>
-.head {
-  display: flex;
-  justify-content: space-between;
-  align-items: start;
-  margin-bottom: var(--space-6);
-}
-.create {
-  display: flex;
-  gap: var(--space-2);
-  margin-bottom: var(--space-4);
-}
-.create .grow {
-  flex: 1;
-}
-.panel {
-  background: var(--color-surface);
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius-lg);
-}
-.notice {
-  color: var(--color-danger);
-  margin-bottom: var(--space-4);
-}
-.pslug {
-  font-size: var(--text-xs);
-  color: var(--color-text-muted);
-}
-.empty {
-  padding: var(--space-4);
-  color: var(--color-text-muted);
-}
-</style>
