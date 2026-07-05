@@ -16,6 +16,7 @@ const MESSAGES = {
   en: {
     'a11y.menu': 'Menu',
     'a11y.home': 'Arvel home',
+    'a11y.back': 'Back',
     'a11y.primary': 'Primary',
     'a11y.language': 'Language',
     'a11y.theme_light': 'Switch to light theme',
@@ -394,6 +395,7 @@ const MESSAGES = {
   fr: {
     'a11y.menu': 'Menu',
     'a11y.home': 'Accueil Arvel',
+    'a11y.back': 'Retour',
     'a11y.primary': 'Navigation principale',
     'a11y.language': 'Langue',
     'a11y.theme_light': 'Passer au thème clair',
@@ -781,6 +783,7 @@ const MESSAGES = {
   ar: {
     'a11y.menu': 'القائمة',
     'a11y.home': 'الصفحة الرئيسية لأرفل',
+    'a11y.back': 'رجوع',
     'a11y.primary': 'التنقل الرئيسي',
     'a11y.language': 'اللغة',
     'a11y.theme_light': 'التبديل إلى الوضع الفاتح',

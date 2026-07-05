@@ -134,8 +134,9 @@ async def _order_out(
             OrderLineOut(
                 product_variant_id=i.product_variant_id,
                 product_name=i.product_name,
+                product_slug=looks.get(i.product_variant_id, ("", "", None, None))[3],
                 variant_name=i.variant_name,
-                image_url=looks.get(i.product_variant_id, ("", "", None))[2],
+                image_url=looks.get(i.product_variant_id, ("", "", None, None))[2],
                 quantity=i.quantity,
                 unit_price_cents=i.unit_price_cents,
             )
@@ -578,8 +579,9 @@ async def admin_order_show(request: Request) -> AdminOrderDetailOut:
             OrderLineOut(
                 product_variant_id=i.product_variant_id,
                 product_name=i.product_name,
+                product_slug=looks.get(i.product_variant_id, ("", "", None, None))[3],
                 variant_name=i.variant_name,
-                image_url=looks.get(i.product_variant_id, ("", "", None))[2],
+                image_url=looks.get(i.product_variant_id, ("", "", None, None))[2],
                 quantity=i.quantity,
                 unit_price_cents=i.unit_price_cents,
             )

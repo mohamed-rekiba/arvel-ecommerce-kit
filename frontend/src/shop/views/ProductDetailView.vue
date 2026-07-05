@@ -1,12 +1,13 @@
 <script setup lang="ts">
 import Button from 'primevue/button'
-import { computed, onMounted, reactive, ref, watch } from 'vue'
+import { computed, onBeforeUnmount, onMounted, reactive, ref, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { ApiError, type Product, type ReviewList, type Variant, api, formatPrice } from '../api'
 import { useCart } from '../cart'
 import { getCachedProduct } from '../product-cache'
 import CountdownTimer from '../components/CountdownTimer.vue'
 import { type MessageKey, t } from '../locale'
+import { pageTitle } from '../pageTitle'
 
 const route = useRoute()
 const router = useRouter()
@@ -16,6 +17,10 @@ const { add } = useCart()
 // shared element present on the new page immediately, or it degrades to a plain fade.
 const cached = getCachedProduct(String(route.params.slug))
 const product = ref<Product | null>(cached)
+
+// feed the slim mobile header its title (the product name), and clear it on the way out
+watch(product, (p) => (pageTitle.value = p?.translation.name ?? ''), { immediate: true })
+onBeforeUnmount(() => (pageTitle.value = ''))
 const status = ref<'loading' | 'error' | 'ready'>(cached ? 'ready' : 'loading')
 const selectedVariantId = ref<number | null>(
   cached?.variants?.find((v) => v.stock > 0)?.id ?? cached?.variants?.[0]?.id ?? null

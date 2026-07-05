@@ -17,7 +17,30 @@ const settings = useSettings()
 const router = useRouter()
 const route = useRoute()
 
+// Context-aware header. A drill-down page (route meta.detail: product, order, checkout, …) gets a
+// SLIM mobile bar — back + title + cart — instead of the full browse header. Desktop always keeps
+// the browse header (it has the room), so the slim bar is mobile/tablet only.
+const isDetail = computed(() => !!route.meta.detail)
+const isMobile = ref(false)
+onMounted(() => {
+  const mq = window.matchMedia('(max-width: 1023.98px)')
+  isMobile.value = mq.matches
+  const onChange = () => (isMobile.value = mq.matches)
+  mq.addEventListener('change', onChange)
+  onBeforeUnmount(() => mq.removeEventListener('change', onChange))
+})
+const slimBar = computed(() => isDetail.value && isMobile.value)
+const detailTitle = computed(() => pageTitle.value)
+
+// Back: reverse-navigate (the router's view-transition guard morphs it, same as the forward card→PDP
+// animation). No in-app history → fall home rather than leave the site.
+function goBack() {
+  if (window.history.state?.back) router.back()
+  else router.push('/')
+}
+
 import { LOCALES, locale, setLocale, t } from './locale'
+import { pageTitle } from './pageTitle'
 
 const cartTotal = computed(() => {
   const cart = cartState.cart
@@ -130,77 +153,101 @@ onBeforeUnmount(() => document.removeEventListener('click', onDocClick))
 
     <!-- main header: logo · scoped search · account · cart -->
     <header class="hd">
-      <div class="hd__in">
-        <button
-          ref="navTrigger"
-          class="ic hamburger"
-          @click="navOpen = !navOpen"
-          :aria-expanded="navOpen"
-          aria-controls="mobile-nav-panel"
-          :aria-label="t('a11y.menu')"
-        >
-          <svg v-if="!navOpen" viewBox="0 0 24 24">
-            <path d="M4 7h16M4 12h16M4 17h16" />
-          </svg>
-          <svg v-else viewBox="0 0 24 24">
-            <path d="M6 6l12 12M18 6L6 18" />
-          </svg>
-        </button>
-        <RouterLink to="/" class="brand" :aria-label="t('a11y.home')">
-          <span class="brand__name">Arvel<b>Shop</b></span>
-          <span class="brand__tag">{{ t('header.tagline') }}</span>
-        </RouterLink>
-
-        <form class="search" role="search" @submit.prevent="submitSearch">
-          <input
-            v-model.trim="searchQ"
-            type="search"
-            class="search__input"
-            :placeholder="t('header.search_ph')"
-            :aria-label="t('nav.search')"
-          />
-          <select v-model="searchCat" class="search__cat" :aria-label="t('header.all_categories')">
-            <option value="">{{ t('header.all_categories') }}</option>
-            <option v-for="c in categories" :key="c.id" :value="c.slug">
-              {{ c.translation.name }}
-            </option>
-          </select>
-          <button type="submit" class="search__go">
-            {{ t('header.search') }}
+      <div class="hd__in" :class="{ 'hd__in--slim': slimBar }">
+        <!-- DRILL-DOWN (mobile): slim contextual bar — back · title · cart -->
+        <template v-if="slimBar">
+          <button class="ic back" @click="goBack" :aria-label="t('a11y.back')">
+            <svg viewBox="0 0 24 24"><path d="M15 5l-7 7 7 7" /></svg>
           </button>
-        </form>
-
-        <div class="hd__tools">
-          <RouterLink to="/account" class="who">
-            <svg viewBox="0 0 24 24" class="who__ic">
-              <circle cx="12" cy="8" r="3.4" />
-              <path d="M5 20a7 7 0 0 1 14 0" />
+          <h1 class="hd__title">{{ detailTitle }}</h1>
+          <RouterLink to="/cart" class="ic cart-mini" :aria-label="t('nav.cart')">
+            <svg viewBox="0 0 24 24">
+              <path d="M6 8h12l-1 12H7z" />
+              <path d="M9 8a3 3 0 0 1 6 0" />
             </svg>
-            <span class="who__meta">
-              <b>{{
-                auth.state.customer
-                  ? t('header.greeting', {
-                      name: auth.state.customer.name.split(' ')[0]
-                    })
-                  : t('header.guest')
-              }}</b>
-              <i>{{ auth.state.customer ? t('account.eyebrow') : t('header.login_register') }}</i>
-            </span>
+            <span v-if="count" class="cart-mini__n">{{ count }}</span>
           </RouterLink>
-          <RouterLink to="/cart" class="cartw" :aria-label="t('nav.cart')">
-            <span class="cartw__ic">
-              <svg viewBox="0 0 24 24">
-                <path d="M6 8h12l-1 12H7z" />
-                <path d="M9 8a3 3 0 0 1 6 0" />
+        </template>
+
+        <!-- BROWSE (roots + all desktop): menu · logo · search · account · cart -->
+        <template v-else>
+          <div class="hd__lead">
+            <button
+              ref="navTrigger"
+              class="ic hamburger"
+              @click="navOpen = !navOpen"
+              :aria-expanded="navOpen"
+              aria-controls="mobile-nav-panel"
+              :aria-label="t('a11y.menu')"
+            >
+              <svg v-if="!navOpen" viewBox="0 0 24 24">
+                <path d="M4 7h16M4 12h16M4 17h16" />
               </svg>
-              <span v-if="count" class="n">{{ count }}</span>
-            </span>
-            <span class="who__meta">
-              <b>{{ t('header.your_cart') }}</b>
-              <i class="tnum">{{ formatPrice(cartTotal) }}</i>
-            </span>
+              <svg v-else viewBox="0 0 24 24">
+                <path d="M6 6l12 12M18 6L6 18" />
+              </svg>
+            </button>
+          </div>
+          <RouterLink to="/" class="brand" :aria-label="t('a11y.home')">
+            <span class="brand__name">Arvel<b>Shop</b></span>
+            <span class="brand__tag">{{ t('header.tagline') }}</span>
           </RouterLink>
-        </div>
+
+          <form class="search" role="search" @submit.prevent="submitSearch">
+            <input
+              v-model.trim="searchQ"
+              type="search"
+              class="search__input"
+              :placeholder="t('header.search_ph')"
+              :aria-label="t('nav.search')"
+            />
+            <select
+              v-model="searchCat"
+              class="search__cat"
+              :aria-label="t('header.all_categories')"
+            >
+              <option value="">{{ t('header.all_categories') }}</option>
+              <option v-for="c in categories" :key="c.id" :value="c.slug">
+                {{ c.translation.name }}
+              </option>
+            </select>
+            <button type="submit" class="search__go">
+              {{ t('header.search') }}
+            </button>
+          </form>
+
+          <div class="hd__tools">
+            <RouterLink to="/account" class="who">
+              <svg viewBox="0 0 24 24" class="who__ic">
+                <circle cx="12" cy="8" r="3.4" />
+                <path d="M5 20a7 7 0 0 1 14 0" />
+              </svg>
+              <span class="who__meta">
+                <b>{{
+                  auth.state.customer
+                    ? t('header.greeting', {
+                        name: auth.state.customer.name.split(' ')[0]
+                      })
+                    : t('header.guest')
+                }}</b>
+                <i>{{ auth.state.customer ? t('account.eyebrow') : t('header.login_register') }}</i>
+              </span>
+            </RouterLink>
+            <RouterLink to="/cart" class="cartw" :aria-label="t('nav.cart')">
+              <span class="cartw__ic">
+                <svg viewBox="0 0 24 24">
+                  <path d="M6 8h12l-1 12H7z" />
+                  <path d="M9 8a3 3 0 0 1 6 0" />
+                </svg>
+                <span v-if="count" class="n">{{ count }}</span>
+              </span>
+              <span class="who__meta">
+                <b>{{ t('header.your_cart') }}</b>
+                <i class="tnum">{{ formatPrice(cartTotal) }}</i>
+              </span>
+            </RouterLink>
+          </div>
+        </template>
       </div>
     </header>
 
@@ -242,8 +289,8 @@ onBeforeUnmount(() => document.removeEventListener('click', onDocClick))
       </div>
     </nav>
 
-    <!-- announcement (live coupon) -->
-    <div v-if="showAnnounce && announcement" class="ann">
+    <!-- announcement (live coupon) — a marketing element for the browse pages, not focus/detail views -->
+    <div v-if="showAnnounce && announcement && !isDetail" class="ann">
       <p class="ann__txt">
         🎁 {{ t('announce.text') }}
         <b class="ann__code">{{ announcement.code }}</b>
@@ -352,6 +399,7 @@ onBeforeUnmount(() => document.removeEventListener('click', onDocClick))
 
 /* utility topbar */
 .tb {
+  display: none; /* utility chrome (currency/lang/theme) — desktop only; on mobile it lives in the menu */
   background: var(--surface-2);
   border-bottom: 1px solid var(--border);
   font-size: 12px;
@@ -422,6 +470,9 @@ onBeforeUnmount(() => document.removeEventListener('click', onDocClick))
 
 /* header */
 .hd {
+  position: sticky;
+  top: 0;
+  z-index: var(--z-header);
   background: var(--surface);
   border-bottom: 1px solid var(--border);
 }
@@ -435,8 +486,49 @@ onBeforeUnmount(() => document.removeEventListener('click', onDocClick))
   align-items: center;
   gap: 10px clamp(0.5rem, 2vw, 2rem);
 }
-.hamburger {
+.hd__lead {
   grid-area: menu;
+  display: flex;
+  align-items: center;
+}
+/* slim drill-down bar: back · title · cart, single row */
+.hd__in--slim {
+  grid-template-columns: auto 1fr auto;
+  grid-template-areas: none;
+  gap: 8px;
+}
+.hd__title {
+  margin: 0;
+  font-size: 16px;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  color: var(--text);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.cart-mini {
+  position: relative;
+  color: var(--text);
+}
+.cart-mini__n {
+  position: absolute;
+  top: 2px;
+  inset-inline-end: 2px;
+  min-width: 16px;
+  height: 16px;
+  padding: 0 4px;
+  border-radius: 999px;
+  background: var(--accent);
+  color: var(--on-accent);
+  font-size: 10px;
+  font-weight: 800;
+  line-height: 16px;
+  text-align: center;
+}
+/* the back chevron points to the start edge — mirror it under RTL */
+[dir='rtl'] .back svg {
+  transform: scaleX(-1);
 }
 .brand {
   grid-area: brand;
@@ -502,6 +594,7 @@ onBeforeUnmount(() => document.removeEventListener('click', onDocClick))
   color: var(--accent-text);
 }
 .brand__tag {
+  display: none; /* decorative tagline — desktop only; the mobile header stays lean */
   font-size: 10.5px;
   color: var(--text-subtle);
 }
@@ -823,8 +916,8 @@ onBeforeUnmount(() => document.removeEventListener('click', onDocClick))
 }
 .ft__cols {
   display: grid;
-  grid-template-columns: 1fr;
-  gap: 24px;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 28px 20px;
 }
 .ft__cols h4 {
   font-size: 11px;
@@ -863,20 +956,27 @@ onBeforeUnmount(() => document.removeEventListener('click', onDocClick))
     display: flex;
   }
 }
-/* search shares the header row here — drop the category select so input + button fit */
-@media (min-width: 640px) and (max-width: 1023.98px) {
+/* below desktop the search is just field + button — the category select would cram the row
+   (category filtering already lives on the catalog page) */
+@media (max-width: 1023.98px) {
   .search__cat {
     display: none;
   }
 }
 @media (min-width: 1024px) {
+  .tb {
+    display: block;
+  }
+  .brand__tag {
+    display: block;
+  }
   .tb__contact {
     display: flex;
   }
   .nv {
     display: block;
   }
-  .hamburger {
+  .hd__lead {
     display: none;
   }
   .ft__cols {

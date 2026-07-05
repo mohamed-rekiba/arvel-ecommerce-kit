@@ -4,10 +4,15 @@ import { computed, onBeforeUnmount, onMounted, ref } from 'vue'
 import { useRoute } from 'vue-router'
 import { type Order, api, formatPrice, orderTokens } from '../api'
 import { type MessageKey, t } from '../locale'
+import { pageTitle } from '../pageTitle'
 
 const route = useRoute()
 const orderId = Number(route.params.id)
 const token = orderTokens.get(orderId) // guests hold the receipt; signed-in owners use bearer
+
+// slim mobile header title
+pageTitle.value = `${t('order.eyebrow')} #${orderId}`
+onBeforeUnmount(() => (pageTitle.value = ''))
 
 const order = ref<Order | null>(null)
 const loading = ref(true)
@@ -157,12 +162,22 @@ onBeforeUnmount(stopPolling)
         <h2>{{ t('order.items') }}</h2>
         <ul class="lines">
           <li v-for="line in order.items" :key="line.product_variant_id" class="line">
-            <span class="line__img">
+            <component
+              :is="line.product_slug ? 'RouterLink' : 'span'"
+              :to="line.product_slug ? `/products/${line.product_slug}` : undefined"
+              class="line__img"
+            >
               <img v-if="line.image_url" :src="line.image_url" :alt="line.product_name" />
               <span v-else class="line__ph" aria-hidden="true" />
-            </span>
+            </component>
             <span class="line__meta">
-              <b>{{ line.product_name }}</b>
+              <RouterLink
+                v-if="line.product_slug"
+                class="line__name"
+                :to="`/products/${line.product_slug}`"
+                >{{ line.product_name }}</RouterLink
+              >
+              <b v-else>{{ line.product_name }}</b>
               <i>{{ line.variant_name }} · ×{{ line.quantity }}</i>
             </span>
             <span class="line__price tnum">{{
@@ -458,9 +473,17 @@ onBeforeUnmount(stopPolling)
   display: flex;
   flex-direction: column;
 }
-.line__meta b {
+.line__meta b,
+.line__name {
   font-size: 13.5px;
   font-weight: 600;
+}
+.line__name {
+  color: var(--text);
+  text-decoration: none;
+}
+.line__name:hover {
+  color: var(--accent-text);
 }
 .line__meta i {
   font-style: normal;

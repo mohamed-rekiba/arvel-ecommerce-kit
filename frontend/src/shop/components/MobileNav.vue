@@ -1,7 +1,8 @@
 <script setup lang="ts">
 import { nextTick, ref, watch } from 'vue'
 import type { Category } from '../api'
-import { t } from '../locale'
+import { LOCALES, locale, setLocale, t } from '../locale'
+import { theme, toggleTheme } from '../../lib/theme'
 
 const props = defineProps<{ open: boolean; categories?: Category[] }>()
 const emit = defineEmits<{ close: [] }>()
@@ -62,6 +63,30 @@ watch(
         <RouterLink to="/" class="mnav__link" @click="emit('close')">{{
           t('nav.about')
         }}</RouterLink>
+
+        <!-- settings live in the menu on mobile, not eating the top bar -->
+        <div class="mnav__settings">
+          <div class="mnav__lang" role="group" :aria-label="t('a11y.language')">
+            <button
+              v-for="code in LOCALES"
+              :key="code"
+              class="mnav__langbtn"
+              :class="{ on: locale.current === code }"
+              :aria-pressed="locale.current === code"
+              @click="locale.current !== code && setLocale(code)"
+            >
+              {{ code.toUpperCase() }}
+            </button>
+          </div>
+          <button
+            class="mnav__theme"
+            @click="toggleTheme"
+            :aria-label="theme === 'dark' ? t('a11y.theme_light') : t('a11y.theme_dark')"
+          >
+            <span aria-hidden="true">{{ theme === 'dark' ? '☀' : '☾' }}</span>
+            {{ theme === 'dark' ? t('a11y.theme_light') : t('a11y.theme_dark') }}
+          </button>
+        </div>
       </nav>
     </div>
   </Transition>
@@ -127,6 +152,48 @@ watch(
 }
 .mnav__cat:hover {
   color: var(--accent-text);
+}
+.mnav__settings {
+  margin-top: auto;
+  padding-top: var(--space-6);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+.mnav__lang {
+  display: inline-flex;
+  gap: 4px;
+}
+.mnav__langbtn {
+  min-width: 44px;
+  min-height: 40px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  background: none;
+  color: var(--text-muted);
+  font: inherit;
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+}
+.mnav__langbtn.on {
+  border-color: var(--accent);
+  color: var(--on-accent);
+  background: var(--accent);
+}
+.mnav__theme {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 44px;
+  padding: 0 12px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  background: none;
+  color: var(--text);
+  font: inherit;
+  font-size: 14px;
+  cursor: pointer;
 }
 
 .mnav-enter-active,

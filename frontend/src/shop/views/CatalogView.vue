@@ -33,6 +33,7 @@ const minPrice = computed(() => (route.query.min ? Number(route.query.min) : und
 const maxPrice = computed(() => (route.query.max ? Number(route.query.max) : undefined))
 const priceMinInput = ref(route.query.min ? String(Number(route.query.min) / 100) : '')
 const priceMaxInput = ref(route.query.max ? String(Number(route.query.max) / 100) : '')
+// Price is a secondary filter — collapsed on mobile so products aren't pushed below the fold; open on the desktop sidebar.
 function applyPrice() {
   setQuery({
     min: priceMinInput.value ? Math.round(Number(priceMinInput.value) * 100) : undefined,
@@ -225,6 +226,12 @@ watch(() => route.query, load)
 }
 .filters {
   position: static;
+  /* grid item defaults to min-width:auto — without this the nowrap strip widens the whole page
+     instead of scrolling inside itself */
+  min-width: 0;
+}
+.filters__group {
+  margin-bottom: 10px;
 }
 .filters__h {
   font-size: 11px;
@@ -234,36 +241,68 @@ watch(() => route.query, load)
   font-weight: 600;
   margin: 0 0 14px;
 }
+.filters__h--toggle {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  width: 100%;
+  border: 0;
+  background: none;
+  font: inherit;
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.14em;
+  color: var(--text-subtle);
+  font-weight: 600;
+  cursor: pointer;
+  padding: 0;
+}
+.filters__chev {
+  font-size: 10px;
+  color: var(--text-muted);
+  transition: transform var(--motion-base);
+}
+.filters__chev.up {
+  transform: rotate(180deg);
+}
+/* mobile: one swipeable strip of category pills, not a wrapping wall */
 .cats {
   list-style: none;
   margin: 0;
-  padding: 0;
+  padding: 0 0 4px;
   display: flex;
-  flex-direction: row;
-  flex-wrap: wrap;
-  gap: 2px;
+  flex-wrap: nowrap;
+  gap: 8px;
+  overflow-x: auto;
+  scrollbar-width: none;
+  -webkit-overflow-scrolling: touch;
+  scroll-snap-type: x proximity;
+}
+.cats::-webkit-scrollbar {
+  display: none;
 }
 .cat {
-  display: block;
-  width: 100%;
-  text-align: start;
-  border: 0;
-  background: none;
-  padding: 8px 10px;
-  border-radius: var(--radius-md);
+  display: inline-block;
+  white-space: nowrap;
+  scroll-snap-align: start;
+  border: 1px solid var(--border);
+  background: var(--surface);
+  padding: 8px 14px;
+  border-radius: var(--radius-full);
   font: inherit;
-  font-size: 14px;
+  font-size: 13px;
   color: var(--text-muted);
   cursor: pointer;
   transition:
     background var(--motion-base),
-    color var(--motion-base);
+    color var(--motion-base),
+    border-color var(--motion-base);
 }
 .cat:hover {
-  background: color-mix(in srgb, var(--text) 5%, transparent);
   color: var(--text);
 }
 .cat.on {
+  border-color: var(--accent);
   background: color-mix(in srgb, var(--accent) 14%, transparent);
   color: var(--accent);
   font-weight: 600;
@@ -354,6 +393,31 @@ watch(() => route.query, load)
   }
   .cats {
     flex-direction: column;
+    flex-wrap: nowrap;
+    gap: 2px;
+    overflow: visible;
+    padding: 0;
+  }
+  .cat {
+    display: block;
+    width: 100%;
+    text-align: start;
+    border: 0;
+    background: none;
+    border-radius: var(--radius-md);
+    padding: 8px 10px;
+    font-size: 14px;
+    white-space: normal;
+  }
+  .cat.on {
+    border-color: transparent;
+  }
+  /* price is default-open in the sidebar, so the disclosure chevron would just be noise */
+  .filters__h--toggle {
+    cursor: default;
+  }
+  .filters__chev {
+    display: none;
   }
   .grid {
     grid-template-columns: repeat(3, 1fr);

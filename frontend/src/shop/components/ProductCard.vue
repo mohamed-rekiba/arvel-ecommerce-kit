@@ -46,19 +46,18 @@ const srcset = computed(() =>
 )
 const name = computed(() => props.product.translation.name)
 
+// Quick-add straight from the card: add the first in-stock variant. (Variant choice, if any, is
+// still available on the product page via the card's image/name links.)
 async function addToBag() {
   const inStock = variants.value.filter((v) => v.stock > 0)
-  if (inStock.length === 1) {
-    busy.value = true
-    try {
-      await add(inStock[0].id, 1)
-      added.value = true
-      setTimeout(() => (added.value = false), 1400)
-    } finally {
-      busy.value = false
-    }
-  } else {
-    router.push(`/products/${props.product.slug}`)
+  if (inStock.length === 0) return // sold out — the button is disabled anyway
+  busy.value = true
+  try {
+    await add(inStock[0].id, 1)
+    added.value = true
+    setTimeout(() => (added.value = false), 1400)
+  } finally {
+    busy.value = false
   }
 }
 </script>

@@ -92,9 +92,9 @@ async def merge_guest_cart(request: Request, user: User) -> None:
 
 async def line_presentation(
     variant_ids: list[int],
-) -> dict[int, tuple[str, str, str | None]]:
-    """variant id → (product name in the active locale, variant name, product thumb URL).
-    Two queries + the media eager-load — shared by the cart serializer and order reads."""
+) -> dict[int, tuple[str, str, str | None, str | None]]:
+    """variant id → (product name in the active locale, variant name, product thumb URL, product
+    slug). Two queries + the media eager-load — shared by the cart serializer and order reads."""
     from app.controllers.catalog_controller import gallery_image_out
     from app.models.product import IMAGES, Product
 
@@ -107,14 +107,14 @@ async def line_presentation(
         .where_in("id", product_ids)
         .get()
     }
-    out: dict[int, tuple[str, str, str | None]] = {}
+    out: dict[int, tuple[str, str, str | None, str | None]] = {}
     for vid, variant in variants.items():
         product = products.get(variant.product_id)
         if product is None:
             continue
         images = await product.get_media(IMAGES)
         thumb = gallery_image_out(images[0]).thumb_url if images else None
-        out[vid] = (product.translation.name, variant.name, thumb)
+        out[vid] = (product.translation.name, variant.name, thumb, product.slug)
     return out
 
 
@@ -139,9 +139,9 @@ async def _serialize(cart: Cart, new_token: str | None = None) -> CartOut:
             CartLineOut(
                 id=i.id,
                 product_variant_id=i.product_variant_id,
-                product_name=looks.get(i.product_variant_id, ("?", "?", None))[0],
-                variant_name=looks.get(i.product_variant_id, ("?", "?", None))[1],
-                image_url=looks.get(i.product_variant_id, ("?", "?", None))[2],
+                product_name=looks.get(i.product_variant_id, ("?", "?", None, None))[0],
+                variant_name=looks.get(i.product_variant_id, ("?", "?", None, None))[1],
+                image_url=looks.get(i.product_variant_id, ("?", "?", None, None))[2],
                 quantity=i.quantity,
                 unit_price_cents=i.unit_price_cents,
                 line_total_cents=i.unit_price_cents * i.quantity,

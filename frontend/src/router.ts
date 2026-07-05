@@ -58,11 +58,22 @@ const router = createRouter({
         {
           path: 'products/:slug',
           name: 'product',
-          component: ProductDetailView
+          component: ProductDetailView,
+          meta: { detail: true }
         },
         { path: 'cart', name: 'cart', component: CartView },
-        { path: 'checkout', name: 'checkout', component: CheckoutView },
-        { path: 'orders/:id', name: 'order', component: OrderDetailView },
+        {
+          path: 'checkout',
+          name: 'checkout',
+          component: CheckoutView,
+          meta: { detail: true }
+        },
+        {
+          path: 'orders/:id',
+          name: 'order',
+          component: OrderDetailView,
+          meta: { detail: true }
+        },
         {
           path: 'account',
           component: AccountLayout,
@@ -103,17 +114,20 @@ const router = createRouter({
         {
           path: 'forgot-password',
           name: 'forgot-password',
-          component: ForgotPasswordView
+          component: ForgotPasswordView,
+          meta: { detail: true }
         },
         {
           path: 'reset-password',
           name: 'reset-password',
-          component: ResetPasswordView
+          component: ResetPasswordView,
+          meta: { detail: true }
         },
         {
           path: 'verify-email',
           name: 'verify-email',
-          component: VerifyEmailView
+          component: VerifyEmailView,
+          meta: { detail: true }
         }
       ]
     },
