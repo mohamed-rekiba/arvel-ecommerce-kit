@@ -1,14 +1,14 @@
 """The root database seeder — run with ``arvel db:seed``.
 
 Seeds a realistic electronics-boutique catalog: several published vendors (brands), a category tree,
-and ~20 products with varied prices and **real, category-matched gallery images** (keyword photos from
-loremflickr, fetched via the arvel Http client and stored through the media library with thumb/preview
-conversions). Also keeps the retrievability edge cases — an empty category, an unpublished category
+and ~30 products with varied prices and **real, category-matched gallery images** (curated, content-
+verified electronics photos from the Unsplash CDN, fetched via the arvel Http client and stored through
+the media library with thumb/preview conversions). Also keeps the retrievability edge cases — an empty
+category, an unpublished category
 branch, an unpublished vendor, and a draft product — so the retrievable_* views can be seen filtering.
 """
 
 import asyncio
-import itertools
 import random
 
 from arvel.database import Seeder
@@ -32,51 +32,101 @@ from database.factories.product_variant_factory import ProductVariantFactory
 from database.factories.user_factory import UserFactory
 from database.seeders.roles_permissions_seeder import RolesPermissionsSeeder
 
-# One clean, curated hero shot (Unsplash CDN) per product type — claimed once, by the first product of
-# that type. Every other gallery image is a loremflickr photo with a globally-unique `lock`, so no two
-# products (or banners) ever share an image while staying category-matched. Values are unique.
-_HERO = {
-    "headphones": "1505740420928-5e560c06d30e",
-    "earbuds": "1590658268037-6bf12165a8df",
-    "speaker": "1608043152269-423dbba4e7e1",
-    "smartphone": "1511707171634-5f897ff02aa9",
-    "laptop": "1496181133206-80ce9b88a853",
-    "monitor": "1527443224154-c4a3942d3acf",
-    "smartwatch": "1523275335684-37898b6baf30",
-    "camera": "1502920917128-1aa500764cbd",
-    "keyboard": "1587829741301-dc798b83add3",
-    "mouse": "1527814050087-3793815479db",
-    "charger": "1588872657578-7efd1f1555ed",
-    "bag": "1553062407-98eeb64c6a62",
+# Curated, content-verified electronics photos (Unsplash CDN) per product type. Harvested from Unsplash
+# search so every shot actually matches its category — this replaces the old loremflickr keyword fills,
+# which returned random photos (a "bag" keyword surfaced handbags, "sport" surfaced athletes, …) and made
+# the electronics store look like it sold non-electronics. Every id below was liveness-checked (HTTP 200).
+# Products of a type rotate through their pool so galleries stay varied instead of all sharing one shot.
+_PHOTOS: dict[str, list[str]] = {
+    "headphones": [
+        "1505740420928-5e560c06d30e",
+        "1618366712010-f4ae9c647dcb",
+        "1613040809024-b4ef7ba99bc3",
+        "1546435770-a3e426bf472b",
+    ],
+    "earbuds": [
+        "1590658268037-6bf12165a8df",
+        "1572569511254-d8f925fe2cbb",
+        "1606841837239-c5a1a4a07af7",
+        "1606220588913-b3aacb4d2f46",
+    ],
+    "speaker": [
+        "1608043152269-423dbba4e7e1",
+        "1589256469067-ea99122bbdc4",
+        "1529359744902-86b2ab9edaea",
+        "1582978571763-2d039e56f0c3",
+    ],
+    "smartphone": [
+        "1511707171634-5f897ff02aa9",
+        "1598327105666-5b89351aff97",
+        "1634403665481-74948d815f03",
+        "1523206489230-c012c64b2b48",
+    ],
+    "laptop": [
+        "1496181133206-80ce9b88a853",
+        "1525547719571-a2d4ac8945e2",
+        "1541807084-5c52b6b3adef",
+    ],
+    "monitor": [
+        "1527443224154-c4a3942d3acf",
+        "1587831990711-23ca6441447b",
+    ],
+    "smartwatch": [
+        "1579586337278-3befd40fd17a",
+        "1660844817855-3ecc7ef21f12",
+        "1546868871-7041f2a55e12",
+        "1637160151663-a410315e4e75",
+    ],
+    "camera": [
+        "1516035069371-29a1b244cc32",
+        "1495707902641-75cac588d2e9",
+        "1512790182412-b19e6d62bc39",
+        "1536632087471-3cf3f2986328",
+    ],
+    "keyboard": [
+        "1618384887929-16ec33fab9ef",
+        "1547394765-185e1e68f34e",
+        "1635987391914-cb84b567e68f",
+        "1595044426077-d36d9236d54a",
+    ],
+    "mouse": [
+        "1615663245857-ac93bb7c39e7",
+        "1527864550417-7fd91fc51a46",
+        "1605773527852-c546a8584ea3",
+        "1527814050087-3793815479db",
+    ],
+    "charger": [
+        "1557767382-97b28f5488e7",
+        "1603539444875-76e7684265f6",
+        "1572721546624-05bf65ad7679",
+    ],
+    "bag": [
+        "1611461527944-1a718332613b",
+        "1508014938279-b7418e08350c",
+        "1594939426837-ed35ea06b743",
+    ],
 }
+_PHOTOS["phone"] = _PHOTOS["smartphone"]  # the "phone" keyword shares the smartphone pool
 _GALLERY_SIZE = 2
-# a monotonic counter → a unique loremflickr `lock` for every non-hero image the seed ever requests
-_lock = itertools.count(1)
-_used_hero: set[str] = set()
+# per-keyword rotation cursor so consecutive products of a type get different photos
+_cursor: dict[str, int] = {}
 
 
 def _gallery(keyword: str, slug: str) -> list[tuple[str, str]]:
-    """Up to `_GALLERY_SIZE` (url, file_name) for a product — every URL globally unique. The first image
-    is the type's curated hero (once); the rest are unique loremflickr keyword photos."""
+    """`_GALLERY_SIZE` (url, file_name) for a product, drawn from the curated electronics pool for its
+    keyword and rotated so products of the same type don't all show the same photo."""
     kw = keyword.split(",")[0]
-    out: list[tuple[str, str]] = []
-    hero = _HERO.get(kw)
-    if hero and hero not in _used_hero:
-        _used_hero.add(hero)
-        out.append(
-            (
-                f"https://images.unsplash.com/photo-{hero}?w=900&h=1125&fit=crop&q=80",
-                f"{slug}-0.jpg",
-            )
+    photos = _PHOTOS.get(kw) or _PHOTOS["smartphone"]  # electronics fallback, never a random source
+    start = _cursor.get(kw, 0)
+    _cursor[kw] = start + _GALLERY_SIZE
+    return [
+        (
+            f"https://images.unsplash.com/photo-{photos[(start + i) % len(photos)]}"
+            "?w=900&h=1125&fit=crop&q=80",
+            f"{slug}-{i}.jpg",
         )
-    while len(out) < _GALLERY_SIZE:
-        out.append(
-            (
-                f"https://loremflickr.com/900/1125/{kw}?lock={next(_lock)}",
-                f"{slug}-{len(out)}.jpg",
-            )
-        )
-    return out
+        for i in range(_GALLERY_SIZE)
+    ]
 
 
 class DatabaseSeeder(Seeder):
@@ -275,7 +325,10 @@ class DatabaseSeeder(Seeder):
             "Aperture X100 Camera",
         }
         products_by_name: dict[str, Product] = {}
-        for category, vendor_slug, price, keyword, name in catalog:
+        self.line(f"→ products: seeding {len(catalog)}, each downloading {_GALLERY_SIZE} images…")
+        for category, vendor_slug, price, keyword, name in self.with_progress_bar(
+            catalog, label="products"
+        ):
             product = await self._product(
                 name,
                 category.id,
@@ -320,6 +373,7 @@ class DatabaseSeeder(Seeder):
         )
 
         # --- orders (varied statuses, backdated across ~75 days → real revenue trend + admin data) ---
+        self.line("→ orders, reviews & coupons…")
         rng = random.Random(1789)
         prod_by_id = {
             p.id: (name, p.price_cents) for name, p in products_by_name.items()
@@ -505,15 +559,16 @@ class DatabaseSeeder(Seeder):
                 "1496181133206-80ce9b88a853",
             ),
         ]
-        # banners get their own unique hero images (loremflickr, keyword per theme) — never a photo a
-        # product also uses
+        # banners get a wide crop of a curated electronics photo per theme (drawn from the same verified
+        # pool as products, so the carousel is on-brand and never a random non-electronics fill)
         _banner_kw = {0: "headphones", 1: "smartphone", 2: "laptop"}
+        self.line(f"→ banners: seeding {len(banners)} hero images…")
         for translations, cta_to, sort, _photo_id in banners:
             banner = await Banner.create(
                 translations=translations, cta_to=cta_to, sort=sort, active=True
             )
-            kw = _banner_kw.get(sort, "electronics")
-            url = f"https://loremflickr.com/1600/700/{kw}?lock={next(_lock)}"
+            pool = _PHOTOS.get(_banner_kw.get(sort, "laptop"), _PHOTOS["laptop"])
+            url = f"https://images.unsplash.com/photo-{pool[-1]}?w=1600&h=700&fit=crop&q=80"
             for _attempt in range(3):
                 if await images.download_and_attach(
                     banner, url, file_name=f"banner-{sort}.jpg", collection=HERO
@@ -538,6 +593,7 @@ class DatabaseSeeder(Seeder):
             "Draft Phone", phones.id, acme, price_cents=1999, published=False
         )
 
+        self.line("→ refreshing visibility + search index…")
         await CatalogVisibilityService().refresh()
         await (
             Product.make_all_searchable()
