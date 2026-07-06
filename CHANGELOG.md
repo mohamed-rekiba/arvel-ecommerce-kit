@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.3.1](https://github.com/mohamed-rekiba/arvel-ecommerce-kit/compare/v0.3.0...v0.3.1) (2026-07-06)
+
+
+### Bug Fixes
+
+* resolve formating issues ([51ee265](https://github.com/mohamed-rekiba/arvel-ecommerce-kit/commit/51ee2652154535d5d6a7b2a135a53acc95884a0f))
+* use successful() not ok() for 2xx gateway/image checks ([de6470d](https://github.com/mohamed-rekiba/arvel-ecommerce-kit/commit/de6470d55d098b961be57a761e626cb1cf2ceeaf))
+
 ## [0.3.0](https://github.com/mohamed-rekiba/arvel-ecommerce-kit/compare/v0.2.0...v0.3.0) (2026-07-05)
 
 
