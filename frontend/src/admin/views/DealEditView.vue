@@ -125,7 +125,9 @@ onMounted(load)
         <template v-else>
           <label class="fld">
             <span>{{ t('deals.window') }}</span>
-            <span class="readonly muted">{{ when(window.starts_at) }} → {{ when(window.ends_at) }}</span>
+            <span class="readonly muted"
+              >{{ when(window.starts_at) }} → {{ when(window.ends_at) }}</span
+            >
           </label>
           <label class="fld fld--row">
             <span>{{ t('common.status') }}</span>

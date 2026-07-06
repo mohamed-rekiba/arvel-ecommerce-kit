@@ -112,7 +112,9 @@ onMounted(load)
           </template>
         </Column>
         <Column :header="t('banners.sort')" header-style="width: 5rem">
-          <template #body="{ data }"><span class="muted">{{ data.sort }}</span></template>
+          <template #body="{ data }"
+            ><span class="muted">{{ data.sort }}</span></template
+          >
         </Column>
         <Column :header="t('common.status')" header-style="width: 7rem">
           <template #body="{ data }">

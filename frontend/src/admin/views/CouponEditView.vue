@@ -130,7 +130,9 @@ onMounted(load)
             />
           </label>
           <label class="fld">
-            <span>{{ form.type === 'percent' ? t('coupons.percent_val') : t('coupons.amount') }}</span>
+            <span>{{
+              form.type === 'percent' ? t('coupons.percent_val') : t('coupons.amount')
+            }}</span>
             <InputNumber
               v-if="form.type === 'percent'"
               v-model="form.value"

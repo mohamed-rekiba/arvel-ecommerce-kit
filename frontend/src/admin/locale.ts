@@ -444,8 +444,10 @@ const MESSAGES = {
     'banners.placement': 'Emplacement',
     'banners.image_after_save': 'Enregistrez d’abord la diapositive, puis téléversez son image.',
     'banners.replace_image': 'Remplacer l’image',
-    'pedit.after_save_hint': 'Le statut, la visibilité et la mise en avant s’appliquent après l’enregistrement.',
-    'pedit.variants_after_save': 'Enregistrez d’abord le produit, puis ajoutez les variantes et le stock.',
+    'pedit.after_save_hint':
+      'Le statut, la visibilité et la mise en avant s’appliquent après l’enregistrement.',
+    'pedit.variants_after_save':
+      'Enregistrez d’abord le produit, puis ajoutez les variantes et le stock.',
     'pedit.no_variants': 'Aucune variante pour l’instant.',
     'pedit.gallery_after_save': 'Enregistrez d’abord le produit, puis téléversez des images.',
     'deals.new': 'Nouvelle promo',

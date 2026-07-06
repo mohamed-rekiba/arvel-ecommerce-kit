@@ -449,7 +449,7 @@ provides-extras = ["2fa", "all", "azure", "console", "dev", "docs", "gcs", "http
 
 [[package]]
 name = "arvel-ecommerce-kit"
-version = "0.1.0"
+version = "0.3.0"
 source = { virtual = "." }
 dependencies = [
     { name = "arvel", extra = ["oidc", "queue-amqp", "s3", "search", "standard", "telemetry"] },
