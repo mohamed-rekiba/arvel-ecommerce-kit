@@ -40,8 +40,10 @@ def _post_webhook(client, event: dict, *, sign: bool = True):
 
 def _gateway_handler(request: httpx.Request) -> httpx.Response:
     if request.url.path == "/charges":
+        # a charge is a resource creation — the gateway answers 201, not 200; the
+        # controller must treat any 2xx as success, not exactly-200
         return httpx.Response(
-            200, json={"id": "ch_test_123", "client_secret": "cs_test_abc"}
+            201, json={"id": "ch_test_123", "client_secret": "cs_test_abc"}
         )
     return httpx.Response(404, json={"error": "not found"})
 

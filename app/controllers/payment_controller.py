@@ -63,7 +63,7 @@ async def pay(request: Request) -> PaymentOut:
         f"{gateway}/charges",
         json={"amount": order.total_cents, "currency": "usd", "order_id": order.id},
     )
-    if not response.ok():
+    if not response.successful():  # a charge POST may answer 201, not just 200
         abort(502, "Payment gateway error.")
     charge: dict[str, Any] = response.json()
 

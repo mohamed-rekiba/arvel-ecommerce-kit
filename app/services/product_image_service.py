@@ -46,7 +46,7 @@ class ProductImageService:
         try:
             # follow_redirects: image CDNs (Picsum, etc.) 302 to the actual file
             response = await Http.timeout(15).get(url, follow_redirects=True)
-            if not response.ok() or not response.content():
+            if not response.successful() or not response.content():
                 return False
             await model.add_media(
                 response.content(),
