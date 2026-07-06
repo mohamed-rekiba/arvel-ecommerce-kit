@@ -246,7 +246,9 @@ onMounted(load)
     :title="isCreate ? t('products.new') : form.translations.en.name || slug"
     back-to="/admin/products"
     :back-label="t('nav.products')"
-    :save-label="saving ? t('common.saving') : isCreate ? t('pedit.create') : t('pedit.save_changes')"
+    :save-label="
+      saving ? t('common.saving') : isCreate ? t('pedit.create') : t('pedit.save_changes')
+    "
     :saving="saving"
     :disabled="saving || !form.translations.en.name.trim()"
     @save="save"
@@ -452,7 +454,9 @@ onMounted(load)
               <span>+ {{ t('pedit.upload') }}</span>
             </label>
           </div>
-          <small v-if="firstError('image')" class="err" role="alert">{{ firstError('image') }}</small>
+          <small v-if="firstError('image')" class="err" role="alert">{{
+            firstError('image')
+          }}</small>
         </template>
       </div>
     </template>

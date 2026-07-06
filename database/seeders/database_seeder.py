@@ -106,7 +106,9 @@ _PHOTOS: dict[str, list[str]] = {
         "1594939426837-ed35ea06b743",
     ],
 }
-_PHOTOS["phone"] = _PHOTOS["smartphone"]  # the "phone" keyword shares the smartphone pool
+_PHOTOS["phone"] = _PHOTOS[
+    "smartphone"
+]  # the "phone" keyword shares the smartphone pool
 _GALLERY_SIZE = 2
 # per-keyword rotation cursor so consecutive products of a type get different photos
 _cursor: dict[str, int] = {}
@@ -116,7 +118,9 @@ def _gallery(keyword: str, slug: str) -> list[tuple[str, str]]:
     """`_GALLERY_SIZE` (url, file_name) for a product, drawn from the curated electronics pool for its
     keyword and rotated so products of the same type don't all show the same photo."""
     kw = keyword.split(",")[0]
-    photos = _PHOTOS.get(kw) or _PHOTOS["smartphone"]  # electronics fallback, never a random source
+    photos = (
+        _PHOTOS.get(kw) or _PHOTOS["smartphone"]
+    )  # electronics fallback, never a random source
     start = _cursor.get(kw, 0)
     _cursor[kw] = start + _GALLERY_SIZE
     return [
@@ -325,7 +329,9 @@ class DatabaseSeeder(Seeder):
             "Aperture X100 Camera",
         }
         products_by_name: dict[str, Product] = {}
-        self.line(f"→ products: seeding {len(catalog)}, each downloading {_GALLERY_SIZE} images…")
+        self.line(
+            f"→ products: seeding {len(catalog)}, each downloading {_GALLERY_SIZE} images…"
+        )
         for category, vendor_slug, price, keyword, name in self.with_progress_bar(
             catalog, label="products"
         ):

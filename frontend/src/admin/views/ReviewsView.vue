@@ -83,7 +83,9 @@ onMounted(load)
         </Column>
         <Column :header="t('reviews.review')">
           <template #body="{ data }">
-            <div class="stars">{{ '★'.repeat(data.rating) }}<span class="pname"> {{ data.title ?? '' }}</span></div>
+            <div class="stars">
+              {{ '★'.repeat(data.rating) }}<span class="pname"> {{ data.title ?? '' }}</span>
+            </div>
             <div class="body">{{ data.body }}</div>
             <div class="pslug">{{ t('reviews.by', { author: data.author }) }}</div>
           </template>
