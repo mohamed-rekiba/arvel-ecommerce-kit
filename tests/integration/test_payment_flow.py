@@ -46,8 +46,10 @@ def test_guest_token_pay_webhook_paid_on_pg(
     from bootstrap.app import create_app
 
     app = create_app()
+    asgi = app.as_asgi()  # registers providers first (incl. the default "http" binding)
+    # fake the outbound gateway AFTER as_asgi, so provider registration doesn't clobber it
     app.instance("http", Client(transport=httpx.MockTransport(_gateway)))
-    with TestClient(app=app.as_asgi()) as client:
+    with TestClient(app=asgi) as client:
         cart_token = client.post(
             "/api/cart/items", json={"product_variant_id": 1, "quantity": 1}
         ).json()["cart_token"]
