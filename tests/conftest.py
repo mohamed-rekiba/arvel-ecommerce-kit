@@ -9,6 +9,9 @@ os.environ.setdefault("QUEUE_CONNECTION", "memory")
 os.environ.setdefault("MAIL_MAILER", "log")
 os.environ.setdefault("SEARCH_DRIVER", "array")
 os.environ.setdefault("FILESYSTEM_DISK", "local")
+# telemetry export needs a live OTLP collector; the unit tier has none, so keep it off (arvel's
+# default) — the OTLP path is exercised in the integration tier, not here.
+os.environ.setdefault("OTEL_ENABLED", "false")
 os.environ.setdefault("PAYMENT_GATEWAY_URL", "https://payments.example.test")
 # a non-default secret: webhook verification fails closed on the shipped default outside debug
 os.environ.setdefault("PAYMENT_GATEWAY_SECRET", "kit-test-webhook-secret")
