@@ -105,7 +105,7 @@ def test_password_reset_flow(client, faked_mail) -> None:
     assert forgot.status_code == 200
     assert "reset_token" not in forgot.json()
     faked_mail.assert_sent(PasswordReset)
-    assert faked_mail.recipients[-1] == ["ada@example.com"]
+    assert faked_mail.recipients[-1]["to"] == ["ada@example.com"]
     reset_token = faked_mail.sent[-1].token
 
     # reset to a new password (the broker keys the stored token by email → the body carries it)

@@ -106,7 +106,7 @@ def test_guest_checkout_email_receives_the_confirmation(client, faked_mail) -> N
     assert placed.status_code == 201
     assert placed.json()["contact_email"] == "guest@example.com"
     faked_mail.assert_sent(OrderConfirmation)
-    assert faked_mail.recipients[0] == ["guest@example.com"]
+    assert faked_mail.recipients[0]["to"] == ["guest@example.com"]
 
 
 def test_guest_checkout_without_email_is_rejected(client, faked_mail) -> None:

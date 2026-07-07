@@ -110,7 +110,7 @@ def test_profile_update_and_email_change_reverifies(client, faked_mail) -> None:
     )
     assert changed.status_code == 200
     assert changed.json()["email_verified"] is False
-    assert faked_mail.recipients[-1] == ["mira.new@example.com"]
+    assert faked_mail.recipients[-1]["to"] == ["mira.new@example.com"]
 
     # a taken email is rejected
     _register(client, email="taken@example.com")
