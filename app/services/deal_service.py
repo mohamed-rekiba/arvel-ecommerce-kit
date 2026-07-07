@@ -4,7 +4,6 @@ authoritative re-price inside the order transaction). Current-price-wins: an exp
 leaks into an order, a deal that started after the item was carted is honored."""
 
 from decimal import Decimal
-from typing import cast
 
 from arvel.dates import Date
 from arvel.support import Money
@@ -27,7 +26,7 @@ async def active_deal(product_id: int) -> Deal | None:
     deals = await Deal.where("product_id", product_id).order_by("id", "desc").get()
     for deal in deals:
         if is_live(deal):
-            return cast("Deal", deal)
+            return deal
     return None
 
 

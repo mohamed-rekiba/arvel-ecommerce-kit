@@ -2,6 +2,7 @@
 (product galleries, banners, customer avatars) in one list, each row resolved to its owner.
 Read-only: deletion stays with the owning resource (e.g. the product-gallery delete route)."""
 
+from collections.abc import Sequence
 from typing import cast
 
 from arvel import abort
@@ -19,7 +20,7 @@ from app.schemas import MediaItemOut
 _OWNER_TYPES = {"Product": "product", "Banner": "banner", "User": "user"}
 
 
-async def _owner_labels(rows: list[Media]) -> dict[tuple[str, int], str]:
+async def _owner_labels(rows: Sequence[Media]) -> dict[tuple[str, int], str]:
     """Batch-resolve owner display labels per model type — one query per type, not per row."""
     ids: dict[str, set[int]] = {}
     for m in rows:

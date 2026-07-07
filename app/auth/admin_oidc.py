@@ -88,4 +88,4 @@ async def resolve_admin(request: Request, *, persist_roles: bool = False) -> Use
     else:
         # Ephemeral, request-scoped grants — no membership written.
         user.set_idp_roles(idp_roles)
-    return cast("User", user)
+    return user
