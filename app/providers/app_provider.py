@@ -44,7 +44,7 @@ class AppServiceProvider(ServiceProvider):
 
     def boot(self) -> None:
         """Boot-time wiring (runs after every provider has registered)."""
-        # Register authorization policies on the app-bound Gate (Laravel AuthServiceProvider).
+        # Register authorization policies on the app-bound Gate.
         from app.models.product import Product
         from app.policies.product_policy import ProductPolicy
 
@@ -52,7 +52,7 @@ class AppServiceProvider(ServiceProvider):
             gate = self.app.make("gate")
             gate.policy(Product, ProductPolicy())
 
-            # super-admin bypasses every ability (Laravel Gate::before → super-admin auto-grant).
+            # super-admin bypasses every ability (a gate before-hook → auto-grant).
             from app.enums import Permission, RoleName
 
             async def _super_admin_first(user: Any, _ability: str) -> bool | None:
@@ -77,7 +77,7 @@ class AppServiceProvider(ServiceProvider):
                 _define(permission)
 
         # Catalog visibility: a publish change on a product/category/vendor flags the views dirty;
-        # the scheduled refresh_if_dirty (routes/console.py) debounces + recomputes (Laravel observers).
+        # the scheduled refresh_if_dirty (routes/console.py) debounces + recomputes (model observers).
         from app.models.category import Category
         from app.models.vendor import Vendor
         from app.observers.publish_observer import PublishObserver
@@ -86,7 +86,7 @@ class AppServiceProvider(ServiceProvider):
         for model in (Product, Category, Vendor):
             model.observe(observer)
 
-        # Register event listeners (Laravel EventServiceProvider).
+        # Register event listeners.
         if self.app.bound("events"):
             from arvel.auth.password_reset import PasswordResetRequested
 
