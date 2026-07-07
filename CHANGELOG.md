@@ -1,5 +1,20 @@
 # Changelog
 
+## [0.3.2](https://github.com/mohamed-rekiba/arvel-ecommerce-kit/compare/v0.3.1...v0.3.2) (2026-07-07)
+
+
+### Bug Fixes
+
+* **account:** compare the email-verify token id as a string ([3eb9ccd](https://github.com/mohamed-rekiba/arvel-ecommerce-kit/commit/3eb9ccdc09f4c2e7db84708a86e4b2712dc6fd31))
+* **models:** complete the morph map with every activity-subject model ([28b5668](https://github.com/mohamed-rekiba/arvel-ecommerce-kit/commit/28b56680604ae3988fc55155c7f91e820cb91963))
+* **models:** register the morph map at import time ([33a9f36](https://github.com/mohamed-rekiba/arvel-ecommerce-kit/commit/33a9f3610a3678b4bd0bd159db3d438e1b4e0254))
+* **types:** align app code with arvel's precise type signatures ([e29a408](https://github.com/mohamed-rekiba/arvel-ecommerce-kit/commit/e29a4080f729207d48343a32acf1a125af49290d))
+
+
+### Documentation
+
+* scrub reference-framework brand names from the app provider ([2fd133a](https://github.com/mohamed-rekiba/arvel-ecommerce-kit/commit/2fd133acdbd41bead14f1b176e671bcf6fed41c6))
+
 ## [0.3.1](https://github.com/mohamed-rekiba/arvel-ecommerce-kit/compare/v0.3.0...v0.3.1) (2026-07-06)
 
 
