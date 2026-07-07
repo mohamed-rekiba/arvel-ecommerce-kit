@@ -87,9 +87,11 @@ def client(tmp_path, monkeypatch):
     from bootstrap.app import create_app
 
     app = create_app()
-    # fake the payment gateway by binding an Http client with a MockTransport (no real network)
+    asgi = app.as_asgi()  # registers providers first (incl. the default "http" binding)
+    # fake the payment gateway by rebinding "http" with a MockTransport (no real network) — AFTER
+    # as_asgi, so provider registration doesn't clobber the override.
     app.instance("http", Client(transport=httpx.MockTransport(_gateway_handler)))
-    with TestClient(app=app.as_asgi()) as test_client:
+    with TestClient(app=asgi) as test_client:
         yield test_client
 
 
