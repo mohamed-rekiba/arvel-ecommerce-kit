@@ -132,7 +132,8 @@ async def verify_email(request: Request, data: VerifyEmailIn) -> MessageOut:
         if user is not None
         else None
     )
-    if user is None or verified_id != user.id:
+    # verify_email_token returns the id in string form (so UUID/ULID keys work), so compare as str
+    if user is None or verified_id != str(user.id):
         raise ValidationException(
             {"token": ["This verification link is invalid or has expired."]}
         )
