@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.4.1](https://github.com/mohamed-rekiba/arvel-ecommerce-kit/compare/v0.4.0...v0.4.1) (2026-07-08)
+
+
+### Documentation
+
+* note the catalog demonstrates offset + cursor pagination ([35b9a6e](https://github.com/mohamed-rekiba/arvel-ecommerce-kit/commit/35b9a6edae05660bda89878cc6963d5bc63d2838))
+
 ## [0.4.0](https://github.com/mohamed-rekiba/arvel-ecommerce-kit/compare/v0.3.2...v0.4.0) (2026-07-08)
 
 
