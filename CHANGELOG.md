@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.4.0](https://github.com/mohamed-rekiba/arvel-ecommerce-kit/compare/v0.3.2...v0.4.0) (2026-07-08)
+
+
+### Features
+
+* **catalog:** infinite-scroll product feed via keyset (cursor) pagination ([f04cbfe](https://github.com/mohamed-rekiba/arvel-ecommerce-kit/commit/f04cbfebe7e0b62ac5d48c0b8213fb401341df8c))
+
 ## [0.3.2](https://github.com/mohamed-rekiba/arvel-ecommerce-kit/compare/v0.3.1...v0.3.2) (2026-07-07)
 
 
