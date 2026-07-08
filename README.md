@@ -51,7 +51,7 @@ its retries lands in `failed_jobs`: inspect with `uv run arvel queue:failed`, re
 
 | Capability | Where |
 |---|---|
-| Catalog (ORM, relations, eager-load, pagination, enum casts) | `app/controllers/catalog_controller.py` |
+| Catalog (ORM, relations, eager-load, offset + cursor pagination, enum casts) | `app/controllers/catalog_controller.py` |
 | Product image **gallery** (media library + thumb/preview conversions) | `app/models/product.py`, `app/services/product_image_service.py` |
 | Customer auth (tokens, hashing, password reset) | `app/controllers/auth_controller.py` |
 | Authorization (gates/policies, admin guards) | `app/policies/`, `app/controllers/admin_product_controller.py` |
