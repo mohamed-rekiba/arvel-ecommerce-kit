@@ -4,6 +4,7 @@ served app reads, then asserts search, filtering, pagination shape, eager-loadin
 """
 
 import asyncio
+import os
 
 import pytest
 from litestar.testing import TestClient
@@ -128,3 +129,79 @@ def test_product_show_eager_loads_and_404s(client) -> None:
 
     missing = client.get("/api/products/does-not-exist")
     assert missing.status_code == 404
+
+
+# --- infinite-scroll feed: keyset (cursor) pagination, exercised through the served path ---
+
+
+async def _insert_product(url: str, *, slug: str, price_cents: int) -> None:
+    """Insert one retrievable product into the DB the served app reads (for the drift test)."""
+    db = ConnectionResolver({"default": {"url": url}})
+    for model in (Category, Product, ProductVariant):
+        model.set_connection(db)
+    shirts = await Category.where("slug", "shirts").first_or_fail()
+    p = await Product.create(
+        category_id=shirts.id,
+        translations={"en": {"name": slug, "description": "inserted mid-scroll."}},
+        slug=slug,
+        price_cents=price_cents,
+        currency="USD",
+        status=ProductStatus.ACTIVE,
+        published=True,
+    )
+    await ProductVariant.create(
+        product_id=p.id, sku=f"{slug}-S", name="Small", stock=10
+    )
+    for model in (Category, Product, ProductVariant):
+        model.set_connection(None)
+    await db.dispose()
+
+
+def test_products_feed_walks_every_page_once_via_cursor(client) -> None:
+    """Walking next_cursor visits all 25 retrievable products exactly once, in slug order, and the
+    feed ends with a null cursor. Default sort 'featured' = slug asc (+ pk tiebreaker)."""
+    seen: list[str] = []
+    cursor: str | None = None
+    pages = 0
+    while True:
+        params: dict[str, object] = {"per_page": 10}
+        if cursor:
+            params["cursor"] = cursor
+        body = client.get("/api/products/feed", params=params).json()
+        pages += 1
+        assert body["per_page"] == 10
+        seen.extend(p["slug"] for p in body["data"])
+        cursor = body.get("next_cursor")
+        if not cursor:
+            break
+        assert pages < 10, "cursor never terminated"
+    assert pages == 3  # 10 + 10 + 5
+    assert seen == [f"aero-shirt-{i:02d}" for i in range(25)]  # full, ordered, no dupes
+
+
+def test_products_feed_is_drift_free_when_a_row_is_inserted_mid_scroll(client) -> None:
+    """The reason to prefer a cursor over offset: a product inserted *before* the cursor boundary
+    between page loads must NOT make page 2 repeat or skip a row. Offset(page=2) would duplicate the
+    boundary row; keyset seeks past the last-seen slug, so it stays exact."""
+    page1 = client.get("/api/products/feed", params={"per_page": 10}).json()
+    page1_slugs = [p["slug"] for p in page1["data"]]
+    assert page1_slugs == [f"aero-shirt-{i:02d}" for i in range(10)]
+    cursor = page1["next_cursor"]
+    assert cursor
+
+    # a new product that sorts within the already-seen window (before the cursor boundary)
+    asyncio.run(
+        _insert_product(
+            os.environ["DATABASE_URL"], slug="aero-shirt-05a", price_cents=2000
+        )
+    )
+
+    page2 = client.get(
+        "/api/products/feed", params={"per_page": 10, "cursor": cursor}
+    ).json()
+    page2_slugs = [p["slug"] for p in page2["data"]]
+    # no overlap with page 1, and the freshly-inserted early row does NOT reappear (it's behind the
+    # cursor) — exactly the rows offset paging would have drifted over.
+    assert set(page1_slugs).isdisjoint(page2_slugs)
+    assert "aero-shirt-05a" not in page2_slugs
+    assert page2_slugs == [f"aero-shirt-{i:02d}" for i in range(10, 20)]

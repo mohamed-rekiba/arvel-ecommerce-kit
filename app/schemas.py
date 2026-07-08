@@ -131,6 +131,16 @@ class ProductPage(Schema):
     total: int
 
 
+class ProductFeed(Schema, omit_defaults=True):
+    """The infinite-scroll catalog feed — arvel's CursorPaginator shape, typed. `next_cursor` is
+    null at the end of the feed; pass it back as the `cursor` query param to load the next page."""
+
+    data: list[ProductOut]
+    per_page: int
+    next_cursor: str | None = None
+    prev_cursor: str | None = None
+
+
 # --- admin views (all rows, incl. hidden, each annotated with is_visible) ---
 
 

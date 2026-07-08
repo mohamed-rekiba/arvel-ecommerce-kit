@@ -119,6 +119,7 @@ Route.post("/email/verify", account.verify_email, name="api.email.verify").statu
 # --- Catalog (public read API) ---
 Route.get("/categories", catalog.categories_index, name="api.categories.index")
 Route.get("/products", catalog.products_index, name="api.products.index")
+Route.get("/products/feed", catalog.products_feed, name="api.products.feed")
 Route.get("/products/{slug:str}", catalog.products_show, name="api.products.show")
 # Media library: serve a gallery item (original) or a named conversion (thumb/preview)
 Route.get("/media/{id:int}", media.serve_media, name="api.media.show")

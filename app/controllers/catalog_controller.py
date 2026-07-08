@@ -15,6 +15,7 @@ from app.schemas import (
     CategoryOut,
     GalleryImageOut,
     ProductDealOut,
+    ProductFeed,
     ProductOut,
     ProductPage,
     VariantOut,
@@ -204,23 +205,17 @@ async def _category_subtree_ids(slug: str) -> list[int]:
     return ids
 
 
-async def products_index(
-    request: Request,
-    q: str | None = None,
-    category: str | None = None,
-    sort: str = "featured",
-    featured: bool | None = None,
-    min_price: int | None = None,
-    max_price: int | None = None,
-    per_page: int = 15,
-    page: int = 1,
-) -> ProductPage:
-    """List **retrievable** products (the storefront view): published, with a published vendor, under a
-    fully-published category. Query params (documented in OpenAPI): `q` (name search), `category`
-    (slug — includes descendant categories), `sort` (featured|price_asc|price_desc|newest|name),
-    `per_page`, `page`."""
-    # scopes: only-visible (EXISTS filter), in_locale (project the active locale's `translation`); the
-    # eager-loaded category is also locale-projected so its translation comes along.
+async def _visible_products_query(
+    q: str | None,
+    category: str | None,
+    featured: bool | None,
+    min_price: int | None,
+    max_price: int | None,
+) -> Any:
+    """The retrievable-storefront product query with the common filters applied (no ordering yet).
+    Shared by the offset listing and the cursor feed so both see the exact same visibility rules.
+    Scopes: only-visible (EXISTS filter), in_locale (project the active locale's `translation`); the
+    eager-loaded category is also locale-projected so its translation comes along."""
     query = (
         Product.with_("variants", "media", category=_in_locale)
         .with_visibility(only_visible=True)
@@ -238,16 +233,64 @@ async def products_index(
         query = query.where("price_cents", ">=", min_price)
     if max_price is not None:
         query = query.where("price_cents", "<=", max_price)
+    return query
 
+
+async def _feed_items(result: Any) -> list[ProductOut]:
+    deals = await deal_service.active_deals_for([p.id for p in result.items()])
+    return [await product_out(p, deals.get(p.id)) for p in result.items()]
+
+
+async def products_index(
+    request: Request,
+    q: str | None = None,
+    category: str | None = None,
+    sort: str = "featured",
+    featured: bool | None = None,
+    min_price: int | None = None,
+    max_price: int | None = None,
+    per_page: int = 15,
+    page: int = 1,
+) -> ProductPage:
+    """List **retrievable** products (the storefront view): published, with a published vendor, under a
+    fully-published category. Query params (documented in OpenAPI): `q` (name search), `category`
+    (slug — includes descendant categories), `sort` (featured|price_asc|price_desc|newest|name),
+    `per_page`, `page`."""
+    query = await _visible_products_query(q, category, featured, min_price, max_price)
     column, direction = _SORTS.get(sort, _SORTS["featured"])
     result = await query.order_by(column, direction).paginate(per_page, page)
-    deals = await deal_service.active_deals_for([p.id for p in result.items()])
     return ProductPage(
-        data=[await product_out(p, deals.get(p.id)) for p in result.items()],
+        data=await _feed_items(result),
         current_page=result.current_page(),
         last_page=result.last_page(),
         per_page=result.per_page(),
         total=result.total(),
+    )
+
+
+async def products_feed(
+    request: Request,
+    q: str | None = None,
+    category: str | None = None,
+    sort: str = "featured",
+    featured: bool | None = None,
+    min_price: int | None = None,
+    max_price: int | None = None,
+    per_page: int = 15,
+    cursor: str | None = None,
+) -> ProductFeed:
+    """Infinite-scroll product feed — keyset (cursor) pagination. Unlike the offset listing, pages
+    stay correct even when products are published mid-scroll (no page drift / duplicate rows). Pass
+    the previous response's `next_cursor` back as `cursor` to fetch the next page; a null
+    `next_cursor` means the end of the feed. Same filters/sorts as the offset listing."""
+    query = await _visible_products_query(q, category, featured, min_price, max_price)
+    column, direction = _SORTS.get(sort, _SORTS["featured"])
+    result = await query.order_by(column, direction).cursor_paginate(per_page, cursor)
+    return ProductFeed(
+        data=await _feed_items(result),
+        per_page=result.per_page(),
+        next_cursor=result.next_cursor(),
+        prev_cursor=result.previous_cursor(),
     )
 
 
