@@ -82,7 +82,9 @@ async def _insert_one(url: str, slug: str) -> None:
     await _refresh(url)
 
 
-def test_cursor_feed_walks_and_is_drift_free_on_pg(postgres_url: str, kit_app: Any) -> None:
+def test_cursor_feed_walks_and_is_drift_free_on_pg(
+    postgres_url: str, kit_app: Any
+) -> None:
     asyncio.run(_seed_catalog(postgres_url, 12))
     with kit_app(DATABASE_URL=postgres_url) as client:
         # 1) walk the whole feed via next_cursor: every row once, slug-ordered, null-terminated
@@ -110,7 +112,9 @@ def test_cursor_feed_walks_and_is_drift_free_on_pg(postgres_url: str, kit_app: A
             f"feed-prod-{i:02d}" for i in range(5)
         ]
         boundary_cursor = page1["next_cursor"]
-        asyncio.run(_insert_one(postgres_url, "feed-prod-02a"))  # sorts between 02 and 03
+        asyncio.run(
+            _insert_one(postgres_url, "feed-prod-02a")
+        )  # sorts between 02 and 03
         page2 = client.get(
             "/api/products/feed", params={"per_page": 5, "cursor": boundary_cursor}
         ).json()

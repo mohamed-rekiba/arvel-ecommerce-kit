@@ -236,7 +236,7 @@ async def _visible_products_query(
     return query
 
 
-async def _feed_items(result: Any) -> list[ProductOut]:
+async def _product_outs(result: Any) -> list[ProductOut]:
     deals = await deal_service.active_deals_for([p.id for p in result.items()])
     return [await product_out(p, deals.get(p.id)) for p in result.items()]
 
@@ -260,7 +260,7 @@ async def products_index(
     column, direction = _SORTS.get(sort, _SORTS["featured"])
     result = await query.order_by(column, direction).paginate(per_page, page)
     return ProductPage(
-        data=await _feed_items(result),
+        data=await _product_outs(result),
         current_page=result.current_page(),
         last_page=result.last_page(),
         per_page=result.per_page(),
@@ -287,7 +287,7 @@ async def products_feed(
     column, direction = _SORTS.get(sort, _SORTS["featured"])
     result = await query.order_by(column, direction).cursor_paginate(per_page, cursor)
     return ProductFeed(
-        data=await _feed_items(result),
+        data=await _product_outs(result),
         per_page=result.per_page(),
         next_cursor=result.next_cursor(),
         prev_cursor=result.previous_cursor(),

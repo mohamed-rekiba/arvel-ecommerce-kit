@@ -131,9 +131,10 @@ class ProductPage(Schema):
     total: int
 
 
-class ProductFeed(Schema, omit_defaults=True):
+class ProductFeed(Schema):
     """The infinite-scroll catalog feed — arvel's CursorPaginator shape, typed. `next_cursor` is
-    null at the end of the feed; pass it back as the `cursor` query param to load the next page."""
+    null at the end of the feed; pass it back as the `cursor` query param to load the next page.
+    (No omit_defaults: the cursor fields always serialize, so a client can stop on `next_cursor === null`.)"""
 
     data: list[ProductOut]
     per_page: int
