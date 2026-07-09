@@ -5,14 +5,14 @@
  * The arvel-ecommerce-kit API.
  * OpenAPI spec version: 0.1.0
  */
-import type { ApiDevGatewayCharges400Extra } from './apiDevGatewayCharges400Extra'
+import type { ApiDevGatewayCharges400Extra } from './apiDevGatewayCharges400Extra';
 
 /**
  * Validation Exception
  */
 export type ApiDevGatewayCharges400 = {
-  status_code: number
-  detail: string
+  status_code: number;
+  detail: string;
   /** @nullable */
-  extra?: ApiDevGatewayCharges400Extra
-}
+  extra?: ApiDevGatewayCharges400Extra;
+};

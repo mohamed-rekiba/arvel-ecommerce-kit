@@ -7,5 +7,5 @@
  */
 
 export interface UpdateItemIn {
-  quantity: number
+  quantity: number;
 }

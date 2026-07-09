@@ -7,5 +7,5 @@
  */
 
 export interface ForgotPasswordIn {
-  email: string
+  email: string;
 }

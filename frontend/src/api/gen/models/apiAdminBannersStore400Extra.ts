@@ -9,4 +9,4 @@
 /**
  * @nullable
  */
-export type ApiAdminBannersStore400Extra = { [key: string]: unknown } | unknown[] | null
+export type ApiAdminBannersStore400Extra = {[key: string]: unknown} | unknown[] | null;

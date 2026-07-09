@@ -5,14 +5,14 @@
  * The arvel-ecommerce-kit API.
  * OpenAPI spec version: 0.1.0
  */
-import type { ApiUserPassword400Extra } from './apiUserPassword400Extra'
+import type { ApiUserPassword400Extra } from './apiUserPassword400Extra';
 
 /**
  * Validation Exception
  */
 export type ApiUserPassword400 = {
-  status_code: number
-  detail: string
+  status_code: number;
+  detail: string;
   /** @nullable */
-  extra?: ApiUserPassword400Extra
-}
+  extra?: ApiUserPassword400Extra;
+};

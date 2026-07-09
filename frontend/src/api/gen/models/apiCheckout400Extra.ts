@@ -9,4 +9,4 @@
 /**
  * @nullable
  */
-export type ApiCheckout400Extra = { [key: string]: unknown } | unknown[] | null
+export type ApiCheckout400Extra = {[key: string]: unknown} | unknown[] | null;

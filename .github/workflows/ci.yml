@@ -90,6 +90,30 @@ jobs:
       - name: pytest -m integration
         run: uv run pytest tests/integration -m integration --tb=short
 
+  contract:
+    name: API Contract (openapi + typed client not drifted)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7
+      - uses: astral-sh/setup-uv@fac544c07dec837d0ccb6301d7b5580bf5edae39 # v8.2.0
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+          enable-cache: true
+      - uses: actions/setup-node@v6
+        with:
+          node-version: "22"
+          cache: npm
+          cache-dependency-path: frontend/package-lock.json
+      - run: uv sync --no-sources --all-extras
+      - run: cd frontend && npm ci
+      # regenerate the exported OpenAPI doc + the orval client from the live API; if either
+      # differs from what's committed, the single typed contract has silently drifted — fail.
+      - name: openapi + client not drifted
+        run: |
+          uv run arvel openapi:export frontend/openapi.json
+          cd frontend && npm run api:generate
+          cd .. && git diff --exit-code frontend/openapi.json frontend/src/api/gen
+
   frontend:
     name: Frontend (vue-tsc + vite build)
     runs-on: ubuntu-latest

@@ -9,4 +9,4 @@
 /**
  * @nullable
  */
-export type ApiAdminCouponsStore400Extra = { [key: string]: unknown } | unknown[] | null
+export type ApiAdminCouponsStore400Extra = {[key: string]: unknown} | unknown[] | null;

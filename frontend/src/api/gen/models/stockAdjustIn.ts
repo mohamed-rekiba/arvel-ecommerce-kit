@@ -7,7 +7,7 @@
  */
 
 export interface StockAdjustIn {
-  set?: number | null
-  delta?: number | null
-  reason?: string | null
+  set?: number | null;
+  delta?: number | null;
+  reason?: string | null;
 }

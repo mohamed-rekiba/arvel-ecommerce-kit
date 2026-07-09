@@ -5,11 +5,11 @@
  * The arvel-ecommerce-kit API.
  * OpenAPI spec version: 0.1.0
  */
-import type { AdminOrderEventOutProperties } from './adminOrderEventOutProperties'
+import type { AdminOrderEventOutProperties } from './adminOrderEventOutProperties';
 
 export interface AdminOrderEventOut {
-  description: string
-  causer_id: number | null
-  properties: AdminOrderEventOutProperties
-  created_at: string | null
+  description: string;
+  causer_id: number | null;
+  properties: AdminOrderEventOutProperties;
+  created_at: string | null;
 }

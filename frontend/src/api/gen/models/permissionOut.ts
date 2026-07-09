@@ -7,6 +7,6 @@
  */
 
 export interface PermissionOut {
-  id: number
-  name: string
+  id: number;
+  name: string;
 }

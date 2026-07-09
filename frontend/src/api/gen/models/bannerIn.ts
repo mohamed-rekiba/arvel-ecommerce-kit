@@ -5,11 +5,11 @@
  * The arvel-ecommerce-kit API.
  * OpenAPI spec version: 0.1.0
  */
-import type { BannerInTranslations } from './bannerInTranslations'
+import type { BannerInTranslations } from './bannerInTranslations';
 
 export interface BannerIn {
-  translations: BannerInTranslations
-  cta_to?: string
-  sort?: number
-  active?: boolean
+  translations: BannerInTranslations;
+  cta_to?: string;
+  sort?: number;
+  active?: boolean;
 }

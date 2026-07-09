@@ -7,5 +7,5 @@
  */
 
 export type ApiAdminReviewsIndexParams = {
-  status?: string
-}
+status?: string;
+};

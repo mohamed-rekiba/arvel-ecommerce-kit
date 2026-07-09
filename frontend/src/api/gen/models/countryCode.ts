@@ -9,7 +9,8 @@
 /**
  * Countries the shop ships to (ISO 3166-1 alpha-2) — a closed, validated set.
  */
-export type CountryCode = (typeof CountryCode)[keyof typeof CountryCode]
+export type CountryCode = typeof CountryCode[keyof typeof CountryCode];
+
 
 export const CountryCode = {
   US: 'US',
@@ -17,5 +18,5 @@ export const CountryCode = {
   GB: 'GB',
   DE: 'DE',
   FR: 'FR',
-  EG: 'EG'
-} as const
+  EG: 'EG',
+} as const;

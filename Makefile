@@ -1,6 +1,6 @@
 # arvel-ecommerce-kit — common tasks. `make help` lists them.
 .DEFAULT_GOAL := help
-.PHONY: help install env up down setup migrate fresh seed bucket serve front front-build worker schedule openapi test test-integration typecheck lint check hooks pre-commit clean
+.PHONY: help install env up down setup migrate fresh seed bucket serve front front-build worker schedule openapi openapi-check test test-integration typecheck lint check hooks pre-commit clean
 
 help: ## Show this help
 	@grep -hE '^[a-zA-Z_-]+:.*?## ' $(MAKEFILE_LIST) | awk 'BEGIN{FS=":.*?## "}{printf "  \033[36m%-12s\033[0m %s\n", $$1, $$2}'
@@ -56,6 +56,12 @@ openapi: ## Export the OpenAPI document + regenerate the typed frontend client (
 	uv run arvel openapi:export frontend/openapi.json
 	cd frontend && npm run api:generate
 
+openapi-check: ## Fail if the committed contract/client drifted from the live API (regen + git diff)
+	uv run arvel openapi:export frontend/openapi.json
+	cd frontend && npm run api:generate
+	@git diff --exit-code frontend/openapi.json frontend/src/api/gen > /dev/null \
+		|| { echo "OpenAPI contract/client is stale — run 'make openapi' and commit the result."; exit 1; }
+
 test: ## Run the test suite (in-process sqlite; no infra needed)
 	uv run pytest
 
@@ -68,7 +74,7 @@ typecheck: ## Strict type-check the app code
 lint: ## Lint + format check
 	uv run ruff check . && uv run ruff format --check .
 
-check: lint typecheck test ## Lint + types + tests
+check: lint typecheck test front-build ## Lint + types + tests + frontend build (vue-tsc)
 
 hooks:  ## Install pre-commit git hooks
 	$(RUN) pre-commit install

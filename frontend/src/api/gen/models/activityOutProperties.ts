@@ -6,4 +6,4 @@
  * OpenAPI spec version: 0.1.0
  */
 
-export type ActivityOutProperties = { [key: string]: unknown }
+export type ActivityOutProperties = {[key: string]: unknown};

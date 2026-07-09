@@ -88,6 +88,8 @@ import type {
   ApiOrdersShow400,
   ApiPasswordForgot400,
   ApiPasswordReset400,
+  ApiProductsFeed400,
+  ApiProductsFeedParams,
   ApiProductsIndex400,
   ApiProductsIndexParams,
   ApiProductsReviewsIndex400,
@@ -133,6 +135,7 @@ import type {
   OrderStatusIn,
   PaymentOut,
   PermissionOut,
+  ProductFeed,
   ProductIn,
   ProductOut,
   ProductPage,
@@ -164,20 +167,26 @@ import type {
   WebhookOut,
   WishlistToggleOut,
   _Public400
-} from './models'
+} from './models';
 
-import { apiFetch } from '../http'
+import { apiFetch } from '../http';
 export type broadcastingAuthResponse201 = {
   data: Response
   status: 201
 }
 
-export type broadcastingAuthResponseSuccess = broadcastingAuthResponse201 & {
-  headers: Headers
-}
-export type broadcastingAuthResponse = broadcastingAuthResponseSuccess
+export type broadcastingAuthResponseSuccess = (broadcastingAuthResponse201) & {
+  headers: Headers;
+};
+;
+
+export type broadcastingAuthResponse = (broadcastingAuthResponseSuccess)
 
 export const getBroadcastingAuthUrl = () => {
+
+
+
+
   return `/broadcasting/auth`
 }
 
@@ -187,26 +196,36 @@ export const getBroadcastingAuthUrl = () => {
  * 403 when the callback denies or no pattern matches.
  * @summary BroadcastingAuth
  */
-export const broadcastingAuth = async (
-  options?: RequestInit
-): Promise<broadcastingAuthResponse> => {
-  return apiFetch<broadcastingAuthResponse>(getBroadcastingAuthUrl(), {
+export const broadcastingAuth = async ( options?: RequestInit): Promise<broadcastingAuthResponse> => {
+
+  return apiFetch<broadcastingAuthResponse>(getBroadcastingAuthUrl(),
+  {
     ...options,
     method: 'POST'
-  })
-}
+
+
+  }
+);}
+
+
 
 export type apiHealthResponse200 = {
   data: HealthStatus
   status: 200
 }
 
-export type apiHealthResponseSuccess = apiHealthResponse200 & {
-  headers: Headers
-}
-export type apiHealthResponse = apiHealthResponseSuccess
+export type apiHealthResponseSuccess = (apiHealthResponse200) & {
+  headers: Headers;
+};
+;
+
+export type apiHealthResponse = (apiHealthResponseSuccess)
 
 export const getApiHealthUrl = () => {
+
+
+
+
   return `/api/health`
 }
 
@@ -214,12 +233,18 @@ export const getApiHealthUrl = () => {
  * Liveness probe.
  * @summary ApiHealth
  */
-export const apiHealth = async (options?: RequestInit): Promise<apiHealthResponse> => {
-  return apiFetch<apiHealthResponse>(getApiHealthUrl(), {
+export const apiHealth = async ( options?: RequestInit): Promise<apiHealthResponse> => {
+
+  return apiFetch<apiHealthResponse>(getApiHealthUrl(),
+  {
     ...options,
     method: 'GET'
-  })
-}
+
+
+  }
+);}
+
+
 
 export type apiLoginResponse200 = {
   data: TokenOut
@@ -231,16 +256,20 @@ export type apiLoginResponse400 = {
   status: 400
 }
 
-export type apiLoginResponseSuccess = apiLoginResponse200 & {
-  headers: Headers
-}
-export type apiLoginResponseError = apiLoginResponse400 & {
-  headers: Headers
-}
+export type apiLoginResponseSuccess = (apiLoginResponse200) & {
+  headers: Headers;
+};
+export type apiLoginResponseError = (apiLoginResponse400) & {
+  headers: Headers;
+};
 
-export type apiLoginResponse = apiLoginResponseSuccess | apiLoginResponseError
+export type apiLoginResponse = (apiLoginResponseSuccess | apiLoginResponseError)
 
 export const getApiLoginUrl = () => {
+
+
+
+
   return `/api/login`
 }
 
@@ -249,29 +278,36 @@ export const getApiLoginUrl = () => {
  * carries — build-a-cart-then-sign-in must never strand items).
  * @summary ApiLogin
  */
-export const apiLogin = async (
-  credentialsIn: CredentialsIn,
-  options?: RequestInit
-): Promise<apiLoginResponse> => {
-  return apiFetch<apiLoginResponse>(getApiLoginUrl(), {
+export const apiLogin = async (credentialsIn: CredentialsIn, options?: RequestInit): Promise<apiLoginResponse> => {
+
+  return apiFetch<apiLoginResponse>(getApiLoginUrl(),
+  {
     ...options,
     method: 'POST',
     headers: { 'Content-Type': 'application/json', ...options?.headers },
     body: JSON.stringify(credentialsIn)
-  })
-}
+  }
+);}
+
+
 
 export type apiUserResponse200 = {
   data: UserOut
   status: 200
 }
 
-export type apiUserResponseSuccess = apiUserResponse200 & {
-  headers: Headers
-}
-export type apiUserResponse = apiUserResponseSuccess
+export type apiUserResponseSuccess = (apiUserResponse200) & {
+  headers: Headers;
+};
+;
+
+export type apiUserResponse = (apiUserResponseSuccess)
 
 export const getApiUserUrl = () => {
+
+
+
+
   return `/api/user`
 }
 
@@ -279,12 +315,18 @@ export const getApiUserUrl = () => {
  * The authenticated user (requires a bearer token).
  * @summary ApiUser
  */
-export const apiUser = async (options?: RequestInit): Promise<apiUserResponse> => {
-  return apiFetch<apiUserResponse>(getApiUserUrl(), {
+export const apiUser = async ( options?: RequestInit): Promise<apiUserResponse> => {
+
+  return apiFetch<apiUserResponse>(getApiUserUrl(),
+  {
     ...options,
     method: 'GET'
-  })
-}
+
+
+  }
+);}
+
+
 
 export type apiUserUpdateResponse200 = {
   data: UserOut
@@ -296,16 +338,20 @@ export type apiUserUpdateResponse400 = {
   status: 400
 }
 
-export type apiUserUpdateResponseSuccess = apiUserUpdateResponse200 & {
-  headers: Headers
-}
-export type apiUserUpdateResponseError = apiUserUpdateResponse400 & {
-  headers: Headers
-}
+export type apiUserUpdateResponseSuccess = (apiUserUpdateResponse200) & {
+  headers: Headers;
+};
+export type apiUserUpdateResponseError = (apiUserUpdateResponse400) & {
+  headers: Headers;
+};
 
-export type apiUserUpdateResponse = apiUserUpdateResponseSuccess | apiUserUpdateResponseError
+export type apiUserUpdateResponse = (apiUserUpdateResponseSuccess | apiUserUpdateResponseError)
 
 export const getApiUserUpdateUrl = () => {
+
+
+
+
   return `/api/user`
 }
 
@@ -314,17 +360,18 @@ export const getApiUserUpdateUrl = () => {
  * verification link to the NEW address.
  * @summary ApiUserUpdate
  */
-export const apiUserUpdate = async (
-  profileIn: ProfileIn,
-  options?: RequestInit
-): Promise<apiUserUpdateResponse> => {
-  return apiFetch<apiUserUpdateResponse>(getApiUserUpdateUrl(), {
+export const apiUserUpdate = async (profileIn: ProfileIn, options?: RequestInit): Promise<apiUserUpdateResponse> => {
+
+  return apiFetch<apiUserUpdateResponse>(getApiUserUpdateUrl(),
+  {
     ...options,
     method: 'PATCH',
     headers: { 'Content-Type': 'application/json', ...options?.headers },
     body: JSON.stringify(profileIn)
-  })
-}
+  }
+);}
+
+
 
 export type apiRegisterResponse201 = {
   data: TokenOut
@@ -336,16 +383,20 @@ export type apiRegisterResponse400 = {
   status: 400
 }
 
-export type apiRegisterResponseSuccess = apiRegisterResponse201 & {
-  headers: Headers
-}
-export type apiRegisterResponseError = apiRegisterResponse400 & {
-  headers: Headers
-}
+export type apiRegisterResponseSuccess = (apiRegisterResponse201) & {
+  headers: Headers;
+};
+export type apiRegisterResponseError = (apiRegisterResponse400) & {
+  headers: Headers;
+};
 
-export type apiRegisterResponse = apiRegisterResponseSuccess | apiRegisterResponseError
+export type apiRegisterResponse = (apiRegisterResponseSuccess | apiRegisterResponseError)
 
 export const getApiRegisterUrl = () => {
+
+
+
+
   return `/api/register`
 }
 
@@ -353,29 +404,36 @@ export const getApiRegisterUrl = () => {
  * Register a customer and issue a scoped API token.
  * @summary ApiRegister
  */
-export const apiRegister = async (
-  registerIn: RegisterIn,
-  options?: RequestInit
-): Promise<apiRegisterResponse> => {
-  return apiFetch<apiRegisterResponse>(getApiRegisterUrl(), {
+export const apiRegister = async (registerIn: RegisterIn, options?: RequestInit): Promise<apiRegisterResponse> => {
+
+  return apiFetch<apiRegisterResponse>(getApiRegisterUrl(),
+  {
     ...options,
     method: 'POST',
     headers: { 'Content-Type': 'application/json', ...options?.headers },
     body: JSON.stringify(registerIn)
-  })
-}
+  }
+);}
+
+
 
 export type apiLogoutResponse200 = {
   data: MessageOut
   status: 200
 }
 
-export type apiLogoutResponseSuccess = apiLogoutResponse200 & {
-  headers: Headers
-}
-export type apiLogoutResponse = apiLogoutResponseSuccess
+export type apiLogoutResponseSuccess = (apiLogoutResponse200) & {
+  headers: Headers;
+};
+;
+
+export type apiLogoutResponse = (apiLogoutResponseSuccess)
 
 export const getApiLogoutUrl = () => {
+
+
+
+
   return `/api/logout`
 }
 
@@ -383,12 +441,18 @@ export const getApiLogoutUrl = () => {
  * Revoke only the current token (Sanctum currentAccessToken()->delete()).
  * @summary ApiLogout
  */
-export const apiLogout = async (options?: RequestInit): Promise<apiLogoutResponse> => {
-  return apiFetch<apiLogoutResponse>(getApiLogoutUrl(), {
+export const apiLogout = async ( options?: RequestInit): Promise<apiLogoutResponse> => {
+
+  return apiFetch<apiLogoutResponse>(getApiLogoutUrl(),
+  {
     ...options,
     method: 'POST'
-  })
-}
+
+
+  }
+);}
+
+
 
 export type apiPasswordForgotResponse200 = {
   data: ForgotPasswordOut
@@ -400,17 +464,20 @@ export type apiPasswordForgotResponse400 = {
   status: 400
 }
 
-export type apiPasswordForgotResponseSuccess = apiPasswordForgotResponse200 & {
-  headers: Headers
-}
-export type apiPasswordForgotResponseError = apiPasswordForgotResponse400 & {
-  headers: Headers
-}
+export type apiPasswordForgotResponseSuccess = (apiPasswordForgotResponse200) & {
+  headers: Headers;
+};
+export type apiPasswordForgotResponseError = (apiPasswordForgotResponse400) & {
+  headers: Headers;
+};
 
-export type apiPasswordForgotResponse =
-  apiPasswordForgotResponseSuccess | apiPasswordForgotResponseError
+export type apiPasswordForgotResponse = (apiPasswordForgotResponseSuccess | apiPasswordForgotResponseError)
 
 export const getApiPasswordForgotUrl = () => {
+
+
+
+
   return `/api/forgot-password`
 }
 
@@ -418,17 +485,18 @@ export const getApiPasswordForgotUrl = () => {
  * Store a single-use reset token and email its link. Always 200 (non-enumerating).
  * @summary ApiPasswordForgot
  */
-export const apiPasswordForgot = async (
-  forgotPasswordIn: ForgotPasswordIn,
-  options?: RequestInit
-): Promise<apiPasswordForgotResponse> => {
-  return apiFetch<apiPasswordForgotResponse>(getApiPasswordForgotUrl(), {
+export const apiPasswordForgot = async (forgotPasswordIn: ForgotPasswordIn, options?: RequestInit): Promise<apiPasswordForgotResponse> => {
+
+  return apiFetch<apiPasswordForgotResponse>(getApiPasswordForgotUrl(),
+  {
     ...options,
     method: 'POST',
     headers: { 'Content-Type': 'application/json', ...options?.headers },
     body: JSON.stringify(forgotPasswordIn)
-  })
-}
+  }
+);}
+
+
 
 export type apiPasswordResetResponse200 = {
   data: MessageOut
@@ -440,17 +508,20 @@ export type apiPasswordResetResponse400 = {
   status: 400
 }
 
-export type apiPasswordResetResponseSuccess = apiPasswordResetResponse200 & {
-  headers: Headers
-}
-export type apiPasswordResetResponseError = apiPasswordResetResponse400 & {
-  headers: Headers
-}
+export type apiPasswordResetResponseSuccess = (apiPasswordResetResponse200) & {
+  headers: Headers;
+};
+export type apiPasswordResetResponseError = (apiPasswordResetResponse400) & {
+  headers: Headers;
+};
 
-export type apiPasswordResetResponse =
-  apiPasswordResetResponseSuccess | apiPasswordResetResponseError
+export type apiPasswordResetResponse = (apiPasswordResetResponseSuccess | apiPasswordResetResponseError)
 
 export const getApiPasswordResetUrl = () => {
+
+
+
+
   return `/api/reset-password`
 }
 
@@ -458,17 +529,18 @@ export const getApiPasswordResetUrl = () => {
  * Consume the single-use reset token and set the new (hashed) password.
  * @summary ApiPasswordReset
  */
-export const apiPasswordReset = async (
-  resetPasswordIn: ResetPasswordIn,
-  options?: RequestInit
-): Promise<apiPasswordResetResponse> => {
-  return apiFetch<apiPasswordResetResponse>(getApiPasswordResetUrl(), {
+export const apiPasswordReset = async (resetPasswordIn: ResetPasswordIn, options?: RequestInit): Promise<apiPasswordResetResponse> => {
+
+  return apiFetch<apiPasswordResetResponse>(getApiPasswordResetUrl(),
+  {
     ...options,
     method: 'POST',
     headers: { 'Content-Type': 'application/json', ...options?.headers },
     body: JSON.stringify(resetPasswordIn)
-  })
-}
+  }
+);}
+
+
 
 export type apiUserPasswordResponse200 = {
   data: MessageOut
@@ -480,16 +552,20 @@ export type apiUserPasswordResponse400 = {
   status: 400
 }
 
-export type apiUserPasswordResponseSuccess = apiUserPasswordResponse200 & {
-  headers: Headers
-}
-export type apiUserPasswordResponseError = apiUserPasswordResponse400 & {
-  headers: Headers
-}
+export type apiUserPasswordResponseSuccess = (apiUserPasswordResponse200) & {
+  headers: Headers;
+};
+export type apiUserPasswordResponseError = (apiUserPasswordResponse400) & {
+  headers: Headers;
+};
 
-export type apiUserPasswordResponse = apiUserPasswordResponseSuccess | apiUserPasswordResponseError
+export type apiUserPasswordResponse = (apiUserPasswordResponseSuccess | apiUserPasswordResponseError)
 
 export const getApiUserPasswordUrl = () => {
+
+
+
+
   return `/api/user/password`
 }
 
@@ -497,29 +573,36 @@ export const getApiUserPasswordUrl = () => {
  * Set a new password — only with the current one in hand (credential-change confirmation).
  * @summary ApiUserPassword
  */
-export const apiUserPassword = async (
-  changePasswordIn: ChangePasswordIn,
-  options?: RequestInit
-): Promise<apiUserPasswordResponse> => {
-  return apiFetch<apiUserPasswordResponse>(getApiUserPasswordUrl(), {
+export const apiUserPassword = async (changePasswordIn: ChangePasswordIn, options?: RequestInit): Promise<apiUserPasswordResponse> => {
+
+  return apiFetch<apiUserPasswordResponse>(getApiUserPasswordUrl(),
+  {
     ...options,
     method: 'PUT',
     headers: { 'Content-Type': 'application/json', ...options?.headers },
     body: JSON.stringify(changePasswordIn)
-  })
-}
+  }
+);}
+
+
 
 export type apiEmailVerificationSendResponse200 = {
   data: MessageOut
   status: 200
 }
 
-export type apiEmailVerificationSendResponseSuccess = apiEmailVerificationSendResponse200 & {
-  headers: Headers
-}
-export type apiEmailVerificationSendResponse = apiEmailVerificationSendResponseSuccess
+export type apiEmailVerificationSendResponseSuccess = (apiEmailVerificationSendResponse200) & {
+  headers: Headers;
+};
+;
+
+export type apiEmailVerificationSendResponse = (apiEmailVerificationSendResponseSuccess)
 
 export const getApiEmailVerificationSendUrl = () => {
+
+
+
+
   return `/api/email/verification-notification`
 }
 
@@ -527,14 +610,18 @@ export const getApiEmailVerificationSendUrl = () => {
  * (Re-)send the verification link to the account email.
  * @summary ApiEmailVerificationSend
  */
-export const apiEmailVerificationSend = async (
-  options?: RequestInit
-): Promise<apiEmailVerificationSendResponse> => {
-  return apiFetch<apiEmailVerificationSendResponse>(getApiEmailVerificationSendUrl(), {
+export const apiEmailVerificationSend = async ( options?: RequestInit): Promise<apiEmailVerificationSendResponse> => {
+
+  return apiFetch<apiEmailVerificationSendResponse>(getApiEmailVerificationSendUrl(),
+  {
     ...options,
     method: 'POST'
-  })
-}
+
+
+  }
+);}
+
+
 
 export type apiEmailVerifyResponse200 = {
   data: MessageOut
@@ -546,16 +633,20 @@ export type apiEmailVerifyResponse400 = {
   status: 400
 }
 
-export type apiEmailVerifyResponseSuccess = apiEmailVerifyResponse200 & {
-  headers: Headers
-}
-export type apiEmailVerifyResponseError = apiEmailVerifyResponse400 & {
-  headers: Headers
-}
+export type apiEmailVerifyResponseSuccess = (apiEmailVerifyResponse200) & {
+  headers: Headers;
+};
+export type apiEmailVerifyResponseError = (apiEmailVerifyResponse400) & {
+  headers: Headers;
+};
 
-export type apiEmailVerifyResponse = apiEmailVerifyResponseSuccess | apiEmailVerifyResponseError
+export type apiEmailVerifyResponse = (apiEmailVerifyResponseSuccess | apiEmailVerifyResponseError)
 
 export const getApiEmailVerifyUrl = () => {
+
+
+
+
   return `/api/email/verify`
 }
 
@@ -565,29 +656,36 @@ export const getApiEmailVerifyUrl = () => {
  * changes — we load the user the link names, then check the token against their current email.
  * @summary ApiEmailVerify
  */
-export const apiEmailVerify = async (
-  verifyEmailIn: VerifyEmailIn,
-  options?: RequestInit
-): Promise<apiEmailVerifyResponse> => {
-  return apiFetch<apiEmailVerifyResponse>(getApiEmailVerifyUrl(), {
+export const apiEmailVerify = async (verifyEmailIn: VerifyEmailIn, options?: RequestInit): Promise<apiEmailVerifyResponse> => {
+
+  return apiFetch<apiEmailVerifyResponse>(getApiEmailVerifyUrl(),
+  {
     ...options,
     method: 'POST',
     headers: { 'Content-Type': 'application/json', ...options?.headers },
     body: JSON.stringify(verifyEmailIn)
-  })
-}
+  }
+);}
+
+
 
 export type apiCategoriesIndexResponse200 = {
   data: CategoryOut[]
   status: 200
 }
 
-export type apiCategoriesIndexResponseSuccess = apiCategoriesIndexResponse200 & {
-  headers: Headers
-}
-export type apiCategoriesIndexResponse = apiCategoriesIndexResponseSuccess
+export type apiCategoriesIndexResponseSuccess = (apiCategoriesIndexResponse200) & {
+  headers: Headers;
+};
+;
+
+export type apiCategoriesIndexResponse = (apiCategoriesIndexResponseSuccess)
 
 export const getApiCategoriesIndexUrl = () => {
+
+
+
+
   return `/api/categories`
 }
 
@@ -597,14 +695,18 @@ export const getApiCategoriesIndexUrl = () => {
  * derived ``image_url`` (a subtree product's thumb) for the storefront's category tiles.
  * @summary ApiCategoriesIndex
  */
-export const apiCategoriesIndex = async (
-  options?: RequestInit
-): Promise<apiCategoriesIndexResponse> => {
-  return apiFetch<apiCategoriesIndexResponse>(getApiCategoriesIndexUrl(), {
+export const apiCategoriesIndex = async ( options?: RequestInit): Promise<apiCategoriesIndexResponse> => {
+
+  return apiFetch<apiCategoriesIndexResponse>(getApiCategoriesIndexUrl(),
+  {
     ...options,
     method: 'GET'
-  })
-}
+
+
+  }
+);}
+
+
 
 export type apiProductsIndexResponse200 = {
   data: ProductPage
@@ -616,26 +718,26 @@ export type apiProductsIndexResponse400 = {
   status: 400
 }
 
-export type apiProductsIndexResponseSuccess = apiProductsIndexResponse200 & {
-  headers: Headers
-}
-export type apiProductsIndexResponseError = apiProductsIndexResponse400 & {
-  headers: Headers
-}
+export type apiProductsIndexResponseSuccess = (apiProductsIndexResponse200) & {
+  headers: Headers;
+};
+export type apiProductsIndexResponseError = (apiProductsIndexResponse400) & {
+  headers: Headers;
+};
 
-export type apiProductsIndexResponse =
-  apiProductsIndexResponseSuccess | apiProductsIndexResponseError
+export type apiProductsIndexResponse = (apiProductsIndexResponseSuccess | apiProductsIndexResponseError)
 
-export const getApiProductsIndexUrl = (params?: ApiProductsIndexParams) => {
-  const normalizedParams = new URLSearchParams()
+export const getApiProductsIndexUrl = (params?: ApiProductsIndexParams,) => {
+  const normalizedParams = new URLSearchParams();
 
   Object.entries(params || {}).forEach(([key, value]) => {
+
     if (value !== undefined) {
       normalizedParams.append(key, value === null ? 'null' : String(value))
     }
-  })
+  });
 
-  const stringifiedParams = normalizedParams.toString()
+  const stringifiedParams = normalizedParams.toString();
 
   return stringifiedParams.length > 0 ? `/api/products?${stringifiedParams}` : `/api/products`
 }
@@ -647,15 +749,72 @@ export const getApiProductsIndexUrl = (params?: ApiProductsIndexParams) => {
  * `per_page`, `page`.
  * @summary ApiProductsIndex
  */
-export const apiProductsIndex = async (
-  params?: ApiProductsIndexParams,
-  options?: RequestInit
-): Promise<apiProductsIndexResponse> => {
-  return apiFetch<apiProductsIndexResponse>(getApiProductsIndexUrl(params), {
+export const apiProductsIndex = async (params?: ApiProductsIndexParams, options?: RequestInit): Promise<apiProductsIndexResponse> => {
+
+  return apiFetch<apiProductsIndexResponse>(getApiProductsIndexUrl(params),
+  {
     ...options,
     method: 'GET'
-  })
+
+
+  }
+);}
+
+
+
+export type apiProductsFeedResponse200 = {
+  data: ProductFeed
+  status: 200
 }
+
+export type apiProductsFeedResponse400 = {
+  data: ApiProductsFeed400
+  status: 400
+}
+
+export type apiProductsFeedResponseSuccess = (apiProductsFeedResponse200) & {
+  headers: Headers;
+};
+export type apiProductsFeedResponseError = (apiProductsFeedResponse400) & {
+  headers: Headers;
+};
+
+export type apiProductsFeedResponse = (apiProductsFeedResponseSuccess | apiProductsFeedResponseError)
+
+export const getApiProductsFeedUrl = (params?: ApiProductsFeedParams,) => {
+  const normalizedParams = new URLSearchParams();
+
+  Object.entries(params || {}).forEach(([key, value]) => {
+
+    if (value !== undefined) {
+      normalizedParams.append(key, value === null ? 'null' : String(value))
+    }
+  });
+
+  const stringifiedParams = normalizedParams.toString();
+
+  return stringifiedParams.length > 0 ? `/api/products/feed?${stringifiedParams}` : `/api/products/feed`
+}
+
+/**
+ * Infinite-scroll product feed — keyset (cursor) pagination. Unlike the offset listing, pages
+ * stay correct even when products are published mid-scroll (no page drift / duplicate rows). Pass
+ * the previous response's `next_cursor` back as `cursor` to fetch the next page; a null
+ * `next_cursor` means the end of the feed. Same filters/sorts as the offset listing.
+ * @summary ApiProductsFeed
+ */
+export const apiProductsFeed = async (params?: ApiProductsFeedParams, options?: RequestInit): Promise<apiProductsFeedResponse> => {
+
+  return apiFetch<apiProductsFeedResponse>(getApiProductsFeedUrl(params),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
 
 export type apiProductsShowResponse200 = {
   data: ProductOut
@@ -667,16 +826,20 @@ export type apiProductsShowResponse400 = {
   status: 400
 }
 
-export type apiProductsShowResponseSuccess = apiProductsShowResponse200 & {
-  headers: Headers
-}
-export type apiProductsShowResponseError = apiProductsShowResponse400 & {
-  headers: Headers
-}
+export type apiProductsShowResponseSuccess = (apiProductsShowResponse200) & {
+  headers: Headers;
+};
+export type apiProductsShowResponseError = (apiProductsShowResponse400) & {
+  headers: Headers;
+};
 
-export type apiProductsShowResponse = apiProductsShowResponseSuccess | apiProductsShowResponseError
+export type apiProductsShowResponse = (apiProductsShowResponseSuccess | apiProductsShowResponseError)
 
-export const getApiProductsShowUrl = (slug: string) => {
+export const getApiProductsShowUrl = (slug: string,) => {
+
+
+
+
   return `/api/products/${slug}`
 }
 
@@ -684,15 +847,18 @@ export const getApiProductsShowUrl = (slug: string) => {
  * Show one **retrievable** product by slug (a non-retrievable product 404s — it isn't public).
  * @summary ApiProductsShow
  */
-export const apiProductsShow = async (
-  slug: string,
-  options?: RequestInit
-): Promise<apiProductsShowResponse> => {
-  return apiFetch<apiProductsShowResponse>(getApiProductsShowUrl(slug), {
+export const apiProductsShow = async (slug: string, options?: RequestInit): Promise<apiProductsShowResponse> => {
+
+  return apiFetch<apiProductsShowResponse>(getApiProductsShowUrl(slug),
+  {
     ...options,
     method: 'GET'
-  })
-}
+
+
+  }
+);}
+
+
 
 export type apiMediaShowResponse200 = {
   data: Response
@@ -704,16 +870,20 @@ export type apiMediaShowResponse400 = {
   status: 400
 }
 
-export type apiMediaShowResponseSuccess = apiMediaShowResponse200 & {
-  headers: Headers
-}
-export type apiMediaShowResponseError = apiMediaShowResponse400 & {
-  headers: Headers
-}
+export type apiMediaShowResponseSuccess = (apiMediaShowResponse200) & {
+  headers: Headers;
+};
+export type apiMediaShowResponseError = (apiMediaShowResponse400) & {
+  headers: Headers;
+};
 
-export type apiMediaShowResponse = apiMediaShowResponseSuccess | apiMediaShowResponseError
+export type apiMediaShowResponse = (apiMediaShowResponseSuccess | apiMediaShowResponseError)
 
-export const getApiMediaShowUrl = (id: number) => {
+export const getApiMediaShowUrl = (id: number,) => {
+
+
+
+
   return `/api/media/${id}`
 }
 
@@ -721,15 +891,18 @@ export const getApiMediaShowUrl = (id: number) => {
  * Stream a media item — the original, or a named conversion (thumb/preview).
  * @summary ApiMediaShow
  */
-export const apiMediaShow = async (
-  id: number,
-  options?: RequestInit
-): Promise<apiMediaShowResponse> => {
-  return apiFetch<apiMediaShowResponse>(getApiMediaShowUrl(id), {
+export const apiMediaShow = async (id: number, options?: RequestInit): Promise<apiMediaShowResponse> => {
+
+  return apiFetch<apiMediaShowResponse>(getApiMediaShowUrl(id),
+  {
     ...options,
     method: 'GET'
-  })
-}
+
+
+  }
+);}
+
+
 
 export type apiMediaConversionResponse200 = {
   data: Response
@@ -741,17 +914,21 @@ export type apiMediaConversionResponse400 = {
   status: 400
 }
 
-export type apiMediaConversionResponseSuccess = apiMediaConversionResponse200 & {
-  headers: Headers
-}
-export type apiMediaConversionResponseError = apiMediaConversionResponse400 & {
-  headers: Headers
-}
+export type apiMediaConversionResponseSuccess = (apiMediaConversionResponse200) & {
+  headers: Headers;
+};
+export type apiMediaConversionResponseError = (apiMediaConversionResponse400) & {
+  headers: Headers;
+};
 
-export type apiMediaConversionResponse =
-  apiMediaConversionResponseSuccess | apiMediaConversionResponseError
+export type apiMediaConversionResponse = (apiMediaConversionResponseSuccess | apiMediaConversionResponseError)
 
-export const getApiMediaConversionUrl = (id: number, conversion: string) => {
+export const getApiMediaConversionUrl = (id: number,
+    conversion: string,) => {
+
+
+
+
   return `/api/media/${id}/${conversion}`
 }
 
@@ -759,16 +936,19 @@ export const getApiMediaConversionUrl = (id: number, conversion: string) => {
  * Stream a media item — the original, or a named conversion (thumb/preview).
  * @summary ApiMediaConversion
  */
-export const apiMediaConversion = async (
-  id: number,
-  conversion: string,
-  options?: RequestInit
-): Promise<apiMediaConversionResponse> => {
-  return apiFetch<apiMediaConversionResponse>(getApiMediaConversionUrl(id, conversion), {
+export const apiMediaConversion = async (id: number,
+    conversion: string, options?: RequestInit): Promise<apiMediaConversionResponse> => {
+
+  return apiFetch<apiMediaConversionResponse>(getApiMediaConversionUrl(id,conversion),
+  {
     ...options,
     method: 'GET'
-  })
-}
+
+
+  }
+);}
+
+
 
 export type apiAdminProductsImageResponse201 = {
   data: GalleryImageOut[]
@@ -780,17 +960,20 @@ export type apiAdminProductsImageResponse400 = {
   status: 400
 }
 
-export type apiAdminProductsImageResponseSuccess = apiAdminProductsImageResponse201 & {
-  headers: Headers
-}
-export type apiAdminProductsImageResponseError = apiAdminProductsImageResponse400 & {
-  headers: Headers
-}
+export type apiAdminProductsImageResponseSuccess = (apiAdminProductsImageResponse201) & {
+  headers: Headers;
+};
+export type apiAdminProductsImageResponseError = (apiAdminProductsImageResponse400) & {
+  headers: Headers;
+};
 
-export type apiAdminProductsImageResponse =
-  apiAdminProductsImageResponseSuccess | apiAdminProductsImageResponseError
+export type apiAdminProductsImageResponse = (apiAdminProductsImageResponseSuccess | apiAdminProductsImageResponseError)
 
-export const getApiAdminProductsImageUrl = (id: number) => {
+export const getApiAdminProductsImageUrl = (id: number,) => {
+
+
+
+
   return `/api/admin/products/${id}/image`
 }
 
@@ -798,15 +981,18 @@ export const getApiAdminProductsImageUrl = (id: number) => {
  * Attach an uploaded image to the product gallery (catalog.update); returns the updated gallery.
  * @summary ApiAdminProductsImage
  */
-export const apiAdminProductsImage = async (
-  id: number,
-  options?: RequestInit
-): Promise<apiAdminProductsImageResponse> => {
-  return apiFetch<apiAdminProductsImageResponse>(getApiAdminProductsImageUrl(id), {
+export const apiAdminProductsImage = async (id: number, options?: RequestInit): Promise<apiAdminProductsImageResponse> => {
+
+  return apiFetch<apiAdminProductsImageResponse>(getApiAdminProductsImageUrl(id),
+  {
     ...options,
     method: 'POST'
-  })
-}
+
+
+  }
+);}
+
+
 
 export type apiAdminProductsMediaDestroyResponse200 = {
   data: GalleryImageOut[]
@@ -818,18 +1004,21 @@ export type apiAdminProductsMediaDestroyResponse400 = {
   status: 400
 }
 
-export type apiAdminProductsMediaDestroyResponseSuccess =
-  apiAdminProductsMediaDestroyResponse200 & {
-    headers: Headers
-  }
-export type apiAdminProductsMediaDestroyResponseError = apiAdminProductsMediaDestroyResponse400 & {
-  headers: Headers
-}
+export type apiAdminProductsMediaDestroyResponseSuccess = (apiAdminProductsMediaDestroyResponse200) & {
+  headers: Headers;
+};
+export type apiAdminProductsMediaDestroyResponseError = (apiAdminProductsMediaDestroyResponse400) & {
+  headers: Headers;
+};
 
-export type apiAdminProductsMediaDestroyResponse =
-  apiAdminProductsMediaDestroyResponseSuccess | apiAdminProductsMediaDestroyResponseError
+export type apiAdminProductsMediaDestroyResponse = (apiAdminProductsMediaDestroyResponseSuccess | apiAdminProductsMediaDestroyResponseError)
 
-export const getApiAdminProductsMediaDestroyUrl = (id: number, mediaId: number) => {
+export const getApiAdminProductsMediaDestroyUrl = (id: number,
+    mediaId: number,) => {
+
+
+
+
   return `/api/admin/products/${id}/media/${mediaId}`
 }
 
@@ -838,19 +1027,19 @@ export const getApiAdminProductsMediaDestroyUrl = (id: number, mediaId: number) 
  * updated gallery. catalog.update authority; a foreign media id can't cross products.
  * @summary ApiAdminProductsMediaDestroy
  */
-export const apiAdminProductsMediaDestroy = async (
-  id: number,
-  mediaId: number,
-  options?: RequestInit
-): Promise<apiAdminProductsMediaDestroyResponse> => {
-  return apiFetch<apiAdminProductsMediaDestroyResponse>(
-    getApiAdminProductsMediaDestroyUrl(id, mediaId),
-    {
-      ...options,
-      method: 'DELETE'
-    }
-  )
-}
+export const apiAdminProductsMediaDestroy = async (id: number,
+    mediaId: number, options?: RequestInit): Promise<apiAdminProductsMediaDestroyResponse> => {
+
+  return apiFetch<apiAdminProductsMediaDestroyResponse>(getApiAdminProductsMediaDestroyUrl(id,mediaId),
+  {
+    ...options,
+    method: 'DELETE'
+
+
+  }
+);}
+
+
 
 export type apiAdminProductsIndexResponse200 = {
   data: AdminProductPage
@@ -862,30 +1051,28 @@ export type apiAdminProductsIndexResponse400 = {
   status: 400
 }
 
-export type apiAdminProductsIndexResponseSuccess = apiAdminProductsIndexResponse200 & {
-  headers: Headers
-}
-export type apiAdminProductsIndexResponseError = apiAdminProductsIndexResponse400 & {
-  headers: Headers
-}
+export type apiAdminProductsIndexResponseSuccess = (apiAdminProductsIndexResponse200) & {
+  headers: Headers;
+};
+export type apiAdminProductsIndexResponseError = (apiAdminProductsIndexResponse400) & {
+  headers: Headers;
+};
 
-export type apiAdminProductsIndexResponse =
-  apiAdminProductsIndexResponseSuccess | apiAdminProductsIndexResponseError
+export type apiAdminProductsIndexResponse = (apiAdminProductsIndexResponseSuccess | apiAdminProductsIndexResponseError)
 
-export const getApiAdminProductsIndexUrl = (params?: ApiAdminProductsIndexParams) => {
-  const normalizedParams = new URLSearchParams()
+export const getApiAdminProductsIndexUrl = (params?: ApiAdminProductsIndexParams,) => {
+  const normalizedParams = new URLSearchParams();
 
   Object.entries(params || {}).forEach(([key, value]) => {
+
     if (value !== undefined) {
       normalizedParams.append(key, value === null ? 'null' : String(value))
     }
-  })
+  });
 
-  const stringifiedParams = normalizedParams.toString()
+  const stringifiedParams = normalizedParams.toString();
 
-  return stringifiedParams.length > 0
-    ? `/api/admin/products?${stringifiedParams}`
-    : `/api/admin/products`
+  return stringifiedParams.length > 0 ? `/api/admin/products?${stringifiedParams}` : `/api/admin/products`
 }
 
 /**
@@ -894,15 +1081,18 @@ export const getApiAdminProductsIndexUrl = (params?: ApiAdminProductsIndexParams
  * sortable by ``sort``. ``archived=true`` lists the soft-deleted (recoverable) rows instead.
  * @summary ApiAdminProductsIndex
  */
-export const apiAdminProductsIndex = async (
-  params?: ApiAdminProductsIndexParams,
-  options?: RequestInit
-): Promise<apiAdminProductsIndexResponse> => {
-  return apiFetch<apiAdminProductsIndexResponse>(getApiAdminProductsIndexUrl(params), {
+export const apiAdminProductsIndex = async (params?: ApiAdminProductsIndexParams, options?: RequestInit): Promise<apiAdminProductsIndexResponse> => {
+
+  return apiFetch<apiAdminProductsIndexResponse>(getApiAdminProductsIndexUrl(params),
+  {
     ...options,
     method: 'GET'
-  })
-}
+
+
+  }
+);}
+
+
 
 export type apiAdminProductsStoreResponse201 = {
   data: AdminProductOut
@@ -914,17 +1104,20 @@ export type apiAdminProductsStoreResponse400 = {
   status: 400
 }
 
-export type apiAdminProductsStoreResponseSuccess = apiAdminProductsStoreResponse201 & {
-  headers: Headers
-}
-export type apiAdminProductsStoreResponseError = apiAdminProductsStoreResponse400 & {
-  headers: Headers
-}
+export type apiAdminProductsStoreResponseSuccess = (apiAdminProductsStoreResponse201) & {
+  headers: Headers;
+};
+export type apiAdminProductsStoreResponseError = (apiAdminProductsStoreResponse400) & {
+  headers: Headers;
+};
 
-export type apiAdminProductsStoreResponse =
-  apiAdminProductsStoreResponseSuccess | apiAdminProductsStoreResponseError
+export type apiAdminProductsStoreResponse = (apiAdminProductsStoreResponseSuccess | apiAdminProductsStoreResponseError)
 
 export const getApiAdminProductsStoreUrl = () => {
+
+
+
+
   return `/api/admin/products`
 }
 
@@ -932,17 +1125,18 @@ export const getApiAdminProductsStoreUrl = () => {
  * Create a product (admins only) with per-locale content (en required).
  * @summary ApiAdminProductsStore
  */
-export const apiAdminProductsStore = async (
-  productIn: ProductIn,
-  options?: RequestInit
-): Promise<apiAdminProductsStoreResponse> => {
-  return apiFetch<apiAdminProductsStoreResponse>(getApiAdminProductsStoreUrl(), {
+export const apiAdminProductsStore = async (productIn: ProductIn, options?: RequestInit): Promise<apiAdminProductsStoreResponse> => {
+
+  return apiFetch<apiAdminProductsStoreResponse>(getApiAdminProductsStoreUrl(),
+  {
     ...options,
     method: 'POST',
     headers: { 'Content-Type': 'application/json', ...options?.headers },
     body: JSON.stringify(productIn)
-  })
-}
+  }
+);}
+
+
 
 export type apiAdminCategoriesIndexResponse200 = {
   data: AdminCategoryPage
@@ -954,45 +1148,46 @@ export type apiAdminCategoriesIndexResponse400 = {
   status: 400
 }
 
-export type apiAdminCategoriesIndexResponseSuccess = apiAdminCategoriesIndexResponse200 & {
-  headers: Headers
-}
-export type apiAdminCategoriesIndexResponseError = apiAdminCategoriesIndexResponse400 & {
-  headers: Headers
-}
+export type apiAdminCategoriesIndexResponseSuccess = (apiAdminCategoriesIndexResponse200) & {
+  headers: Headers;
+};
+export type apiAdminCategoriesIndexResponseError = (apiAdminCategoriesIndexResponse400) & {
+  headers: Headers;
+};
 
-export type apiAdminCategoriesIndexResponse =
-  apiAdminCategoriesIndexResponseSuccess | apiAdminCategoriesIndexResponseError
+export type apiAdminCategoriesIndexResponse = (apiAdminCategoriesIndexResponseSuccess | apiAdminCategoriesIndexResponseError)
 
-export const getApiAdminCategoriesIndexUrl = (params?: ApiAdminCategoriesIndexParams) => {
-  const normalizedParams = new URLSearchParams()
+export const getApiAdminCategoriesIndexUrl = (params?: ApiAdminCategoriesIndexParams,) => {
+  const normalizedParams = new URLSearchParams();
 
   Object.entries(params || {}).forEach(([key, value]) => {
+
     if (value !== undefined) {
       normalizedParams.append(key, value === null ? 'null' : String(value))
     }
-  })
+  });
 
-  const stringifiedParams = normalizedParams.toString()
+  const stringifiedParams = normalizedParams.toString();
 
-  return stringifiedParams.length > 0
-    ? `/api/admin/categories?${stringifiedParams}`
-    : `/api/admin/categories`
+  return stringifiedParams.length > 0 ? `/api/admin/categories?${stringifiedParams}` : `/api/admin/categories`
 }
 
 /**
  * List **all** categories (admin) with `is_visible` (inline EXISTS column).
  * @summary ApiAdminCategoriesIndex
  */
-export const apiAdminCategoriesIndex = async (
-  params?: ApiAdminCategoriesIndexParams,
-  options?: RequestInit
-): Promise<apiAdminCategoriesIndexResponse> => {
-  return apiFetch<apiAdminCategoriesIndexResponse>(getApiAdminCategoriesIndexUrl(params), {
+export const apiAdminCategoriesIndex = async (params?: ApiAdminCategoriesIndexParams, options?: RequestInit): Promise<apiAdminCategoriesIndexResponse> => {
+
+  return apiFetch<apiAdminCategoriesIndexResponse>(getApiAdminCategoriesIndexUrl(params),
+  {
     ...options,
     method: 'GET'
-  })
-}
+
+
+  }
+);}
+
+
 
 export type apiAdminCategoriesStoreResponse201 = {
   data: AdminCategoryOut
@@ -1004,34 +1199,38 @@ export type apiAdminCategoriesStoreResponse400 = {
   status: 400
 }
 
-export type apiAdminCategoriesStoreResponseSuccess = apiAdminCategoriesStoreResponse201 & {
-  headers: Headers
-}
-export type apiAdminCategoriesStoreResponseError = apiAdminCategoriesStoreResponse400 & {
-  headers: Headers
-}
+export type apiAdminCategoriesStoreResponseSuccess = (apiAdminCategoriesStoreResponse201) & {
+  headers: Headers;
+};
+export type apiAdminCategoriesStoreResponseError = (apiAdminCategoriesStoreResponse400) & {
+  headers: Headers;
+};
 
-export type apiAdminCategoriesStoreResponse =
-  apiAdminCategoriesStoreResponseSuccess | apiAdminCategoriesStoreResponseError
+export type apiAdminCategoriesStoreResponse = (apiAdminCategoriesStoreResponseSuccess | apiAdminCategoriesStoreResponseError)
 
 export const getApiAdminCategoriesStoreUrl = () => {
+
+
+
+
   return `/api/admin/categories`
 }
 
 /**
  * @summary ApiAdminCategoriesStore
  */
-export const apiAdminCategoriesStore = async (
-  categoryIn: CategoryIn,
-  options?: RequestInit
-): Promise<apiAdminCategoriesStoreResponse> => {
-  return apiFetch<apiAdminCategoriesStoreResponse>(getApiAdminCategoriesStoreUrl(), {
+export const apiAdminCategoriesStore = async (categoryIn: CategoryIn, options?: RequestInit): Promise<apiAdminCategoriesStoreResponse> => {
+
+  return apiFetch<apiAdminCategoriesStoreResponse>(getApiAdminCategoriesStoreUrl(),
+  {
     ...options,
     method: 'POST',
     headers: { 'Content-Type': 'application/json', ...options?.headers },
     body: JSON.stringify(categoryIn)
-  })
-}
+  }
+);}
+
+
 
 export type apiAdminProductsShowResponse200 = {
   data: AdminProductDetailOut
@@ -1043,17 +1242,20 @@ export type apiAdminProductsShowResponse400 = {
   status: 400
 }
 
-export type apiAdminProductsShowResponseSuccess = apiAdminProductsShowResponse200 & {
-  headers: Headers
-}
-export type apiAdminProductsShowResponseError = apiAdminProductsShowResponse400 & {
-  headers: Headers
-}
+export type apiAdminProductsShowResponseSuccess = (apiAdminProductsShowResponse200) & {
+  headers: Headers;
+};
+export type apiAdminProductsShowResponseError = (apiAdminProductsShowResponse400) & {
+  headers: Headers;
+};
 
-export type apiAdminProductsShowResponse =
-  apiAdminProductsShowResponseSuccess | apiAdminProductsShowResponseError
+export type apiAdminProductsShowResponse = (apiAdminProductsShowResponseSuccess | apiAdminProductsShowResponseError)
 
-export const getApiAdminProductsShowUrl = (id: number) => {
+export const getApiAdminProductsShowUrl = (id: number,) => {
+
+
+
+
   return `/api/admin/products/${id}`
 }
 
@@ -1061,15 +1263,18 @@ export const getApiAdminProductsShowUrl = (id: number) => {
  * One product with variants + gallery — the editor's read (hidden products included).
  * @summary ApiAdminProductsShow
  */
-export const apiAdminProductsShow = async (
-  id: number,
-  options?: RequestInit
-): Promise<apiAdminProductsShowResponse> => {
-  return apiFetch<apiAdminProductsShowResponse>(getApiAdminProductsShowUrl(id), {
+export const apiAdminProductsShow = async (id: number, options?: RequestInit): Promise<apiAdminProductsShowResponse> => {
+
+  return apiFetch<apiAdminProductsShowResponse>(getApiAdminProductsShowUrl(id),
+  {
     ...options,
     method: 'GET'
-  })
-}
+
+
+  }
+);}
+
+
 
 export type apiAdminProductsUpdateResponse200 = {
   data: AdminProductOut
@@ -1081,17 +1286,20 @@ export type apiAdminProductsUpdateResponse400 = {
   status: 400
 }
 
-export type apiAdminProductsUpdateResponseSuccess = apiAdminProductsUpdateResponse200 & {
-  headers: Headers
-}
-export type apiAdminProductsUpdateResponseError = apiAdminProductsUpdateResponse400 & {
-  headers: Headers
-}
+export type apiAdminProductsUpdateResponseSuccess = (apiAdminProductsUpdateResponse200) & {
+  headers: Headers;
+};
+export type apiAdminProductsUpdateResponseError = (apiAdminProductsUpdateResponse400) & {
+  headers: Headers;
+};
 
-export type apiAdminProductsUpdateResponse =
-  apiAdminProductsUpdateResponseSuccess | apiAdminProductsUpdateResponseError
+export type apiAdminProductsUpdateResponse = (apiAdminProductsUpdateResponseSuccess | apiAdminProductsUpdateResponseError)
 
-export const getApiAdminProductsUpdateUrl = (id: number) => {
+export const getApiAdminProductsUpdateUrl = (id: number,) => {
+
+
+
+
   return `/api/admin/products/${id}`
 }
 
@@ -1100,18 +1308,19 @@ export const getApiAdminProductsUpdateUrl = (id: number) => {
  * 404 to non-admins so existence isn't leaked).
  * @summary ApiAdminProductsUpdate
  */
-export const apiAdminProductsUpdate = async (
-  id: number,
-  updateProductIn: UpdateProductIn,
-  options?: RequestInit
-): Promise<apiAdminProductsUpdateResponse> => {
-  return apiFetch<apiAdminProductsUpdateResponse>(getApiAdminProductsUpdateUrl(id), {
+export const apiAdminProductsUpdate = async (id: number,
+    updateProductIn: UpdateProductIn, options?: RequestInit): Promise<apiAdminProductsUpdateResponse> => {
+
+  return apiFetch<apiAdminProductsUpdateResponse>(getApiAdminProductsUpdateUrl(id),
+  {
     ...options,
     method: 'PUT',
     headers: { 'Content-Type': 'application/json', ...options?.headers },
     body: JSON.stringify(updateProductIn)
-  })
-}
+  }
+);}
+
+
 
 export type apiAdminProductsDestroyResponse200 = {
   data: MessageOut
@@ -1123,17 +1332,20 @@ export type apiAdminProductsDestroyResponse400 = {
   status: 400
 }
 
-export type apiAdminProductsDestroyResponseSuccess = apiAdminProductsDestroyResponse200 & {
-  headers: Headers
-}
-export type apiAdminProductsDestroyResponseError = apiAdminProductsDestroyResponse400 & {
-  headers: Headers
-}
+export type apiAdminProductsDestroyResponseSuccess = (apiAdminProductsDestroyResponse200) & {
+  headers: Headers;
+};
+export type apiAdminProductsDestroyResponseError = (apiAdminProductsDestroyResponse400) & {
+  headers: Headers;
+};
 
-export type apiAdminProductsDestroyResponse =
-  apiAdminProductsDestroyResponseSuccess | apiAdminProductsDestroyResponseError
+export type apiAdminProductsDestroyResponse = (apiAdminProductsDestroyResponseSuccess | apiAdminProductsDestroyResponseError)
 
-export const getApiAdminProductsDestroyUrl = (id: number) => {
+export const getApiAdminProductsDestroyUrl = (id: number,) => {
+
+
+
+
   return `/api/admin/products/${id}`
 }
 
@@ -1141,15 +1353,18 @@ export const getApiAdminProductsDestroyUrl = (id: number) => {
  * ARCHIVE a product (soft delete — order history intact, restorable; 404 to non-admins).
  * @summary ApiAdminProductsDestroy
  */
-export const apiAdminProductsDestroy = async (
-  id: number,
-  options?: RequestInit
-): Promise<apiAdminProductsDestroyResponse> => {
-  return apiFetch<apiAdminProductsDestroyResponse>(getApiAdminProductsDestroyUrl(id), {
+export const apiAdminProductsDestroy = async (id: number, options?: RequestInit): Promise<apiAdminProductsDestroyResponse> => {
+
+  return apiFetch<apiAdminProductsDestroyResponse>(getApiAdminProductsDestroyUrl(id),
+  {
     ...options,
     method: 'DELETE'
-  })
-}
+
+
+  }
+);}
+
+
 
 export type apiAdminProductsRestoreResponse200 = {
   data: AdminProductOut
@@ -1161,17 +1376,20 @@ export type apiAdminProductsRestoreResponse400 = {
   status: 400
 }
 
-export type apiAdminProductsRestoreResponseSuccess = apiAdminProductsRestoreResponse200 & {
-  headers: Headers
-}
-export type apiAdminProductsRestoreResponseError = apiAdminProductsRestoreResponse400 & {
-  headers: Headers
-}
+export type apiAdminProductsRestoreResponseSuccess = (apiAdminProductsRestoreResponse200) & {
+  headers: Headers;
+};
+export type apiAdminProductsRestoreResponseError = (apiAdminProductsRestoreResponse400) & {
+  headers: Headers;
+};
 
-export type apiAdminProductsRestoreResponse =
-  apiAdminProductsRestoreResponseSuccess | apiAdminProductsRestoreResponseError
+export type apiAdminProductsRestoreResponse = (apiAdminProductsRestoreResponseSuccess | apiAdminProductsRestoreResponseError)
 
-export const getApiAdminProductsRestoreUrl = (id: number) => {
+export const getApiAdminProductsRestoreUrl = (id: number,) => {
+
+
+
+
   return `/api/admin/products/${id}/restore`
 }
 
@@ -1180,15 +1398,18 @@ export const getApiAdminProductsRestoreUrl = (id: number) => {
  * restores as hidden.
  * @summary ApiAdminProductsRestore
  */
-export const apiAdminProductsRestore = async (
-  id: number,
-  options?: RequestInit
-): Promise<apiAdminProductsRestoreResponse> => {
-  return apiFetch<apiAdminProductsRestoreResponse>(getApiAdminProductsRestoreUrl(id), {
+export const apiAdminProductsRestore = async (id: number, options?: RequestInit): Promise<apiAdminProductsRestoreResponse> => {
+
+  return apiFetch<apiAdminProductsRestoreResponse>(getApiAdminProductsRestoreUrl(id),
+  {
     ...options,
     method: 'POST'
-  })
-}
+
+
+  }
+);}
+
+
 
 export type apiAdminCategoriesUpdateResponse200 = {
   data: AdminCategoryOut
@@ -1200,35 +1421,39 @@ export type apiAdminCategoriesUpdateResponse400 = {
   status: 400
 }
 
-export type apiAdminCategoriesUpdateResponseSuccess = apiAdminCategoriesUpdateResponse200 & {
-  headers: Headers
-}
-export type apiAdminCategoriesUpdateResponseError = apiAdminCategoriesUpdateResponse400 & {
-  headers: Headers
-}
+export type apiAdminCategoriesUpdateResponseSuccess = (apiAdminCategoriesUpdateResponse200) & {
+  headers: Headers;
+};
+export type apiAdminCategoriesUpdateResponseError = (apiAdminCategoriesUpdateResponse400) & {
+  headers: Headers;
+};
 
-export type apiAdminCategoriesUpdateResponse =
-  apiAdminCategoriesUpdateResponseSuccess | apiAdminCategoriesUpdateResponseError
+export type apiAdminCategoriesUpdateResponse = (apiAdminCategoriesUpdateResponseSuccess | apiAdminCategoriesUpdateResponseError)
 
-export const getApiAdminCategoriesUpdateUrl = (id: number) => {
+export const getApiAdminCategoriesUpdateUrl = (id: number,) => {
+
+
+
+
   return `/api/admin/categories/${id}`
 }
 
 /**
  * @summary ApiAdminCategoriesUpdate
  */
-export const apiAdminCategoriesUpdate = async (
-  id: number,
-  categoryUpdateIn: CategoryUpdateIn,
-  options?: RequestInit
-): Promise<apiAdminCategoriesUpdateResponse> => {
-  return apiFetch<apiAdminCategoriesUpdateResponse>(getApiAdminCategoriesUpdateUrl(id), {
+export const apiAdminCategoriesUpdate = async (id: number,
+    categoryUpdateIn: CategoryUpdateIn, options?: RequestInit): Promise<apiAdminCategoriesUpdateResponse> => {
+
+  return apiFetch<apiAdminCategoriesUpdateResponse>(getApiAdminCategoriesUpdateUrl(id),
+  {
     ...options,
     method: 'PUT',
     headers: { 'Content-Type': 'application/json', ...options?.headers },
     body: JSON.stringify(categoryUpdateIn)
-  })
-}
+  }
+);}
+
+
 
 export type apiAdminCategoriesDestroyResponse200 = {
   data: MessageOut
@@ -1240,58 +1465,74 @@ export type apiAdminCategoriesDestroyResponse400 = {
   status: 400
 }
 
-export type apiAdminCategoriesDestroyResponseSuccess = apiAdminCategoriesDestroyResponse200 & {
-  headers: Headers
-}
-export type apiAdminCategoriesDestroyResponseError = apiAdminCategoriesDestroyResponse400 & {
-  headers: Headers
-}
+export type apiAdminCategoriesDestroyResponseSuccess = (apiAdminCategoriesDestroyResponse200) & {
+  headers: Headers;
+};
+export type apiAdminCategoriesDestroyResponseError = (apiAdminCategoriesDestroyResponse400) & {
+  headers: Headers;
+};
 
-export type apiAdminCategoriesDestroyResponse =
-  apiAdminCategoriesDestroyResponseSuccess | apiAdminCategoriesDestroyResponseError
+export type apiAdminCategoriesDestroyResponse = (apiAdminCategoriesDestroyResponseSuccess | apiAdminCategoriesDestroyResponseError)
 
-export const getApiAdminCategoriesDestroyUrl = (id: number) => {
+export const getApiAdminCategoriesDestroyUrl = (id: number,) => {
+
+
+
+
   return `/api/admin/categories/${id}`
 }
 
 /**
  * @summary ApiAdminCategoriesDestroy
  */
-export const apiAdminCategoriesDestroy = async (
-  id: number,
-  options?: RequestInit
-): Promise<apiAdminCategoriesDestroyResponse> => {
-  return apiFetch<apiAdminCategoriesDestroyResponse>(getApiAdminCategoriesDestroyUrl(id), {
+export const apiAdminCategoriesDestroy = async (id: number, options?: RequestInit): Promise<apiAdminCategoriesDestroyResponse> => {
+
+  return apiFetch<apiAdminCategoriesDestroyResponse>(getApiAdminCategoriesDestroyUrl(id),
+  {
     ...options,
     method: 'DELETE'
-  })
-}
+
+
+  }
+);}
+
+
 
 export type apiAdminVendorsIndexResponse200 = {
   data: AdminVendorOut[]
   status: 200
 }
 
-export type apiAdminVendorsIndexResponseSuccess = apiAdminVendorsIndexResponse200 & {
-  headers: Headers
-}
-export type apiAdminVendorsIndexResponse = apiAdminVendorsIndexResponseSuccess
+export type apiAdminVendorsIndexResponseSuccess = (apiAdminVendorsIndexResponse200) & {
+  headers: Headers;
+};
+;
+
+export type apiAdminVendorsIndexResponse = (apiAdminVendorsIndexResponseSuccess)
 
 export const getApiAdminVendorsIndexUrl = () => {
+
+
+
+
   return `/api/admin/vendors`
 }
 
 /**
  * @summary ApiAdminVendorsIndex
  */
-export const apiAdminVendorsIndex = async (
-  options?: RequestInit
-): Promise<apiAdminVendorsIndexResponse> => {
-  return apiFetch<apiAdminVendorsIndexResponse>(getApiAdminVendorsIndexUrl(), {
+export const apiAdminVendorsIndex = async ( options?: RequestInit): Promise<apiAdminVendorsIndexResponse> => {
+
+  return apiFetch<apiAdminVendorsIndexResponse>(getApiAdminVendorsIndexUrl(),
+  {
     ...options,
     method: 'GET'
-  })
-}
+
+
+  }
+);}
+
+
 
 export type apiAdminVendorsStoreResponse201 = {
   data: AdminVendorOut
@@ -1303,34 +1544,38 @@ export type apiAdminVendorsStoreResponse400 = {
   status: 400
 }
 
-export type apiAdminVendorsStoreResponseSuccess = apiAdminVendorsStoreResponse201 & {
-  headers: Headers
-}
-export type apiAdminVendorsStoreResponseError = apiAdminVendorsStoreResponse400 & {
-  headers: Headers
-}
+export type apiAdminVendorsStoreResponseSuccess = (apiAdminVendorsStoreResponse201) & {
+  headers: Headers;
+};
+export type apiAdminVendorsStoreResponseError = (apiAdminVendorsStoreResponse400) & {
+  headers: Headers;
+};
 
-export type apiAdminVendorsStoreResponse =
-  apiAdminVendorsStoreResponseSuccess | apiAdminVendorsStoreResponseError
+export type apiAdminVendorsStoreResponse = (apiAdminVendorsStoreResponseSuccess | apiAdminVendorsStoreResponseError)
 
 export const getApiAdminVendorsStoreUrl = () => {
+
+
+
+
   return `/api/admin/vendors`
 }
 
 /**
  * @summary ApiAdminVendorsStore
  */
-export const apiAdminVendorsStore = async (
-  vendorIn: VendorIn,
-  options?: RequestInit
-): Promise<apiAdminVendorsStoreResponse> => {
-  return apiFetch<apiAdminVendorsStoreResponse>(getApiAdminVendorsStoreUrl(), {
+export const apiAdminVendorsStore = async (vendorIn: VendorIn, options?: RequestInit): Promise<apiAdminVendorsStoreResponse> => {
+
+  return apiFetch<apiAdminVendorsStoreResponse>(getApiAdminVendorsStoreUrl(),
+  {
     ...options,
     method: 'POST',
     headers: { 'Content-Type': 'application/json', ...options?.headers },
     body: JSON.stringify(vendorIn)
-  })
-}
+  }
+);}
+
+
 
 export type apiAdminVendorsUpdateResponse200 = {
   data: AdminVendorOut
@@ -1342,17 +1587,20 @@ export type apiAdminVendorsUpdateResponse400 = {
   status: 400
 }
 
-export type apiAdminVendorsUpdateResponseSuccess = apiAdminVendorsUpdateResponse200 & {
-  headers: Headers
-}
-export type apiAdminVendorsUpdateResponseError = apiAdminVendorsUpdateResponse400 & {
-  headers: Headers
-}
+export type apiAdminVendorsUpdateResponseSuccess = (apiAdminVendorsUpdateResponse200) & {
+  headers: Headers;
+};
+export type apiAdminVendorsUpdateResponseError = (apiAdminVendorsUpdateResponse400) & {
+  headers: Headers;
+};
 
-export type apiAdminVendorsUpdateResponse =
-  apiAdminVendorsUpdateResponseSuccess | apiAdminVendorsUpdateResponseError
+export type apiAdminVendorsUpdateResponse = (apiAdminVendorsUpdateResponseSuccess | apiAdminVendorsUpdateResponseError)
 
-export const getApiAdminVendorsUpdateUrl = (id: number) => {
+export const getApiAdminVendorsUpdateUrl = (id: number,) => {
+
+
+
+
   return `/api/admin/vendors/${id}`
 }
 
@@ -1361,18 +1609,19 @@ export const getApiAdminVendorsUpdateUrl = (id: number) => {
  * product the vendor owns (recomputed by the debounced views refresh).
  * @summary ApiAdminVendorsUpdate
  */
-export const apiAdminVendorsUpdate = async (
-  id: number,
-  vendorUpdateIn: VendorUpdateIn,
-  options?: RequestInit
-): Promise<apiAdminVendorsUpdateResponse> => {
-  return apiFetch<apiAdminVendorsUpdateResponse>(getApiAdminVendorsUpdateUrl(id), {
+export const apiAdminVendorsUpdate = async (id: number,
+    vendorUpdateIn: VendorUpdateIn, options?: RequestInit): Promise<apiAdminVendorsUpdateResponse> => {
+
+  return apiFetch<apiAdminVendorsUpdateResponse>(getApiAdminVendorsUpdateUrl(id),
+  {
     ...options,
     method: 'PUT',
     headers: { 'Content-Type': 'application/json', ...options?.headers },
     body: JSON.stringify(vendorUpdateIn)
-  })
-}
+  }
+);}
+
+
 
 export type apiAdminVariantsIndexResponse200 = {
   data: VariantOut[]
@@ -1384,32 +1633,38 @@ export type apiAdminVariantsIndexResponse400 = {
   status: 400
 }
 
-export type apiAdminVariantsIndexResponseSuccess = apiAdminVariantsIndexResponse200 & {
-  headers: Headers
-}
-export type apiAdminVariantsIndexResponseError = apiAdminVariantsIndexResponse400 & {
-  headers: Headers
-}
+export type apiAdminVariantsIndexResponseSuccess = (apiAdminVariantsIndexResponse200) & {
+  headers: Headers;
+};
+export type apiAdminVariantsIndexResponseError = (apiAdminVariantsIndexResponse400) & {
+  headers: Headers;
+};
 
-export type apiAdminVariantsIndexResponse =
-  apiAdminVariantsIndexResponseSuccess | apiAdminVariantsIndexResponseError
+export type apiAdminVariantsIndexResponse = (apiAdminVariantsIndexResponseSuccess | apiAdminVariantsIndexResponseError)
 
-export const getApiAdminVariantsIndexUrl = (id: number) => {
+export const getApiAdminVariantsIndexUrl = (id: number,) => {
+
+
+
+
   return `/api/admin/products/${id}/variants`
 }
 
 /**
  * @summary ApiAdminVariantsIndex
  */
-export const apiAdminVariantsIndex = async (
-  id: number,
-  options?: RequestInit
-): Promise<apiAdminVariantsIndexResponse> => {
-  return apiFetch<apiAdminVariantsIndexResponse>(getApiAdminVariantsIndexUrl(id), {
+export const apiAdminVariantsIndex = async (id: number, options?: RequestInit): Promise<apiAdminVariantsIndexResponse> => {
+
+  return apiFetch<apiAdminVariantsIndexResponse>(getApiAdminVariantsIndexUrl(id),
+  {
     ...options,
     method: 'GET'
-  })
-}
+
+
+  }
+);}
+
+
 
 export type apiAdminVariantsStoreResponse201 = {
   data: VariantOut
@@ -1421,35 +1676,39 @@ export type apiAdminVariantsStoreResponse400 = {
   status: 400
 }
 
-export type apiAdminVariantsStoreResponseSuccess = apiAdminVariantsStoreResponse201 & {
-  headers: Headers
-}
-export type apiAdminVariantsStoreResponseError = apiAdminVariantsStoreResponse400 & {
-  headers: Headers
-}
+export type apiAdminVariantsStoreResponseSuccess = (apiAdminVariantsStoreResponse201) & {
+  headers: Headers;
+};
+export type apiAdminVariantsStoreResponseError = (apiAdminVariantsStoreResponse400) & {
+  headers: Headers;
+};
 
-export type apiAdminVariantsStoreResponse =
-  apiAdminVariantsStoreResponseSuccess | apiAdminVariantsStoreResponseError
+export type apiAdminVariantsStoreResponse = (apiAdminVariantsStoreResponseSuccess | apiAdminVariantsStoreResponseError)
 
-export const getApiAdminVariantsStoreUrl = (id: number) => {
+export const getApiAdminVariantsStoreUrl = (id: number,) => {
+
+
+
+
   return `/api/admin/products/${id}/variants`
 }
 
 /**
  * @summary ApiAdminVariantsStore
  */
-export const apiAdminVariantsStore = async (
-  id: number,
-  variantIn: VariantIn,
-  options?: RequestInit
-): Promise<apiAdminVariantsStoreResponse> => {
-  return apiFetch<apiAdminVariantsStoreResponse>(getApiAdminVariantsStoreUrl(id), {
+export const apiAdminVariantsStore = async (id: number,
+    variantIn: VariantIn, options?: RequestInit): Promise<apiAdminVariantsStoreResponse> => {
+
+  return apiFetch<apiAdminVariantsStoreResponse>(getApiAdminVariantsStoreUrl(id),
+  {
     ...options,
     method: 'POST',
     headers: { 'Content-Type': 'application/json', ...options?.headers },
     body: JSON.stringify(variantIn)
-  })
-}
+  }
+);}
+
+
 
 export type apiAdminVariantsDestroyResponse200 = {
   data: MessageOut
@@ -1461,17 +1720,20 @@ export type apiAdminVariantsDestroyResponse400 = {
   status: 400
 }
 
-export type apiAdminVariantsDestroyResponseSuccess = apiAdminVariantsDestroyResponse200 & {
-  headers: Headers
-}
-export type apiAdminVariantsDestroyResponseError = apiAdminVariantsDestroyResponse400 & {
-  headers: Headers
-}
+export type apiAdminVariantsDestroyResponseSuccess = (apiAdminVariantsDestroyResponse200) & {
+  headers: Headers;
+};
+export type apiAdminVariantsDestroyResponseError = (apiAdminVariantsDestroyResponse400) & {
+  headers: Headers;
+};
 
-export type apiAdminVariantsDestroyResponse =
-  apiAdminVariantsDestroyResponseSuccess | apiAdminVariantsDestroyResponseError
+export type apiAdminVariantsDestroyResponse = (apiAdminVariantsDestroyResponseSuccess | apiAdminVariantsDestroyResponseError)
 
-export const getApiAdminVariantsDestroyUrl = (id: number) => {
+export const getApiAdminVariantsDestroyUrl = (id: number,) => {
+
+
+
+
   return `/api/admin/variants/${id}`
 }
 
@@ -1480,15 +1742,18 @@ export const getApiAdminVariantsDestroyUrl = (id: number) => {
  * cart lines holding it are removed — the cart re-renders without the dead line.
  * @summary ApiAdminVariantsDestroy
  */
-export const apiAdminVariantsDestroy = async (
-  id: number,
-  options?: RequestInit
-): Promise<apiAdminVariantsDestroyResponse> => {
-  return apiFetch<apiAdminVariantsDestroyResponse>(getApiAdminVariantsDestroyUrl(id), {
+export const apiAdminVariantsDestroy = async (id: number, options?: RequestInit): Promise<apiAdminVariantsDestroyResponse> => {
+
+  return apiFetch<apiAdminVariantsDestroyResponse>(getApiAdminVariantsDestroyUrl(id),
+  {
     ...options,
     method: 'DELETE'
-  })
-}
+
+
+  }
+);}
+
+
 
 export type apiAdminVariantsUpdateResponse200 = {
   data: VariantOut
@@ -1500,35 +1765,39 @@ export type apiAdminVariantsUpdateResponse400 = {
   status: 400
 }
 
-export type apiAdminVariantsUpdateResponseSuccess = apiAdminVariantsUpdateResponse200 & {
-  headers: Headers
-}
-export type apiAdminVariantsUpdateResponseError = apiAdminVariantsUpdateResponse400 & {
-  headers: Headers
-}
+export type apiAdminVariantsUpdateResponseSuccess = (apiAdminVariantsUpdateResponse200) & {
+  headers: Headers;
+};
+export type apiAdminVariantsUpdateResponseError = (apiAdminVariantsUpdateResponse400) & {
+  headers: Headers;
+};
 
-export type apiAdminVariantsUpdateResponse =
-  apiAdminVariantsUpdateResponseSuccess | apiAdminVariantsUpdateResponseError
+export type apiAdminVariantsUpdateResponse = (apiAdminVariantsUpdateResponseSuccess | apiAdminVariantsUpdateResponseError)
 
-export const getApiAdminVariantsUpdateUrl = (id: number) => {
+export const getApiAdminVariantsUpdateUrl = (id: number,) => {
+
+
+
+
   return `/api/admin/variants/${id}`
 }
 
 /**
  * @summary ApiAdminVariantsUpdate
  */
-export const apiAdminVariantsUpdate = async (
-  id: number,
-  variantUpdateIn: VariantUpdateIn,
-  options?: RequestInit
-): Promise<apiAdminVariantsUpdateResponse> => {
-  return apiFetch<apiAdminVariantsUpdateResponse>(getApiAdminVariantsUpdateUrl(id), {
+export const apiAdminVariantsUpdate = async (id: number,
+    variantUpdateIn: VariantUpdateIn, options?: RequestInit): Promise<apiAdminVariantsUpdateResponse> => {
+
+  return apiFetch<apiAdminVariantsUpdateResponse>(getApiAdminVariantsUpdateUrl(id),
+  {
     ...options,
     method: 'PATCH',
     headers: { 'Content-Type': 'application/json', ...options?.headers },
     body: JSON.stringify(variantUpdateIn)
-  })
-}
+  }
+);}
+
+
 
 export type apiAdminVariantsStockResponse200 = {
   data: VariantOut
@@ -1540,17 +1809,20 @@ export type apiAdminVariantsStockResponse400 = {
   status: 400
 }
 
-export type apiAdminVariantsStockResponseSuccess = apiAdminVariantsStockResponse200 & {
-  headers: Headers
-}
-export type apiAdminVariantsStockResponseError = apiAdminVariantsStockResponse400 & {
-  headers: Headers
-}
+export type apiAdminVariantsStockResponseSuccess = (apiAdminVariantsStockResponse200) & {
+  headers: Headers;
+};
+export type apiAdminVariantsStockResponseError = (apiAdminVariantsStockResponse400) & {
+  headers: Headers;
+};
 
-export type apiAdminVariantsStockResponse =
-  apiAdminVariantsStockResponseSuccess | apiAdminVariantsStockResponseError
+export type apiAdminVariantsStockResponse = (apiAdminVariantsStockResponseSuccess | apiAdminVariantsStockResponseError)
 
-export const getApiAdminVariantsStockUrl = (id: number) => {
+export const getApiAdminVariantsStockUrl = (id: number,) => {
+
+
+
+
   return `/api/admin/variants/${id}/stock`
 }
 
@@ -1559,18 +1831,19 @@ export const getApiAdminVariantsStockUrl = (id: number) => {
  * lock so concurrent adjustments are deterministic.
  * @summary ApiAdminVariantsStock
  */
-export const apiAdminVariantsStock = async (
-  id: number,
-  stockAdjustIn: StockAdjustIn,
-  options?: RequestInit
-): Promise<apiAdminVariantsStockResponse> => {
-  return apiFetch<apiAdminVariantsStockResponse>(getApiAdminVariantsStockUrl(id), {
+export const apiAdminVariantsStock = async (id: number,
+    stockAdjustIn: StockAdjustIn, options?: RequestInit): Promise<apiAdminVariantsStockResponse> => {
+
+  return apiFetch<apiAdminVariantsStockResponse>(getApiAdminVariantsStockUrl(id),
+  {
     ...options,
     method: 'POST',
     headers: { 'Content-Type': 'application/json', ...options?.headers },
     body: JSON.stringify(stockAdjustIn)
-  })
-}
+  }
+);}
+
+
 
 export type apiAdminUsersIndexResponse200 = {
   data: AdminUserPage
@@ -1582,26 +1855,26 @@ export type apiAdminUsersIndexResponse400 = {
   status: 400
 }
 
-export type apiAdminUsersIndexResponseSuccess = apiAdminUsersIndexResponse200 & {
-  headers: Headers
-}
-export type apiAdminUsersIndexResponseError = apiAdminUsersIndexResponse400 & {
-  headers: Headers
-}
+export type apiAdminUsersIndexResponseSuccess = (apiAdminUsersIndexResponse200) & {
+  headers: Headers;
+};
+export type apiAdminUsersIndexResponseError = (apiAdminUsersIndexResponse400) & {
+  headers: Headers;
+};
 
-export type apiAdminUsersIndexResponse =
-  apiAdminUsersIndexResponseSuccess | apiAdminUsersIndexResponseError
+export type apiAdminUsersIndexResponse = (apiAdminUsersIndexResponseSuccess | apiAdminUsersIndexResponseError)
 
-export const getApiAdminUsersIndexUrl = (params?: ApiAdminUsersIndexParams) => {
-  const normalizedParams = new URLSearchParams()
+export const getApiAdminUsersIndexUrl = (params?: ApiAdminUsersIndexParams,) => {
+  const normalizedParams = new URLSearchParams();
 
   Object.entries(params || {}).forEach(([key, value]) => {
+
     if (value !== undefined) {
       normalizedParams.append(key, value === null ? 'null' : String(value))
     }
-  })
+  });
 
-  const stringifiedParams = normalizedParams.toString()
+  const stringifiedParams = normalizedParams.toString();
 
   return stringifiedParams.length > 0 ? `/api/admin/users?${stringifiedParams}` : `/api/admin/users`
 }
@@ -1610,15 +1883,18 @@ export const getApiAdminUsersIndexUrl = (params?: ApiAdminUsersIndexParams) => {
  * Search + paginate the user directory (name/email substring).
  * @summary ApiAdminUsersIndex
  */
-export const apiAdminUsersIndex = async (
-  params?: ApiAdminUsersIndexParams,
-  options?: RequestInit
-): Promise<apiAdminUsersIndexResponse> => {
-  return apiFetch<apiAdminUsersIndexResponse>(getApiAdminUsersIndexUrl(params), {
+export const apiAdminUsersIndex = async (params?: ApiAdminUsersIndexParams, options?: RequestInit): Promise<apiAdminUsersIndexResponse> => {
+
+  return apiFetch<apiAdminUsersIndexResponse>(getApiAdminUsersIndexUrl(params),
+  {
     ...options,
     method: 'GET'
-  })
-}
+
+
+  }
+);}
+
+
 
 export type apiAdminUsersShowResponse200 = {
   data: AdminUserDetailOut
@@ -1630,17 +1906,20 @@ export type apiAdminUsersShowResponse400 = {
   status: 400
 }
 
-export type apiAdminUsersShowResponseSuccess = apiAdminUsersShowResponse200 & {
-  headers: Headers
-}
-export type apiAdminUsersShowResponseError = apiAdminUsersShowResponse400 & {
-  headers: Headers
-}
+export type apiAdminUsersShowResponseSuccess = (apiAdminUsersShowResponse200) & {
+  headers: Headers;
+};
+export type apiAdminUsersShowResponseError = (apiAdminUsersShowResponse400) & {
+  headers: Headers;
+};
 
-export type apiAdminUsersShowResponse =
-  apiAdminUsersShowResponseSuccess | apiAdminUsersShowResponseError
+export type apiAdminUsersShowResponse = (apiAdminUsersShowResponseSuccess | apiAdminUsersShowResponseError)
 
-export const getApiAdminUsersShowUrl = (id: number) => {
+export const getApiAdminUsersShowUrl = (id: number,) => {
+
+
+
+
   return `/api/admin/users/${id}`
 }
 
@@ -1648,27 +1927,36 @@ export const getApiAdminUsersShowUrl = (id: number) => {
  * One user: profile basics, roles, and an order summary.
  * @summary ApiAdminUsersShow
  */
-export const apiAdminUsersShow = async (
-  id: number,
-  options?: RequestInit
-): Promise<apiAdminUsersShowResponse> => {
-  return apiFetch<apiAdminUsersShowResponse>(getApiAdminUsersShowUrl(id), {
+export const apiAdminUsersShow = async (id: number, options?: RequestInit): Promise<apiAdminUsersShowResponse> => {
+
+  return apiFetch<apiAdminUsersShowResponse>(getApiAdminUsersShowUrl(id),
+  {
     ...options,
     method: 'GET'
-  })
-}
+
+
+  }
+);}
+
+
 
 export type apiAdminRolesIndexResponse200 = {
   data: RoleOut[]
   status: 200
 }
 
-export type apiAdminRolesIndexResponseSuccess = apiAdminRolesIndexResponse200 & {
-  headers: Headers
-}
-export type apiAdminRolesIndexResponse = apiAdminRolesIndexResponseSuccess
+export type apiAdminRolesIndexResponseSuccess = (apiAdminRolesIndexResponse200) & {
+  headers: Headers;
+};
+;
+
+export type apiAdminRolesIndexResponse = (apiAdminRolesIndexResponseSuccess)
 
 export const getApiAdminRolesIndexUrl = () => {
+
+
+
+
   return `/api/admin/roles`
 }
 
@@ -1676,26 +1964,36 @@ export const getApiAdminRolesIndexUrl = () => {
  * List every role with the permissions it grants.
  * @summary ApiAdminRolesIndex
  */
-export const apiAdminRolesIndex = async (
-  options?: RequestInit
-): Promise<apiAdminRolesIndexResponse> => {
-  return apiFetch<apiAdminRolesIndexResponse>(getApiAdminRolesIndexUrl(), {
+export const apiAdminRolesIndex = async ( options?: RequestInit): Promise<apiAdminRolesIndexResponse> => {
+
+  return apiFetch<apiAdminRolesIndexResponse>(getApiAdminRolesIndexUrl(),
+  {
     ...options,
     method: 'GET'
-  })
-}
+
+
+  }
+);}
+
+
 
 export type apiAdminPermissionsIndexResponse200 = {
   data: PermissionOut[]
   status: 200
 }
 
-export type apiAdminPermissionsIndexResponseSuccess = apiAdminPermissionsIndexResponse200 & {
-  headers: Headers
-}
-export type apiAdminPermissionsIndexResponse = apiAdminPermissionsIndexResponseSuccess
+export type apiAdminPermissionsIndexResponseSuccess = (apiAdminPermissionsIndexResponse200) & {
+  headers: Headers;
+};
+;
+
+export type apiAdminPermissionsIndexResponse = (apiAdminPermissionsIndexResponseSuccess)
 
 export const getApiAdminPermissionsIndexUrl = () => {
+
+
+
+
   return `/api/admin/permissions`
 }
 
@@ -1703,14 +2001,18 @@ export const getApiAdminPermissionsIndexUrl = () => {
  * List every permission in the system.
  * @summary ApiAdminPermissionsIndex
  */
-export const apiAdminPermissionsIndex = async (
-  options?: RequestInit
-): Promise<apiAdminPermissionsIndexResponse> => {
-  return apiFetch<apiAdminPermissionsIndexResponse>(getApiAdminPermissionsIndexUrl(), {
+export const apiAdminPermissionsIndex = async ( options?: RequestInit): Promise<apiAdminPermissionsIndexResponse> => {
+
+  return apiFetch<apiAdminPermissionsIndexResponse>(getApiAdminPermissionsIndexUrl(),
+  {
     ...options,
     method: 'GET'
-  })
-}
+
+
+  }
+);}
+
+
 
 export type apiAdminUsersRolesResponse200 = {
   data: UserRolesOut
@@ -1722,17 +2024,20 @@ export type apiAdminUsersRolesResponse400 = {
   status: 400
 }
 
-export type apiAdminUsersRolesResponseSuccess = apiAdminUsersRolesResponse200 & {
-  headers: Headers
-}
-export type apiAdminUsersRolesResponseError = apiAdminUsersRolesResponse400 & {
-  headers: Headers
-}
+export type apiAdminUsersRolesResponseSuccess = (apiAdminUsersRolesResponse200) & {
+  headers: Headers;
+};
+export type apiAdminUsersRolesResponseError = (apiAdminUsersRolesResponse400) & {
+  headers: Headers;
+};
 
-export type apiAdminUsersRolesResponse =
-  apiAdminUsersRolesResponseSuccess | apiAdminUsersRolesResponseError
+export type apiAdminUsersRolesResponse = (apiAdminUsersRolesResponseSuccess | apiAdminUsersRolesResponseError)
 
-export const getApiAdminUsersRolesUrl = (id: number) => {
+export const getApiAdminUsersRolesUrl = (id: number,) => {
+
+
+
+
   return `/api/admin/users/${id}/roles`
 }
 
@@ -1740,15 +2045,18 @@ export const getApiAdminUsersRolesUrl = (id: number) => {
  * The roles currently assigned to a user.
  * @summary ApiAdminUsersRoles
  */
-export const apiAdminUsersRoles = async (
-  id: number,
-  options?: RequestInit
-): Promise<apiAdminUsersRolesResponse> => {
-  return apiFetch<apiAdminUsersRolesResponse>(getApiAdminUsersRolesUrl(id), {
+export const apiAdminUsersRoles = async (id: number, options?: RequestInit): Promise<apiAdminUsersRolesResponse> => {
+
+  return apiFetch<apiAdminUsersRolesResponse>(getApiAdminUsersRolesUrl(id),
+  {
     ...options,
     method: 'GET'
-  })
-}
+
+
+  }
+);}
+
+
 
 export type apiAdminUsersRolesAssignResponse200 = {
   data: UserRolesOut
@@ -1760,17 +2068,20 @@ export type apiAdminUsersRolesAssignResponse400 = {
   status: 400
 }
 
-export type apiAdminUsersRolesAssignResponseSuccess = apiAdminUsersRolesAssignResponse200 & {
-  headers: Headers
-}
-export type apiAdminUsersRolesAssignResponseError = apiAdminUsersRolesAssignResponse400 & {
-  headers: Headers
-}
+export type apiAdminUsersRolesAssignResponseSuccess = (apiAdminUsersRolesAssignResponse200) & {
+  headers: Headers;
+};
+export type apiAdminUsersRolesAssignResponseError = (apiAdminUsersRolesAssignResponse400) & {
+  headers: Headers;
+};
 
-export type apiAdminUsersRolesAssignResponse =
-  apiAdminUsersRolesAssignResponseSuccess | apiAdminUsersRolesAssignResponseError
+export type apiAdminUsersRolesAssignResponse = (apiAdminUsersRolesAssignResponseSuccess | apiAdminUsersRolesAssignResponseError)
 
-export const getApiAdminUsersRolesAssignUrl = (id: number) => {
+export const getApiAdminUsersRolesAssignUrl = (id: number,) => {
+
+
+
+
   return `/api/admin/users/${id}/roles`
 }
 
@@ -1778,18 +2089,19 @@ export const getApiAdminUsersRolesAssignUrl = (id: number) => {
  * Assign a role to a user (roles.manage), recording it in the audit log.
  * @summary ApiAdminUsersRolesAssign
  */
-export const apiAdminUsersRolesAssign = async (
-  id: number,
-  assignRoleIn: AssignRoleIn,
-  options?: RequestInit
-): Promise<apiAdminUsersRolesAssignResponse> => {
-  return apiFetch<apiAdminUsersRolesAssignResponse>(getApiAdminUsersRolesAssignUrl(id), {
+export const apiAdminUsersRolesAssign = async (id: number,
+    assignRoleIn: AssignRoleIn, options?: RequestInit): Promise<apiAdminUsersRolesAssignResponse> => {
+
+  return apiFetch<apiAdminUsersRolesAssignResponse>(getApiAdminUsersRolesAssignUrl(id),
+  {
     ...options,
     method: 'POST',
     headers: { 'Content-Type': 'application/json', ...options?.headers },
     body: JSON.stringify(assignRoleIn)
-  })
-}
+  }
+);}
+
+
 
 export type apiAdminUsersRolesRevokeResponse200 = {
   data: UserRolesOut
@@ -1801,17 +2113,21 @@ export type apiAdminUsersRolesRevokeResponse400 = {
   status: 400
 }
 
-export type apiAdminUsersRolesRevokeResponseSuccess = apiAdminUsersRolesRevokeResponse200 & {
-  headers: Headers
-}
-export type apiAdminUsersRolesRevokeResponseError = apiAdminUsersRolesRevokeResponse400 & {
-  headers: Headers
-}
+export type apiAdminUsersRolesRevokeResponseSuccess = (apiAdminUsersRolesRevokeResponse200) & {
+  headers: Headers;
+};
+export type apiAdminUsersRolesRevokeResponseError = (apiAdminUsersRolesRevokeResponse400) & {
+  headers: Headers;
+};
 
-export type apiAdminUsersRolesRevokeResponse =
-  apiAdminUsersRolesRevokeResponseSuccess | apiAdminUsersRolesRevokeResponseError
+export type apiAdminUsersRolesRevokeResponse = (apiAdminUsersRolesRevokeResponseSuccess | apiAdminUsersRolesRevokeResponseError)
 
-export const getApiAdminUsersRolesRevokeUrl = (id: number, role: string) => {
+export const getApiAdminUsersRolesRevokeUrl = (id: number,
+    role: string,) => {
+
+
+
+
   return `/api/admin/users/${id}/roles/${role}`
 }
 
@@ -1819,28 +2135,37 @@ export const getApiAdminUsersRolesRevokeUrl = (id: number, role: string) => {
  * Revoke a role from a user (roles.manage), recording it in the audit log.
  * @summary ApiAdminUsersRolesRevoke
  */
-export const apiAdminUsersRolesRevoke = async (
-  id: number,
-  role: string,
-  options?: RequestInit
-): Promise<apiAdminUsersRolesRevokeResponse> => {
-  return apiFetch<apiAdminUsersRolesRevokeResponse>(getApiAdminUsersRolesRevokeUrl(id, role), {
+export const apiAdminUsersRolesRevoke = async (id: number,
+    role: string, options?: RequestInit): Promise<apiAdminUsersRolesRevokeResponse> => {
+
+  return apiFetch<apiAdminUsersRolesRevokeResponse>(getApiAdminUsersRolesRevokeUrl(id,role),
+  {
     ...options,
     method: 'DELETE'
-  })
-}
+
+
+  }
+);}
+
+
 
 export type apiAdminAuditIndexResponse200 = {
   data: ActivityOut[]
   status: 200
 }
 
-export type apiAdminAuditIndexResponseSuccess = apiAdminAuditIndexResponse200 & {
-  headers: Headers
-}
-export type apiAdminAuditIndexResponse = apiAdminAuditIndexResponseSuccess
+export type apiAdminAuditIndexResponseSuccess = (apiAdminAuditIndexResponse200) & {
+  headers: Headers;
+};
+;
+
+export type apiAdminAuditIndexResponse = (apiAdminAuditIndexResponseSuccess)
 
 export const getApiAdminAuditIndexUrl = () => {
+
+
+
+
   return `/api/admin/audit`
 }
 
@@ -1848,26 +2173,36 @@ export const getApiAdminAuditIndexUrl = () => {
  * The most recent audit-log entries (audit.view).
  * @summary ApiAdminAuditIndex
  */
-export const apiAdminAuditIndex = async (
-  options?: RequestInit
-): Promise<apiAdminAuditIndexResponse> => {
-  return apiFetch<apiAdminAuditIndexResponse>(getApiAdminAuditIndexUrl(), {
+export const apiAdminAuditIndex = async ( options?: RequestInit): Promise<apiAdminAuditIndexResponse> => {
+
+  return apiFetch<apiAdminAuditIndexResponse>(getApiAdminAuditIndexUrl(),
+  {
     ...options,
     method: 'GET'
-  })
-}
+
+
+  }
+);}
+
+
 
 export type apiAdminMeResponse200 = {
   data: AdminMeOut
   status: 200
 }
 
-export type apiAdminMeResponseSuccess = apiAdminMeResponse200 & {
-  headers: Headers
-}
-export type apiAdminMeResponse = apiAdminMeResponseSuccess
+export type apiAdminMeResponseSuccess = (apiAdminMeResponse200) & {
+  headers: Headers;
+};
+;
+
+export type apiAdminMeResponse = (apiAdminMeResponseSuccess)
 
 export const getApiAdminMeUrl = () => {
+
+
+
+
   return `/api/admin/me`
 }
 
@@ -1876,24 +2211,36 @@ export const getApiAdminMeUrl = () => {
  * token, 403 without the admin realm role).
  * @summary ApiAdminMe
  */
-export const apiAdminMe = async (options?: RequestInit): Promise<apiAdminMeResponse> => {
-  return apiFetch<apiAdminMeResponse>(getApiAdminMeUrl(), {
+export const apiAdminMe = async ( options?: RequestInit): Promise<apiAdminMeResponse> => {
+
+  return apiFetch<apiAdminMeResponse>(getApiAdminMeUrl(),
+  {
     ...options,
     method: 'GET'
-  })
-}
+
+
+  }
+);}
+
+
 
 export type apiAdminOidcTokenResponse200 = {
   data: TokenOut
   status: 200
 }
 
-export type apiAdminOidcTokenResponseSuccess = apiAdminOidcTokenResponse200 & {
-  headers: Headers
-}
-export type apiAdminOidcTokenResponse = apiAdminOidcTokenResponseSuccess
+export type apiAdminOidcTokenResponseSuccess = (apiAdminOidcTokenResponse200) & {
+  headers: Headers;
+};
+;
+
+export type apiAdminOidcTokenResponse = (apiAdminOidcTokenResponseSuccess)
 
 export const getApiAdminOidcTokenUrl = () => {
+
+
+
+
   return `/api/admin/oidc/token`
 }
 
@@ -1903,14 +2250,18 @@ export const getApiAdminOidcTokenUrl = () => {
  * bearer-guarded admin APIs.
  * @summary ApiAdminOidcToken
  */
-export const apiAdminOidcToken = async (
-  options?: RequestInit
-): Promise<apiAdminOidcTokenResponse> => {
-  return apiFetch<apiAdminOidcTokenResponse>(getApiAdminOidcTokenUrl(), {
+export const apiAdminOidcToken = async ( options?: RequestInit): Promise<apiAdminOidcTokenResponse> => {
+
+  return apiFetch<apiAdminOidcTokenResponse>(getApiAdminOidcTokenUrl(),
+  {
     ...options,
     method: 'POST'
-  })
-}
+
+
+  }
+);}
+
+
 
 export type apiProductsReviewsIndexResponse200 = {
   data: ReviewListOut
@@ -1922,17 +2273,20 @@ export type apiProductsReviewsIndexResponse400 = {
   status: 400
 }
 
-export type apiProductsReviewsIndexResponseSuccess = apiProductsReviewsIndexResponse200 & {
-  headers: Headers
-}
-export type apiProductsReviewsIndexResponseError = apiProductsReviewsIndexResponse400 & {
-  headers: Headers
-}
+export type apiProductsReviewsIndexResponseSuccess = (apiProductsReviewsIndexResponse200) & {
+  headers: Headers;
+};
+export type apiProductsReviewsIndexResponseError = (apiProductsReviewsIndexResponse400) & {
+  headers: Headers;
+};
 
-export type apiProductsReviewsIndexResponse =
-  apiProductsReviewsIndexResponseSuccess | apiProductsReviewsIndexResponseError
+export type apiProductsReviewsIndexResponse = (apiProductsReviewsIndexResponseSuccess | apiProductsReviewsIndexResponseError)
 
-export const getApiProductsReviewsIndexUrl = (slug: string) => {
+export const getApiProductsReviewsIndexUrl = (slug: string,) => {
+
+
+
+
   return `/api/products/${slug}/reviews`
 }
 
@@ -1940,15 +2294,18 @@ export const getApiProductsReviewsIndexUrl = (slug: string) => {
  * APPROVED reviews for the product (+ the caller's own review, whatever its status).
  * @summary ApiProductsReviewsIndex
  */
-export const apiProductsReviewsIndex = async (
-  slug: string,
-  options?: RequestInit
-): Promise<apiProductsReviewsIndexResponse> => {
-  return apiFetch<apiProductsReviewsIndexResponse>(getApiProductsReviewsIndexUrl(slug), {
+export const apiProductsReviewsIndex = async (slug: string, options?: RequestInit): Promise<apiProductsReviewsIndexResponse> => {
+
+  return apiFetch<apiProductsReviewsIndexResponse>(getApiProductsReviewsIndexUrl(slug),
+  {
     ...options,
     method: 'GET'
-  })
-}
+
+
+  }
+);}
+
+
 
 export type apiProductsReviewsStoreResponse201 = {
   data: ReviewOut
@@ -1960,17 +2317,20 @@ export type apiProductsReviewsStoreResponse400 = {
   status: 400
 }
 
-export type apiProductsReviewsStoreResponseSuccess = apiProductsReviewsStoreResponse201 & {
-  headers: Headers
-}
-export type apiProductsReviewsStoreResponseError = apiProductsReviewsStoreResponse400 & {
-  headers: Headers
-}
+export type apiProductsReviewsStoreResponseSuccess = (apiProductsReviewsStoreResponse201) & {
+  headers: Headers;
+};
+export type apiProductsReviewsStoreResponseError = (apiProductsReviewsStoreResponse400) & {
+  headers: Headers;
+};
 
-export type apiProductsReviewsStoreResponse =
-  apiProductsReviewsStoreResponseSuccess | apiProductsReviewsStoreResponseError
+export type apiProductsReviewsStoreResponse = (apiProductsReviewsStoreResponseSuccess | apiProductsReviewsStoreResponseError)
 
-export const getApiProductsReviewsStoreUrl = (slug: string) => {
+export const getApiProductsReviewsStoreUrl = (slug: string,) => {
+
+
+
+
   return `/api/products/${slug}/reviews`
 }
 
@@ -1978,18 +2338,19 @@ export const getApiProductsReviewsStoreUrl = (slug: string) => {
  * Submit a review — verified purchasers only, one per product; lands PENDING.
  * @summary ApiProductsReviewsStore
  */
-export const apiProductsReviewsStore = async (
-  slug: string,
-  reviewIn: ReviewIn,
-  options?: RequestInit
-): Promise<apiProductsReviewsStoreResponse> => {
-  return apiFetch<apiProductsReviewsStoreResponse>(getApiProductsReviewsStoreUrl(slug), {
+export const apiProductsReviewsStore = async (slug: string,
+    reviewIn: ReviewIn, options?: RequestInit): Promise<apiProductsReviewsStoreResponse> => {
+
+  return apiFetch<apiProductsReviewsStoreResponse>(getApiProductsReviewsStoreUrl(slug),
+  {
     ...options,
     method: 'POST',
     headers: { 'Content-Type': 'application/json', ...options?.headers },
     body: JSON.stringify(reviewIn)
-  })
-}
+  }
+);}
+
+
 
 export type apiAdminReviewsIndexResponse200 = {
   data: AdminReviewOut[]
@@ -2001,44 +2362,45 @@ export type apiAdminReviewsIndexResponse400 = {
   status: 400
 }
 
-export type apiAdminReviewsIndexResponseSuccess = apiAdminReviewsIndexResponse200 & {
-  headers: Headers
-}
-export type apiAdminReviewsIndexResponseError = apiAdminReviewsIndexResponse400 & {
-  headers: Headers
-}
+export type apiAdminReviewsIndexResponseSuccess = (apiAdminReviewsIndexResponse200) & {
+  headers: Headers;
+};
+export type apiAdminReviewsIndexResponseError = (apiAdminReviewsIndexResponse400) & {
+  headers: Headers;
+};
 
-export type apiAdminReviewsIndexResponse =
-  apiAdminReviewsIndexResponseSuccess | apiAdminReviewsIndexResponseError
+export type apiAdminReviewsIndexResponse = (apiAdminReviewsIndexResponseSuccess | apiAdminReviewsIndexResponseError)
 
-export const getApiAdminReviewsIndexUrl = (params?: ApiAdminReviewsIndexParams) => {
-  const normalizedParams = new URLSearchParams()
+export const getApiAdminReviewsIndexUrl = (params?: ApiAdminReviewsIndexParams,) => {
+  const normalizedParams = new URLSearchParams();
 
   Object.entries(params || {}).forEach(([key, value]) => {
+
     if (value !== undefined) {
       normalizedParams.append(key, value === null ? 'null' : String(value))
     }
-  })
+  });
 
-  const stringifiedParams = normalizedParams.toString()
+  const stringifiedParams = normalizedParams.toString();
 
-  return stringifiedParams.length > 0
-    ? `/api/admin/reviews?${stringifiedParams}`
-    : `/api/admin/reviews`
+  return stringifiedParams.length > 0 ? `/api/admin/reviews?${stringifiedParams}` : `/api/admin/reviews`
 }
 
 /**
  * @summary ApiAdminReviewsIndex
  */
-export const apiAdminReviewsIndex = async (
-  params?: ApiAdminReviewsIndexParams,
-  options?: RequestInit
-): Promise<apiAdminReviewsIndexResponse> => {
-  return apiFetch<apiAdminReviewsIndexResponse>(getApiAdminReviewsIndexUrl(params), {
+export const apiAdminReviewsIndex = async (params?: ApiAdminReviewsIndexParams, options?: RequestInit): Promise<apiAdminReviewsIndexResponse> => {
+
+  return apiFetch<apiAdminReviewsIndexResponse>(getApiAdminReviewsIndexUrl(params),
+  {
     ...options,
     method: 'GET'
-  })
-}
+
+
+  }
+);}
+
+
 
 export type apiAdminReviewsModerateResponse200 = {
   data: AdminReviewOut
@@ -2050,17 +2412,21 @@ export type apiAdminReviewsModerateResponse400 = {
   status: 400
 }
 
-export type apiAdminReviewsModerateResponseSuccess = apiAdminReviewsModerateResponse200 & {
-  headers: Headers
-}
-export type apiAdminReviewsModerateResponseError = apiAdminReviewsModerateResponse400 & {
-  headers: Headers
-}
+export type apiAdminReviewsModerateResponseSuccess = (apiAdminReviewsModerateResponse200) & {
+  headers: Headers;
+};
+export type apiAdminReviewsModerateResponseError = (apiAdminReviewsModerateResponse400) & {
+  headers: Headers;
+};
 
-export type apiAdminReviewsModerateResponse =
-  apiAdminReviewsModerateResponseSuccess | apiAdminReviewsModerateResponseError
+export type apiAdminReviewsModerateResponse = (apiAdminReviewsModerateResponseSuccess | apiAdminReviewsModerateResponseError)
 
-export const getApiAdminReviewsModerateUrl = (id: number, decision: string) => {
+export const getApiAdminReviewsModerateUrl = (id: number,
+    decision: string,) => {
+
+
+
+
   return `/api/admin/reviews/${id}/${decision}`
 }
 
@@ -2069,16 +2435,19 @@ export const getApiAdminReviewsModerateUrl = (id: number, decision: string) => {
  * transitions keep it exact (approve adds, un-approve subtracts).
  * @summary ApiAdminReviewsModerate
  */
-export const apiAdminReviewsModerate = async (
-  id: number,
-  decision: string,
-  options?: RequestInit
-): Promise<apiAdminReviewsModerateResponse> => {
-  return apiFetch<apiAdminReviewsModerateResponse>(getApiAdminReviewsModerateUrl(id, decision), {
+export const apiAdminReviewsModerate = async (id: number,
+    decision: string, options?: RequestInit): Promise<apiAdminReviewsModerateResponse> => {
+
+  return apiFetch<apiAdminReviewsModerateResponse>(getApiAdminReviewsModerateUrl(id,decision),
+  {
     ...options,
     method: 'POST'
-  })
-}
+
+
+  }
+);}
+
+
 
 export type apiVariantsStockAlertSubscribeResponse200 = {
   data: MessageOut
@@ -2090,19 +2459,20 @@ export type apiVariantsStockAlertSubscribeResponse400 = {
   status: 400
 }
 
-export type apiVariantsStockAlertSubscribeResponseSuccess =
-  apiVariantsStockAlertSubscribeResponse200 & {
-    headers: Headers
-  }
-export type apiVariantsStockAlertSubscribeResponseError =
-  apiVariantsStockAlertSubscribeResponse400 & {
-    headers: Headers
-  }
+export type apiVariantsStockAlertSubscribeResponseSuccess = (apiVariantsStockAlertSubscribeResponse200) & {
+  headers: Headers;
+};
+export type apiVariantsStockAlertSubscribeResponseError = (apiVariantsStockAlertSubscribeResponse400) & {
+  headers: Headers;
+};
 
-export type apiVariantsStockAlertSubscribeResponse =
-  apiVariantsStockAlertSubscribeResponseSuccess | apiVariantsStockAlertSubscribeResponseError
+export type apiVariantsStockAlertSubscribeResponse = (apiVariantsStockAlertSubscribeResponseSuccess | apiVariantsStockAlertSubscribeResponseError)
 
-export const getApiVariantsStockAlertSubscribeUrl = (id: number) => {
+export const getApiVariantsStockAlertSubscribeUrl = (id: number,) => {
+
+
+
+
   return `/api/variants/${id}/stock-alert`
 }
 
@@ -2110,18 +2480,18 @@ export const getApiVariantsStockAlertSubscribeUrl = (id: number) => {
  * Watch a SOLD-OUT variant (in-stock → 422; duplicates are an idempotent no-op).
  * @summary ApiVariantsStockAlertSubscribe
  */
-export const apiVariantsStockAlertSubscribe = async (
-  id: number,
-  options?: RequestInit
-): Promise<apiVariantsStockAlertSubscribeResponse> => {
-  return apiFetch<apiVariantsStockAlertSubscribeResponse>(
-    getApiVariantsStockAlertSubscribeUrl(id),
-    {
-      ...options,
-      method: 'POST'
-    }
-  )
-}
+export const apiVariantsStockAlertSubscribe = async (id: number, options?: RequestInit): Promise<apiVariantsStockAlertSubscribeResponse> => {
+
+  return apiFetch<apiVariantsStockAlertSubscribeResponse>(getApiVariantsStockAlertSubscribeUrl(id),
+  {
+    ...options,
+    method: 'POST'
+
+
+  }
+);}
+
+
 
 export type apiVariantsStockAlertUnsubscribeResponse200 = {
   data: MessageOut
@@ -2133,49 +2503,56 @@ export type apiVariantsStockAlertUnsubscribeResponse400 = {
   status: 400
 }
 
-export type apiVariantsStockAlertUnsubscribeResponseSuccess =
-  apiVariantsStockAlertUnsubscribeResponse200 & {
-    headers: Headers
-  }
-export type apiVariantsStockAlertUnsubscribeResponseError =
-  apiVariantsStockAlertUnsubscribeResponse400 & {
-    headers: Headers
-  }
+export type apiVariantsStockAlertUnsubscribeResponseSuccess = (apiVariantsStockAlertUnsubscribeResponse200) & {
+  headers: Headers;
+};
+export type apiVariantsStockAlertUnsubscribeResponseError = (apiVariantsStockAlertUnsubscribeResponse400) & {
+  headers: Headers;
+};
 
-export type apiVariantsStockAlertUnsubscribeResponse =
-  apiVariantsStockAlertUnsubscribeResponseSuccess | apiVariantsStockAlertUnsubscribeResponseError
+export type apiVariantsStockAlertUnsubscribeResponse = (apiVariantsStockAlertUnsubscribeResponseSuccess | apiVariantsStockAlertUnsubscribeResponseError)
 
-export const getApiVariantsStockAlertUnsubscribeUrl = (id: number) => {
+export const getApiVariantsStockAlertUnsubscribeUrl = (id: number,) => {
+
+
+
+
   return `/api/variants/${id}/stock-alert`
 }
 
 /**
  * @summary ApiVariantsStockAlertUnsubscribe
  */
-export const apiVariantsStockAlertUnsubscribe = async (
-  id: number,
-  options?: RequestInit
-): Promise<apiVariantsStockAlertUnsubscribeResponse> => {
-  return apiFetch<apiVariantsStockAlertUnsubscribeResponse>(
-    getApiVariantsStockAlertUnsubscribeUrl(id),
-    {
-      ...options,
-      method: 'DELETE'
-    }
-  )
-}
+export const apiVariantsStockAlertUnsubscribe = async (id: number, options?: RequestInit): Promise<apiVariantsStockAlertUnsubscribeResponse> => {
+
+  return apiFetch<apiVariantsStockAlertUnsubscribeResponse>(getApiVariantsStockAlertUnsubscribeUrl(id),
+  {
+    ...options,
+    method: 'DELETE'
+
+
+  }
+);}
+
+
 
 export type apiCartShowResponse200 = {
   data: CartOut
   status: 200
 }
 
-export type apiCartShowResponseSuccess = apiCartShowResponse200 & {
-  headers: Headers
-}
-export type apiCartShowResponse = apiCartShowResponseSuccess
+export type apiCartShowResponseSuccess = (apiCartShowResponse200) & {
+  headers: Headers;
+};
+;
+
+export type apiCartShowResponse = (apiCartShowResponseSuccess)
 
 export const getApiCartShowUrl = () => {
+
+
+
+
   return `/api/cart`
 }
 
@@ -2183,12 +2560,18 @@ export const getApiCartShowUrl = () => {
  * Show the current cart (an empty shell if none exists yet).
  * @summary ApiCartShow
  */
-export const apiCartShow = async (options?: RequestInit): Promise<apiCartShowResponse> => {
-  return apiFetch<apiCartShowResponse>(getApiCartShowUrl(), {
+export const apiCartShow = async ( options?: RequestInit): Promise<apiCartShowResponse> => {
+
+  return apiFetch<apiCartShowResponse>(getApiCartShowUrl(),
+  {
     ...options,
     method: 'GET'
-  })
-}
+
+
+  }
+);}
+
+
 
 export type apiCartItemsAddResponse201 = {
   data: CartOut
@@ -2200,16 +2583,20 @@ export type apiCartItemsAddResponse400 = {
   status: 400
 }
 
-export type apiCartItemsAddResponseSuccess = apiCartItemsAddResponse201 & {
-  headers: Headers
-}
-export type apiCartItemsAddResponseError = apiCartItemsAddResponse400 & {
-  headers: Headers
-}
+export type apiCartItemsAddResponseSuccess = (apiCartItemsAddResponse201) & {
+  headers: Headers;
+};
+export type apiCartItemsAddResponseError = (apiCartItemsAddResponse400) & {
+  headers: Headers;
+};
 
-export type apiCartItemsAddResponse = apiCartItemsAddResponseSuccess | apiCartItemsAddResponseError
+export type apiCartItemsAddResponse = (apiCartItemsAddResponseSuccess | apiCartItemsAddResponseError)
 
 export const getApiCartItemsAddUrl = () => {
+
+
+
+
   return `/api/cart/items`
 }
 
@@ -2217,17 +2604,18 @@ export const getApiCartItemsAddUrl = () => {
  * Add a variant to the cart (or bump its quantity if already present).
  * @summary ApiCartItemsAdd
  */
-export const apiCartItemsAdd = async (
-  addItemIn: AddItemIn,
-  options?: RequestInit
-): Promise<apiCartItemsAddResponse> => {
-  return apiFetch<apiCartItemsAddResponse>(getApiCartItemsAddUrl(), {
+export const apiCartItemsAdd = async (addItemIn: AddItemIn, options?: RequestInit): Promise<apiCartItemsAddResponse> => {
+
+  return apiFetch<apiCartItemsAddResponse>(getApiCartItemsAddUrl(),
+  {
     ...options,
     method: 'POST',
     headers: { 'Content-Type': 'application/json', ...options?.headers },
     body: JSON.stringify(addItemIn)
-  })
-}
+  }
+);}
+
+
 
 export type apiCartItemsRemoveResponse200 = {
   data: CartOut
@@ -2239,17 +2627,20 @@ export type apiCartItemsRemoveResponse400 = {
   status: 400
 }
 
-export type apiCartItemsRemoveResponseSuccess = apiCartItemsRemoveResponse200 & {
-  headers: Headers
-}
-export type apiCartItemsRemoveResponseError = apiCartItemsRemoveResponse400 & {
-  headers: Headers
-}
+export type apiCartItemsRemoveResponseSuccess = (apiCartItemsRemoveResponse200) & {
+  headers: Headers;
+};
+export type apiCartItemsRemoveResponseError = (apiCartItemsRemoveResponse400) & {
+  headers: Headers;
+};
 
-export type apiCartItemsRemoveResponse =
-  apiCartItemsRemoveResponseSuccess | apiCartItemsRemoveResponseError
+export type apiCartItemsRemoveResponse = (apiCartItemsRemoveResponseSuccess | apiCartItemsRemoveResponseError)
 
-export const getApiCartItemsRemoveUrl = (id: number) => {
+export const getApiCartItemsRemoveUrl = (id: number,) => {
+
+
+
+
   return `/api/cart/items/${id}`
 }
 
@@ -2257,15 +2648,18 @@ export const getApiCartItemsRemoveUrl = (id: number) => {
  * Remove a line from the cart.
  * @summary ApiCartItemsRemove
  */
-export const apiCartItemsRemove = async (
-  id: number,
-  options?: RequestInit
-): Promise<apiCartItemsRemoveResponse> => {
-  return apiFetch<apiCartItemsRemoveResponse>(getApiCartItemsRemoveUrl(id), {
+export const apiCartItemsRemove = async (id: number, options?: RequestInit): Promise<apiCartItemsRemoveResponse> => {
+
+  return apiFetch<apiCartItemsRemoveResponse>(getApiCartItemsRemoveUrl(id),
+  {
     ...options,
     method: 'DELETE'
-  })
-}
+
+
+  }
+);}
+
+
 
 export type apiCartItemsUpdateResponse200 = {
   data: CartOut
@@ -2277,17 +2671,20 @@ export type apiCartItemsUpdateResponse400 = {
   status: 400
 }
 
-export type apiCartItemsUpdateResponseSuccess = apiCartItemsUpdateResponse200 & {
-  headers: Headers
-}
-export type apiCartItemsUpdateResponseError = apiCartItemsUpdateResponse400 & {
-  headers: Headers
-}
+export type apiCartItemsUpdateResponseSuccess = (apiCartItemsUpdateResponse200) & {
+  headers: Headers;
+};
+export type apiCartItemsUpdateResponseError = (apiCartItemsUpdateResponse400) & {
+  headers: Headers;
+};
 
-export type apiCartItemsUpdateResponse =
-  apiCartItemsUpdateResponseSuccess | apiCartItemsUpdateResponseError
+export type apiCartItemsUpdateResponse = (apiCartItemsUpdateResponseSuccess | apiCartItemsUpdateResponseError)
 
-export const getApiCartItemsUpdateUrl = (id: number) => {
+export const getApiCartItemsUpdateUrl = (id: number,) => {
+
+
+
+
   return `/api/cart/items/${id}`
 }
 
@@ -2295,18 +2692,19 @@ export const getApiCartItemsUpdateUrl = (id: number) => {
  * Set a line's quantity (0 removes it).
  * @summary ApiCartItemsUpdate
  */
-export const apiCartItemsUpdate = async (
-  id: number,
-  updateItemIn: UpdateItemIn,
-  options?: RequestInit
-): Promise<apiCartItemsUpdateResponse> => {
-  return apiFetch<apiCartItemsUpdateResponse>(getApiCartItemsUpdateUrl(id), {
+export const apiCartItemsUpdate = async (id: number,
+    updateItemIn: UpdateItemIn, options?: RequestInit): Promise<apiCartItemsUpdateResponse> => {
+
+  return apiFetch<apiCartItemsUpdateResponse>(getApiCartItemsUpdateUrl(id),
+  {
     ...options,
     method: 'PATCH',
     headers: { 'Content-Type': 'application/json', ...options?.headers },
     body: JSON.stringify(updateItemIn)
-  })
-}
+  }
+);}
+
+
 
 export type apiCartCouponApplyResponse200 = {
   data: CartOut
@@ -2318,17 +2716,20 @@ export type apiCartCouponApplyResponse400 = {
   status: 400
 }
 
-export type apiCartCouponApplyResponseSuccess = apiCartCouponApplyResponse200 & {
-  headers: Headers
-}
-export type apiCartCouponApplyResponseError = apiCartCouponApplyResponse400 & {
-  headers: Headers
-}
+export type apiCartCouponApplyResponseSuccess = (apiCartCouponApplyResponse200) & {
+  headers: Headers;
+};
+export type apiCartCouponApplyResponseError = (apiCartCouponApplyResponse400) & {
+  headers: Headers;
+};
 
-export type apiCartCouponApplyResponse =
-  apiCartCouponApplyResponseSuccess | apiCartCouponApplyResponseError
+export type apiCartCouponApplyResponse = (apiCartCouponApplyResponseSuccess | apiCartCouponApplyResponseError)
 
 export const getApiCartCouponApplyUrl = () => {
+
+
+
+
   return `/api/cart/coupon`
 }
 
@@ -2337,55 +2738,72 @@ export const getApiCartCouponApplyUrl = () => {
  * authoritatively — a code can expire between apply and place-order).
  * @summary ApiCartCouponApply
  */
-export const apiCartCouponApply = async (
-  applyCouponIn: ApplyCouponIn,
-  options?: RequestInit
-): Promise<apiCartCouponApplyResponse> => {
-  return apiFetch<apiCartCouponApplyResponse>(getApiCartCouponApplyUrl(), {
+export const apiCartCouponApply = async (applyCouponIn: ApplyCouponIn, options?: RequestInit): Promise<apiCartCouponApplyResponse> => {
+
+  return apiFetch<apiCartCouponApplyResponse>(getApiCartCouponApplyUrl(),
+  {
     ...options,
     method: 'POST',
     headers: { 'Content-Type': 'application/json', ...options?.headers },
     body: JSON.stringify(applyCouponIn)
-  })
-}
+  }
+);}
+
+
 
 export type apiCartCouponRemoveResponse200 = {
   data: CartOut
   status: 200
 }
 
-export type apiCartCouponRemoveResponseSuccess = apiCartCouponRemoveResponse200 & {
-  headers: Headers
-}
-export type apiCartCouponRemoveResponse = apiCartCouponRemoveResponseSuccess
+export type apiCartCouponRemoveResponseSuccess = (apiCartCouponRemoveResponse200) & {
+  headers: Headers;
+};
+;
+
+export type apiCartCouponRemoveResponse = (apiCartCouponRemoveResponseSuccess)
 
 export const getApiCartCouponRemoveUrl = () => {
+
+
+
+
   return `/api/cart/coupon`
 }
 
 /**
  * @summary ApiCartCouponRemove
  */
-export const apiCartCouponRemove = async (
-  options?: RequestInit
-): Promise<apiCartCouponRemoveResponse> => {
-  return apiFetch<apiCartCouponRemoveResponse>(getApiCartCouponRemoveUrl(), {
+export const apiCartCouponRemove = async ( options?: RequestInit): Promise<apiCartCouponRemoveResponse> => {
+
+  return apiFetch<apiCartCouponRemoveResponse>(getApiCartCouponRemoveUrl(),
+  {
     ...options,
     method: 'DELETE'
-  })
-}
+
+
+  }
+);}
+
+
 
 export type apiAccountAvatarResponse201 = {
   data: UserOut
   status: 201
 }
 
-export type apiAccountAvatarResponseSuccess = apiAccountAvatarResponse201 & {
-  headers: Headers
-}
-export type apiAccountAvatarResponse = apiAccountAvatarResponseSuccess
+export type apiAccountAvatarResponseSuccess = (apiAccountAvatarResponse201) & {
+  headers: Headers;
+};
+;
+
+export type apiAccountAvatarResponse = (apiAccountAvatarResponseSuccess)
 
 export const getApiAccountAvatarUrl = () => {
+
+
+
+
   return `/api/account/avatar`
 }
 
@@ -2393,40 +2811,54 @@ export const getApiAccountAvatarUrl = () => {
  * Attach/replace the account avatar (one image; the previous one is removed).
  * @summary ApiAccountAvatar
  */
-export const apiAccountAvatar = async (
-  options?: RequestInit
-): Promise<apiAccountAvatarResponse> => {
-  return apiFetch<apiAccountAvatarResponse>(getApiAccountAvatarUrl(), {
+export const apiAccountAvatar = async ( options?: RequestInit): Promise<apiAccountAvatarResponse> => {
+
+  return apiFetch<apiAccountAvatarResponse>(getApiAccountAvatarUrl(),
+  {
     ...options,
     method: 'POST'
-  })
-}
+
+
+  }
+);}
+
+
 
 export type apiAccountAddressesIndexResponse200 = {
   data: SavedAddressOut[]
   status: 200
 }
 
-export type apiAccountAddressesIndexResponseSuccess = apiAccountAddressesIndexResponse200 & {
-  headers: Headers
-}
-export type apiAccountAddressesIndexResponse = apiAccountAddressesIndexResponseSuccess
+export type apiAccountAddressesIndexResponseSuccess = (apiAccountAddressesIndexResponse200) & {
+  headers: Headers;
+};
+;
+
+export type apiAccountAddressesIndexResponse = (apiAccountAddressesIndexResponseSuccess)
 
 export const getApiAccountAddressesIndexUrl = () => {
+
+
+
+
   return `/api/account/addresses`
 }
 
 /**
  * @summary ApiAccountAddressesIndex
  */
-export const apiAccountAddressesIndex = async (
-  options?: RequestInit
-): Promise<apiAccountAddressesIndexResponse> => {
-  return apiFetch<apiAccountAddressesIndexResponse>(getApiAccountAddressesIndexUrl(), {
+export const apiAccountAddressesIndex = async ( options?: RequestInit): Promise<apiAccountAddressesIndexResponse> => {
+
+  return apiFetch<apiAccountAddressesIndexResponse>(getApiAccountAddressesIndexUrl(),
+  {
     ...options,
     method: 'GET'
-  })
-}
+
+
+  }
+);}
+
+
 
 export type apiAccountAddressesStoreResponse201 = {
   data: SavedAddressOut
@@ -2438,34 +2870,38 @@ export type apiAccountAddressesStoreResponse400 = {
   status: 400
 }
 
-export type apiAccountAddressesStoreResponseSuccess = apiAccountAddressesStoreResponse201 & {
-  headers: Headers
-}
-export type apiAccountAddressesStoreResponseError = apiAccountAddressesStoreResponse400 & {
-  headers: Headers
-}
+export type apiAccountAddressesStoreResponseSuccess = (apiAccountAddressesStoreResponse201) & {
+  headers: Headers;
+};
+export type apiAccountAddressesStoreResponseError = (apiAccountAddressesStoreResponse400) & {
+  headers: Headers;
+};
 
-export type apiAccountAddressesStoreResponse =
-  apiAccountAddressesStoreResponseSuccess | apiAccountAddressesStoreResponseError
+export type apiAccountAddressesStoreResponse = (apiAccountAddressesStoreResponseSuccess | apiAccountAddressesStoreResponseError)
 
 export const getApiAccountAddressesStoreUrl = () => {
+
+
+
+
   return `/api/account/addresses`
 }
 
 /**
  * @summary ApiAccountAddressesStore
  */
-export const apiAccountAddressesStore = async (
-  savedAddressIn: SavedAddressIn,
-  options?: RequestInit
-): Promise<apiAccountAddressesStoreResponse> => {
-  return apiFetch<apiAccountAddressesStoreResponse>(getApiAccountAddressesStoreUrl(), {
+export const apiAccountAddressesStore = async (savedAddressIn: SavedAddressIn, options?: RequestInit): Promise<apiAccountAddressesStoreResponse> => {
+
+  return apiFetch<apiAccountAddressesStoreResponse>(getApiAccountAddressesStoreUrl(),
+  {
     ...options,
     method: 'POST',
     headers: { 'Content-Type': 'application/json', ...options?.headers },
     body: JSON.stringify(savedAddressIn)
-  })
-}
+  }
+);}
+
+
 
 export type apiAccountAddressesDestroyResponse200 = {
   data: ApiAccountAddressesDestroy200
@@ -2477,32 +2913,38 @@ export type apiAccountAddressesDestroyResponse400 = {
   status: 400
 }
 
-export type apiAccountAddressesDestroyResponseSuccess = apiAccountAddressesDestroyResponse200 & {
-  headers: Headers
-}
-export type apiAccountAddressesDestroyResponseError = apiAccountAddressesDestroyResponse400 & {
-  headers: Headers
-}
+export type apiAccountAddressesDestroyResponseSuccess = (apiAccountAddressesDestroyResponse200) & {
+  headers: Headers;
+};
+export type apiAccountAddressesDestroyResponseError = (apiAccountAddressesDestroyResponse400) & {
+  headers: Headers;
+};
 
-export type apiAccountAddressesDestroyResponse =
-  apiAccountAddressesDestroyResponseSuccess | apiAccountAddressesDestroyResponseError
+export type apiAccountAddressesDestroyResponse = (apiAccountAddressesDestroyResponseSuccess | apiAccountAddressesDestroyResponseError)
 
-export const getApiAccountAddressesDestroyUrl = (id: number) => {
+export const getApiAccountAddressesDestroyUrl = (id: number,) => {
+
+
+
+
   return `/api/account/addresses/${id}`
 }
 
 /**
  * @summary ApiAccountAddressesDestroy
  */
-export const apiAccountAddressesDestroy = async (
-  id: number,
-  options?: RequestInit
-): Promise<apiAccountAddressesDestroyResponse> => {
-  return apiFetch<apiAccountAddressesDestroyResponse>(getApiAccountAddressesDestroyUrl(id), {
+export const apiAccountAddressesDestroy = async (id: number, options?: RequestInit): Promise<apiAccountAddressesDestroyResponse> => {
+
+  return apiFetch<apiAccountAddressesDestroyResponse>(getApiAccountAddressesDestroyUrl(id),
+  {
     ...options,
     method: 'DELETE'
-  })
-}
+
+
+  }
+);}
+
+
 
 export type apiAccountAddressesUpdateResponse200 = {
   data: SavedAddressOut
@@ -2514,107 +2956,147 @@ export type apiAccountAddressesUpdateResponse400 = {
   status: 400
 }
 
-export type apiAccountAddressesUpdateResponseSuccess = apiAccountAddressesUpdateResponse200 & {
-  headers: Headers
-}
-export type apiAccountAddressesUpdateResponseError = apiAccountAddressesUpdateResponse400 & {
-  headers: Headers
-}
+export type apiAccountAddressesUpdateResponseSuccess = (apiAccountAddressesUpdateResponse200) & {
+  headers: Headers;
+};
+export type apiAccountAddressesUpdateResponseError = (apiAccountAddressesUpdateResponse400) & {
+  headers: Headers;
+};
 
-export type apiAccountAddressesUpdateResponse =
-  apiAccountAddressesUpdateResponseSuccess | apiAccountAddressesUpdateResponseError
+export type apiAccountAddressesUpdateResponse = (apiAccountAddressesUpdateResponseSuccess | apiAccountAddressesUpdateResponseError)
 
-export const getApiAccountAddressesUpdateUrl = (id: number) => {
+export const getApiAccountAddressesUpdateUrl = (id: number,) => {
+
+
+
+
   return `/api/account/addresses/${id}`
 }
 
 /**
  * @summary ApiAccountAddressesUpdate
  */
-export const apiAccountAddressesUpdate = async (
-  id: number,
-  savedAddressIn: SavedAddressIn,
-  options?: RequestInit
-): Promise<apiAccountAddressesUpdateResponse> => {
-  return apiFetch<apiAccountAddressesUpdateResponse>(getApiAccountAddressesUpdateUrl(id), {
+export const apiAccountAddressesUpdate = async (id: number,
+    savedAddressIn: SavedAddressIn, options?: RequestInit): Promise<apiAccountAddressesUpdateResponse> => {
+
+  return apiFetch<apiAccountAddressesUpdateResponse>(getApiAccountAddressesUpdateUrl(id),
+  {
     ...options,
     method: 'PATCH',
     headers: { 'Content-Type': 'application/json', ...options?.headers },
     body: JSON.stringify(savedAddressIn)
-  })
-}
+  }
+);}
+
+
 
 export type apiDealsIndexResponse200 = {
   data: DealOut[]
   status: 200
 }
 
-export type apiDealsIndexResponseSuccess = apiDealsIndexResponse200 & {
-  headers: Headers
-}
-export type apiDealsIndexResponse = apiDealsIndexResponseSuccess
+export type apiDealsIndexResponseSuccess = (apiDealsIndexResponse200) & {
+  headers: Headers;
+};
+;
+
+export type apiDealsIndexResponse = (apiDealsIndexResponseSuccess)
 
 export const getApiDealsIndexUrl = () => {
+
+
+
+
   return `/api/deals`
 }
 
 /**
  * @summary ApiDealsIndex
  */
-export const apiDealsIndex = async (options?: RequestInit): Promise<apiDealsIndexResponse> => {
-  return apiFetch<apiDealsIndexResponse>(getApiDealsIndexUrl(), {
+export const apiDealsIndex = async ( options?: RequestInit): Promise<apiDealsIndexResponse> => {
+
+  return apiFetch<apiDealsIndexResponse>(getApiDealsIndexUrl(),
+  {
     ...options,
     method: 'GET'
-  })
-}
+
+
+  }
+);}
+
+
 
 export type apiAnnouncementResponse200 = {
   data: AnnouncementOut
   status: 200
 }
 
-export type apiAnnouncementResponseSuccess = apiAnnouncementResponse200 & {
-  headers: Headers
-}
-export type apiAnnouncementResponse = apiAnnouncementResponseSuccess
+export type apiAnnouncementResponseSuccess = (apiAnnouncementResponse200) & {
+  headers: Headers;
+};
+;
+
+export type apiAnnouncementResponse = (apiAnnouncementResponseSuccess)
 
 export const getApiAnnouncementUrl = () => {
+
+
+
+
   return `/api/announcement`
 }
 
 /**
  * @summary ApiAnnouncement
  */
-export const apiAnnouncement = async (options?: RequestInit): Promise<apiAnnouncementResponse> => {
-  return apiFetch<apiAnnouncementResponse>(getApiAnnouncementUrl(), {
+export const apiAnnouncement = async ( options?: RequestInit): Promise<apiAnnouncementResponse> => {
+
+  return apiFetch<apiAnnouncementResponse>(getApiAnnouncementUrl(),
+  {
     ...options,
     method: 'GET'
-  })
-}
+
+
+  }
+);}
+
+
 
 export type apiSettingsResponse200 = {
   data: SettingsOut
   status: 200
 }
 
-export type apiSettingsResponseSuccess = apiSettingsResponse200 & {
-  headers: Headers
-}
-export type apiSettingsResponse = apiSettingsResponseSuccess
+export type apiSettingsResponseSuccess = (apiSettingsResponse200) & {
+  headers: Headers;
+};
+;
+
+export type apiSettingsResponse = (apiSettingsResponseSuccess)
 
 export const getApiSettingsUrl = () => {
+
+
+
+
   return `/api/settings`
 }
 
 /**
  * @summary ApiSettings
  */
-export const apiSettings = async (options?: RequestInit): Promise<apiSettingsResponse> => {
-  return apiFetch<apiSettingsResponse>(getApiSettingsUrl(), {
+export const apiSettings = async ( options?: RequestInit): Promise<apiSettingsResponse> => {
+
+  return apiFetch<apiSettingsResponse>(getApiSettingsUrl(),
+  {
     ...options,
     method: 'GET'
-  })
-}
+
+
+  }
+);}
+
+
 
 export type apiNewsletterResponse200 = {
   data: MessageOut
@@ -2626,16 +3108,20 @@ export type apiNewsletterResponse400 = {
   status: 400
 }
 
-export type apiNewsletterResponseSuccess = apiNewsletterResponse200 & {
-  headers: Headers
-}
-export type apiNewsletterResponseError = apiNewsletterResponse400 & {
-  headers: Headers
-}
+export type apiNewsletterResponseSuccess = (apiNewsletterResponse200) & {
+  headers: Headers;
+};
+export type apiNewsletterResponseError = (apiNewsletterResponse400) & {
+  headers: Headers;
+};
 
-export type apiNewsletterResponse = apiNewsletterResponseSuccess | apiNewsletterResponseError
+export type apiNewsletterResponse = (apiNewsletterResponseSuccess | apiNewsletterResponseError)
 
 export const getApiNewsletterUrl = () => {
+
+
+
+
   return `/api/newsletter`
 }
 
@@ -2643,43 +3129,54 @@ export const getApiNewsletterUrl = () => {
  * Idempotent newsletter signup — re-subscribing an existing email is a friendly 200.
  * @summary ApiNewsletter
  */
-export const apiNewsletter = async (
-  newsletterIn: NewsletterIn,
-  options?: RequestInit
-): Promise<apiNewsletterResponse> => {
-  return apiFetch<apiNewsletterResponse>(getApiNewsletterUrl(), {
+export const apiNewsletter = async (newsletterIn: NewsletterIn, options?: RequestInit): Promise<apiNewsletterResponse> => {
+
+  return apiFetch<apiNewsletterResponse>(getApiNewsletterUrl(),
+  {
     ...options,
     method: 'POST',
     headers: { 'Content-Type': 'application/json', ...options?.headers },
     body: JSON.stringify(newsletterIn)
-  })
-}
+  }
+);}
+
+
 
 export type apiAdminSettingsResponse200 = {
   data: SettingsOut
   status: 200
 }
 
-export type apiAdminSettingsResponseSuccess = apiAdminSettingsResponse200 & {
-  headers: Headers
-}
-export type apiAdminSettingsResponse = apiAdminSettingsResponseSuccess
+export type apiAdminSettingsResponseSuccess = (apiAdminSettingsResponse200) & {
+  headers: Headers;
+};
+;
+
+export type apiAdminSettingsResponse = (apiAdminSettingsResponseSuccess)
 
 export const getApiAdminSettingsUrl = () => {
+
+
+
+
   return `/api/admin/settings`
 }
 
 /**
  * @summary ApiAdminSettings
  */
-export const apiAdminSettings = async (
-  options?: RequestInit
-): Promise<apiAdminSettingsResponse> => {
-  return apiFetch<apiAdminSettingsResponse>(getApiAdminSettingsUrl(), {
+export const apiAdminSettings = async ( options?: RequestInit): Promise<apiAdminSettingsResponse> => {
+
+  return apiFetch<apiAdminSettingsResponse>(getApiAdminSettingsUrl(),
+  {
     ...options,
     method: 'GET'
-  })
-}
+
+
+  }
+);}
+
+
 
 export type apiAdminSettingsUpdateResponse200 = {
   data: SettingsOut
@@ -2691,134 +3188,182 @@ export type apiAdminSettingsUpdateResponse400 = {
   status: 400
 }
 
-export type apiAdminSettingsUpdateResponseSuccess = apiAdminSettingsUpdateResponse200 & {
-  headers: Headers
-}
-export type apiAdminSettingsUpdateResponseError = apiAdminSettingsUpdateResponse400 & {
-  headers: Headers
-}
+export type apiAdminSettingsUpdateResponseSuccess = (apiAdminSettingsUpdateResponse200) & {
+  headers: Headers;
+};
+export type apiAdminSettingsUpdateResponseError = (apiAdminSettingsUpdateResponse400) & {
+  headers: Headers;
+};
 
-export type apiAdminSettingsUpdateResponse =
-  apiAdminSettingsUpdateResponseSuccess | apiAdminSettingsUpdateResponseError
+export type apiAdminSettingsUpdateResponse = (apiAdminSettingsUpdateResponseSuccess | apiAdminSettingsUpdateResponseError)
 
 export const getApiAdminSettingsUpdateUrl = () => {
+
+
+
+
   return `/api/admin/settings`
 }
 
 /**
  * @summary ApiAdminSettingsUpdate
  */
-export const apiAdminSettingsUpdate = async (
-  settingsIn: SettingsIn,
-  options?: RequestInit
-): Promise<apiAdminSettingsUpdateResponse> => {
-  return apiFetch<apiAdminSettingsUpdateResponse>(getApiAdminSettingsUpdateUrl(), {
+export const apiAdminSettingsUpdate = async (settingsIn: SettingsIn, options?: RequestInit): Promise<apiAdminSettingsUpdateResponse> => {
+
+  return apiFetch<apiAdminSettingsUpdateResponse>(getApiAdminSettingsUpdateUrl(),
+  {
     ...options,
     method: 'PATCH',
     headers: { 'Content-Type': 'application/json', ...options?.headers },
     body: JSON.stringify(settingsIn)
-  })
-}
+  }
+);}
+
+
 
 export type apiAdminMediaResponse200 = {
   data: MediaItemOut[]
   status: 200
 }
 
-export type apiAdminMediaResponseSuccess = apiAdminMediaResponse200 & {
-  headers: Headers
-}
-export type apiAdminMediaResponse = apiAdminMediaResponseSuccess
+export type apiAdminMediaResponseSuccess = (apiAdminMediaResponse200) & {
+  headers: Headers;
+};
+;
+
+export type apiAdminMediaResponse = (apiAdminMediaResponseSuccess)
 
 export const getApiAdminMediaUrl = () => {
+
+
+
+
   return `/api/admin/media`
 }
 
 /**
  * @summary ApiAdminMedia
  */
-export const apiAdminMedia = async (options?: RequestInit): Promise<apiAdminMediaResponse> => {
-  return apiFetch<apiAdminMediaResponse>(getApiAdminMediaUrl(), {
+export const apiAdminMedia = async ( options?: RequestInit): Promise<apiAdminMediaResponse> => {
+
+  return apiFetch<apiAdminMediaResponse>(getApiAdminMediaUrl(),
+  {
     ...options,
     method: 'GET'
-  })
-}
+
+
+  }
+);}
+
+
 
 export type apiAdminNewsletterResponse200 = {
   data: NewsletterSubscriberOut[]
   status: 200
 }
 
-export type apiAdminNewsletterResponseSuccess = apiAdminNewsletterResponse200 & {
-  headers: Headers
-}
-export type apiAdminNewsletterResponse = apiAdminNewsletterResponseSuccess
+export type apiAdminNewsletterResponseSuccess = (apiAdminNewsletterResponse200) & {
+  headers: Headers;
+};
+;
+
+export type apiAdminNewsletterResponse = (apiAdminNewsletterResponseSuccess)
 
 export const getApiAdminNewsletterUrl = () => {
+
+
+
+
   return `/api/admin/newsletter`
 }
 
 /**
  * @summary ApiAdminNewsletter
  */
-export const apiAdminNewsletter = async (
-  options?: RequestInit
-): Promise<apiAdminNewsletterResponse> => {
-  return apiFetch<apiAdminNewsletterResponse>(getApiAdminNewsletterUrl(), {
+export const apiAdminNewsletter = async ( options?: RequestInit): Promise<apiAdminNewsletterResponse> => {
+
+  return apiFetch<apiAdminNewsletterResponse>(getApiAdminNewsletterUrl(),
+  {
     ...options,
     method: 'GET'
-  })
-}
+
+
+  }
+);}
+
+
 
 export type apiBannersIndexResponse200 = {
   data: BannerOut[]
   status: 200
 }
 
-export type apiBannersIndexResponseSuccess = apiBannersIndexResponse200 & {
-  headers: Headers
-}
-export type apiBannersIndexResponse = apiBannersIndexResponseSuccess
+export type apiBannersIndexResponseSuccess = (apiBannersIndexResponse200) & {
+  headers: Headers;
+};
+;
+
+export type apiBannersIndexResponse = (apiBannersIndexResponseSuccess)
 
 export const getApiBannersIndexUrl = () => {
+
+
+
+
   return `/api/banners`
 }
 
 /**
  * @summary ApiBannersIndex
  */
-export const apiBannersIndex = async (options?: RequestInit): Promise<apiBannersIndexResponse> => {
-  return apiFetch<apiBannersIndexResponse>(getApiBannersIndexUrl(), {
+export const apiBannersIndex = async ( options?: RequestInit): Promise<apiBannersIndexResponse> => {
+
+  return apiFetch<apiBannersIndexResponse>(getApiBannersIndexUrl(),
+  {
     ...options,
     method: 'GET'
-  })
-}
+
+
+  }
+);}
+
+
 
 export type apiAdminBannersIndexResponse200 = {
   data: AdminBannerOut[]
   status: 200
 }
 
-export type apiAdminBannersIndexResponseSuccess = apiAdminBannersIndexResponse200 & {
-  headers: Headers
-}
-export type apiAdminBannersIndexResponse = apiAdminBannersIndexResponseSuccess
+export type apiAdminBannersIndexResponseSuccess = (apiAdminBannersIndexResponse200) & {
+  headers: Headers;
+};
+;
+
+export type apiAdminBannersIndexResponse = (apiAdminBannersIndexResponseSuccess)
 
 export const getApiAdminBannersIndexUrl = () => {
+
+
+
+
   return `/api/admin/banners`
 }
 
 /**
  * @summary ApiAdminBannersIndex
  */
-export const apiAdminBannersIndex = async (
-  options?: RequestInit
-): Promise<apiAdminBannersIndexResponse> => {
-  return apiFetch<apiAdminBannersIndexResponse>(getApiAdminBannersIndexUrl(), {
+export const apiAdminBannersIndex = async ( options?: RequestInit): Promise<apiAdminBannersIndexResponse> => {
+
+  return apiFetch<apiAdminBannersIndexResponse>(getApiAdminBannersIndexUrl(),
+  {
     ...options,
     method: 'GET'
-  })
-}
+
+
+  }
+);}
+
+
 
 export type apiAdminBannersStoreResponse201 = {
   data: AdminBannerOut
@@ -2830,34 +3375,38 @@ export type apiAdminBannersStoreResponse400 = {
   status: 400
 }
 
-export type apiAdminBannersStoreResponseSuccess = apiAdminBannersStoreResponse201 & {
-  headers: Headers
-}
-export type apiAdminBannersStoreResponseError = apiAdminBannersStoreResponse400 & {
-  headers: Headers
-}
+export type apiAdminBannersStoreResponseSuccess = (apiAdminBannersStoreResponse201) & {
+  headers: Headers;
+};
+export type apiAdminBannersStoreResponseError = (apiAdminBannersStoreResponse400) & {
+  headers: Headers;
+};
 
-export type apiAdminBannersStoreResponse =
-  apiAdminBannersStoreResponseSuccess | apiAdminBannersStoreResponseError
+export type apiAdminBannersStoreResponse = (apiAdminBannersStoreResponseSuccess | apiAdminBannersStoreResponseError)
 
 export const getApiAdminBannersStoreUrl = () => {
+
+
+
+
   return `/api/admin/banners`
 }
 
 /**
  * @summary ApiAdminBannersStore
  */
-export const apiAdminBannersStore = async (
-  bannerIn: BannerIn,
-  options?: RequestInit
-): Promise<apiAdminBannersStoreResponse> => {
-  return apiFetch<apiAdminBannersStoreResponse>(getApiAdminBannersStoreUrl(), {
+export const apiAdminBannersStore = async (bannerIn: BannerIn, options?: RequestInit): Promise<apiAdminBannersStoreResponse> => {
+
+  return apiFetch<apiAdminBannersStoreResponse>(getApiAdminBannersStoreUrl(),
+  {
     ...options,
     method: 'POST',
     headers: { 'Content-Type': 'application/json', ...options?.headers },
     body: JSON.stringify(bannerIn)
-  })
-}
+  }
+);}
+
+
 
 export type apiAdminBannersDestroyResponse200 = {
   data: ApiAdminBannersDestroy200
@@ -2869,32 +3418,38 @@ export type apiAdminBannersDestroyResponse400 = {
   status: 400
 }
 
-export type apiAdminBannersDestroyResponseSuccess = apiAdminBannersDestroyResponse200 & {
-  headers: Headers
-}
-export type apiAdminBannersDestroyResponseError = apiAdminBannersDestroyResponse400 & {
-  headers: Headers
-}
+export type apiAdminBannersDestroyResponseSuccess = (apiAdminBannersDestroyResponse200) & {
+  headers: Headers;
+};
+export type apiAdminBannersDestroyResponseError = (apiAdminBannersDestroyResponse400) & {
+  headers: Headers;
+};
 
-export type apiAdminBannersDestroyResponse =
-  apiAdminBannersDestroyResponseSuccess | apiAdminBannersDestroyResponseError
+export type apiAdminBannersDestroyResponse = (apiAdminBannersDestroyResponseSuccess | apiAdminBannersDestroyResponseError)
 
-export const getApiAdminBannersDestroyUrl = (id: number) => {
+export const getApiAdminBannersDestroyUrl = (id: number,) => {
+
+
+
+
   return `/api/admin/banners/${id}`
 }
 
 /**
  * @summary ApiAdminBannersDestroy
  */
-export const apiAdminBannersDestroy = async (
-  id: number,
-  options?: RequestInit
-): Promise<apiAdminBannersDestroyResponse> => {
-  return apiFetch<apiAdminBannersDestroyResponse>(getApiAdminBannersDestroyUrl(id), {
+export const apiAdminBannersDestroy = async (id: number, options?: RequestInit): Promise<apiAdminBannersDestroyResponse> => {
+
+  return apiFetch<apiAdminBannersDestroyResponse>(getApiAdminBannersDestroyUrl(id),
+  {
     ...options,
     method: 'DELETE'
-  })
-}
+
+
+  }
+);}
+
+
 
 export type apiAdminBannersUpdateResponse200 = {
   data: AdminBannerOut
@@ -2906,35 +3461,39 @@ export type apiAdminBannersUpdateResponse400 = {
   status: 400
 }
 
-export type apiAdminBannersUpdateResponseSuccess = apiAdminBannersUpdateResponse200 & {
-  headers: Headers
-}
-export type apiAdminBannersUpdateResponseError = apiAdminBannersUpdateResponse400 & {
-  headers: Headers
-}
+export type apiAdminBannersUpdateResponseSuccess = (apiAdminBannersUpdateResponse200) & {
+  headers: Headers;
+};
+export type apiAdminBannersUpdateResponseError = (apiAdminBannersUpdateResponse400) & {
+  headers: Headers;
+};
 
-export type apiAdminBannersUpdateResponse =
-  apiAdminBannersUpdateResponseSuccess | apiAdminBannersUpdateResponseError
+export type apiAdminBannersUpdateResponse = (apiAdminBannersUpdateResponseSuccess | apiAdminBannersUpdateResponseError)
 
-export const getApiAdminBannersUpdateUrl = (id: number) => {
+export const getApiAdminBannersUpdateUrl = (id: number,) => {
+
+
+
+
   return `/api/admin/banners/${id}`
 }
 
 /**
  * @summary ApiAdminBannersUpdate
  */
-export const apiAdminBannersUpdate = async (
-  id: number,
-  bannerUpdateIn: BannerUpdateIn,
-  options?: RequestInit
-): Promise<apiAdminBannersUpdateResponse> => {
-  return apiFetch<apiAdminBannersUpdateResponse>(getApiAdminBannersUpdateUrl(id), {
+export const apiAdminBannersUpdate = async (id: number,
+    bannerUpdateIn: BannerUpdateIn, options?: RequestInit): Promise<apiAdminBannersUpdateResponse> => {
+
+  return apiFetch<apiAdminBannersUpdateResponse>(getApiAdminBannersUpdateUrl(id),
+  {
     ...options,
     method: 'PATCH',
     headers: { 'Content-Type': 'application/json', ...options?.headers },
     body: JSON.stringify(bannerUpdateIn)
-  })
-}
+  }
+);}
+
+
 
 export type apiAdminBannersImageResponse201 = {
   data: AdminBannerOut
@@ -2946,17 +3505,20 @@ export type apiAdminBannersImageResponse400 = {
   status: 400
 }
 
-export type apiAdminBannersImageResponseSuccess = apiAdminBannersImageResponse201 & {
-  headers: Headers
-}
-export type apiAdminBannersImageResponseError = apiAdminBannersImageResponse400 & {
-  headers: Headers
-}
+export type apiAdminBannersImageResponseSuccess = (apiAdminBannersImageResponse201) & {
+  headers: Headers;
+};
+export type apiAdminBannersImageResponseError = (apiAdminBannersImageResponse400) & {
+  headers: Headers;
+};
 
-export type apiAdminBannersImageResponse =
-  apiAdminBannersImageResponseSuccess | apiAdminBannersImageResponseError
+export type apiAdminBannersImageResponse = (apiAdminBannersImageResponseSuccess | apiAdminBannersImageResponseError)
 
-export const getApiAdminBannersImageUrl = (id: number) => {
+export const getApiAdminBannersImageUrl = (id: number,) => {
+
+
+
+
   return `/api/admin/banners/${id}/image`
 }
 
@@ -2964,41 +3526,54 @@ export const getApiAdminBannersImageUrl = (id: number) => {
  * Attach/replace the slide image (the previous one is removed — a slide has ONE image).
  * @summary ApiAdminBannersImage
  */
-export const apiAdminBannersImage = async (
-  id: number,
-  options?: RequestInit
-): Promise<apiAdminBannersImageResponse> => {
-  return apiFetch<apiAdminBannersImageResponse>(getApiAdminBannersImageUrl(id), {
+export const apiAdminBannersImage = async (id: number, options?: RequestInit): Promise<apiAdminBannersImageResponse> => {
+
+  return apiFetch<apiAdminBannersImageResponse>(getApiAdminBannersImageUrl(id),
+  {
     ...options,
     method: 'POST'
-  })
-}
+
+
+  }
+);}
+
+
 
 export type apiAdminDealsIndexResponse200 = {
   data: AdminDealOut[]
   status: 200
 }
 
-export type apiAdminDealsIndexResponseSuccess = apiAdminDealsIndexResponse200 & {
-  headers: Headers
-}
-export type apiAdminDealsIndexResponse = apiAdminDealsIndexResponseSuccess
+export type apiAdminDealsIndexResponseSuccess = (apiAdminDealsIndexResponse200) & {
+  headers: Headers;
+};
+;
+
+export type apiAdminDealsIndexResponse = (apiAdminDealsIndexResponseSuccess)
 
 export const getApiAdminDealsIndexUrl = () => {
+
+
+
+
   return `/api/admin/deals`
 }
 
 /**
  * @summary ApiAdminDealsIndex
  */
-export const apiAdminDealsIndex = async (
-  options?: RequestInit
-): Promise<apiAdminDealsIndexResponse> => {
-  return apiFetch<apiAdminDealsIndexResponse>(getApiAdminDealsIndexUrl(), {
+export const apiAdminDealsIndex = async ( options?: RequestInit): Promise<apiAdminDealsIndexResponse> => {
+
+  return apiFetch<apiAdminDealsIndexResponse>(getApiAdminDealsIndexUrl(),
+  {
     ...options,
     method: 'GET'
-  })
-}
+
+
+  }
+);}
+
+
 
 export type apiAdminDealsStoreResponse201 = {
   data: AdminDealOut
@@ -3010,34 +3585,38 @@ export type apiAdminDealsStoreResponse400 = {
   status: 400
 }
 
-export type apiAdminDealsStoreResponseSuccess = apiAdminDealsStoreResponse201 & {
-  headers: Headers
-}
-export type apiAdminDealsStoreResponseError = apiAdminDealsStoreResponse400 & {
-  headers: Headers
-}
+export type apiAdminDealsStoreResponseSuccess = (apiAdminDealsStoreResponse201) & {
+  headers: Headers;
+};
+export type apiAdminDealsStoreResponseError = (apiAdminDealsStoreResponse400) & {
+  headers: Headers;
+};
 
-export type apiAdminDealsStoreResponse =
-  apiAdminDealsStoreResponseSuccess | apiAdminDealsStoreResponseError
+export type apiAdminDealsStoreResponse = (apiAdminDealsStoreResponseSuccess | apiAdminDealsStoreResponseError)
 
 export const getApiAdminDealsStoreUrl = () => {
+
+
+
+
   return `/api/admin/deals`
 }
 
 /**
  * @summary ApiAdminDealsStore
  */
-export const apiAdminDealsStore = async (
-  dealIn: DealIn,
-  options?: RequestInit
-): Promise<apiAdminDealsStoreResponse> => {
-  return apiFetch<apiAdminDealsStoreResponse>(getApiAdminDealsStoreUrl(), {
+export const apiAdminDealsStore = async (dealIn: DealIn, options?: RequestInit): Promise<apiAdminDealsStoreResponse> => {
+
+  return apiFetch<apiAdminDealsStoreResponse>(getApiAdminDealsStoreUrl(),
+  {
     ...options,
     method: 'POST',
     headers: { 'Content-Type': 'application/json', ...options?.headers },
     body: JSON.stringify(dealIn)
-  })
-}
+  }
+);}
+
+
 
 export type apiAdminDealsDestroyResponse200 = {
   data: ApiAdminDealsDestroy200
@@ -3049,32 +3628,38 @@ export type apiAdminDealsDestroyResponse400 = {
   status: 400
 }
 
-export type apiAdminDealsDestroyResponseSuccess = apiAdminDealsDestroyResponse200 & {
-  headers: Headers
-}
-export type apiAdminDealsDestroyResponseError = apiAdminDealsDestroyResponse400 & {
-  headers: Headers
-}
+export type apiAdminDealsDestroyResponseSuccess = (apiAdminDealsDestroyResponse200) & {
+  headers: Headers;
+};
+export type apiAdminDealsDestroyResponseError = (apiAdminDealsDestroyResponse400) & {
+  headers: Headers;
+};
 
-export type apiAdminDealsDestroyResponse =
-  apiAdminDealsDestroyResponseSuccess | apiAdminDealsDestroyResponseError
+export type apiAdminDealsDestroyResponse = (apiAdminDealsDestroyResponseSuccess | apiAdminDealsDestroyResponseError)
 
-export const getApiAdminDealsDestroyUrl = (id: number) => {
+export const getApiAdminDealsDestroyUrl = (id: number,) => {
+
+
+
+
   return `/api/admin/deals/${id}`
 }
 
 /**
  * @summary ApiAdminDealsDestroy
  */
-export const apiAdminDealsDestroy = async (
-  id: number,
-  options?: RequestInit
-): Promise<apiAdminDealsDestroyResponse> => {
-  return apiFetch<apiAdminDealsDestroyResponse>(getApiAdminDealsDestroyUrl(id), {
+export const apiAdminDealsDestroy = async (id: number, options?: RequestInit): Promise<apiAdminDealsDestroyResponse> => {
+
+  return apiFetch<apiAdminDealsDestroyResponse>(getApiAdminDealsDestroyUrl(id),
+  {
     ...options,
     method: 'DELETE'
-  })
-}
+
+
+  }
+);}
+
+
 
 export type apiAdminDealsUpdateResponse200 = {
   data: AdminDealOut
@@ -3086,61 +3671,75 @@ export type apiAdminDealsUpdateResponse400 = {
   status: 400
 }
 
-export type apiAdminDealsUpdateResponseSuccess = apiAdminDealsUpdateResponse200 & {
-  headers: Headers
-}
-export type apiAdminDealsUpdateResponseError = apiAdminDealsUpdateResponse400 & {
-  headers: Headers
-}
+export type apiAdminDealsUpdateResponseSuccess = (apiAdminDealsUpdateResponse200) & {
+  headers: Headers;
+};
+export type apiAdminDealsUpdateResponseError = (apiAdminDealsUpdateResponse400) & {
+  headers: Headers;
+};
 
-export type apiAdminDealsUpdateResponse =
-  apiAdminDealsUpdateResponseSuccess | apiAdminDealsUpdateResponseError
+export type apiAdminDealsUpdateResponse = (apiAdminDealsUpdateResponseSuccess | apiAdminDealsUpdateResponseError)
 
-export const getApiAdminDealsUpdateUrl = (id: number) => {
+export const getApiAdminDealsUpdateUrl = (id: number,) => {
+
+
+
+
   return `/api/admin/deals/${id}`
 }
 
 /**
  * @summary ApiAdminDealsUpdate
  */
-export const apiAdminDealsUpdate = async (
-  id: number,
-  dealUpdateIn: DealUpdateIn,
-  options?: RequestInit
-): Promise<apiAdminDealsUpdateResponse> => {
-  return apiFetch<apiAdminDealsUpdateResponse>(getApiAdminDealsUpdateUrl(id), {
+export const apiAdminDealsUpdate = async (id: number,
+    dealUpdateIn: DealUpdateIn, options?: RequestInit): Promise<apiAdminDealsUpdateResponse> => {
+
+  return apiFetch<apiAdminDealsUpdateResponse>(getApiAdminDealsUpdateUrl(id),
+  {
     ...options,
     method: 'PATCH',
     headers: { 'Content-Type': 'application/json', ...options?.headers },
     body: JSON.stringify(dealUpdateIn)
-  })
-}
+  }
+);}
+
+
 
 export type apiAdminCouponsIndexResponse200 = {
   data: AdminCouponOut[]
   status: 200
 }
 
-export type apiAdminCouponsIndexResponseSuccess = apiAdminCouponsIndexResponse200 & {
-  headers: Headers
-}
-export type apiAdminCouponsIndexResponse = apiAdminCouponsIndexResponseSuccess
+export type apiAdminCouponsIndexResponseSuccess = (apiAdminCouponsIndexResponse200) & {
+  headers: Headers;
+};
+;
+
+export type apiAdminCouponsIndexResponse = (apiAdminCouponsIndexResponseSuccess)
 
 export const getApiAdminCouponsIndexUrl = () => {
+
+
+
+
   return `/api/admin/coupons`
 }
 
 /**
  * @summary ApiAdminCouponsIndex
  */
-export const apiAdminCouponsIndex = async (
-  options?: RequestInit
-): Promise<apiAdminCouponsIndexResponse> => {
-  return apiFetch<apiAdminCouponsIndexResponse>(getApiAdminCouponsIndexUrl(), {
+export const apiAdminCouponsIndex = async ( options?: RequestInit): Promise<apiAdminCouponsIndexResponse> => {
+
+  return apiFetch<apiAdminCouponsIndexResponse>(getApiAdminCouponsIndexUrl(),
+  {
     ...options,
     method: 'GET'
-  })
-}
+
+
+  }
+);}
+
+
 
 export type apiAdminCouponsStoreResponse201 = {
   data: AdminCouponOut
@@ -3152,34 +3751,38 @@ export type apiAdminCouponsStoreResponse400 = {
   status: 400
 }
 
-export type apiAdminCouponsStoreResponseSuccess = apiAdminCouponsStoreResponse201 & {
-  headers: Headers
-}
-export type apiAdminCouponsStoreResponseError = apiAdminCouponsStoreResponse400 & {
-  headers: Headers
-}
+export type apiAdminCouponsStoreResponseSuccess = (apiAdminCouponsStoreResponse201) & {
+  headers: Headers;
+};
+export type apiAdminCouponsStoreResponseError = (apiAdminCouponsStoreResponse400) & {
+  headers: Headers;
+};
 
-export type apiAdminCouponsStoreResponse =
-  apiAdminCouponsStoreResponseSuccess | apiAdminCouponsStoreResponseError
+export type apiAdminCouponsStoreResponse = (apiAdminCouponsStoreResponseSuccess | apiAdminCouponsStoreResponseError)
 
 export const getApiAdminCouponsStoreUrl = () => {
+
+
+
+
   return `/api/admin/coupons`
 }
 
 /**
  * @summary ApiAdminCouponsStore
  */
-export const apiAdminCouponsStore = async (
-  couponIn: CouponIn,
-  options?: RequestInit
-): Promise<apiAdminCouponsStoreResponse> => {
-  return apiFetch<apiAdminCouponsStoreResponse>(getApiAdminCouponsStoreUrl(), {
+export const apiAdminCouponsStore = async (couponIn: CouponIn, options?: RequestInit): Promise<apiAdminCouponsStoreResponse> => {
+
+  return apiFetch<apiAdminCouponsStoreResponse>(getApiAdminCouponsStoreUrl(),
+  {
     ...options,
     method: 'POST',
     headers: { 'Content-Type': 'application/json', ...options?.headers },
     body: JSON.stringify(couponIn)
-  })
-}
+  }
+);}
+
+
 
 export type apiAdminCouponsUpdateResponse200 = {
   data: AdminCouponOut
@@ -3191,17 +3794,20 @@ export type apiAdminCouponsUpdateResponse400 = {
   status: 400
 }
 
-export type apiAdminCouponsUpdateResponseSuccess = apiAdminCouponsUpdateResponse200 & {
-  headers: Headers
-}
-export type apiAdminCouponsUpdateResponseError = apiAdminCouponsUpdateResponse400 & {
-  headers: Headers
-}
+export type apiAdminCouponsUpdateResponseSuccess = (apiAdminCouponsUpdateResponse200) & {
+  headers: Headers;
+};
+export type apiAdminCouponsUpdateResponseError = (apiAdminCouponsUpdateResponse400) & {
+  headers: Headers;
+};
 
-export type apiAdminCouponsUpdateResponse =
-  apiAdminCouponsUpdateResponseSuccess | apiAdminCouponsUpdateResponseError
+export type apiAdminCouponsUpdateResponse = (apiAdminCouponsUpdateResponseSuccess | apiAdminCouponsUpdateResponseError)
 
-export const getApiAdminCouponsUpdateUrl = (id: number) => {
+export const getApiAdminCouponsUpdateUrl = (id: number,) => {
+
+
+
+
   return `/api/admin/coupons/${id}`
 }
 
@@ -3210,18 +3816,19 @@ export const getApiAdminCouponsUpdateUrl = (id: number) => {
  * re-validates every redemption).
  * @summary ApiAdminCouponsUpdate
  */
-export const apiAdminCouponsUpdate = async (
-  id: number,
-  couponUpdateIn: CouponUpdateIn,
-  options?: RequestInit
-): Promise<apiAdminCouponsUpdateResponse> => {
-  return apiFetch<apiAdminCouponsUpdateResponse>(getApiAdminCouponsUpdateUrl(id), {
+export const apiAdminCouponsUpdate = async (id: number,
+    couponUpdateIn: CouponUpdateIn, options?: RequestInit): Promise<apiAdminCouponsUpdateResponse> => {
+
+  return apiFetch<apiAdminCouponsUpdateResponse>(getApiAdminCouponsUpdateUrl(id),
+  {
     ...options,
     method: 'PATCH',
     headers: { 'Content-Type': 'application/json', ...options?.headers },
     body: JSON.stringify(couponUpdateIn)
-  })
-}
+  }
+);}
+
+
 
 export type apiCheckoutResponse201 = {
   data: OrderOut
@@ -3233,16 +3840,20 @@ export type apiCheckoutResponse400 = {
   status: 400
 }
 
-export type apiCheckoutResponseSuccess = apiCheckoutResponse201 & {
-  headers: Headers
-}
-export type apiCheckoutResponseError = apiCheckoutResponse400 & {
-  headers: Headers
-}
+export type apiCheckoutResponseSuccess = (apiCheckoutResponse201) & {
+  headers: Headers;
+};
+export type apiCheckoutResponseError = (apiCheckoutResponse400) & {
+  headers: Headers;
+};
 
-export type apiCheckoutResponse = apiCheckoutResponseSuccess | apiCheckoutResponseError
+export type apiCheckoutResponse = (apiCheckoutResponseSuccess | apiCheckoutResponseError)
 
 export const getApiCheckoutUrl = () => {
+
+
+
+
   return `/api/checkout`
 }
 
@@ -3251,29 +3862,36 @@ export const getApiCheckoutUrl = () => {
  * capturing the contact email + shipping address and the server-computed money breakdown.
  * @summary ApiCheckout
  */
-export const apiCheckout = async (
-  checkoutIn: CheckoutIn,
-  options?: RequestInit
-): Promise<apiCheckoutResponse> => {
-  return apiFetch<apiCheckoutResponse>(getApiCheckoutUrl(), {
+export const apiCheckout = async (checkoutIn: CheckoutIn, options?: RequestInit): Promise<apiCheckoutResponse> => {
+
+  return apiFetch<apiCheckoutResponse>(getApiCheckoutUrl(),
+  {
     ...options,
     method: 'POST',
     headers: { 'Content-Type': 'application/json', ...options?.headers },
     body: JSON.stringify(checkoutIn)
-  })
-}
+  }
+);}
+
+
 
 export type apiMetricsOrdersPlacedResponse200 = {
   data: MetricsOut
   status: 200
 }
 
-export type apiMetricsOrdersPlacedResponseSuccess = apiMetricsOrdersPlacedResponse200 & {
-  headers: Headers
-}
-export type apiMetricsOrdersPlacedResponse = apiMetricsOrdersPlacedResponseSuccess
+export type apiMetricsOrdersPlacedResponseSuccess = (apiMetricsOrdersPlacedResponse200) & {
+  headers: Headers;
+};
+;
+
+export type apiMetricsOrdersPlacedResponse = (apiMetricsOrdersPlacedResponseSuccess)
 
 export const getApiMetricsOrdersPlacedUrl = () => {
+
+
+
+
   return `/api/metrics/orders-placed`
 }
 
@@ -3281,26 +3899,36 @@ export const getApiMetricsOrdersPlacedUrl = () => {
  * Order metrics bumped by the order.placed listeners (proves event→listener + the queued job).
  * @summary ApiMetricsOrdersPlaced
  */
-export const apiMetricsOrdersPlaced = async (
-  options?: RequestInit
-): Promise<apiMetricsOrdersPlacedResponse> => {
-  return apiFetch<apiMetricsOrdersPlacedResponse>(getApiMetricsOrdersPlacedUrl(), {
+export const apiMetricsOrdersPlaced = async ( options?: RequestInit): Promise<apiMetricsOrdersPlacedResponse> => {
+
+  return apiFetch<apiMetricsOrdersPlacedResponse>(getApiMetricsOrdersPlacedUrl(),
+  {
     ...options,
     method: 'GET'
-  })
-}
+
+
+  }
+);}
+
+
 
 export type apiOrdersIndexResponse200 = {
   data: OrderOut[]
   status: 200
 }
 
-export type apiOrdersIndexResponseSuccess = apiOrdersIndexResponse200 & {
-  headers: Headers
-}
-export type apiOrdersIndexResponse = apiOrdersIndexResponseSuccess
+export type apiOrdersIndexResponseSuccess = (apiOrdersIndexResponse200) & {
+  headers: Headers;
+};
+;
+
+export type apiOrdersIndexResponse = (apiOrdersIndexResponseSuccess)
 
 export const getApiOrdersIndexUrl = () => {
+
+
+
+
   return `/api/orders`
 }
 
@@ -3308,12 +3936,18 @@ export const getApiOrdersIndexUrl = () => {
  * The authenticated user's orders (newest first).
  * @summary ApiOrdersIndex
  */
-export const apiOrdersIndex = async (options?: RequestInit): Promise<apiOrdersIndexResponse> => {
-  return apiFetch<apiOrdersIndexResponse>(getApiOrdersIndexUrl(), {
+export const apiOrdersIndex = async ( options?: RequestInit): Promise<apiOrdersIndexResponse> => {
+
+  return apiFetch<apiOrdersIndexResponse>(getApiOrdersIndexUrl(),
+  {
     ...options,
     method: 'GET'
-  })
-}
+
+
+  }
+);}
+
+
 
 export type apiOrdersShowResponse200 = {
   data: OrderOut
@@ -3325,16 +3959,20 @@ export type apiOrdersShowResponse400 = {
   status: 400
 }
 
-export type apiOrdersShowResponseSuccess = apiOrdersShowResponse200 & {
-  headers: Headers
-}
-export type apiOrdersShowResponseError = apiOrdersShowResponse400 & {
-  headers: Headers
-}
+export type apiOrdersShowResponseSuccess = (apiOrdersShowResponse200) & {
+  headers: Headers;
+};
+export type apiOrdersShowResponseError = (apiOrdersShowResponse400) & {
+  headers: Headers;
+};
 
-export type apiOrdersShowResponse = apiOrdersShowResponseSuccess | apiOrdersShowResponseError
+export type apiOrdersShowResponse = (apiOrdersShowResponseSuccess | apiOrdersShowResponseError)
 
-export const getApiOrdersShowUrl = (id: number) => {
+export const getApiOrdersShowUrl = (id: number,) => {
+
+
+
+
   return `/api/orders/${id}`
 }
 
@@ -3343,15 +3981,18 @@ export const getApiOrdersShowUrl = (id: number) => {
  * the order-token holder.
  * @summary ApiOrdersShow
  */
-export const apiOrdersShow = async (
-  id: number,
-  options?: RequestInit
-): Promise<apiOrdersShowResponse> => {
-  return apiFetch<apiOrdersShowResponse>(getApiOrdersShowUrl(id), {
+export const apiOrdersShow = async (id: number, options?: RequestInit): Promise<apiOrdersShowResponse> => {
+
+  return apiFetch<apiOrdersShowResponse>(getApiOrdersShowUrl(id),
+  {
     ...options,
     method: 'GET'
-  })
-}
+
+
+  }
+);}
+
+
 
 export type apiOrdersInvoiceResponse200 = {
   data: Response
@@ -3363,32 +4004,38 @@ export type apiOrdersInvoiceResponse400 = {
   status: 400
 }
 
-export type apiOrdersInvoiceResponseSuccess = apiOrdersInvoiceResponse200 & {
-  headers: Headers
-}
-export type apiOrdersInvoiceResponseError = apiOrdersInvoiceResponse400 & {
-  headers: Headers
-}
+export type apiOrdersInvoiceResponseSuccess = (apiOrdersInvoiceResponse200) & {
+  headers: Headers;
+};
+export type apiOrdersInvoiceResponseError = (apiOrdersInvoiceResponse400) & {
+  headers: Headers;
+};
 
-export type apiOrdersInvoiceResponse =
-  apiOrdersInvoiceResponseSuccess | apiOrdersInvoiceResponseError
+export type apiOrdersInvoiceResponse = (apiOrdersInvoiceResponseSuccess | apiOrdersInvoiceResponseError)
 
-export const getApiOrdersInvoiceUrl = (id: number) => {
+export const getApiOrdersInvoiceUrl = (id: number,) => {
+
+
+
+
   return `/api/orders/${id}/invoice`
 }
 
 /**
  * @summary ApiOrdersInvoice
  */
-export const apiOrdersInvoice = async (
-  id: number,
-  options?: RequestInit
-): Promise<apiOrdersInvoiceResponse> => {
-  return apiFetch<apiOrdersInvoiceResponse>(getApiOrdersInvoiceUrl(id), {
+export const apiOrdersInvoice = async (id: number, options?: RequestInit): Promise<apiOrdersInvoiceResponse> => {
+
+  return apiFetch<apiOrdersInvoiceResponse>(getApiOrdersInvoiceUrl(id),
+  {
     ...options,
     method: 'GET'
-  })
-}
+
+
+  }
+);}
+
+
 
 export type apiOrdersCancelResponse200 = {
   data: OrderOut
@@ -3400,16 +4047,20 @@ export type apiOrdersCancelResponse400 = {
   status: 400
 }
 
-export type apiOrdersCancelResponseSuccess = apiOrdersCancelResponse200 & {
-  headers: Headers
-}
-export type apiOrdersCancelResponseError = apiOrdersCancelResponse400 & {
-  headers: Headers
-}
+export type apiOrdersCancelResponseSuccess = (apiOrdersCancelResponse200) & {
+  headers: Headers;
+};
+export type apiOrdersCancelResponseError = (apiOrdersCancelResponse400) & {
+  headers: Headers;
+};
 
-export type apiOrdersCancelResponse = apiOrdersCancelResponseSuccess | apiOrdersCancelResponseError
+export type apiOrdersCancelResponse = (apiOrdersCancelResponseSuccess | apiOrdersCancelResponseError)
 
-export const getApiOrdersCancelUrl = (id: number) => {
+export const getApiOrdersCancelUrl = (id: number,) => {
+
+
+
+
   return `/api/orders/${id}/cancel`
 }
 
@@ -3419,27 +4070,36 @@ export const getApiOrdersCancelUrl = (id: number) => {
  * money is out of scope (documented limitation).
  * @summary ApiOrdersCancel
  */
-export const apiOrdersCancel = async (
-  id: number,
-  options?: RequestInit
-): Promise<apiOrdersCancelResponse> => {
-  return apiFetch<apiOrdersCancelResponse>(getApiOrdersCancelUrl(id), {
+export const apiOrdersCancel = async (id: number, options?: RequestInit): Promise<apiOrdersCancelResponse> => {
+
+  return apiFetch<apiOrdersCancelResponse>(getApiOrdersCancelUrl(id),
+  {
     ...options,
     method: 'POST'
-  })
-}
+
+
+  }
+);}
+
+
 
 export type apiNotificationsIndexResponse200 = {
   data: NotificationOut[]
   status: 200
 }
 
-export type apiNotificationsIndexResponseSuccess = apiNotificationsIndexResponse200 & {
-  headers: Headers
-}
-export type apiNotificationsIndexResponse = apiNotificationsIndexResponseSuccess
+export type apiNotificationsIndexResponseSuccess = (apiNotificationsIndexResponse200) & {
+  headers: Headers;
+};
+;
+
+export type apiNotificationsIndexResponse = (apiNotificationsIndexResponseSuccess)
 
 export const getApiNotificationsIndexUrl = () => {
+
+
+
+
   return `/api/notifications`
 }
 
@@ -3447,26 +4107,36 @@ export const getApiNotificationsIndexUrl = () => {
  * The signed-in customer's notifications, newest first.
  * @summary ApiNotificationsIndex
  */
-export const apiNotificationsIndex = async (
-  options?: RequestInit
-): Promise<apiNotificationsIndexResponse> => {
-  return apiFetch<apiNotificationsIndexResponse>(getApiNotificationsIndexUrl(), {
+export const apiNotificationsIndex = async ( options?: RequestInit): Promise<apiNotificationsIndexResponse> => {
+
+  return apiFetch<apiNotificationsIndexResponse>(getApiNotificationsIndexUrl(),
+  {
     ...options,
     method: 'GET'
-  })
-}
+
+
+  }
+);}
+
+
 
 export type apiNotificationsReadResponse200 = {
   data: MessageOut
   status: 200
 }
 
-export type apiNotificationsReadResponseSuccess = apiNotificationsReadResponse200 & {
-  headers: Headers
-}
-export type apiNotificationsReadResponse = apiNotificationsReadResponseSuccess
+export type apiNotificationsReadResponseSuccess = (apiNotificationsReadResponse200) & {
+  headers: Headers;
+};
+;
+
+export type apiNotificationsReadResponse = (apiNotificationsReadResponseSuccess)
 
 export const getApiNotificationsReadUrl = () => {
+
+
+
+
   return `/api/notifications/read`
 }
 
@@ -3474,26 +4144,36 @@ export const getApiNotificationsReadUrl = () => {
  * Mark all of the customer's notifications as read.
  * @summary ApiNotificationsRead
  */
-export const apiNotificationsRead = async (
-  options?: RequestInit
-): Promise<apiNotificationsReadResponse> => {
-  return apiFetch<apiNotificationsReadResponse>(getApiNotificationsReadUrl(), {
+export const apiNotificationsRead = async ( options?: RequestInit): Promise<apiNotificationsReadResponse> => {
+
+  return apiFetch<apiNotificationsReadResponse>(getApiNotificationsReadUrl(),
+  {
     ...options,
     method: 'POST'
-  })
-}
+
+
+  }
+);}
+
+
 
 export type apiWishlistIndexResponse200 = {
   data: ProductOut[]
   status: 200
 }
 
-export type apiWishlistIndexResponseSuccess = apiWishlistIndexResponse200 & {
-  headers: Headers
-}
-export type apiWishlistIndexResponse = apiWishlistIndexResponseSuccess
+export type apiWishlistIndexResponseSuccess = (apiWishlistIndexResponse200) & {
+  headers: Headers;
+};
+;
+
+export type apiWishlistIndexResponse = (apiWishlistIndexResponseSuccess)
 
 export const getApiWishlistIndexUrl = () => {
+
+
+
+
   return `/api/wishlist`
 }
 
@@ -3501,14 +4181,18 @@ export const getApiWishlistIndexUrl = () => {
  * The signed-in customer's saved products (only ones still retrievable on the storefront).
  * @summary ApiWishlistIndex
  */
-export const apiWishlistIndex = async (
-  options?: RequestInit
-): Promise<apiWishlistIndexResponse> => {
-  return apiFetch<apiWishlistIndexResponse>(getApiWishlistIndexUrl(), {
+export const apiWishlistIndex = async ( options?: RequestInit): Promise<apiWishlistIndexResponse> => {
+
+  return apiFetch<apiWishlistIndexResponse>(getApiWishlistIndexUrl(),
+  {
     ...options,
     method: 'GET'
-  })
-}
+
+
+  }
+);}
+
+
 
 export type apiWishlistToggleResponse200 = {
   data: WishlistToggleOut
@@ -3520,17 +4204,20 @@ export type apiWishlistToggleResponse400 = {
   status: 400
 }
 
-export type apiWishlistToggleResponseSuccess = apiWishlistToggleResponse200 & {
-  headers: Headers
-}
-export type apiWishlistToggleResponseError = apiWishlistToggleResponse400 & {
-  headers: Headers
-}
+export type apiWishlistToggleResponseSuccess = (apiWishlistToggleResponse200) & {
+  headers: Headers;
+};
+export type apiWishlistToggleResponseError = (apiWishlistToggleResponse400) & {
+  headers: Headers;
+};
 
-export type apiWishlistToggleResponse =
-  apiWishlistToggleResponseSuccess | apiWishlistToggleResponseError
+export type apiWishlistToggleResponse = (apiWishlistToggleResponseSuccess | apiWishlistToggleResponseError)
 
-export const getApiWishlistToggleUrl = (productId: number) => {
+export const getApiWishlistToggleUrl = (productId: number,) => {
+
+
+
+
   return `/api/wishlist/${productId}`
 }
 
@@ -3538,27 +4225,36 @@ export const getApiWishlistToggleUrl = (productId: number) => {
  * Add the product to the wishlist, or remove it if already saved.
  * @summary ApiWishlistToggle
  */
-export const apiWishlistToggle = async (
-  productId: number,
-  options?: RequestInit
-): Promise<apiWishlistToggleResponse> => {
-  return apiFetch<apiWishlistToggleResponse>(getApiWishlistToggleUrl(productId), {
+export const apiWishlistToggle = async (productId: number, options?: RequestInit): Promise<apiWishlistToggleResponse> => {
+
+  return apiFetch<apiWishlistToggleResponse>(getApiWishlistToggleUrl(productId),
+  {
     ...options,
     method: 'POST'
-  })
-}
+
+
+  }
+);}
+
+
 
 export type apiAdminOrdersIndexResponse200 = {
   data: OrderOut[]
   status: 200
 }
 
-export type apiAdminOrdersIndexResponseSuccess = apiAdminOrdersIndexResponse200 & {
-  headers: Headers
-}
-export type apiAdminOrdersIndexResponse = apiAdminOrdersIndexResponseSuccess
+export type apiAdminOrdersIndexResponseSuccess = (apiAdminOrdersIndexResponse200) & {
+  headers: Headers;
+};
+;
+
+export type apiAdminOrdersIndexResponse = (apiAdminOrdersIndexResponseSuccess)
 
 export const getApiAdminOrdersIndexUrl = () => {
+
+
+
+
   return `/api/admin/orders`
 }
 
@@ -3567,14 +4263,18 @@ export const getApiAdminOrdersIndexUrl = () => {
  * by ``?q=`` (order id, or a case-insensitive contact-email fragment). Requires orders.view.
  * @summary ApiAdminOrdersIndex
  */
-export const apiAdminOrdersIndex = async (
-  options?: RequestInit
-): Promise<apiAdminOrdersIndexResponse> => {
-  return apiFetch<apiAdminOrdersIndexResponse>(getApiAdminOrdersIndexUrl(), {
+export const apiAdminOrdersIndex = async ( options?: RequestInit): Promise<apiAdminOrdersIndexResponse> => {
+
+  return apiFetch<apiAdminOrdersIndexResponse>(getApiAdminOrdersIndexUrl(),
+  {
     ...options,
     method: 'GET'
-  })
-}
+
+
+  }
+);}
+
+
 
 export type apiAdminOrdersShowResponse200 = {
   data: AdminOrderDetailOut
@@ -3586,17 +4286,20 @@ export type apiAdminOrdersShowResponse400 = {
   status: 400
 }
 
-export type apiAdminOrdersShowResponseSuccess = apiAdminOrdersShowResponse200 & {
-  headers: Headers
-}
-export type apiAdminOrdersShowResponseError = apiAdminOrdersShowResponse400 & {
-  headers: Headers
-}
+export type apiAdminOrdersShowResponseSuccess = (apiAdminOrdersShowResponse200) & {
+  headers: Headers;
+};
+export type apiAdminOrdersShowResponseError = (apiAdminOrdersShowResponse400) & {
+  headers: Headers;
+};
 
-export type apiAdminOrdersShowResponse =
-  apiAdminOrdersShowResponseSuccess | apiAdminOrdersShowResponseError
+export type apiAdminOrdersShowResponse = (apiAdminOrdersShowResponseSuccess | apiAdminOrdersShowResponseError)
 
-export const getApiAdminOrdersShowUrl = (id: number) => {
+export const getApiAdminOrdersShowUrl = (id: number,) => {
+
+
+
+
   return `/api/admin/orders/${id}`
 }
 
@@ -3606,15 +4309,18 @@ export const getApiAdminOrdersShowUrl = (id: number) => {
  * the transition history from the activity trail. Requires orders.view.
  * @summary ApiAdminOrdersShow
  */
-export const apiAdminOrdersShow = async (
-  id: number,
-  options?: RequestInit
-): Promise<apiAdminOrdersShowResponse> => {
-  return apiFetch<apiAdminOrdersShowResponse>(getApiAdminOrdersShowUrl(id), {
+export const apiAdminOrdersShow = async (id: number, options?: RequestInit): Promise<apiAdminOrdersShowResponse> => {
+
+  return apiFetch<apiAdminOrdersShowResponse>(getApiAdminOrdersShowUrl(id),
+  {
     ...options,
     method: 'GET'
-  })
-}
+
+
+  }
+);}
+
+
 
 export type apiAdminOrdersStatusResponse200 = {
   data: OrderOut
@@ -3626,17 +4332,20 @@ export type apiAdminOrdersStatusResponse400 = {
   status: 400
 }
 
-export type apiAdminOrdersStatusResponseSuccess = apiAdminOrdersStatusResponse200 & {
-  headers: Headers
-}
-export type apiAdminOrdersStatusResponseError = apiAdminOrdersStatusResponse400 & {
-  headers: Headers
-}
+export type apiAdminOrdersStatusResponseSuccess = (apiAdminOrdersStatusResponse200) & {
+  headers: Headers;
+};
+export type apiAdminOrdersStatusResponseError = (apiAdminOrdersStatusResponse400) & {
+  headers: Headers;
+};
 
-export type apiAdminOrdersStatusResponse =
-  apiAdminOrdersStatusResponseSuccess | apiAdminOrdersStatusResponseError
+export type apiAdminOrdersStatusResponse = (apiAdminOrdersStatusResponseSuccess | apiAdminOrdersStatusResponseError)
 
-export const getApiAdminOrdersStatusUrl = (id: number) => {
+export const getApiAdminOrdersStatusUrl = (id: number,) => {
+
+
+
+
   return `/api/admin/orders/${id}/status`
 }
 
@@ -3644,18 +4353,19 @@ export const getApiAdminOrdersStatusUrl = (id: number) => {
  * Transition an order, enforcing the state machine. Requires orders.update (guests already 401'd).
  * @summary ApiAdminOrdersStatus
  */
-export const apiAdminOrdersStatus = async (
-  id: number,
-  orderStatusIn: OrderStatusIn,
-  options?: RequestInit
-): Promise<apiAdminOrdersStatusResponse> => {
-  return apiFetch<apiAdminOrdersStatusResponse>(getApiAdminOrdersStatusUrl(id), {
+export const apiAdminOrdersStatus = async (id: number,
+    orderStatusIn: OrderStatusIn, options?: RequestInit): Promise<apiAdminOrdersStatusResponse> => {
+
+  return apiFetch<apiAdminOrdersStatusResponse>(getApiAdminOrdersStatusUrl(id),
+  {
     ...options,
     method: 'POST',
     headers: { 'Content-Type': 'application/json', ...options?.headers },
     body: JSON.stringify(orderStatusIn)
-  })
-}
+  }
+);}
+
+
 
 export type apiOrdersPayResponse201 = {
   data: PaymentOut
@@ -3667,16 +4377,20 @@ export type apiOrdersPayResponse400 = {
   status: 400
 }
 
-export type apiOrdersPayResponseSuccess = apiOrdersPayResponse201 & {
-  headers: Headers
-}
-export type apiOrdersPayResponseError = apiOrdersPayResponse400 & {
-  headers: Headers
-}
+export type apiOrdersPayResponseSuccess = (apiOrdersPayResponse201) & {
+  headers: Headers;
+};
+export type apiOrdersPayResponseError = (apiOrdersPayResponse400) & {
+  headers: Headers;
+};
 
-export type apiOrdersPayResponse = apiOrdersPayResponseSuccess | apiOrdersPayResponseError
+export type apiOrdersPayResponse = (apiOrdersPayResponseSuccess | apiOrdersPayResponseError)
 
-export const getApiOrdersPayUrl = (id: number) => {
+export const getApiOrdersPayUrl = (id: number,) => {
+
+
+
+
   return `/api/orders/${id}/pay`
 }
 
@@ -3685,15 +4399,18 @@ export const getApiOrdersPayUrl = (id: number) => {
  * the order's access token (guests must be able to pay; PENDING-only).
  * @summary ApiOrdersPay
  */
-export const apiOrdersPay = async (
-  id: number,
-  options?: RequestInit
-): Promise<apiOrdersPayResponse> => {
-  return apiFetch<apiOrdersPayResponse>(getApiOrdersPayUrl(id), {
+export const apiOrdersPay = async (id: number, options?: RequestInit): Promise<apiOrdersPayResponse> => {
+
+  return apiFetch<apiOrdersPayResponse>(getApiOrdersPayUrl(id),
+  {
     ...options,
     method: 'POST'
-  })
-}
+
+
+  }
+);}
+
+
 
 export type apiWebhooksPaymentResponse201 = {
   data: WebhookOut
@@ -3705,17 +4422,20 @@ export type apiWebhooksPaymentResponse400 = {
   status: 400
 }
 
-export type apiWebhooksPaymentResponseSuccess = apiWebhooksPaymentResponse201 & {
-  headers: Headers
-}
-export type apiWebhooksPaymentResponseError = apiWebhooksPaymentResponse400 & {
-  headers: Headers
-}
+export type apiWebhooksPaymentResponseSuccess = (apiWebhooksPaymentResponse201) & {
+  headers: Headers;
+};
+export type apiWebhooksPaymentResponseError = (apiWebhooksPaymentResponse400) & {
+  headers: Headers;
+};
 
-export type apiWebhooksPaymentResponse =
-  apiWebhooksPaymentResponseSuccess | apiWebhooksPaymentResponseError
+export type apiWebhooksPaymentResponse = (apiWebhooksPaymentResponseSuccess | apiWebhooksPaymentResponseError)
 
 export const getApiWebhooksPaymentUrl = () => {
+
+
+
+
   return `/api/webhooks/payment`
 }
 
@@ -3724,17 +4444,18 @@ export const getApiWebhooksPaymentUrl = () => {
  * request must carry a valid gateway signature (authenticity) before any side effects run.
  * @summary ApiWebhooksPayment
  */
-export const apiWebhooksPayment = async (
-  webhookIn: WebhookIn,
-  options?: RequestInit
-): Promise<apiWebhooksPaymentResponse> => {
-  return apiFetch<apiWebhooksPaymentResponse>(getApiWebhooksPaymentUrl(), {
+export const apiWebhooksPayment = async (webhookIn: WebhookIn, options?: RequestInit): Promise<apiWebhooksPaymentResponse> => {
+
+  return apiFetch<apiWebhooksPaymentResponse>(getApiWebhooksPaymentUrl(),
+  {
     ...options,
     method: 'POST',
     headers: { 'Content-Type': 'application/json', ...options?.headers },
     body: JSON.stringify(webhookIn)
-  })
-}
+  }
+);}
+
+
 
 export type apiDevGatewayChargesResponse201 = {
   data: DevChargeOut
@@ -3746,17 +4467,20 @@ export type apiDevGatewayChargesResponse400 = {
   status: 400
 }
 
-export type apiDevGatewayChargesResponseSuccess = apiDevGatewayChargesResponse201 & {
-  headers: Headers
-}
-export type apiDevGatewayChargesResponseError = apiDevGatewayChargesResponse400 & {
-  headers: Headers
-}
+export type apiDevGatewayChargesResponseSuccess = (apiDevGatewayChargesResponse201) & {
+  headers: Headers;
+};
+export type apiDevGatewayChargesResponseError = (apiDevGatewayChargesResponse400) & {
+  headers: Headers;
+};
 
-export type apiDevGatewayChargesResponse =
-  apiDevGatewayChargesResponseSuccess | apiDevGatewayChargesResponseError
+export type apiDevGatewayChargesResponse = (apiDevGatewayChargesResponseSuccess | apiDevGatewayChargesResponseError)
 
 export const getApiDevGatewayChargesUrl = () => {
+
+
+
+
   return `/api/dev-gateway/charges`
 }
 
@@ -3764,41 +4488,54 @@ export const getApiDevGatewayChargesUrl = () => {
  * Accept a charge and queue the async success webhook (the PSP's notify leg).
  * @summary ApiDevGatewayCharges
  */
-export const apiDevGatewayCharges = async (
-  devChargeIn: DevChargeIn,
-  options?: RequestInit
-): Promise<apiDevGatewayChargesResponse> => {
-  return apiFetch<apiDevGatewayChargesResponse>(getApiDevGatewayChargesUrl(), {
+export const apiDevGatewayCharges = async (devChargeIn: DevChargeIn, options?: RequestInit): Promise<apiDevGatewayChargesResponse> => {
+
+  return apiFetch<apiDevGatewayChargesResponse>(getApiDevGatewayChargesUrl(),
+  {
     ...options,
     method: 'POST',
     headers: { 'Content-Type': 'application/json', ...options?.headers },
     body: JSON.stringify(devChargeIn)
-  })
-}
+  }
+);}
+
+
 
 export type publicRootResponse200 = {
   data: unknown
   status: 200
 }
 
-export type publicRootResponseSuccess = publicRootResponse200 & {
-  headers: Headers
-}
-export type publicRootResponse = publicRootResponseSuccess
+export type publicRootResponseSuccess = (publicRootResponse200) & {
+  headers: Headers;
+};
+;
+
+export type publicRootResponse = (publicRootResponseSuccess)
 
 export const getPublicRootUrl = () => {
+
+
+
+
   return `/`
 }
 
 /**
  * @summary PublicRoot
  */
-export const publicRoot = async (options?: RequestInit): Promise<publicRootResponse> => {
-  return apiFetch<publicRootResponse>(getPublicRootUrl(), {
+export const publicRoot = async ( options?: RequestInit): Promise<publicRootResponse> => {
+
+  return apiFetch<publicRootResponse>(getPublicRootUrl(),
+  {
     ...options,
     method: 'GET'
-  })
-}
+
+
+  }
+);}
+
+
 
 export type _publicResponse200 = {
   data: unknown
@@ -3810,16 +4547,20 @@ export type _publicResponse400 = {
   status: 400
 }
 
-export type _publicResponseSuccess = _publicResponse200 & {
-  headers: Headers
-}
-export type _publicResponseError = _publicResponse400 & {
-  headers: Headers
-}
+export type _publicResponseSuccess = (_publicResponse200) & {
+  headers: Headers;
+};
+export type _publicResponseError = (_publicResponse400) & {
+  headers: Headers;
+};
 
-export type _publicResponse = _publicResponseSuccess | _publicResponseError
+export type _publicResponse = (_publicResponseSuccess | _publicResponseError)
 
-export const getPublicUrl = (path: string) => {
+export const getPublicUrl = (path: string,) => {
+
+
+
+
   return `/${path}`
 }
 
@@ -3827,8 +4568,12 @@ export const getPublicUrl = (path: string) => {
  * @summary Public
  */
 export const _public = async (path: string, options?: RequestInit): Promise<_publicResponse> => {
-  return apiFetch<_publicResponse>(getPublicUrl(path), {
+
+  return apiFetch<_publicResponse>(getPublicUrl(path),
+  {
     ...options,
     method: 'GET'
-  })
-}
+
+
+  }
+);}

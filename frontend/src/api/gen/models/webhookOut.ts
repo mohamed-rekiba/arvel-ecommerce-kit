@@ -7,5 +7,5 @@
  */
 
 export interface WebhookOut {
-  status: string
+  status: string;
 }

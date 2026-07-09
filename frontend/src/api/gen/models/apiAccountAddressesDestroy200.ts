@@ -6,4 +6,4 @@
  * OpenAPI spec version: 0.1.0
  */
 
-export type ApiAccountAddressesDestroy200 = { [key: string]: string }
+export type ApiAccountAddressesDestroy200 = {[key: string]: string};

@@ -7,5 +7,5 @@
  */
 
 export interface OrderStatusIn {
-  status: string
+  status: string;
 }

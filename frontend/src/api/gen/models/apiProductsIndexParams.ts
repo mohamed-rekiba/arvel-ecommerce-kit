@@ -7,12 +7,12 @@
  */
 
 export type ApiProductsIndexParams = {
-  q?: string | null
-  category?: string | null
-  sort?: string
-  featured?: boolean | null
-  min_price?: number | null
-  max_price?: number | null
-  per_page?: number
-  page?: number
-}
+category?: string | null;
+featured?: boolean | null;
+max_price?: number | null;
+min_price?: number | null;
+page?: number;
+per_page?: number;
+q?: string | null;
+sort?: string;
+};

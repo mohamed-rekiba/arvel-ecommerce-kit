@@ -9,9 +9,10 @@
 /**
  * How a coupon discounts the order.
  */
-export type CouponType = (typeof CouponType)[keyof typeof CouponType]
+export type CouponType = typeof CouponType[keyof typeof CouponType];
+
 
 export const CouponType = {
   percent: 'percent',
-  fixed: 'fixed'
-} as const
+  fixed: 'fixed',
+} as const;

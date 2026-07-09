@@ -7,7 +7,7 @@
  */
 
 export interface ReviewIn {
-  rating: number
-  body: string
-  title?: string | null
+  rating: number;
+  body: string;
+  title?: string | null;
 }

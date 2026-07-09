@@ -7,14 +7,14 @@
  */
 
 export type ApiAdminProductsIndexParams = {
-  per_page?: number
-  page?: number
-  archived?: boolean
-  q?: string | null
-  category_id?: number | null
-  vendor_id?: number | null
-  price_min?: number | null
-  price_max?: number | null
-  active?: string | null
-  sort?: string
-}
+active?: string | null;
+archived?: boolean;
+category_id?: number | null;
+page?: number;
+per_page?: number;
+price_max?: number | null;
+price_min?: number | null;
+q?: string | null;
+sort?: string;
+vendor_id?: number | null;
+};

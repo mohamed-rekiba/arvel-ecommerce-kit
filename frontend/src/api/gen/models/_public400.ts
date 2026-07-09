@@ -5,14 +5,14 @@
  * The arvel-ecommerce-kit API.
  * OpenAPI spec version: 0.1.0
  */
-import type { _Public400Extra } from './_public400Extra'
+import type { _Public400Extra } from './_public400Extra';
 
 /**
  * Validation Exception
  */
 export type _Public400 = {
-  status_code: number
-  detail: string
+  status_code: number;
+  detail: string;
   /** @nullable */
-  extra?: _Public400Extra
-}
+  extra?: _Public400Extra;
+};
