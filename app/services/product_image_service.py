@@ -6,9 +6,13 @@ the model's registered conversions (thumb/preview) are generated automatically. 
 layer (not the controller/seeder) per the convention.
 """
 
+import tempfile
+from pathlib import Path
+
+from anyio import open_file
 from arvel import Http
 from arvel.media import HasMedia, Image
-from arvel.support.facades import Config
+from arvel.support.facades import Config, Log
 
 from app.models.product import IMAGES
 
@@ -41,18 +45,32 @@ class ProductImageService:
     async def download_and_attach(
         self, model: HasMedia, url: str, *, file_name: str, collection: str = IMAGES
     ) -> bool:
-        """Download an image from ``url`` (arvel Http client) and attach it to the gallery. Returns
-        False (a no-op) if the fetch fails — so seeding never crashes when offline."""
+        """Download an image from ``url`` and attach it to the gallery. The body streams straight
+        to a temp file (``Http.sink()`` — constant memory regardless of image size) and is read
+        back for the attach (``add_media`` is bytes-only). Returns False (a no-op) if the fetch
+        fails — so seeding never crashes when offline."""
         try:
-            # follow_redirects: image CDNs (Picsum, etc.) 302 to the actual file
-            response = await Http.timeout(15).get(url, follow_redirects=True)
-            if not response.successful() or not response.content():
-                return False
-            await model.add_media(
-                response.content(),
-                file_name=file_name,
-                mime_type=response.header("content-type"),
-            ).to_media_collection(collection, disk=_disk())
-        except Exception:  # noqa: BLE001 — offline / bad image → seed without it, don't crash
+            with tempfile.TemporaryDirectory() as tmp_dir:
+                tmp_path = Path(tmp_dir) / "download"
+                # follow_redirects: image CDNs (Picsum, etc.) 302 to the actual file
+                response = (
+                    await Http.timeout(15)
+                    .sink(tmp_path)
+                    .get(url, follow_redirects=True)
+                )
+                if not response.successful():
+                    return False
+                async with await open_file(tmp_path, "rb") as fh:
+                    data = await fh.read()
+                if not data:
+                    return False
+                await model.add_media(
+                    data,
+                    file_name=file_name,
+                    mime_type=response.header("content-type"),
+                ).to_media_collection(collection, disk=_disk())
+        except Exception as exc:  # noqa: BLE001 — offline / bad image / storage down → seed
+            # without it, don't crash; but log so a real storage failure isn't silently swallowed
+            Log.warning("product image fetch/attach failed", url=url, error=repr(exc))
             return False
         return True
