@@ -4,6 +4,11 @@ Handlers are typed with ``arvel.Schema`` so the OpenAPI request/response schemas
 at /schema) AND the request body is validated — a missing or malformed body is a clean 400, not a 500:
   POST /api/login  -> verify credentials, issue a personal access token
   GET  /api/user   -> protected; requires ``Authorization: Bearer <token>``
+
+Guarded subtrees are declared as ``Route.group(...)`` blocks (K3): prefix, name, the
+``Authenticate`` middleware, and the ``bearer`` OpenAPI security scheme are stated once per
+subtree instead of repeated on every route (DR-0052 lets a group carry ``secure=`` alongside
+``middleware=``, so enforcement and its documentation can't drift apart).
 """
 
 from arvel import Route, Schema, abort, config
@@ -87,9 +92,8 @@ Route.get("/health", health, name="api.health")
 Route.post("/login", login, name="api.login").status(
     200
 )  # action, not a resource creation
-Route.get("/user", me, name="api.user").secure(
-    "bearer"
-)  # shows the lock + 'Authorize' in API docs
+# secure-only: no Authenticate — a bearer token is optional context, not a requirement, here
+Route.get("/user", me, name="api.user").secure("bearer")
 
 # --- Customer auth ---
 Route.post("/register", auth.register, name="api.register")  # creates a user → 201
@@ -100,19 +104,6 @@ Route.post("/forgot-password", auth.forgot_password, name="api.password.forgot")
 Route.post("/reset-password", auth.reset_password, name="api.password.reset").status(
     200
 )
-
-# --- Account self-service (profile, password, email verification) ---
-Route.patch("/user", account.update_profile, name="api.user.update").middleware(
-    Authenticate
-).secure("bearer")
-Route.put("/user/password", account.change_password, name="api.user.password").status(
-    200
-).middleware(Authenticate).secure("bearer")
-Route.post(
-    "/email/verification-notification",
-    account.send_verification,
-    name="api.email.verification.send",
-).status(200).middleware(Authenticate).secure("bearer")
 # the link target is public — the signed token IS the credential
 Route.post("/email/verify", account.verify_email, name="api.email.verify").status(200)
 
@@ -126,163 +117,11 @@ Route.get("/media/{id:int}", media.serve_media, name="api.media.show")
 Route.get(
     "/media/{id:int}/{conversion:str}", media.serve_media, name="api.media.conversion"
 )
-Route.post(
-    "/admin/products/{id:int}/image",
-    media.upload_image,
-    name="api.admin.products.image",
-).middleware(Authenticate).secure("bearer")
-Route.delete(
-    "/admin/products/{id:int}/media/{media_id:int}",
-    media.delete_image,
-    name="api.admin.products.media.destroy",
-).status(200).middleware(Authenticate).secure("bearer")
-
-# --- Admin product CRUD (auth-guarded by middleware; policy-guarded in the controller) ---
-# Authenticate (401 if guest) runs as route middleware BEFORE body parsing — Laravel ordering; the
-# ProductPolicy then decides admin-vs-customer (403/404) inside the controller.
-# Admin listings return EVERY row (incl. hidden) with an is_visible flag — vs the storefront, which
-# only returns the retrievable set.
-Route.get(
-    "/admin/products", admin_products.products_index, name="api.admin.products.index"
-).middleware(Authenticate).secure("bearer")
-Route.get(
-    "/admin/categories",
-    admin_products.categories_index,
-    name="api.admin.categories.index",
-).middleware(Authenticate).secure("bearer")
-Route.get(
-    "/admin/products/{id:int}", admin_products.show, name="api.admin.products.show"
-).middleware(Authenticate).secure("bearer")
-Route.post(
-    "/admin/products", admin_products.store, name="api.admin.products.store"
-).middleware(Authenticate).secure("bearer")
-Route.put(
-    "/admin/products/{id:int}", admin_products.update, name="api.admin.products.update"
-).middleware(Authenticate).secure("bearer")
-Route.delete(
-    "/admin/products/{id:int}",
-    admin_products.destroy,
-    name="api.admin.products.destroy",
-).middleware(Authenticate).secure("bearer")
-Route.post(
-    "/admin/products/{id:int}/restore",
-    admin_products.restore,
-    name="api.admin.products.restore",
-).status(200).middleware(Authenticate).secure("bearer")
-
-# --- Admin categories + vendors (the retrievability dimensions; catalog.* authority) ---
-Route.post(
-    "/admin/categories", taxonomy.category_store, name="api.admin.categories.store"
-).middleware(Authenticate).secure("bearer")
-Route.put(
-    "/admin/categories/{id:int}",
-    taxonomy.category_update,
-    name="api.admin.categories.update",
-).middleware(Authenticate).secure("bearer")
-Route.delete(
-    "/admin/categories/{id:int}",
-    taxonomy.category_destroy,
-    name="api.admin.categories.destroy",
-).status(200).middleware(Authenticate).secure("bearer")
-Route.get(
-    "/admin/vendors", taxonomy.vendors_index, name="api.admin.vendors.index"
-).middleware(Authenticate).secure("bearer")
-Route.post(
-    "/admin/vendors", taxonomy.vendor_store, name="api.admin.vendors.store"
-).middleware(Authenticate).secure("bearer")
-Route.put(
-    "/admin/vendors/{id:int}", taxonomy.vendor_update, name="api.admin.vendors.update"
-).middleware(Authenticate).secure("bearer")
-
-# --- Admin variants + stock (nested under the product; catalog.update authority) ---
-Route.get(
-    "/admin/products/{id:int}/variants",
-    admin_variants.index,
-    name="api.admin.variants.index",
-).middleware(Authenticate).secure("bearer")
-Route.post(
-    "/admin/products/{id:int}/variants",
-    admin_variants.store,
-    name="api.admin.variants.store",
-).middleware(Authenticate).secure("bearer")
-Route.patch(
-    "/admin/variants/{id:int}", admin_variants.update, name="api.admin.variants.update"
-).middleware(Authenticate).secure("bearer")
-Route.post(
-    "/admin/variants/{id:int}/stock",
-    admin_variants.adjust_stock,
-    name="api.admin.variants.stock",
-).status(200).middleware(Authenticate).secure("bearer")
-Route.delete(
-    "/admin/variants/{id:int}",
-    admin_variants.destroy,
-    name="api.admin.variants.destroy",
-).status(200).middleware(Authenticate).secure("bearer")
-
-# --- Admin user directory (users.view; role mutations stay on roles.manage) ---
-Route.get("/admin/users", admin_users.index, name="api.admin.users.index").middleware(
-    Authenticate
-).secure("bearer")
-Route.get(
-    "/admin/users/{id:int}", admin_users.show, name="api.admin.users.show"
-).middleware(Authenticate).secure("bearer")
-
-# --- Admin RBAC + audit (roles.manage / audit.view; super-admin bypasses) ---
-Route.get("/admin/roles", rbac.roles_index, name="api.admin.roles.index").middleware(
-    Authenticate
-).secure("bearer")
-Route.get(
-    "/admin/permissions", rbac.permissions_index, name="api.admin.permissions.index"
-).middleware(Authenticate).secure("bearer")
-Route.get(
-    "/admin/users/{id:int}/roles", rbac.user_roles, name="api.admin.users.roles"
-).middleware(Authenticate).secure("bearer")
-Route.post(
-    "/admin/users/{id:int}/roles", rbac.assign_role, name="api.admin.users.roles.assign"
-).status(200).middleware(Authenticate).secure("bearer")
-Route.delete(
-    "/admin/users/{id:int}/roles/{role:str}",
-    rbac.revoke_role,
-    name="api.admin.users.roles.revoke",
-).status(200).middleware(Authenticate).secure("bearer")
-Route.get("/admin/audit", rbac.audit_index, name="api.admin.audit.index").middleware(
-    Authenticate
-).secure("bearer")
-
-# --- Admin (OIDC / Keycloak) ---
-Route.get("/admin/me", admin.me, name="api.admin.me").secure("oidc")
-# Exchange a Keycloak token (from the SPA's auth-code+PKCE flow) for an arvel bearer PAT.
-Route.post(
-    "/admin/oidc/token", admin.oidc_exchange, name="api.admin.oidc.token"
-).status(200).secure("oidc")
 
 # --- Product reviews (verified purchasers; moderated) ---
 Route.get(
     "/products/{slug:str}/reviews", reviews.index, name="api.products.reviews.index"
 )
-Route.post(
-    "/products/{slug:str}/reviews", reviews.store, name="api.products.reviews.store"
-).middleware(Authenticate).secure("bearer")
-Route.get(
-    "/admin/reviews", reviews.admin_index, name="api.admin.reviews.index"
-).middleware(Authenticate).secure("bearer")
-Route.post(
-    "/admin/reviews/{id:int}/{decision:str}",
-    reviews.moderate,
-    name="api.admin.reviews.moderate",
-).status(200).middleware(Authenticate).secure("bearer")
-
-# --- Back-in-stock alerts (signed-in customers) ---
-Route.post(
-    "/variants/{id:int}/stock-alert",
-    stock_alerts.subscribe,
-    name="api.variants.stock_alert.subscribe",
-).status(200).middleware(Authenticate).secure("bearer")
-Route.delete(
-    "/variants/{id:int}/stock-alert",
-    stock_alerts.unsubscribe,
-    name="api.variants.stock_alert.unsubscribe",
-).status(200).middleware(Authenticate).secure("bearer")
 
 # --- Cart (guest by X-Cart-Token, or the authenticated user's cart) ---
 Route.get("/cart", cart.show, name="api.cart.show")
@@ -296,25 +135,6 @@ Route.delete("/cart/coupon", cart.remove_coupon, name="api.cart.coupon.remove").
     200
 )
 
-# --- Address book (signed-in customers) ---
-Route.post(
-    "/account/avatar", account.upload_avatar, name="api.account.avatar"
-).middleware(Authenticate).secure("bearer")
-Route.get(
-    "/account/addresses", addresses.index, name="api.account.addresses.index"
-).middleware(Authenticate).secure("bearer")
-Route.post(
-    "/account/addresses", addresses.store, name="api.account.addresses.store"
-).middleware(Authenticate).secure("bearer")
-Route.patch(
-    "/account/addresses/{id:int}", addresses.update, name="api.account.addresses.update"
-).middleware(Authenticate).secure("bearer")
-Route.delete(
-    "/account/addresses/{id:int}",
-    addresses.destroy,
-    name="api.account.addresses.destroy",
-).middleware(Authenticate).secure("bearer")
-
 # --- Deals (flash sales) ---
 Route.get("/deals", deals.index, name="api.deals.index")
 Route.get("/announcement", announcement.show, name="api.announcement")
@@ -322,61 +142,9 @@ Route.get("/announcement", announcement.show, name="api.announcement")
 # --- Settings + newsletter ---
 Route.get("/settings", settings.public_settings, name="api.settings")
 Route.post("/newsletter", settings.subscribe, name="api.newsletter").status(200)
-Route.get(
-    "/admin/settings", settings.admin_settings, name="api.admin.settings"
-).middleware(Authenticate).secure("bearer")
-Route.patch(
-    "/admin/settings", settings.update_settings, name="api.admin.settings.update"
-).middleware(Authenticate).secure("bearer")
-Route.get("/admin/media", media_library.index, name="api.admin.media").middleware(
-    Authenticate
-).secure("bearer")
-Route.get(
-    "/admin/newsletter", settings.newsletter_index, name="api.admin.newsletter"
-).middleware(Authenticate).secure("bearer")
 
 # --- Hero banners ---
 Route.get("/banners", banners.index, name="api.banners.index")
-Route.get(
-    "/admin/banners", banners.admin_index, name="api.admin.banners.index"
-).middleware(Authenticate).secure("bearer")
-Route.post("/admin/banners", banners.store, name="api.admin.banners.store").middleware(
-    Authenticate
-).secure("bearer")
-Route.patch(
-    "/admin/banners/{id:int}", banners.update, name="api.admin.banners.update"
-).middleware(Authenticate).secure("bearer")
-Route.delete(
-    "/admin/banners/{id:int}", banners.destroy, name="api.admin.banners.destroy"
-).middleware(Authenticate).secure("bearer")
-Route.post(
-    "/admin/banners/{id:int}/image",
-    banners.upload_image,
-    name="api.admin.banners.image",
-).middleware(Authenticate).secure("bearer")
-Route.get("/admin/deals", admin_deals.index, name="api.admin.deals.index").middleware(
-    Authenticate
-).secure("bearer")
-Route.post("/admin/deals", admin_deals.store, name="api.admin.deals.store").middleware(
-    Authenticate
-).secure("bearer")
-Route.patch(
-    "/admin/deals/{id:int}", admin_deals.update, name="api.admin.deals.update"
-).middleware(Authenticate).secure("bearer")
-Route.delete(
-    "/admin/deals/{id:int}", admin_deals.destroy, name="api.admin.deals.destroy"
-).middleware(Authenticate).secure("bearer")
-
-# --- Admin coupons (catalog authority) ---
-Route.get(
-    "/admin/coupons", admin_coupons.index, name="api.admin.coupons.index"
-).middleware(Authenticate).secure("bearer")
-Route.post(
-    "/admin/coupons", admin_coupons.store, name="api.admin.coupons.store"
-).middleware(Authenticate).secure("bearer")
-Route.patch(
-    "/admin/coupons/{id:int}", admin_coupons.update, name="api.admin.coupons.update"
-).middleware(Authenticate).secure("bearer")
 
 # --- Checkout & orders ---
 Route.post("/checkout", checkout.checkout, name="api.checkout")
@@ -385,9 +153,6 @@ Route.get(
     checkout.orders_placed_count,
     name="api.metrics.orders_placed",
 )
-Route.get("/orders", checkout.my_orders, name="api.orders.index").middleware(
-    Authenticate
-).secure("bearer")
 # One order: the signed-in owner (bearer) OR the holder of the order's access token
 # (X-Order-Token, issued at checkout) — controller-level ownership, so guests can use it.
 Route.get("/orders/{id:int}", checkout.show, name="api.orders.show")
@@ -395,32 +160,6 @@ Route.get("/orders/{id:int}/invoice", invoice.show, name="api.orders.invoice")
 Route.post("/orders/{id:int}/cancel", checkout.cancel, name="api.orders.cancel").status(
     200
 )  # a transition, not a creation
-# --- Customer notifications (database channel of the notification system) ---
-Route.get(
-    "/notifications", notifications.index, name="api.notifications.index"
-).middleware(Authenticate).secure("bearer")
-Route.post(
-    "/notifications/read", notifications.mark_read, name="api.notifications.read"
-).status(200).middleware(Authenticate).secure("bearer")
-
-# --- Customer wishlist (saved products) ---
-Route.get("/wishlist", wishlist.index, name="api.wishlist.index").middleware(
-    Authenticate
-).secure("bearer")
-Route.post(
-    "/wishlist/{product_id:int}", wishlist.toggle, name="api.wishlist.toggle"
-).status(200).middleware(Authenticate).secure("bearer")
-Route.get(
-    "/admin/orders", checkout.admin_orders_index, name="api.admin.orders.index"
-).middleware(Authenticate).secure("bearer")
-Route.get(
-    "/admin/orders/{id:int}", checkout.admin_order_show, name="api.admin.orders.show"
-).middleware(Authenticate).secure("bearer")
-Route.post(
-    "/admin/orders/{id:int}/status",
-    checkout.update_status,
-    name="api.admin.orders.status",
-).status(200).middleware(Authenticate).secure("bearer")  # a transition, not a creation
 
 # --- Payments ---
 # Pay: signed-in owner OR guest order-token holder (guests must be able to pay) — the ownership
@@ -429,6 +168,191 @@ Route.post("/orders/{id:int}/pay", payment.pay, name="api.orders.pay")
 Route.post(
     "/webhooks/payment", payment.webhook, name="api.webhooks.payment"
 )  # gateway → us
+
+# --- Bare guarded: no shared prefix, so grouped for middleware+security only ---
+with Route.group(middleware=[Authenticate], secure=["bearer"]):
+    Route.patch("/user", account.update_profile, name="api.user.update")
+    Route.put(
+        "/user/password", account.change_password, name="api.user.password"
+    ).status(200)
+    Route.post(
+        "/email/verification-notification",
+        account.send_verification,
+        name="api.email.verification.send",
+    ).status(200)
+    # topical sibling (GET /products/{slug}/reviews) is public; this one-off needs its own auth
+    Route.post(
+        "/products/{slug:str}/reviews", reviews.store, name="api.products.reviews.store"
+    )
+    # topical siblings (GET /orders/{id}, /orders/{id}/invoice) are public; this one needs auth
+    Route.get("/orders", checkout.my_orders, name="api.orders.index")
+
+# --- Account self-service (avatar + address book) ---
+with Route.group(
+    prefix="/account", name="api.account.", middleware=[Authenticate], secure=["bearer"]
+):
+    Route.post("/avatar", account.upload_avatar, name="avatar")
+    Route.get("/addresses", addresses.index, name="addresses.index")
+    Route.post("/addresses", addresses.store, name="addresses.store")
+    Route.patch("/addresses/{id:int}", addresses.update, name="addresses.update")
+    Route.delete("/addresses/{id:int}", addresses.destroy, name="addresses.destroy")
+
+# --- Customer notifications (database channel of the notification system) ---
+with Route.group(
+    prefix="/notifications",
+    name="api.notifications.",
+    middleware=[Authenticate],
+    secure=["bearer"],
+):
+    Route.get("", notifications.index, name="index")
+    Route.post("/read", notifications.mark_read, name="read").status(200)
+
+# --- Customer wishlist (saved products) ---
+with Route.group(
+    prefix="/wishlist",
+    name="api.wishlist.",
+    middleware=[Authenticate],
+    secure=["bearer"],
+):
+    Route.get("", wishlist.index, name="index")
+    Route.post("/{product_id:int}", wishlist.toggle, name="toggle").status(200)
+
+# --- Back-in-stock alerts (signed-in customers) ---
+with Route.group(
+    prefix="/variants/{id:int}/stock-alert",
+    name="api.variants.stock_alert.",
+    middleware=[Authenticate],
+    secure=["bearer"],
+):
+    Route.post("", stock_alerts.subscribe, name="subscribe").status(200)
+    Route.delete("", stock_alerts.unsubscribe, name="unsubscribe").status(200)
+
+# --- Admin (nested: OIDC self-service outer, bearer-guarded operations inner) ---
+with Route.group(prefix="/admin", name="api.admin."):
+    Route.get("/me", admin.me, name="me").secure("oidc")
+    # Exchange a Keycloak token (from the SPA's auth-code+PKCE flow) for an arvel bearer PAT.
+    Route.post("/oidc/token", admin.oidc_exchange, name="oidc.token").status(
+        200
+    ).secure("oidc")
+
+    with Route.group(middleware=[Authenticate], secure=["bearer"]):
+        # Admin product CRUD (auth-guarded by middleware; policy-guarded in the controller).
+        # Authenticate (401 if guest) runs as route middleware BEFORE body parsing, so an
+        # unauthenticated request never reaches parsing/policy checks; the ProductPolicy then
+        # decides admin-vs-customer (403/404) inside the controller. Admin listings return
+        # EVERY row (incl. hidden) with an is_visible flag — vs the storefront, which only
+        # returns the retrievable set.
+        Route.post(
+            "/products/{id:int}/image", media.upload_image, name="products.image"
+        )
+        Route.delete(
+            "/products/{id:int}/media/{media_id:int}",
+            media.delete_image,
+            name="products.media.destroy",
+        ).status(200)
+        Route.get("/products", admin_products.products_index, name="products.index")
+        Route.get(
+            "/categories", admin_products.categories_index, name="categories.index"
+        )
+        Route.get("/products/{id:int}", admin_products.show, name="products.show")
+        Route.post("/products", admin_products.store, name="products.store")
+        Route.put("/products/{id:int}", admin_products.update, name="products.update")
+        Route.delete(
+            "/products/{id:int}", admin_products.destroy, name="products.destroy"
+        )
+        Route.post(
+            "/products/{id:int}/restore",
+            admin_products.restore,
+            name="products.restore",
+        ).status(200)
+
+        # Admin categories + vendors (the retrievability dimensions; catalog.* authority).
+        Route.post("/categories", taxonomy.category_store, name="categories.store")
+        Route.put(
+            "/categories/{id:int}", taxonomy.category_update, name="categories.update"
+        )
+        Route.delete(
+            "/categories/{id:int}", taxonomy.category_destroy, name="categories.destroy"
+        ).status(200)
+        Route.get("/vendors", taxonomy.vendors_index, name="vendors.index")
+        Route.post("/vendors", taxonomy.vendor_store, name="vendors.store")
+        Route.put("/vendors/{id:int}", taxonomy.vendor_update, name="vendors.update")
+
+        # Admin variants + stock (nested under the product; catalog.update authority).
+        Route.get(
+            "/products/{id:int}/variants", admin_variants.index, name="variants.index"
+        )
+        Route.post(
+            "/products/{id:int}/variants", admin_variants.store, name="variants.store"
+        )
+        Route.patch("/variants/{id:int}", admin_variants.update, name="variants.update")
+        Route.post(
+            "/variants/{id:int}/stock",
+            admin_variants.adjust_stock,
+            name="variants.stock",
+        ).status(200)
+        Route.delete(
+            "/variants/{id:int}", admin_variants.destroy, name="variants.destroy"
+        ).status(200)
+
+        # Admin user directory (users.view; role mutations stay on roles.manage).
+        Route.get("/users", admin_users.index, name="users.index")
+        Route.get("/users/{id:int}", admin_users.show, name="users.show")
+
+        # Admin RBAC + audit (roles.manage / audit.view; super-admin bypasses).
+        Route.get("/roles", rbac.roles_index, name="roles.index")
+        Route.get("/permissions", rbac.permissions_index, name="permissions.index")
+        Route.get("/users/{id:int}/roles", rbac.user_roles, name="users.roles")
+        Route.post(
+            "/users/{id:int}/roles", rbac.assign_role, name="users.roles.assign"
+        ).status(200)
+        Route.delete(
+            "/users/{id:int}/roles/{role:str}",
+            rbac.revoke_role,
+            name="users.roles.revoke",
+        ).status(200)
+        Route.get("/audit", rbac.audit_index, name="audit.index")
+
+        # Admin reviews.
+        Route.get("/reviews", reviews.admin_index, name="reviews.index")
+        Route.post(
+            "/reviews/{id:int}/{decision:str}",
+            reviews.moderate,
+            name="reviews.moderate",
+        ).status(200)
+
+        # Admin settings + media + newsletter.
+        Route.get("/settings", settings.admin_settings, name="settings")
+        Route.patch("/settings", settings.update_settings, name="settings.update")
+        Route.get("/media", media_library.index, name="media")
+        Route.get("/newsletter", settings.newsletter_index, name="newsletter")
+
+        # Admin banners.
+        Route.get("/banners", banners.admin_index, name="banners.index")
+        Route.post("/banners", banners.store, name="banners.store")
+        Route.patch("/banners/{id:int}", banners.update, name="banners.update")
+        Route.delete("/banners/{id:int}", banners.destroy, name="banners.destroy")
+        Route.post(
+            "/banners/{id:int}/image", banners.upload_image, name="banners.image"
+        )
+
+        # Admin deals.
+        Route.get("/deals", admin_deals.index, name="deals.index")
+        Route.post("/deals", admin_deals.store, name="deals.store")
+        Route.patch("/deals/{id:int}", admin_deals.update, name="deals.update")
+        Route.delete("/deals/{id:int}", admin_deals.destroy, name="deals.destroy")
+
+        # Admin coupons (catalog authority).
+        Route.get("/coupons", admin_coupons.index, name="coupons.index")
+        Route.post("/coupons", admin_coupons.store, name="coupons.store")
+        Route.patch("/coupons/{id:int}", admin_coupons.update, name="coupons.update")
+
+        # Admin orders.
+        Route.get("/orders", checkout.admin_orders_index, name="orders.index")
+        Route.get("/orders/{id:int}", checkout.admin_order_show, name="orders.show")
+        Route.post(
+            "/orders/{id:int}/status", checkout.update_status, name="orders.status"
+        ).status(200)  # a transition, not a creation
 
 # --- Dev payment gateway (debug builds only) ---
 # A stand-in PSP so the payment loop runs live with no external account: charges succeed and the

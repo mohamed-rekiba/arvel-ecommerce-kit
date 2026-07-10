@@ -542,87 +542,6 @@ export const apiPasswordReset = async (resetPasswordIn: ResetPasswordIn, options
 
 
 
-export type apiUserPasswordResponse200 = {
-  data: MessageOut
-  status: 200
-}
-
-export type apiUserPasswordResponse400 = {
-  data: ApiUserPassword400
-  status: 400
-}
-
-export type apiUserPasswordResponseSuccess = (apiUserPasswordResponse200) & {
-  headers: Headers;
-};
-export type apiUserPasswordResponseError = (apiUserPasswordResponse400) & {
-  headers: Headers;
-};
-
-export type apiUserPasswordResponse = (apiUserPasswordResponseSuccess | apiUserPasswordResponseError)
-
-export const getApiUserPasswordUrl = () => {
-
-
-
-
-  return `/api/user/password`
-}
-
-/**
- * Set a new password — only with the current one in hand (credential-change confirmation).
- * @summary ApiUserPassword
- */
-export const apiUserPassword = async (changePasswordIn: ChangePasswordIn, options?: RequestInit): Promise<apiUserPasswordResponse> => {
-
-  return apiFetch<apiUserPasswordResponse>(getApiUserPasswordUrl(),
-  {
-    ...options,
-    method: 'PUT',
-    headers: { 'Content-Type': 'application/json', ...options?.headers },
-    body: JSON.stringify(changePasswordIn)
-  }
-);}
-
-
-
-export type apiEmailVerificationSendResponse200 = {
-  data: MessageOut
-  status: 200
-}
-
-export type apiEmailVerificationSendResponseSuccess = (apiEmailVerificationSendResponse200) & {
-  headers: Headers;
-};
-;
-
-export type apiEmailVerificationSendResponse = (apiEmailVerificationSendResponseSuccess)
-
-export const getApiEmailVerificationSendUrl = () => {
-
-
-
-
-  return `/api/email/verification-notification`
-}
-
-/**
- * (Re-)send the verification link to the account email.
- * @summary ApiEmailVerificationSend
- */
-export const apiEmailVerificationSend = async ( options?: RequestInit): Promise<apiEmailVerificationSendResponse> => {
-
-  return apiFetch<apiEmailVerificationSendResponse>(getApiEmailVerificationSendUrl(),
-  {
-    ...options,
-    method: 'POST'
-
-
-  }
-);}
-
-
-
 export type apiEmailVerifyResponse200 = {
   data: MessageOut
   status: 200
@@ -943,6 +862,1480 @@ export const apiMediaConversion = async (id: number,
   {
     ...options,
     method: 'GET'
+
+
+  }
+);}
+
+
+
+export type apiProductsReviewsIndexResponse200 = {
+  data: ReviewListOut
+  status: 200
+}
+
+export type apiProductsReviewsIndexResponse400 = {
+  data: ApiProductsReviewsIndex400
+  status: 400
+}
+
+export type apiProductsReviewsIndexResponseSuccess = (apiProductsReviewsIndexResponse200) & {
+  headers: Headers;
+};
+export type apiProductsReviewsIndexResponseError = (apiProductsReviewsIndexResponse400) & {
+  headers: Headers;
+};
+
+export type apiProductsReviewsIndexResponse = (apiProductsReviewsIndexResponseSuccess | apiProductsReviewsIndexResponseError)
+
+export const getApiProductsReviewsIndexUrl = (slug: string,) => {
+
+
+
+
+  return `/api/products/${slug}/reviews`
+}
+
+/**
+ * APPROVED reviews for the product (+ the caller's own review, whatever its status).
+ * @summary ApiProductsReviewsIndex
+ */
+export const apiProductsReviewsIndex = async (slug: string, options?: RequestInit): Promise<apiProductsReviewsIndexResponse> => {
+
+  return apiFetch<apiProductsReviewsIndexResponse>(getApiProductsReviewsIndexUrl(slug),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+export type apiProductsReviewsStoreResponse201 = {
+  data: ReviewOut
+  status: 201
+}
+
+export type apiProductsReviewsStoreResponse400 = {
+  data: ApiProductsReviewsStore400
+  status: 400
+}
+
+export type apiProductsReviewsStoreResponseSuccess = (apiProductsReviewsStoreResponse201) & {
+  headers: Headers;
+};
+export type apiProductsReviewsStoreResponseError = (apiProductsReviewsStoreResponse400) & {
+  headers: Headers;
+};
+
+export type apiProductsReviewsStoreResponse = (apiProductsReviewsStoreResponseSuccess | apiProductsReviewsStoreResponseError)
+
+export const getApiProductsReviewsStoreUrl = (slug: string,) => {
+
+
+
+
+  return `/api/products/${slug}/reviews`
+}
+
+/**
+ * Submit a review — verified purchasers only, one per product; lands PENDING.
+ * @summary ApiProductsReviewsStore
+ */
+export const apiProductsReviewsStore = async (slug: string,
+    reviewIn: ReviewIn, options?: RequestInit): Promise<apiProductsReviewsStoreResponse> => {
+
+  return apiFetch<apiProductsReviewsStoreResponse>(getApiProductsReviewsStoreUrl(slug),
+  {
+    ...options,
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...options?.headers },
+    body: JSON.stringify(reviewIn)
+  }
+);}
+
+
+
+export type apiCartShowResponse200 = {
+  data: CartOut
+  status: 200
+}
+
+export type apiCartShowResponseSuccess = (apiCartShowResponse200) & {
+  headers: Headers;
+};
+;
+
+export type apiCartShowResponse = (apiCartShowResponseSuccess)
+
+export const getApiCartShowUrl = () => {
+
+
+
+
+  return `/api/cart`
+}
+
+/**
+ * Show the current cart (an empty shell if none exists yet).
+ * @summary ApiCartShow
+ */
+export const apiCartShow = async ( options?: RequestInit): Promise<apiCartShowResponse> => {
+
+  return apiFetch<apiCartShowResponse>(getApiCartShowUrl(),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+export type apiCartItemsAddResponse201 = {
+  data: CartOut
+  status: 201
+}
+
+export type apiCartItemsAddResponse400 = {
+  data: ApiCartItemsAdd400
+  status: 400
+}
+
+export type apiCartItemsAddResponseSuccess = (apiCartItemsAddResponse201) & {
+  headers: Headers;
+};
+export type apiCartItemsAddResponseError = (apiCartItemsAddResponse400) & {
+  headers: Headers;
+};
+
+export type apiCartItemsAddResponse = (apiCartItemsAddResponseSuccess | apiCartItemsAddResponseError)
+
+export const getApiCartItemsAddUrl = () => {
+
+
+
+
+  return `/api/cart/items`
+}
+
+/**
+ * Add a variant to the cart (or bump its quantity if already present).
+ * @summary ApiCartItemsAdd
+ */
+export const apiCartItemsAdd = async (addItemIn: AddItemIn, options?: RequestInit): Promise<apiCartItemsAddResponse> => {
+
+  return apiFetch<apiCartItemsAddResponse>(getApiCartItemsAddUrl(),
+  {
+    ...options,
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...options?.headers },
+    body: JSON.stringify(addItemIn)
+  }
+);}
+
+
+
+export type apiCartItemsRemoveResponse200 = {
+  data: CartOut
+  status: 200
+}
+
+export type apiCartItemsRemoveResponse400 = {
+  data: ApiCartItemsRemove400
+  status: 400
+}
+
+export type apiCartItemsRemoveResponseSuccess = (apiCartItemsRemoveResponse200) & {
+  headers: Headers;
+};
+export type apiCartItemsRemoveResponseError = (apiCartItemsRemoveResponse400) & {
+  headers: Headers;
+};
+
+export type apiCartItemsRemoveResponse = (apiCartItemsRemoveResponseSuccess | apiCartItemsRemoveResponseError)
+
+export const getApiCartItemsRemoveUrl = (id: number,) => {
+
+
+
+
+  return `/api/cart/items/${id}`
+}
+
+/**
+ * Remove a line from the cart.
+ * @summary ApiCartItemsRemove
+ */
+export const apiCartItemsRemove = async (id: number, options?: RequestInit): Promise<apiCartItemsRemoveResponse> => {
+
+  return apiFetch<apiCartItemsRemoveResponse>(getApiCartItemsRemoveUrl(id),
+  {
+    ...options,
+    method: 'DELETE'
+
+
+  }
+);}
+
+
+
+export type apiCartItemsUpdateResponse200 = {
+  data: CartOut
+  status: 200
+}
+
+export type apiCartItemsUpdateResponse400 = {
+  data: ApiCartItemsUpdate400
+  status: 400
+}
+
+export type apiCartItemsUpdateResponseSuccess = (apiCartItemsUpdateResponse200) & {
+  headers: Headers;
+};
+export type apiCartItemsUpdateResponseError = (apiCartItemsUpdateResponse400) & {
+  headers: Headers;
+};
+
+export type apiCartItemsUpdateResponse = (apiCartItemsUpdateResponseSuccess | apiCartItemsUpdateResponseError)
+
+export const getApiCartItemsUpdateUrl = (id: number,) => {
+
+
+
+
+  return `/api/cart/items/${id}`
+}
+
+/**
+ * Set a line's quantity (0 removes it).
+ * @summary ApiCartItemsUpdate
+ */
+export const apiCartItemsUpdate = async (id: number,
+    updateItemIn: UpdateItemIn, options?: RequestInit): Promise<apiCartItemsUpdateResponse> => {
+
+  return apiFetch<apiCartItemsUpdateResponse>(getApiCartItemsUpdateUrl(id),
+  {
+    ...options,
+    method: 'PATCH',
+    headers: { 'Content-Type': 'application/json', ...options?.headers },
+    body: JSON.stringify(updateItemIn)
+  }
+);}
+
+
+
+export type apiCartCouponApplyResponse200 = {
+  data: CartOut
+  status: 200
+}
+
+export type apiCartCouponApplyResponse400 = {
+  data: ApiCartCouponApply400
+  status: 400
+}
+
+export type apiCartCouponApplyResponseSuccess = (apiCartCouponApplyResponse200) & {
+  headers: Headers;
+};
+export type apiCartCouponApplyResponseError = (apiCartCouponApplyResponse400) & {
+  headers: Headers;
+};
+
+export type apiCartCouponApplyResponse = (apiCartCouponApplyResponseSuccess | apiCartCouponApplyResponseError)
+
+export const getApiCartCouponApplyUrl = () => {
+
+
+
+
+  return `/api/cart/coupon`
+}
+
+/**
+ * Attach a coupon to the cart with immediate validation (checkout re-validates
+ * authoritatively — a code can expire between apply and place-order).
+ * @summary ApiCartCouponApply
+ */
+export const apiCartCouponApply = async (applyCouponIn: ApplyCouponIn, options?: RequestInit): Promise<apiCartCouponApplyResponse> => {
+
+  return apiFetch<apiCartCouponApplyResponse>(getApiCartCouponApplyUrl(),
+  {
+    ...options,
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...options?.headers },
+    body: JSON.stringify(applyCouponIn)
+  }
+);}
+
+
+
+export type apiCartCouponRemoveResponse200 = {
+  data: CartOut
+  status: 200
+}
+
+export type apiCartCouponRemoveResponseSuccess = (apiCartCouponRemoveResponse200) & {
+  headers: Headers;
+};
+;
+
+export type apiCartCouponRemoveResponse = (apiCartCouponRemoveResponseSuccess)
+
+export const getApiCartCouponRemoveUrl = () => {
+
+
+
+
+  return `/api/cart/coupon`
+}
+
+/**
+ * @summary ApiCartCouponRemove
+ */
+export const apiCartCouponRemove = async ( options?: RequestInit): Promise<apiCartCouponRemoveResponse> => {
+
+  return apiFetch<apiCartCouponRemoveResponse>(getApiCartCouponRemoveUrl(),
+  {
+    ...options,
+    method: 'DELETE'
+
+
+  }
+);}
+
+
+
+export type apiDealsIndexResponse200 = {
+  data: DealOut[]
+  status: 200
+}
+
+export type apiDealsIndexResponseSuccess = (apiDealsIndexResponse200) & {
+  headers: Headers;
+};
+;
+
+export type apiDealsIndexResponse = (apiDealsIndexResponseSuccess)
+
+export const getApiDealsIndexUrl = () => {
+
+
+
+
+  return `/api/deals`
+}
+
+/**
+ * @summary ApiDealsIndex
+ */
+export const apiDealsIndex = async ( options?: RequestInit): Promise<apiDealsIndexResponse> => {
+
+  return apiFetch<apiDealsIndexResponse>(getApiDealsIndexUrl(),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+export type apiAnnouncementResponse200 = {
+  data: AnnouncementOut
+  status: 200
+}
+
+export type apiAnnouncementResponseSuccess = (apiAnnouncementResponse200) & {
+  headers: Headers;
+};
+;
+
+export type apiAnnouncementResponse = (apiAnnouncementResponseSuccess)
+
+export const getApiAnnouncementUrl = () => {
+
+
+
+
+  return `/api/announcement`
+}
+
+/**
+ * @summary ApiAnnouncement
+ */
+export const apiAnnouncement = async ( options?: RequestInit): Promise<apiAnnouncementResponse> => {
+
+  return apiFetch<apiAnnouncementResponse>(getApiAnnouncementUrl(),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+export type apiSettingsResponse200 = {
+  data: SettingsOut
+  status: 200
+}
+
+export type apiSettingsResponseSuccess = (apiSettingsResponse200) & {
+  headers: Headers;
+};
+;
+
+export type apiSettingsResponse = (apiSettingsResponseSuccess)
+
+export const getApiSettingsUrl = () => {
+
+
+
+
+  return `/api/settings`
+}
+
+/**
+ * @summary ApiSettings
+ */
+export const apiSettings = async ( options?: RequestInit): Promise<apiSettingsResponse> => {
+
+  return apiFetch<apiSettingsResponse>(getApiSettingsUrl(),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+export type apiNewsletterResponse200 = {
+  data: MessageOut
+  status: 200
+}
+
+export type apiNewsletterResponse400 = {
+  data: ApiNewsletter400
+  status: 400
+}
+
+export type apiNewsletterResponseSuccess = (apiNewsletterResponse200) & {
+  headers: Headers;
+};
+export type apiNewsletterResponseError = (apiNewsletterResponse400) & {
+  headers: Headers;
+};
+
+export type apiNewsletterResponse = (apiNewsletterResponseSuccess | apiNewsletterResponseError)
+
+export const getApiNewsletterUrl = () => {
+
+
+
+
+  return `/api/newsletter`
+}
+
+/**
+ * Idempotent newsletter signup — re-subscribing an existing email is a friendly 200.
+ * @summary ApiNewsletter
+ */
+export const apiNewsletter = async (newsletterIn: NewsletterIn, options?: RequestInit): Promise<apiNewsletterResponse> => {
+
+  return apiFetch<apiNewsletterResponse>(getApiNewsletterUrl(),
+  {
+    ...options,
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...options?.headers },
+    body: JSON.stringify(newsletterIn)
+  }
+);}
+
+
+
+export type apiBannersIndexResponse200 = {
+  data: BannerOut[]
+  status: 200
+}
+
+export type apiBannersIndexResponseSuccess = (apiBannersIndexResponse200) & {
+  headers: Headers;
+};
+;
+
+export type apiBannersIndexResponse = (apiBannersIndexResponseSuccess)
+
+export const getApiBannersIndexUrl = () => {
+
+
+
+
+  return `/api/banners`
+}
+
+/**
+ * @summary ApiBannersIndex
+ */
+export const apiBannersIndex = async ( options?: RequestInit): Promise<apiBannersIndexResponse> => {
+
+  return apiFetch<apiBannersIndexResponse>(getApiBannersIndexUrl(),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+export type apiCheckoutResponse201 = {
+  data: OrderOut
+  status: 201
+}
+
+export type apiCheckoutResponse400 = {
+  data: ApiCheckout400
+  status: 400
+}
+
+export type apiCheckoutResponseSuccess = (apiCheckoutResponse201) & {
+  headers: Headers;
+};
+export type apiCheckoutResponseError = (apiCheckoutResponse400) & {
+  headers: Headers;
+};
+
+export type apiCheckoutResponse = (apiCheckoutResponseSuccess | apiCheckoutResponseError)
+
+export const getApiCheckoutUrl = () => {
+
+
+
+
+  return `/api/checkout`
+}
+
+/**
+ * Convert the current cart into a PENDING order, atomically (stock locked, cart cleared),
+ * capturing the contact email + shipping address and the server-computed money breakdown.
+ * @summary ApiCheckout
+ */
+export const apiCheckout = async (checkoutIn: CheckoutIn, options?: RequestInit): Promise<apiCheckoutResponse> => {
+
+  return apiFetch<apiCheckoutResponse>(getApiCheckoutUrl(),
+  {
+    ...options,
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...options?.headers },
+    body: JSON.stringify(checkoutIn)
+  }
+);}
+
+
+
+export type apiMetricsOrdersPlacedResponse200 = {
+  data: MetricsOut
+  status: 200
+}
+
+export type apiMetricsOrdersPlacedResponseSuccess = (apiMetricsOrdersPlacedResponse200) & {
+  headers: Headers;
+};
+;
+
+export type apiMetricsOrdersPlacedResponse = (apiMetricsOrdersPlacedResponseSuccess)
+
+export const getApiMetricsOrdersPlacedUrl = () => {
+
+
+
+
+  return `/api/metrics/orders-placed`
+}
+
+/**
+ * Order metrics bumped by the order.placed listeners (proves event→listener + the queued job).
+ * @summary ApiMetricsOrdersPlaced
+ */
+export const apiMetricsOrdersPlaced = async ( options?: RequestInit): Promise<apiMetricsOrdersPlacedResponse> => {
+
+  return apiFetch<apiMetricsOrdersPlacedResponse>(getApiMetricsOrdersPlacedUrl(),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+export type apiOrdersShowResponse200 = {
+  data: OrderOut
+  status: 200
+}
+
+export type apiOrdersShowResponse400 = {
+  data: ApiOrdersShow400
+  status: 400
+}
+
+export type apiOrdersShowResponseSuccess = (apiOrdersShowResponse200) & {
+  headers: Headers;
+};
+export type apiOrdersShowResponseError = (apiOrdersShowResponse400) & {
+  headers: Headers;
+};
+
+export type apiOrdersShowResponse = (apiOrdersShowResponseSuccess | apiOrdersShowResponseError)
+
+export const getApiOrdersShowUrl = (id: number,) => {
+
+
+
+
+  return `/api/orders/${id}`
+}
+
+/**
+ * One order, with lines + breakdown + the tracking timeline — for the signed-in owner or
+ * the order-token holder.
+ * @summary ApiOrdersShow
+ */
+export const apiOrdersShow = async (id: number, options?: RequestInit): Promise<apiOrdersShowResponse> => {
+
+  return apiFetch<apiOrdersShowResponse>(getApiOrdersShowUrl(id),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+export type apiOrdersInvoiceResponse200 = {
+  data: Response
+  status: 200
+}
+
+export type apiOrdersInvoiceResponse400 = {
+  data: ApiOrdersInvoice400
+  status: 400
+}
+
+export type apiOrdersInvoiceResponseSuccess = (apiOrdersInvoiceResponse200) & {
+  headers: Headers;
+};
+export type apiOrdersInvoiceResponseError = (apiOrdersInvoiceResponse400) & {
+  headers: Headers;
+};
+
+export type apiOrdersInvoiceResponse = (apiOrdersInvoiceResponseSuccess | apiOrdersInvoiceResponseError)
+
+export const getApiOrdersInvoiceUrl = (id: number,) => {
+
+
+
+
+  return `/api/orders/${id}/invoice`
+}
+
+/**
+ * @summary ApiOrdersInvoice
+ */
+export const apiOrdersInvoice = async (id: number, options?: RequestInit): Promise<apiOrdersInvoiceResponse> => {
+
+  return apiFetch<apiOrdersInvoiceResponse>(getApiOrdersInvoiceUrl(id),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+export type apiOrdersCancelResponse200 = {
+  data: OrderOut
+  status: 200
+}
+
+export type apiOrdersCancelResponse400 = {
+  data: ApiOrdersCancel400
+  status: 400
+}
+
+export type apiOrdersCancelResponseSuccess = (apiOrdersCancelResponse200) & {
+  headers: Headers;
+};
+export type apiOrdersCancelResponseError = (apiOrdersCancelResponse400) & {
+  headers: Headers;
+};
+
+export type apiOrdersCancelResponse = (apiOrdersCancelResponseSuccess | apiOrdersCancelResponseError)
+
+export const getApiOrdersCancelUrl = (id: number,) => {
+
+
+
+
+  return `/api/orders/${id}/cancel`
+}
+
+/**
+ * Cancel the order (owner or token holder) while the state machine allows it — restoring the
+ * decremented stock atomically. Cancelling a PAID order records the cancellation; refunding the
+ * money is out of scope (documented limitation).
+ * @summary ApiOrdersCancel
+ */
+export const apiOrdersCancel = async (id: number, options?: RequestInit): Promise<apiOrdersCancelResponse> => {
+
+  return apiFetch<apiOrdersCancelResponse>(getApiOrdersCancelUrl(id),
+  {
+    ...options,
+    method: 'POST'
+
+
+  }
+);}
+
+
+
+export type apiOrdersPayResponse201 = {
+  data: PaymentOut
+  status: 201
+}
+
+export type apiOrdersPayResponse400 = {
+  data: ApiOrdersPay400
+  status: 400
+}
+
+export type apiOrdersPayResponseSuccess = (apiOrdersPayResponse201) & {
+  headers: Headers;
+};
+export type apiOrdersPayResponseError = (apiOrdersPayResponse400) & {
+  headers: Headers;
+};
+
+export type apiOrdersPayResponse = (apiOrdersPayResponseSuccess | apiOrdersPayResponseError)
+
+export const getApiOrdersPayUrl = (id: number,) => {
+
+
+
+
+  return `/api/orders/${id}/pay`
+}
+
+/**
+ * Create a charge for the order via the gateway — the signed-in owner or the guest holding
+ * the order's access token (guests must be able to pay; PENDING-only).
+ * @summary ApiOrdersPay
+ */
+export const apiOrdersPay = async (id: number, options?: RequestInit): Promise<apiOrdersPayResponse> => {
+
+  return apiFetch<apiOrdersPayResponse>(getApiOrdersPayUrl(id),
+  {
+    ...options,
+    method: 'POST'
+
+
+  }
+);}
+
+
+
+export type apiWebhooksPaymentResponse201 = {
+  data: WebhookOut
+  status: 201
+}
+
+export type apiWebhooksPaymentResponse400 = {
+  data: ApiWebhooksPayment400
+  status: 400
+}
+
+export type apiWebhooksPaymentResponseSuccess = (apiWebhooksPaymentResponse201) & {
+  headers: Headers;
+};
+export type apiWebhooksPaymentResponseError = (apiWebhooksPaymentResponse400) & {
+  headers: Headers;
+};
+
+export type apiWebhooksPaymentResponse = (apiWebhooksPaymentResponseSuccess | apiWebhooksPaymentResponseError)
+
+export const getApiWebhooksPaymentUrl = () => {
+
+
+
+
+  return `/api/webhooks/payment`
+}
+
+/**
+ * Idempotently process a gateway webhook — a redelivery of the same event id is a no-op. The
+ * request must carry a valid gateway signature (authenticity) before any side effects run.
+ * @summary ApiWebhooksPayment
+ */
+export const apiWebhooksPayment = async (webhookIn: WebhookIn, options?: RequestInit): Promise<apiWebhooksPaymentResponse> => {
+
+  return apiFetch<apiWebhooksPaymentResponse>(getApiWebhooksPaymentUrl(),
+  {
+    ...options,
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...options?.headers },
+    body: JSON.stringify(webhookIn)
+  }
+);}
+
+
+
+export type apiUserPasswordResponse200 = {
+  data: MessageOut
+  status: 200
+}
+
+export type apiUserPasswordResponse400 = {
+  data: ApiUserPassword400
+  status: 400
+}
+
+export type apiUserPasswordResponseSuccess = (apiUserPasswordResponse200) & {
+  headers: Headers;
+};
+export type apiUserPasswordResponseError = (apiUserPasswordResponse400) & {
+  headers: Headers;
+};
+
+export type apiUserPasswordResponse = (apiUserPasswordResponseSuccess | apiUserPasswordResponseError)
+
+export const getApiUserPasswordUrl = () => {
+
+
+
+
+  return `/api/user/password`
+}
+
+/**
+ * Set a new password — only with the current one in hand (credential-change confirmation).
+ * @summary ApiUserPassword
+ */
+export const apiUserPassword = async (changePasswordIn: ChangePasswordIn, options?: RequestInit): Promise<apiUserPasswordResponse> => {
+
+  return apiFetch<apiUserPasswordResponse>(getApiUserPasswordUrl(),
+  {
+    ...options,
+    method: 'PUT',
+    headers: { 'Content-Type': 'application/json', ...options?.headers },
+    body: JSON.stringify(changePasswordIn)
+  }
+);}
+
+
+
+export type apiEmailVerificationSendResponse200 = {
+  data: MessageOut
+  status: 200
+}
+
+export type apiEmailVerificationSendResponseSuccess = (apiEmailVerificationSendResponse200) & {
+  headers: Headers;
+};
+;
+
+export type apiEmailVerificationSendResponse = (apiEmailVerificationSendResponseSuccess)
+
+export const getApiEmailVerificationSendUrl = () => {
+
+
+
+
+  return `/api/email/verification-notification`
+}
+
+/**
+ * (Re-)send the verification link to the account email.
+ * @summary ApiEmailVerificationSend
+ */
+export const apiEmailVerificationSend = async ( options?: RequestInit): Promise<apiEmailVerificationSendResponse> => {
+
+  return apiFetch<apiEmailVerificationSendResponse>(getApiEmailVerificationSendUrl(),
+  {
+    ...options,
+    method: 'POST'
+
+
+  }
+);}
+
+
+
+export type apiOrdersIndexResponse200 = {
+  data: OrderOut[]
+  status: 200
+}
+
+export type apiOrdersIndexResponseSuccess = (apiOrdersIndexResponse200) & {
+  headers: Headers;
+};
+;
+
+export type apiOrdersIndexResponse = (apiOrdersIndexResponseSuccess)
+
+export const getApiOrdersIndexUrl = () => {
+
+
+
+
+  return `/api/orders`
+}
+
+/**
+ * The authenticated user's orders (newest first).
+ * @summary ApiOrdersIndex
+ */
+export const apiOrdersIndex = async ( options?: RequestInit): Promise<apiOrdersIndexResponse> => {
+
+  return apiFetch<apiOrdersIndexResponse>(getApiOrdersIndexUrl(),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+export type apiAccountAvatarResponse201 = {
+  data: UserOut
+  status: 201
+}
+
+export type apiAccountAvatarResponseSuccess = (apiAccountAvatarResponse201) & {
+  headers: Headers;
+};
+;
+
+export type apiAccountAvatarResponse = (apiAccountAvatarResponseSuccess)
+
+export const getApiAccountAvatarUrl = () => {
+
+
+
+
+  return `/api/account/avatar`
+}
+
+/**
+ * Attach/replace the account avatar (one image; the previous one is removed).
+ * @summary ApiAccountAvatar
+ */
+export const apiAccountAvatar = async ( options?: RequestInit): Promise<apiAccountAvatarResponse> => {
+
+  return apiFetch<apiAccountAvatarResponse>(getApiAccountAvatarUrl(),
+  {
+    ...options,
+    method: 'POST'
+
+
+  }
+);}
+
+
+
+export type apiAccountAddressesIndexResponse200 = {
+  data: SavedAddressOut[]
+  status: 200
+}
+
+export type apiAccountAddressesIndexResponseSuccess = (apiAccountAddressesIndexResponse200) & {
+  headers: Headers;
+};
+;
+
+export type apiAccountAddressesIndexResponse = (apiAccountAddressesIndexResponseSuccess)
+
+export const getApiAccountAddressesIndexUrl = () => {
+
+
+
+
+  return `/api/account/addresses`
+}
+
+/**
+ * @summary ApiAccountAddressesIndex
+ */
+export const apiAccountAddressesIndex = async ( options?: RequestInit): Promise<apiAccountAddressesIndexResponse> => {
+
+  return apiFetch<apiAccountAddressesIndexResponse>(getApiAccountAddressesIndexUrl(),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+export type apiAccountAddressesStoreResponse201 = {
+  data: SavedAddressOut
+  status: 201
+}
+
+export type apiAccountAddressesStoreResponse400 = {
+  data: ApiAccountAddressesStore400
+  status: 400
+}
+
+export type apiAccountAddressesStoreResponseSuccess = (apiAccountAddressesStoreResponse201) & {
+  headers: Headers;
+};
+export type apiAccountAddressesStoreResponseError = (apiAccountAddressesStoreResponse400) & {
+  headers: Headers;
+};
+
+export type apiAccountAddressesStoreResponse = (apiAccountAddressesStoreResponseSuccess | apiAccountAddressesStoreResponseError)
+
+export const getApiAccountAddressesStoreUrl = () => {
+
+
+
+
+  return `/api/account/addresses`
+}
+
+/**
+ * @summary ApiAccountAddressesStore
+ */
+export const apiAccountAddressesStore = async (savedAddressIn: SavedAddressIn, options?: RequestInit): Promise<apiAccountAddressesStoreResponse> => {
+
+  return apiFetch<apiAccountAddressesStoreResponse>(getApiAccountAddressesStoreUrl(),
+  {
+    ...options,
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...options?.headers },
+    body: JSON.stringify(savedAddressIn)
+  }
+);}
+
+
+
+export type apiAccountAddressesDestroyResponse200 = {
+  data: ApiAccountAddressesDestroy200
+  status: 200
+}
+
+export type apiAccountAddressesDestroyResponse400 = {
+  data: ApiAccountAddressesDestroy400
+  status: 400
+}
+
+export type apiAccountAddressesDestroyResponseSuccess = (apiAccountAddressesDestroyResponse200) & {
+  headers: Headers;
+};
+export type apiAccountAddressesDestroyResponseError = (apiAccountAddressesDestroyResponse400) & {
+  headers: Headers;
+};
+
+export type apiAccountAddressesDestroyResponse = (apiAccountAddressesDestroyResponseSuccess | apiAccountAddressesDestroyResponseError)
+
+export const getApiAccountAddressesDestroyUrl = (id: number,) => {
+
+
+
+
+  return `/api/account/addresses/${id}`
+}
+
+/**
+ * @summary ApiAccountAddressesDestroy
+ */
+export const apiAccountAddressesDestroy = async (id: number, options?: RequestInit): Promise<apiAccountAddressesDestroyResponse> => {
+
+  return apiFetch<apiAccountAddressesDestroyResponse>(getApiAccountAddressesDestroyUrl(id),
+  {
+    ...options,
+    method: 'DELETE'
+
+
+  }
+);}
+
+
+
+export type apiAccountAddressesUpdateResponse200 = {
+  data: SavedAddressOut
+  status: 200
+}
+
+export type apiAccountAddressesUpdateResponse400 = {
+  data: ApiAccountAddressesUpdate400
+  status: 400
+}
+
+export type apiAccountAddressesUpdateResponseSuccess = (apiAccountAddressesUpdateResponse200) & {
+  headers: Headers;
+};
+export type apiAccountAddressesUpdateResponseError = (apiAccountAddressesUpdateResponse400) & {
+  headers: Headers;
+};
+
+export type apiAccountAddressesUpdateResponse = (apiAccountAddressesUpdateResponseSuccess | apiAccountAddressesUpdateResponseError)
+
+export const getApiAccountAddressesUpdateUrl = (id: number,) => {
+
+
+
+
+  return `/api/account/addresses/${id}`
+}
+
+/**
+ * @summary ApiAccountAddressesUpdate
+ */
+export const apiAccountAddressesUpdate = async (id: number,
+    savedAddressIn: SavedAddressIn, options?: RequestInit): Promise<apiAccountAddressesUpdateResponse> => {
+
+  return apiFetch<apiAccountAddressesUpdateResponse>(getApiAccountAddressesUpdateUrl(id),
+  {
+    ...options,
+    method: 'PATCH',
+    headers: { 'Content-Type': 'application/json', ...options?.headers },
+    body: JSON.stringify(savedAddressIn)
+  }
+);}
+
+
+
+export type apiNotificationsIndexResponse200 = {
+  data: NotificationOut[]
+  status: 200
+}
+
+export type apiNotificationsIndexResponseSuccess = (apiNotificationsIndexResponse200) & {
+  headers: Headers;
+};
+;
+
+export type apiNotificationsIndexResponse = (apiNotificationsIndexResponseSuccess)
+
+export const getApiNotificationsIndexUrl = () => {
+
+
+
+
+  return `/api/notifications`
+}
+
+/**
+ * The signed-in customer's notifications, newest first.
+ * @summary ApiNotificationsIndex
+ */
+export const apiNotificationsIndex = async ( options?: RequestInit): Promise<apiNotificationsIndexResponse> => {
+
+  return apiFetch<apiNotificationsIndexResponse>(getApiNotificationsIndexUrl(),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+export type apiNotificationsReadResponse200 = {
+  data: MessageOut
+  status: 200
+}
+
+export type apiNotificationsReadResponseSuccess = (apiNotificationsReadResponse200) & {
+  headers: Headers;
+};
+;
+
+export type apiNotificationsReadResponse = (apiNotificationsReadResponseSuccess)
+
+export const getApiNotificationsReadUrl = () => {
+
+
+
+
+  return `/api/notifications/read`
+}
+
+/**
+ * Mark all of the customer's notifications as read.
+ * @summary ApiNotificationsRead
+ */
+export const apiNotificationsRead = async ( options?: RequestInit): Promise<apiNotificationsReadResponse> => {
+
+  return apiFetch<apiNotificationsReadResponse>(getApiNotificationsReadUrl(),
+  {
+    ...options,
+    method: 'POST'
+
+
+  }
+);}
+
+
+
+export type apiWishlistIndexResponse200 = {
+  data: ProductOut[]
+  status: 200
+}
+
+export type apiWishlistIndexResponseSuccess = (apiWishlistIndexResponse200) & {
+  headers: Headers;
+};
+;
+
+export type apiWishlistIndexResponse = (apiWishlistIndexResponseSuccess)
+
+export const getApiWishlistIndexUrl = () => {
+
+
+
+
+  return `/api/wishlist`
+}
+
+/**
+ * The signed-in customer's saved products (only ones still retrievable on the storefront).
+ * @summary ApiWishlistIndex
+ */
+export const apiWishlistIndex = async ( options?: RequestInit): Promise<apiWishlistIndexResponse> => {
+
+  return apiFetch<apiWishlistIndexResponse>(getApiWishlistIndexUrl(),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+export type apiWishlistToggleResponse200 = {
+  data: WishlistToggleOut
+  status: 200
+}
+
+export type apiWishlistToggleResponse400 = {
+  data: ApiWishlistToggle400
+  status: 400
+}
+
+export type apiWishlistToggleResponseSuccess = (apiWishlistToggleResponse200) & {
+  headers: Headers;
+};
+export type apiWishlistToggleResponseError = (apiWishlistToggleResponse400) & {
+  headers: Headers;
+};
+
+export type apiWishlistToggleResponse = (apiWishlistToggleResponseSuccess | apiWishlistToggleResponseError)
+
+export const getApiWishlistToggleUrl = (productId: number,) => {
+
+
+
+
+  return `/api/wishlist/${productId}`
+}
+
+/**
+ * Add the product to the wishlist, or remove it if already saved.
+ * @summary ApiWishlistToggle
+ */
+export const apiWishlistToggle = async (productId: number, options?: RequestInit): Promise<apiWishlistToggleResponse> => {
+
+  return apiFetch<apiWishlistToggleResponse>(getApiWishlistToggleUrl(productId),
+  {
+    ...options,
+    method: 'POST'
+
+
+  }
+);}
+
+
+
+export type apiVariantsStockAlertSubscribeResponse200 = {
+  data: MessageOut
+  status: 200
+}
+
+export type apiVariantsStockAlertSubscribeResponse400 = {
+  data: ApiVariantsStockAlertSubscribe400
+  status: 400
+}
+
+export type apiVariantsStockAlertSubscribeResponseSuccess = (apiVariantsStockAlertSubscribeResponse200) & {
+  headers: Headers;
+};
+export type apiVariantsStockAlertSubscribeResponseError = (apiVariantsStockAlertSubscribeResponse400) & {
+  headers: Headers;
+};
+
+export type apiVariantsStockAlertSubscribeResponse = (apiVariantsStockAlertSubscribeResponseSuccess | apiVariantsStockAlertSubscribeResponseError)
+
+export const getApiVariantsStockAlertSubscribeUrl = (id: number,) => {
+
+
+
+
+  return `/api/variants/${id}/stock-alert`
+}
+
+/**
+ * Watch a SOLD-OUT variant (in-stock → 422; duplicates are an idempotent no-op).
+ * @summary ApiVariantsStockAlertSubscribe
+ */
+export const apiVariantsStockAlertSubscribe = async (id: number, options?: RequestInit): Promise<apiVariantsStockAlertSubscribeResponse> => {
+
+  return apiFetch<apiVariantsStockAlertSubscribeResponse>(getApiVariantsStockAlertSubscribeUrl(id),
+  {
+    ...options,
+    method: 'POST'
+
+
+  }
+);}
+
+
+
+export type apiVariantsStockAlertUnsubscribeResponse200 = {
+  data: MessageOut
+  status: 200
+}
+
+export type apiVariantsStockAlertUnsubscribeResponse400 = {
+  data: ApiVariantsStockAlertUnsubscribe400
+  status: 400
+}
+
+export type apiVariantsStockAlertUnsubscribeResponseSuccess = (apiVariantsStockAlertUnsubscribeResponse200) & {
+  headers: Headers;
+};
+export type apiVariantsStockAlertUnsubscribeResponseError = (apiVariantsStockAlertUnsubscribeResponse400) & {
+  headers: Headers;
+};
+
+export type apiVariantsStockAlertUnsubscribeResponse = (apiVariantsStockAlertUnsubscribeResponseSuccess | apiVariantsStockAlertUnsubscribeResponseError)
+
+export const getApiVariantsStockAlertUnsubscribeUrl = (id: number,) => {
+
+
+
+
+  return `/api/variants/${id}/stock-alert`
+}
+
+/**
+ * @summary ApiVariantsStockAlertUnsubscribe
+ */
+export const apiVariantsStockAlertUnsubscribe = async (id: number, options?: RequestInit): Promise<apiVariantsStockAlertUnsubscribeResponse> => {
+
+  return apiFetch<apiVariantsStockAlertUnsubscribeResponse>(getApiVariantsStockAlertUnsubscribeUrl(id),
+  {
+    ...options,
+    method: 'DELETE'
+
+
+  }
+);}
+
+
+
+export type apiAdminMeResponse200 = {
+  data: AdminMeOut
+  status: 200
+}
+
+export type apiAdminMeResponseSuccess = (apiAdminMeResponse200) & {
+  headers: Headers;
+};
+;
+
+export type apiAdminMeResponse = (apiAdminMeResponseSuccess)
+
+export const getApiAdminMeUrl = () => {
+
+
+
+
+  return `/api/admin/me`
+}
+
+/**
+ * The current admin's identity, resolved from the Keycloak OIDC token (401 without a valid
+ * token, 403 without the admin realm role).
+ * @summary ApiAdminMe
+ */
+export const apiAdminMe = async ( options?: RequestInit): Promise<apiAdminMeResponse> => {
+
+  return apiFetch<apiAdminMeResponse>(getApiAdminMeUrl(),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+export type apiAdminOidcTokenResponse200 = {
+  data: TokenOut
+  status: 200
+}
+
+export type apiAdminOidcTokenResponseSuccess = (apiAdminOidcTokenResponse200) & {
+  headers: Headers;
+};
+;
+
+export type apiAdminOidcTokenResponse = (apiAdminOidcTokenResponseSuccess)
+
+export const getApiAdminOidcTokenUrl = () => {
+
+
+
+
+  return `/api/admin/oidc/token`
+}
+
+/**
+ * Exchange a validated Keycloak token for an arvel bearer PAT. JIT-provisions the admin and
+ * persists the Keycloak-mapped RBAC roles so the issued bearer carries them into the
+ * bearer-guarded admin APIs.
+ * @summary ApiAdminOidcToken
+ */
+export const apiAdminOidcToken = async ( options?: RequestInit): Promise<apiAdminOidcTokenResponse> => {
+
+  return apiFetch<apiAdminOidcTokenResponse>(getApiAdminOidcTokenUrl(),
+  {
+    ...options,
+    method: 'POST'
 
 
   }
@@ -2186,172 +3579,6 @@ export const apiAdminAuditIndex = async ( options?: RequestInit): Promise<apiAdm
 
 
 
-export type apiAdminMeResponse200 = {
-  data: AdminMeOut
-  status: 200
-}
-
-export type apiAdminMeResponseSuccess = (apiAdminMeResponse200) & {
-  headers: Headers;
-};
-;
-
-export type apiAdminMeResponse = (apiAdminMeResponseSuccess)
-
-export const getApiAdminMeUrl = () => {
-
-
-
-
-  return `/api/admin/me`
-}
-
-/**
- * The current admin's identity, resolved from the Keycloak OIDC token (401 without a valid
- * token, 403 without the admin realm role).
- * @summary ApiAdminMe
- */
-export const apiAdminMe = async ( options?: RequestInit): Promise<apiAdminMeResponse> => {
-
-  return apiFetch<apiAdminMeResponse>(getApiAdminMeUrl(),
-  {
-    ...options,
-    method: 'GET'
-
-
-  }
-);}
-
-
-
-export type apiAdminOidcTokenResponse200 = {
-  data: TokenOut
-  status: 200
-}
-
-export type apiAdminOidcTokenResponseSuccess = (apiAdminOidcTokenResponse200) & {
-  headers: Headers;
-};
-;
-
-export type apiAdminOidcTokenResponse = (apiAdminOidcTokenResponseSuccess)
-
-export const getApiAdminOidcTokenUrl = () => {
-
-
-
-
-  return `/api/admin/oidc/token`
-}
-
-/**
- * Exchange a validated Keycloak token for an arvel bearer PAT. JIT-provisions the admin and
- * persists the Keycloak-mapped RBAC roles so the issued bearer carries them into the
- * bearer-guarded admin APIs.
- * @summary ApiAdminOidcToken
- */
-export const apiAdminOidcToken = async ( options?: RequestInit): Promise<apiAdminOidcTokenResponse> => {
-
-  return apiFetch<apiAdminOidcTokenResponse>(getApiAdminOidcTokenUrl(),
-  {
-    ...options,
-    method: 'POST'
-
-
-  }
-);}
-
-
-
-export type apiProductsReviewsIndexResponse200 = {
-  data: ReviewListOut
-  status: 200
-}
-
-export type apiProductsReviewsIndexResponse400 = {
-  data: ApiProductsReviewsIndex400
-  status: 400
-}
-
-export type apiProductsReviewsIndexResponseSuccess = (apiProductsReviewsIndexResponse200) & {
-  headers: Headers;
-};
-export type apiProductsReviewsIndexResponseError = (apiProductsReviewsIndexResponse400) & {
-  headers: Headers;
-};
-
-export type apiProductsReviewsIndexResponse = (apiProductsReviewsIndexResponseSuccess | apiProductsReviewsIndexResponseError)
-
-export const getApiProductsReviewsIndexUrl = (slug: string,) => {
-
-
-
-
-  return `/api/products/${slug}/reviews`
-}
-
-/**
- * APPROVED reviews for the product (+ the caller's own review, whatever its status).
- * @summary ApiProductsReviewsIndex
- */
-export const apiProductsReviewsIndex = async (slug: string, options?: RequestInit): Promise<apiProductsReviewsIndexResponse> => {
-
-  return apiFetch<apiProductsReviewsIndexResponse>(getApiProductsReviewsIndexUrl(slug),
-  {
-    ...options,
-    method: 'GET'
-
-
-  }
-);}
-
-
-
-export type apiProductsReviewsStoreResponse201 = {
-  data: ReviewOut
-  status: 201
-}
-
-export type apiProductsReviewsStoreResponse400 = {
-  data: ApiProductsReviewsStore400
-  status: 400
-}
-
-export type apiProductsReviewsStoreResponseSuccess = (apiProductsReviewsStoreResponse201) & {
-  headers: Headers;
-};
-export type apiProductsReviewsStoreResponseError = (apiProductsReviewsStoreResponse400) & {
-  headers: Headers;
-};
-
-export type apiProductsReviewsStoreResponse = (apiProductsReviewsStoreResponseSuccess | apiProductsReviewsStoreResponseError)
-
-export const getApiProductsReviewsStoreUrl = (slug: string,) => {
-
-
-
-
-  return `/api/products/${slug}/reviews`
-}
-
-/**
- * Submit a review — verified purchasers only, one per product; lands PENDING.
- * @summary ApiProductsReviewsStore
- */
-export const apiProductsReviewsStore = async (slug: string,
-    reviewIn: ReviewIn, options?: RequestInit): Promise<apiProductsReviewsStoreResponse> => {
-
-  return apiFetch<apiProductsReviewsStoreResponse>(getApiProductsReviewsStoreUrl(slug),
-  {
-    ...options,
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json', ...options?.headers },
-    body: JSON.stringify(reviewIn)
-  }
-);}
-
-
-
 export type apiAdminReviewsIndexResponse200 = {
   data: AdminReviewOut[]
   status: 200
@@ -2444,699 +3671,6 @@ export const apiAdminReviewsModerate = async (id: number,
     method: 'POST'
 
 
-  }
-);}
-
-
-
-export type apiVariantsStockAlertSubscribeResponse200 = {
-  data: MessageOut
-  status: 200
-}
-
-export type apiVariantsStockAlertSubscribeResponse400 = {
-  data: ApiVariantsStockAlertSubscribe400
-  status: 400
-}
-
-export type apiVariantsStockAlertSubscribeResponseSuccess = (apiVariantsStockAlertSubscribeResponse200) & {
-  headers: Headers;
-};
-export type apiVariantsStockAlertSubscribeResponseError = (apiVariantsStockAlertSubscribeResponse400) & {
-  headers: Headers;
-};
-
-export type apiVariantsStockAlertSubscribeResponse = (apiVariantsStockAlertSubscribeResponseSuccess | apiVariantsStockAlertSubscribeResponseError)
-
-export const getApiVariantsStockAlertSubscribeUrl = (id: number,) => {
-
-
-
-
-  return `/api/variants/${id}/stock-alert`
-}
-
-/**
- * Watch a SOLD-OUT variant (in-stock → 422; duplicates are an idempotent no-op).
- * @summary ApiVariantsStockAlertSubscribe
- */
-export const apiVariantsStockAlertSubscribe = async (id: number, options?: RequestInit): Promise<apiVariantsStockAlertSubscribeResponse> => {
-
-  return apiFetch<apiVariantsStockAlertSubscribeResponse>(getApiVariantsStockAlertSubscribeUrl(id),
-  {
-    ...options,
-    method: 'POST'
-
-
-  }
-);}
-
-
-
-export type apiVariantsStockAlertUnsubscribeResponse200 = {
-  data: MessageOut
-  status: 200
-}
-
-export type apiVariantsStockAlertUnsubscribeResponse400 = {
-  data: ApiVariantsStockAlertUnsubscribe400
-  status: 400
-}
-
-export type apiVariantsStockAlertUnsubscribeResponseSuccess = (apiVariantsStockAlertUnsubscribeResponse200) & {
-  headers: Headers;
-};
-export type apiVariantsStockAlertUnsubscribeResponseError = (apiVariantsStockAlertUnsubscribeResponse400) & {
-  headers: Headers;
-};
-
-export type apiVariantsStockAlertUnsubscribeResponse = (apiVariantsStockAlertUnsubscribeResponseSuccess | apiVariantsStockAlertUnsubscribeResponseError)
-
-export const getApiVariantsStockAlertUnsubscribeUrl = (id: number,) => {
-
-
-
-
-  return `/api/variants/${id}/stock-alert`
-}
-
-/**
- * @summary ApiVariantsStockAlertUnsubscribe
- */
-export const apiVariantsStockAlertUnsubscribe = async (id: number, options?: RequestInit): Promise<apiVariantsStockAlertUnsubscribeResponse> => {
-
-  return apiFetch<apiVariantsStockAlertUnsubscribeResponse>(getApiVariantsStockAlertUnsubscribeUrl(id),
-  {
-    ...options,
-    method: 'DELETE'
-
-
-  }
-);}
-
-
-
-export type apiCartShowResponse200 = {
-  data: CartOut
-  status: 200
-}
-
-export type apiCartShowResponseSuccess = (apiCartShowResponse200) & {
-  headers: Headers;
-};
-;
-
-export type apiCartShowResponse = (apiCartShowResponseSuccess)
-
-export const getApiCartShowUrl = () => {
-
-
-
-
-  return `/api/cart`
-}
-
-/**
- * Show the current cart (an empty shell if none exists yet).
- * @summary ApiCartShow
- */
-export const apiCartShow = async ( options?: RequestInit): Promise<apiCartShowResponse> => {
-
-  return apiFetch<apiCartShowResponse>(getApiCartShowUrl(),
-  {
-    ...options,
-    method: 'GET'
-
-
-  }
-);}
-
-
-
-export type apiCartItemsAddResponse201 = {
-  data: CartOut
-  status: 201
-}
-
-export type apiCartItemsAddResponse400 = {
-  data: ApiCartItemsAdd400
-  status: 400
-}
-
-export type apiCartItemsAddResponseSuccess = (apiCartItemsAddResponse201) & {
-  headers: Headers;
-};
-export type apiCartItemsAddResponseError = (apiCartItemsAddResponse400) & {
-  headers: Headers;
-};
-
-export type apiCartItemsAddResponse = (apiCartItemsAddResponseSuccess | apiCartItemsAddResponseError)
-
-export const getApiCartItemsAddUrl = () => {
-
-
-
-
-  return `/api/cart/items`
-}
-
-/**
- * Add a variant to the cart (or bump its quantity if already present).
- * @summary ApiCartItemsAdd
- */
-export const apiCartItemsAdd = async (addItemIn: AddItemIn, options?: RequestInit): Promise<apiCartItemsAddResponse> => {
-
-  return apiFetch<apiCartItemsAddResponse>(getApiCartItemsAddUrl(),
-  {
-    ...options,
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json', ...options?.headers },
-    body: JSON.stringify(addItemIn)
-  }
-);}
-
-
-
-export type apiCartItemsRemoveResponse200 = {
-  data: CartOut
-  status: 200
-}
-
-export type apiCartItemsRemoveResponse400 = {
-  data: ApiCartItemsRemove400
-  status: 400
-}
-
-export type apiCartItemsRemoveResponseSuccess = (apiCartItemsRemoveResponse200) & {
-  headers: Headers;
-};
-export type apiCartItemsRemoveResponseError = (apiCartItemsRemoveResponse400) & {
-  headers: Headers;
-};
-
-export type apiCartItemsRemoveResponse = (apiCartItemsRemoveResponseSuccess | apiCartItemsRemoveResponseError)
-
-export const getApiCartItemsRemoveUrl = (id: number,) => {
-
-
-
-
-  return `/api/cart/items/${id}`
-}
-
-/**
- * Remove a line from the cart.
- * @summary ApiCartItemsRemove
- */
-export const apiCartItemsRemove = async (id: number, options?: RequestInit): Promise<apiCartItemsRemoveResponse> => {
-
-  return apiFetch<apiCartItemsRemoveResponse>(getApiCartItemsRemoveUrl(id),
-  {
-    ...options,
-    method: 'DELETE'
-
-
-  }
-);}
-
-
-
-export type apiCartItemsUpdateResponse200 = {
-  data: CartOut
-  status: 200
-}
-
-export type apiCartItemsUpdateResponse400 = {
-  data: ApiCartItemsUpdate400
-  status: 400
-}
-
-export type apiCartItemsUpdateResponseSuccess = (apiCartItemsUpdateResponse200) & {
-  headers: Headers;
-};
-export type apiCartItemsUpdateResponseError = (apiCartItemsUpdateResponse400) & {
-  headers: Headers;
-};
-
-export type apiCartItemsUpdateResponse = (apiCartItemsUpdateResponseSuccess | apiCartItemsUpdateResponseError)
-
-export const getApiCartItemsUpdateUrl = (id: number,) => {
-
-
-
-
-  return `/api/cart/items/${id}`
-}
-
-/**
- * Set a line's quantity (0 removes it).
- * @summary ApiCartItemsUpdate
- */
-export const apiCartItemsUpdate = async (id: number,
-    updateItemIn: UpdateItemIn, options?: RequestInit): Promise<apiCartItemsUpdateResponse> => {
-
-  return apiFetch<apiCartItemsUpdateResponse>(getApiCartItemsUpdateUrl(id),
-  {
-    ...options,
-    method: 'PATCH',
-    headers: { 'Content-Type': 'application/json', ...options?.headers },
-    body: JSON.stringify(updateItemIn)
-  }
-);}
-
-
-
-export type apiCartCouponApplyResponse200 = {
-  data: CartOut
-  status: 200
-}
-
-export type apiCartCouponApplyResponse400 = {
-  data: ApiCartCouponApply400
-  status: 400
-}
-
-export type apiCartCouponApplyResponseSuccess = (apiCartCouponApplyResponse200) & {
-  headers: Headers;
-};
-export type apiCartCouponApplyResponseError = (apiCartCouponApplyResponse400) & {
-  headers: Headers;
-};
-
-export type apiCartCouponApplyResponse = (apiCartCouponApplyResponseSuccess | apiCartCouponApplyResponseError)
-
-export const getApiCartCouponApplyUrl = () => {
-
-
-
-
-  return `/api/cart/coupon`
-}
-
-/**
- * Attach a coupon to the cart with immediate validation (checkout re-validates
- * authoritatively — a code can expire between apply and place-order).
- * @summary ApiCartCouponApply
- */
-export const apiCartCouponApply = async (applyCouponIn: ApplyCouponIn, options?: RequestInit): Promise<apiCartCouponApplyResponse> => {
-
-  return apiFetch<apiCartCouponApplyResponse>(getApiCartCouponApplyUrl(),
-  {
-    ...options,
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json', ...options?.headers },
-    body: JSON.stringify(applyCouponIn)
-  }
-);}
-
-
-
-export type apiCartCouponRemoveResponse200 = {
-  data: CartOut
-  status: 200
-}
-
-export type apiCartCouponRemoveResponseSuccess = (apiCartCouponRemoveResponse200) & {
-  headers: Headers;
-};
-;
-
-export type apiCartCouponRemoveResponse = (apiCartCouponRemoveResponseSuccess)
-
-export const getApiCartCouponRemoveUrl = () => {
-
-
-
-
-  return `/api/cart/coupon`
-}
-
-/**
- * @summary ApiCartCouponRemove
- */
-export const apiCartCouponRemove = async ( options?: RequestInit): Promise<apiCartCouponRemoveResponse> => {
-
-  return apiFetch<apiCartCouponRemoveResponse>(getApiCartCouponRemoveUrl(),
-  {
-    ...options,
-    method: 'DELETE'
-
-
-  }
-);}
-
-
-
-export type apiAccountAvatarResponse201 = {
-  data: UserOut
-  status: 201
-}
-
-export type apiAccountAvatarResponseSuccess = (apiAccountAvatarResponse201) & {
-  headers: Headers;
-};
-;
-
-export type apiAccountAvatarResponse = (apiAccountAvatarResponseSuccess)
-
-export const getApiAccountAvatarUrl = () => {
-
-
-
-
-  return `/api/account/avatar`
-}
-
-/**
- * Attach/replace the account avatar (one image; the previous one is removed).
- * @summary ApiAccountAvatar
- */
-export const apiAccountAvatar = async ( options?: RequestInit): Promise<apiAccountAvatarResponse> => {
-
-  return apiFetch<apiAccountAvatarResponse>(getApiAccountAvatarUrl(),
-  {
-    ...options,
-    method: 'POST'
-
-
-  }
-);}
-
-
-
-export type apiAccountAddressesIndexResponse200 = {
-  data: SavedAddressOut[]
-  status: 200
-}
-
-export type apiAccountAddressesIndexResponseSuccess = (apiAccountAddressesIndexResponse200) & {
-  headers: Headers;
-};
-;
-
-export type apiAccountAddressesIndexResponse = (apiAccountAddressesIndexResponseSuccess)
-
-export const getApiAccountAddressesIndexUrl = () => {
-
-
-
-
-  return `/api/account/addresses`
-}
-
-/**
- * @summary ApiAccountAddressesIndex
- */
-export const apiAccountAddressesIndex = async ( options?: RequestInit): Promise<apiAccountAddressesIndexResponse> => {
-
-  return apiFetch<apiAccountAddressesIndexResponse>(getApiAccountAddressesIndexUrl(),
-  {
-    ...options,
-    method: 'GET'
-
-
-  }
-);}
-
-
-
-export type apiAccountAddressesStoreResponse201 = {
-  data: SavedAddressOut
-  status: 201
-}
-
-export type apiAccountAddressesStoreResponse400 = {
-  data: ApiAccountAddressesStore400
-  status: 400
-}
-
-export type apiAccountAddressesStoreResponseSuccess = (apiAccountAddressesStoreResponse201) & {
-  headers: Headers;
-};
-export type apiAccountAddressesStoreResponseError = (apiAccountAddressesStoreResponse400) & {
-  headers: Headers;
-};
-
-export type apiAccountAddressesStoreResponse = (apiAccountAddressesStoreResponseSuccess | apiAccountAddressesStoreResponseError)
-
-export const getApiAccountAddressesStoreUrl = () => {
-
-
-
-
-  return `/api/account/addresses`
-}
-
-/**
- * @summary ApiAccountAddressesStore
- */
-export const apiAccountAddressesStore = async (savedAddressIn: SavedAddressIn, options?: RequestInit): Promise<apiAccountAddressesStoreResponse> => {
-
-  return apiFetch<apiAccountAddressesStoreResponse>(getApiAccountAddressesStoreUrl(),
-  {
-    ...options,
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json', ...options?.headers },
-    body: JSON.stringify(savedAddressIn)
-  }
-);}
-
-
-
-export type apiAccountAddressesDestroyResponse200 = {
-  data: ApiAccountAddressesDestroy200
-  status: 200
-}
-
-export type apiAccountAddressesDestroyResponse400 = {
-  data: ApiAccountAddressesDestroy400
-  status: 400
-}
-
-export type apiAccountAddressesDestroyResponseSuccess = (apiAccountAddressesDestroyResponse200) & {
-  headers: Headers;
-};
-export type apiAccountAddressesDestroyResponseError = (apiAccountAddressesDestroyResponse400) & {
-  headers: Headers;
-};
-
-export type apiAccountAddressesDestroyResponse = (apiAccountAddressesDestroyResponseSuccess | apiAccountAddressesDestroyResponseError)
-
-export const getApiAccountAddressesDestroyUrl = (id: number,) => {
-
-
-
-
-  return `/api/account/addresses/${id}`
-}
-
-/**
- * @summary ApiAccountAddressesDestroy
- */
-export const apiAccountAddressesDestroy = async (id: number, options?: RequestInit): Promise<apiAccountAddressesDestroyResponse> => {
-
-  return apiFetch<apiAccountAddressesDestroyResponse>(getApiAccountAddressesDestroyUrl(id),
-  {
-    ...options,
-    method: 'DELETE'
-
-
-  }
-);}
-
-
-
-export type apiAccountAddressesUpdateResponse200 = {
-  data: SavedAddressOut
-  status: 200
-}
-
-export type apiAccountAddressesUpdateResponse400 = {
-  data: ApiAccountAddressesUpdate400
-  status: 400
-}
-
-export type apiAccountAddressesUpdateResponseSuccess = (apiAccountAddressesUpdateResponse200) & {
-  headers: Headers;
-};
-export type apiAccountAddressesUpdateResponseError = (apiAccountAddressesUpdateResponse400) & {
-  headers: Headers;
-};
-
-export type apiAccountAddressesUpdateResponse = (apiAccountAddressesUpdateResponseSuccess | apiAccountAddressesUpdateResponseError)
-
-export const getApiAccountAddressesUpdateUrl = (id: number,) => {
-
-
-
-
-  return `/api/account/addresses/${id}`
-}
-
-/**
- * @summary ApiAccountAddressesUpdate
- */
-export const apiAccountAddressesUpdate = async (id: number,
-    savedAddressIn: SavedAddressIn, options?: RequestInit): Promise<apiAccountAddressesUpdateResponse> => {
-
-  return apiFetch<apiAccountAddressesUpdateResponse>(getApiAccountAddressesUpdateUrl(id),
-  {
-    ...options,
-    method: 'PATCH',
-    headers: { 'Content-Type': 'application/json', ...options?.headers },
-    body: JSON.stringify(savedAddressIn)
-  }
-);}
-
-
-
-export type apiDealsIndexResponse200 = {
-  data: DealOut[]
-  status: 200
-}
-
-export type apiDealsIndexResponseSuccess = (apiDealsIndexResponse200) & {
-  headers: Headers;
-};
-;
-
-export type apiDealsIndexResponse = (apiDealsIndexResponseSuccess)
-
-export const getApiDealsIndexUrl = () => {
-
-
-
-
-  return `/api/deals`
-}
-
-/**
- * @summary ApiDealsIndex
- */
-export const apiDealsIndex = async ( options?: RequestInit): Promise<apiDealsIndexResponse> => {
-
-  return apiFetch<apiDealsIndexResponse>(getApiDealsIndexUrl(),
-  {
-    ...options,
-    method: 'GET'
-
-
-  }
-);}
-
-
-
-export type apiAnnouncementResponse200 = {
-  data: AnnouncementOut
-  status: 200
-}
-
-export type apiAnnouncementResponseSuccess = (apiAnnouncementResponse200) & {
-  headers: Headers;
-};
-;
-
-export type apiAnnouncementResponse = (apiAnnouncementResponseSuccess)
-
-export const getApiAnnouncementUrl = () => {
-
-
-
-
-  return `/api/announcement`
-}
-
-/**
- * @summary ApiAnnouncement
- */
-export const apiAnnouncement = async ( options?: RequestInit): Promise<apiAnnouncementResponse> => {
-
-  return apiFetch<apiAnnouncementResponse>(getApiAnnouncementUrl(),
-  {
-    ...options,
-    method: 'GET'
-
-
-  }
-);}
-
-
-
-export type apiSettingsResponse200 = {
-  data: SettingsOut
-  status: 200
-}
-
-export type apiSettingsResponseSuccess = (apiSettingsResponse200) & {
-  headers: Headers;
-};
-;
-
-export type apiSettingsResponse = (apiSettingsResponseSuccess)
-
-export const getApiSettingsUrl = () => {
-
-
-
-
-  return `/api/settings`
-}
-
-/**
- * @summary ApiSettings
- */
-export const apiSettings = async ( options?: RequestInit): Promise<apiSettingsResponse> => {
-
-  return apiFetch<apiSettingsResponse>(getApiSettingsUrl(),
-  {
-    ...options,
-    method: 'GET'
-
-
-  }
-);}
-
-
-
-export type apiNewsletterResponse200 = {
-  data: MessageOut
-  status: 200
-}
-
-export type apiNewsletterResponse400 = {
-  data: ApiNewsletter400
-  status: 400
-}
-
-export type apiNewsletterResponseSuccess = (apiNewsletterResponse200) & {
-  headers: Headers;
-};
-export type apiNewsletterResponseError = (apiNewsletterResponse400) & {
-  headers: Headers;
-};
-
-export type apiNewsletterResponse = (apiNewsletterResponseSuccess | apiNewsletterResponseError)
-
-export const getApiNewsletterUrl = () => {
-
-
-
-
-  return `/api/newsletter`
-}
-
-/**
- * Idempotent newsletter signup — re-subscribing an existing email is a friendly 200.
- * @summary ApiNewsletter
- */
-export const apiNewsletter = async (newsletterIn: NewsletterIn, options?: RequestInit): Promise<apiNewsletterResponse> => {
-
-  return apiFetch<apiNewsletterResponse>(getApiNewsletterUrl(),
-  {
-    ...options,
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json', ...options?.headers },
-    body: JSON.stringify(newsletterIn)
   }
 );}
 
@@ -3283,42 +3817,6 @@ export const getApiAdminNewsletterUrl = () => {
 export const apiAdminNewsletter = async ( options?: RequestInit): Promise<apiAdminNewsletterResponse> => {
 
   return apiFetch<apiAdminNewsletterResponse>(getApiAdminNewsletterUrl(),
-  {
-    ...options,
-    method: 'GET'
-
-
-  }
-);}
-
-
-
-export type apiBannersIndexResponse200 = {
-  data: BannerOut[]
-  status: 200
-}
-
-export type apiBannersIndexResponseSuccess = (apiBannersIndexResponse200) & {
-  headers: Headers;
-};
-;
-
-export type apiBannersIndexResponse = (apiBannersIndexResponseSuccess)
-
-export const getApiBannersIndexUrl = () => {
-
-
-
-
-  return `/api/banners`
-}
-
-/**
- * @summary ApiBannersIndex
- */
-export const apiBannersIndex = async ( options?: RequestInit): Promise<apiBannersIndexResponse> => {
-
-  return apiFetch<apiBannersIndexResponse>(getApiBannersIndexUrl(),
   {
     ...options,
     method: 'GET'
@@ -3830,414 +4328,6 @@ export const apiAdminCouponsUpdate = async (id: number,
 
 
 
-export type apiCheckoutResponse201 = {
-  data: OrderOut
-  status: 201
-}
-
-export type apiCheckoutResponse400 = {
-  data: ApiCheckout400
-  status: 400
-}
-
-export type apiCheckoutResponseSuccess = (apiCheckoutResponse201) & {
-  headers: Headers;
-};
-export type apiCheckoutResponseError = (apiCheckoutResponse400) & {
-  headers: Headers;
-};
-
-export type apiCheckoutResponse = (apiCheckoutResponseSuccess | apiCheckoutResponseError)
-
-export const getApiCheckoutUrl = () => {
-
-
-
-
-  return `/api/checkout`
-}
-
-/**
- * Convert the current cart into a PENDING order, atomically (stock locked, cart cleared),
- * capturing the contact email + shipping address and the server-computed money breakdown.
- * @summary ApiCheckout
- */
-export const apiCheckout = async (checkoutIn: CheckoutIn, options?: RequestInit): Promise<apiCheckoutResponse> => {
-
-  return apiFetch<apiCheckoutResponse>(getApiCheckoutUrl(),
-  {
-    ...options,
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json', ...options?.headers },
-    body: JSON.stringify(checkoutIn)
-  }
-);}
-
-
-
-export type apiMetricsOrdersPlacedResponse200 = {
-  data: MetricsOut
-  status: 200
-}
-
-export type apiMetricsOrdersPlacedResponseSuccess = (apiMetricsOrdersPlacedResponse200) & {
-  headers: Headers;
-};
-;
-
-export type apiMetricsOrdersPlacedResponse = (apiMetricsOrdersPlacedResponseSuccess)
-
-export const getApiMetricsOrdersPlacedUrl = () => {
-
-
-
-
-  return `/api/metrics/orders-placed`
-}
-
-/**
- * Order metrics bumped by the order.placed listeners (proves event→listener + the queued job).
- * @summary ApiMetricsOrdersPlaced
- */
-export const apiMetricsOrdersPlaced = async ( options?: RequestInit): Promise<apiMetricsOrdersPlacedResponse> => {
-
-  return apiFetch<apiMetricsOrdersPlacedResponse>(getApiMetricsOrdersPlacedUrl(),
-  {
-    ...options,
-    method: 'GET'
-
-
-  }
-);}
-
-
-
-export type apiOrdersIndexResponse200 = {
-  data: OrderOut[]
-  status: 200
-}
-
-export type apiOrdersIndexResponseSuccess = (apiOrdersIndexResponse200) & {
-  headers: Headers;
-};
-;
-
-export type apiOrdersIndexResponse = (apiOrdersIndexResponseSuccess)
-
-export const getApiOrdersIndexUrl = () => {
-
-
-
-
-  return `/api/orders`
-}
-
-/**
- * The authenticated user's orders (newest first).
- * @summary ApiOrdersIndex
- */
-export const apiOrdersIndex = async ( options?: RequestInit): Promise<apiOrdersIndexResponse> => {
-
-  return apiFetch<apiOrdersIndexResponse>(getApiOrdersIndexUrl(),
-  {
-    ...options,
-    method: 'GET'
-
-
-  }
-);}
-
-
-
-export type apiOrdersShowResponse200 = {
-  data: OrderOut
-  status: 200
-}
-
-export type apiOrdersShowResponse400 = {
-  data: ApiOrdersShow400
-  status: 400
-}
-
-export type apiOrdersShowResponseSuccess = (apiOrdersShowResponse200) & {
-  headers: Headers;
-};
-export type apiOrdersShowResponseError = (apiOrdersShowResponse400) & {
-  headers: Headers;
-};
-
-export type apiOrdersShowResponse = (apiOrdersShowResponseSuccess | apiOrdersShowResponseError)
-
-export const getApiOrdersShowUrl = (id: number,) => {
-
-
-
-
-  return `/api/orders/${id}`
-}
-
-/**
- * One order, with lines + breakdown + the tracking timeline — for the signed-in owner or
- * the order-token holder.
- * @summary ApiOrdersShow
- */
-export const apiOrdersShow = async (id: number, options?: RequestInit): Promise<apiOrdersShowResponse> => {
-
-  return apiFetch<apiOrdersShowResponse>(getApiOrdersShowUrl(id),
-  {
-    ...options,
-    method: 'GET'
-
-
-  }
-);}
-
-
-
-export type apiOrdersInvoiceResponse200 = {
-  data: Response
-  status: 200
-}
-
-export type apiOrdersInvoiceResponse400 = {
-  data: ApiOrdersInvoice400
-  status: 400
-}
-
-export type apiOrdersInvoiceResponseSuccess = (apiOrdersInvoiceResponse200) & {
-  headers: Headers;
-};
-export type apiOrdersInvoiceResponseError = (apiOrdersInvoiceResponse400) & {
-  headers: Headers;
-};
-
-export type apiOrdersInvoiceResponse = (apiOrdersInvoiceResponseSuccess | apiOrdersInvoiceResponseError)
-
-export const getApiOrdersInvoiceUrl = (id: number,) => {
-
-
-
-
-  return `/api/orders/${id}/invoice`
-}
-
-/**
- * @summary ApiOrdersInvoice
- */
-export const apiOrdersInvoice = async (id: number, options?: RequestInit): Promise<apiOrdersInvoiceResponse> => {
-
-  return apiFetch<apiOrdersInvoiceResponse>(getApiOrdersInvoiceUrl(id),
-  {
-    ...options,
-    method: 'GET'
-
-
-  }
-);}
-
-
-
-export type apiOrdersCancelResponse200 = {
-  data: OrderOut
-  status: 200
-}
-
-export type apiOrdersCancelResponse400 = {
-  data: ApiOrdersCancel400
-  status: 400
-}
-
-export type apiOrdersCancelResponseSuccess = (apiOrdersCancelResponse200) & {
-  headers: Headers;
-};
-export type apiOrdersCancelResponseError = (apiOrdersCancelResponse400) & {
-  headers: Headers;
-};
-
-export type apiOrdersCancelResponse = (apiOrdersCancelResponseSuccess | apiOrdersCancelResponseError)
-
-export const getApiOrdersCancelUrl = (id: number,) => {
-
-
-
-
-  return `/api/orders/${id}/cancel`
-}
-
-/**
- * Cancel the order (owner or token holder) while the state machine allows it — restoring the
- * decremented stock atomically. Cancelling a PAID order records the cancellation; refunding the
- * money is out of scope (documented limitation).
- * @summary ApiOrdersCancel
- */
-export const apiOrdersCancel = async (id: number, options?: RequestInit): Promise<apiOrdersCancelResponse> => {
-
-  return apiFetch<apiOrdersCancelResponse>(getApiOrdersCancelUrl(id),
-  {
-    ...options,
-    method: 'POST'
-
-
-  }
-);}
-
-
-
-export type apiNotificationsIndexResponse200 = {
-  data: NotificationOut[]
-  status: 200
-}
-
-export type apiNotificationsIndexResponseSuccess = (apiNotificationsIndexResponse200) & {
-  headers: Headers;
-};
-;
-
-export type apiNotificationsIndexResponse = (apiNotificationsIndexResponseSuccess)
-
-export const getApiNotificationsIndexUrl = () => {
-
-
-
-
-  return `/api/notifications`
-}
-
-/**
- * The signed-in customer's notifications, newest first.
- * @summary ApiNotificationsIndex
- */
-export const apiNotificationsIndex = async ( options?: RequestInit): Promise<apiNotificationsIndexResponse> => {
-
-  return apiFetch<apiNotificationsIndexResponse>(getApiNotificationsIndexUrl(),
-  {
-    ...options,
-    method: 'GET'
-
-
-  }
-);}
-
-
-
-export type apiNotificationsReadResponse200 = {
-  data: MessageOut
-  status: 200
-}
-
-export type apiNotificationsReadResponseSuccess = (apiNotificationsReadResponse200) & {
-  headers: Headers;
-};
-;
-
-export type apiNotificationsReadResponse = (apiNotificationsReadResponseSuccess)
-
-export const getApiNotificationsReadUrl = () => {
-
-
-
-
-  return `/api/notifications/read`
-}
-
-/**
- * Mark all of the customer's notifications as read.
- * @summary ApiNotificationsRead
- */
-export const apiNotificationsRead = async ( options?: RequestInit): Promise<apiNotificationsReadResponse> => {
-
-  return apiFetch<apiNotificationsReadResponse>(getApiNotificationsReadUrl(),
-  {
-    ...options,
-    method: 'POST'
-
-
-  }
-);}
-
-
-
-export type apiWishlistIndexResponse200 = {
-  data: ProductOut[]
-  status: 200
-}
-
-export type apiWishlistIndexResponseSuccess = (apiWishlistIndexResponse200) & {
-  headers: Headers;
-};
-;
-
-export type apiWishlistIndexResponse = (apiWishlistIndexResponseSuccess)
-
-export const getApiWishlistIndexUrl = () => {
-
-
-
-
-  return `/api/wishlist`
-}
-
-/**
- * The signed-in customer's saved products (only ones still retrievable on the storefront).
- * @summary ApiWishlistIndex
- */
-export const apiWishlistIndex = async ( options?: RequestInit): Promise<apiWishlistIndexResponse> => {
-
-  return apiFetch<apiWishlistIndexResponse>(getApiWishlistIndexUrl(),
-  {
-    ...options,
-    method: 'GET'
-
-
-  }
-);}
-
-
-
-export type apiWishlistToggleResponse200 = {
-  data: WishlistToggleOut
-  status: 200
-}
-
-export type apiWishlistToggleResponse400 = {
-  data: ApiWishlistToggle400
-  status: 400
-}
-
-export type apiWishlistToggleResponseSuccess = (apiWishlistToggleResponse200) & {
-  headers: Headers;
-};
-export type apiWishlistToggleResponseError = (apiWishlistToggleResponse400) & {
-  headers: Headers;
-};
-
-export type apiWishlistToggleResponse = (apiWishlistToggleResponseSuccess | apiWishlistToggleResponseError)
-
-export const getApiWishlistToggleUrl = (productId: number,) => {
-
-
-
-
-  return `/api/wishlist/${productId}`
-}
-
-/**
- * Add the product to the wishlist, or remove it if already saved.
- * @summary ApiWishlistToggle
- */
-export const apiWishlistToggle = async (productId: number, options?: RequestInit): Promise<apiWishlistToggleResponse> => {
-
-  return apiFetch<apiWishlistToggleResponse>(getApiWishlistToggleUrl(productId),
-  {
-    ...options,
-    method: 'POST'
-
-
-  }
-);}
-
-
-
 export type apiAdminOrdersIndexResponse200 = {
   data: OrderOut[]
   status: 200
@@ -4362,96 +4452,6 @@ export const apiAdminOrdersStatus = async (id: number,
     method: 'POST',
     headers: { 'Content-Type': 'application/json', ...options?.headers },
     body: JSON.stringify(orderStatusIn)
-  }
-);}
-
-
-
-export type apiOrdersPayResponse201 = {
-  data: PaymentOut
-  status: 201
-}
-
-export type apiOrdersPayResponse400 = {
-  data: ApiOrdersPay400
-  status: 400
-}
-
-export type apiOrdersPayResponseSuccess = (apiOrdersPayResponse201) & {
-  headers: Headers;
-};
-export type apiOrdersPayResponseError = (apiOrdersPayResponse400) & {
-  headers: Headers;
-};
-
-export type apiOrdersPayResponse = (apiOrdersPayResponseSuccess | apiOrdersPayResponseError)
-
-export const getApiOrdersPayUrl = (id: number,) => {
-
-
-
-
-  return `/api/orders/${id}/pay`
-}
-
-/**
- * Create a charge for the order via the gateway — the signed-in owner or the guest holding
- * the order's access token (guests must be able to pay; PENDING-only).
- * @summary ApiOrdersPay
- */
-export const apiOrdersPay = async (id: number, options?: RequestInit): Promise<apiOrdersPayResponse> => {
-
-  return apiFetch<apiOrdersPayResponse>(getApiOrdersPayUrl(id),
-  {
-    ...options,
-    method: 'POST'
-
-
-  }
-);}
-
-
-
-export type apiWebhooksPaymentResponse201 = {
-  data: WebhookOut
-  status: 201
-}
-
-export type apiWebhooksPaymentResponse400 = {
-  data: ApiWebhooksPayment400
-  status: 400
-}
-
-export type apiWebhooksPaymentResponseSuccess = (apiWebhooksPaymentResponse201) & {
-  headers: Headers;
-};
-export type apiWebhooksPaymentResponseError = (apiWebhooksPaymentResponse400) & {
-  headers: Headers;
-};
-
-export type apiWebhooksPaymentResponse = (apiWebhooksPaymentResponseSuccess | apiWebhooksPaymentResponseError)
-
-export const getApiWebhooksPaymentUrl = () => {
-
-
-
-
-  return `/api/webhooks/payment`
-}
-
-/**
- * Idempotently process a gateway webhook — a redelivery of the same event id is a no-op. The
- * request must carry a valid gateway signature (authenticity) before any side effects run.
- * @summary ApiWebhooksPayment
- */
-export const apiWebhooksPayment = async (webhookIn: WebhookIn, options?: RequestInit): Promise<apiWebhooksPaymentResponse> => {
-
-  return apiFetch<apiWebhooksPaymentResponse>(getApiWebhooksPaymentUrl(),
-  {
-    ...options,
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json', ...options?.headers },
-    body: JSON.stringify(webhookIn)
   }
 );}
 

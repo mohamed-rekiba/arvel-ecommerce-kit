@@ -1,0 +1,1520 @@
+[
+  {
+    "methods": [
+      "GET"
+    ],
+    "path": "/",
+    "name": "public.root",
+    "middleware": [],
+    "security": [],
+    "status_code": null,
+    "group": null,
+    "domain": null
+  },
+  {
+    "methods": [
+      "GET"
+    ],
+    "path": "/api/account/addresses",
+    "name": "api.account.addresses.index",
+    "middleware": [
+      "Authenticate"
+    ],
+    "security": [
+      "bearer"
+    ],
+    "status_code": null,
+    "group": "api",
+    "domain": null
+  },
+  {
+    "methods": [
+      "POST"
+    ],
+    "path": "/api/account/addresses",
+    "name": "api.account.addresses.store",
+    "middleware": [
+      "Authenticate"
+    ],
+    "security": [
+      "bearer"
+    ],
+    "status_code": null,
+    "group": "api",
+    "domain": null
+  },
+  {
+    "methods": [
+      "DELETE"
+    ],
+    "path": "/api/account/addresses/{id:int}",
+    "name": "api.account.addresses.destroy",
+    "middleware": [
+      "Authenticate"
+    ],
+    "security": [
+      "bearer"
+    ],
+    "status_code": null,
+    "group": "api",
+    "domain": null
+  },
+  {
+    "methods": [
+      "PATCH"
+    ],
+    "path": "/api/account/addresses/{id:int}",
+    "name": "api.account.addresses.update",
+    "middleware": [
+      "Authenticate"
+    ],
+    "security": [
+      "bearer"
+    ],
+    "status_code": null,
+    "group": "api",
+    "domain": null
+  },
+  {
+    "methods": [
+      "POST"
+    ],
+    "path": "/api/account/avatar",
+    "name": "api.account.avatar",
+    "middleware": [
+      "Authenticate"
+    ],
+    "security": [
+      "bearer"
+    ],
+    "status_code": null,
+    "group": "api",
+    "domain": null
+  },
+  {
+    "methods": [
+      "GET"
+    ],
+    "path": "/api/admin/audit",
+    "name": "api.admin.audit.index",
+    "middleware": [
+      "Authenticate"
+    ],
+    "security": [
+      "bearer"
+    ],
+    "status_code": null,
+    "group": "api",
+    "domain": null
+  },
+  {
+    "methods": [
+      "GET"
+    ],
+    "path": "/api/admin/banners",
+    "name": "api.admin.banners.index",
+    "middleware": [
+      "Authenticate"
+    ],
+    "security": [
+      "bearer"
+    ],
+    "status_code": null,
+    "group": "api",
+    "domain": null
+  },
+  {
+    "methods": [
+      "POST"
+    ],
+    "path": "/api/admin/banners",
+    "name": "api.admin.banners.store",
+    "middleware": [
+      "Authenticate"
+    ],
+    "security": [
+      "bearer"
+    ],
+    "status_code": null,
+    "group": "api",
+    "domain": null
+  },
+  {
+    "methods": [
+      "DELETE"
+    ],
+    "path": "/api/admin/banners/{id:int}",
+    "name": "api.admin.banners.destroy",
+    "middleware": [
+      "Authenticate"
+    ],
+    "security": [
+      "bearer"
+    ],
+    "status_code": null,
+    "group": "api",
+    "domain": null
+  },
+  {
+    "methods": [
+      "PATCH"
+    ],
+    "path": "/api/admin/banners/{id:int}",
+    "name": "api.admin.banners.update",
+    "middleware": [
+      "Authenticate"
+    ],
+    "security": [
+      "bearer"
+    ],
+    "status_code": null,
+    "group": "api",
+    "domain": null
+  },
+  {
+    "methods": [
+      "POST"
+    ],
+    "path": "/api/admin/banners/{id:int}/image",
+    "name": "api.admin.banners.image",
+    "middleware": [
+      "Authenticate"
+    ],
+    "security": [
+      "bearer"
+    ],
+    "status_code": null,
+    "group": "api",
+    "domain": null
+  },
+  {
+    "methods": [
+      "GET"
+    ],
+    "path": "/api/admin/categories",
+    "name": "api.admin.categories.index",
+    "middleware": [
+      "Authenticate"
+    ],
+    "security": [
+      "bearer"
+    ],
+    "status_code": null,
+    "group": "api",
+    "domain": null
+  },
+  {
+    "methods": [
+      "POST"
+    ],
+    "path": "/api/admin/categories",
+    "name": "api.admin.categories.store",
+    "middleware": [
+      "Authenticate"
+    ],
+    "security": [
+      "bearer"
+    ],
+    "status_code": null,
+    "group": "api",
+    "domain": null
+  },
+  {
+    "methods": [
+      "DELETE"
+    ],
+    "path": "/api/admin/categories/{id:int}",
+    "name": "api.admin.categories.destroy",
+    "middleware": [
+      "Authenticate"
+    ],
+    "security": [
+      "bearer"
+    ],
+    "status_code": 200,
+    "group": "api",
+    "domain": null
+  },
+  {
+    "methods": [
+      "PUT"
+    ],
+    "path": "/api/admin/categories/{id:int}",
+    "name": "api.admin.categories.update",
+    "middleware": [
+      "Authenticate"
+    ],
+    "security": [
+      "bearer"
+    ],
+    "status_code": null,
+    "group": "api",
+    "domain": null
+  },
+  {
+    "methods": [
+      "GET"
+    ],
+    "path": "/api/admin/coupons",
+    "name": "api.admin.coupons.index",
+    "middleware": [
+      "Authenticate"
+    ],
+    "security": [
+      "bearer"
+    ],
+    "status_code": null,
+    "group": "api",
+    "domain": null
+  },
+  {
+    "methods": [
+      "POST"
+    ],
+    "path": "/api/admin/coupons",
+    "name": "api.admin.coupons.store",
+    "middleware": [
+      "Authenticate"
+    ],
+    "security": [
+      "bearer"
+    ],
+    "status_code": null,
+    "group": "api",
+    "domain": null
+  },
+  {
+    "methods": [
+      "PATCH"
+    ],
+    "path": "/api/admin/coupons/{id:int}",
+    "name": "api.admin.coupons.update",
+    "middleware": [
+      "Authenticate"
+    ],
+    "security": [
+      "bearer"
+    ],
+    "status_code": null,
+    "group": "api",
+    "domain": null
+  },
+  {
+    "methods": [
+      "GET"
+    ],
+    "path": "/api/admin/deals",
+    "name": "api.admin.deals.index",
+    "middleware": [
+      "Authenticate"
+    ],
+    "security": [
+      "bearer"
+    ],
+    "status_code": null,
+    "group": "api",
+    "domain": null
+  },
+  {
+    "methods": [
+      "POST"
+    ],
+    "path": "/api/admin/deals",
+    "name": "api.admin.deals.store",
+    "middleware": [
+      "Authenticate"
+    ],
+    "security": [
+      "bearer"
+    ],
+    "status_code": null,
+    "group": "api",
+    "domain": null
+  },
+  {
+    "methods": [
+      "DELETE"
+    ],
+    "path": "/api/admin/deals/{id:int}",
+    "name": "api.admin.deals.destroy",
+    "middleware": [
+      "Authenticate"
+    ],
+    "security": [
+      "bearer"
+    ],
+    "status_code": null,
+    "group": "api",
+    "domain": null
+  },
+  {
+    "methods": [
+      "PATCH"
+    ],
+    "path": "/api/admin/deals/{id:int}",
+    "name": "api.admin.deals.update",
+    "middleware": [
+      "Authenticate"
+    ],
+    "security": [
+      "bearer"
+    ],
+    "status_code": null,
+    "group": "api",
+    "domain": null
+  },
+  {
+    "methods": [
+      "GET"
+    ],
+    "path": "/api/admin/me",
+    "name": "api.admin.me",
+    "middleware": [],
+    "security": [
+      "oidc"
+    ],
+    "status_code": null,
+    "group": "api",
+    "domain": null
+  },
+  {
+    "methods": [
+      "GET"
+    ],
+    "path": "/api/admin/media",
+    "name": "api.admin.media",
+    "middleware": [
+      "Authenticate"
+    ],
+    "security": [
+      "bearer"
+    ],
+    "status_code": null,
+    "group": "api",
+    "domain": null
+  },
+  {
+    "methods": [
+      "GET"
+    ],
+    "path": "/api/admin/newsletter",
+    "name": "api.admin.newsletter",
+    "middleware": [
+      "Authenticate"
+    ],
+    "security": [
+      "bearer"
+    ],
+    "status_code": null,
+    "group": "api",
+    "domain": null
+  },
+  {
+    "methods": [
+      "POST"
+    ],
+    "path": "/api/admin/oidc/token",
+    "name": "api.admin.oidc.token",
+    "middleware": [],
+    "security": [
+      "oidc"
+    ],
+    "status_code": 200,
+    "group": "api",
+    "domain": null
+  },
+  {
+    "methods": [
+      "GET"
+    ],
+    "path": "/api/admin/orders",
+    "name": "api.admin.orders.index",
+    "middleware": [
+      "Authenticate"
+    ],
+    "security": [
+      "bearer"
+    ],
+    "status_code": null,
+    "group": "api",
+    "domain": null
+  },
+  {
+    "methods": [
+      "GET"
+    ],
+    "path": "/api/admin/orders/{id:int}",
+    "name": "api.admin.orders.show",
+    "middleware": [
+      "Authenticate"
+    ],
+    "security": [
+      "bearer"
+    ],
+    "status_code": null,
+    "group": "api",
+    "domain": null
+  },
+  {
+    "methods": [
+      "POST"
+    ],
+    "path": "/api/admin/orders/{id:int}/status",
+    "name": "api.admin.orders.status",
+    "middleware": [
+      "Authenticate"
+    ],
+    "security": [
+      "bearer"
+    ],
+    "status_code": 200,
+    "group": "api",
+    "domain": null
+  },
+  {
+    "methods": [
+      "GET"
+    ],
+    "path": "/api/admin/permissions",
+    "name": "api.admin.permissions.index",
+    "middleware": [
+      "Authenticate"
+    ],
+    "security": [
+      "bearer"
+    ],
+    "status_code": null,
+    "group": "api",
+    "domain": null
+  },
+  {
+    "methods": [
+      "GET"
+    ],
+    "path": "/api/admin/products",
+    "name": "api.admin.products.index",
+    "middleware": [
+      "Authenticate"
+    ],
+    "security": [
+      "bearer"
+    ],
+    "status_code": null,
+    "group": "api",
+    "domain": null
+  },
+  {
+    "methods": [
+      "POST"
+    ],
+    "path": "/api/admin/products",
+    "name": "api.admin.products.store",
+    "middleware": [
+      "Authenticate"
+    ],
+    "security": [
+      "bearer"
+    ],
+    "status_code": null,
+    "group": "api",
+    "domain": null
+  },
+  {
+    "methods": [
+      "DELETE"
+    ],
+    "path": "/api/admin/products/{id:int}",
+    "name": "api.admin.products.destroy",
+    "middleware": [
+      "Authenticate"
+    ],
+    "security": [
+      "bearer"
+    ],
+    "status_code": null,
+    "group": "api",
+    "domain": null
+  },
+  {
+    "methods": [
+      "GET"
+    ],
+    "path": "/api/admin/products/{id:int}",
+    "name": "api.admin.products.show",
+    "middleware": [
+      "Authenticate"
+    ],
+    "security": [
+      "bearer"
+    ],
+    "status_code": null,
+    "group": "api",
+    "domain": null
+  },
+  {
+    "methods": [
+      "PUT"
+    ],
+    "path": "/api/admin/products/{id:int}",
+    "name": "api.admin.products.update",
+    "middleware": [
+      "Authenticate"
+    ],
+    "security": [
+      "bearer"
+    ],
+    "status_code": null,
+    "group": "api",
+    "domain": null
+  },
+  {
+    "methods": [
+      "POST"
+    ],
+    "path": "/api/admin/products/{id:int}/image",
+    "name": "api.admin.products.image",
+    "middleware": [
+      "Authenticate"
+    ],
+    "security": [
+      "bearer"
+    ],
+    "status_code": null,
+    "group": "api",
+    "domain": null
+  },
+  {
+    "methods": [
+      "DELETE"
+    ],
+    "path": "/api/admin/products/{id:int}/media/{media_id:int}",
+    "name": "api.admin.products.media.destroy",
+    "middleware": [
+      "Authenticate"
+    ],
+    "security": [
+      "bearer"
+    ],
+    "status_code": 200,
+    "group": "api",
+    "domain": null
+  },
+  {
+    "methods": [
+      "POST"
+    ],
+    "path": "/api/admin/products/{id:int}/restore",
+    "name": "api.admin.products.restore",
+    "middleware": [
+      "Authenticate"
+    ],
+    "security": [
+      "bearer"
+    ],
+    "status_code": 200,
+    "group": "api",
+    "domain": null
+  },
+  {
+    "methods": [
+      "GET"
+    ],
+    "path": "/api/admin/products/{id:int}/variants",
+    "name": "api.admin.variants.index",
+    "middleware": [
+      "Authenticate"
+    ],
+    "security": [
+      "bearer"
+    ],
+    "status_code": null,
+    "group": "api",
+    "domain": null
+  },
+  {
+    "methods": [
+      "POST"
+    ],
+    "path": "/api/admin/products/{id:int}/variants",
+    "name": "api.admin.variants.store",
+    "middleware": [
+      "Authenticate"
+    ],
+    "security": [
+      "bearer"
+    ],
+    "status_code": null,
+    "group": "api",
+    "domain": null
+  },
+  {
+    "methods": [
+      "GET"
+    ],
+    "path": "/api/admin/reviews",
+    "name": "api.admin.reviews.index",
+    "middleware": [
+      "Authenticate"
+    ],
+    "security": [
+      "bearer"
+    ],
+    "status_code": null,
+    "group": "api",
+    "domain": null
+  },
+  {
+    "methods": [
+      "POST"
+    ],
+    "path": "/api/admin/reviews/{id:int}/{decision:str}",
+    "name": "api.admin.reviews.moderate",
+    "middleware": [
+      "Authenticate"
+    ],
+    "security": [
+      "bearer"
+    ],
+    "status_code": 200,
+    "group": "api",
+    "domain": null
+  },
+  {
+    "methods": [
+      "GET"
+    ],
+    "path": "/api/admin/roles",
+    "name": "api.admin.roles.index",
+    "middleware": [
+      "Authenticate"
+    ],
+    "security": [
+      "bearer"
+    ],
+    "status_code": null,
+    "group": "api",
+    "domain": null
+  },
+  {
+    "methods": [
+      "GET"
+    ],
+    "path": "/api/admin/settings",
+    "name": "api.admin.settings",
+    "middleware": [
+      "Authenticate"
+    ],
+    "security": [
+      "bearer"
+    ],
+    "status_code": null,
+    "group": "api",
+    "domain": null
+  },
+  {
+    "methods": [
+      "PATCH"
+    ],
+    "path": "/api/admin/settings",
+    "name": "api.admin.settings.update",
+    "middleware": [
+      "Authenticate"
+    ],
+    "security": [
+      "bearer"
+    ],
+    "status_code": null,
+    "group": "api",
+    "domain": null
+  },
+  {
+    "methods": [
+      "GET"
+    ],
+    "path": "/api/admin/users",
+    "name": "api.admin.users.index",
+    "middleware": [
+      "Authenticate"
+    ],
+    "security": [
+      "bearer"
+    ],
+    "status_code": null,
+    "group": "api",
+    "domain": null
+  },
+  {
+    "methods": [
+      "GET"
+    ],
+    "path": "/api/admin/users/{id:int}",
+    "name": "api.admin.users.show",
+    "middleware": [
+      "Authenticate"
+    ],
+    "security": [
+      "bearer"
+    ],
+    "status_code": null,
+    "group": "api",
+    "domain": null
+  },
+  {
+    "methods": [
+      "GET"
+    ],
+    "path": "/api/admin/users/{id:int}/roles",
+    "name": "api.admin.users.roles",
+    "middleware": [
+      "Authenticate"
+    ],
+    "security": [
+      "bearer"
+    ],
+    "status_code": null,
+    "group": "api",
+    "domain": null
+  },
+  {
+    "methods": [
+      "POST"
+    ],
+    "path": "/api/admin/users/{id:int}/roles",
+    "name": "api.admin.users.roles.assign",
+    "middleware": [
+      "Authenticate"
+    ],
+    "security": [
+      "bearer"
+    ],
+    "status_code": 200,
+    "group": "api",
+    "domain": null
+  },
+  {
+    "methods": [
+      "DELETE"
+    ],
+    "path": "/api/admin/users/{id:int}/roles/{role:str}",
+    "name": "api.admin.users.roles.revoke",
+    "middleware": [
+      "Authenticate"
+    ],
+    "security": [
+      "bearer"
+    ],
+    "status_code": 200,
+    "group": "api",
+    "domain": null
+  },
+  {
+    "methods": [
+      "DELETE"
+    ],
+    "path": "/api/admin/variants/{id:int}",
+    "name": "api.admin.variants.destroy",
+    "middleware": [
+      "Authenticate"
+    ],
+    "security": [
+      "bearer"
+    ],
+    "status_code": 200,
+    "group": "api",
+    "domain": null
+  },
+  {
+    "methods": [
+      "PATCH"
+    ],
+    "path": "/api/admin/variants/{id:int}",
+    "name": "api.admin.variants.update",
+    "middleware": [
+      "Authenticate"
+    ],
+    "security": [
+      "bearer"
+    ],
+    "status_code": null,
+    "group": "api",
+    "domain": null
+  },
+  {
+    "methods": [
+      "POST"
+    ],
+    "path": "/api/admin/variants/{id:int}/stock",
+    "name": "api.admin.variants.stock",
+    "middleware": [
+      "Authenticate"
+    ],
+    "security": [
+      "bearer"
+    ],
+    "status_code": 200,
+    "group": "api",
+    "domain": null
+  },
+  {
+    "methods": [
+      "GET"
+    ],
+    "path": "/api/admin/vendors",
+    "name": "api.admin.vendors.index",
+    "middleware": [
+      "Authenticate"
+    ],
+    "security": [
+      "bearer"
+    ],
+    "status_code": null,
+    "group": "api",
+    "domain": null
+  },
+  {
+    "methods": [
+      "POST"
+    ],
+    "path": "/api/admin/vendors",
+    "name": "api.admin.vendors.store",
+    "middleware": [
+      "Authenticate"
+    ],
+    "security": [
+      "bearer"
+    ],
+    "status_code": null,
+    "group": "api",
+    "domain": null
+  },
+  {
+    "methods": [
+      "PUT"
+    ],
+    "path": "/api/admin/vendors/{id:int}",
+    "name": "api.admin.vendors.update",
+    "middleware": [
+      "Authenticate"
+    ],
+    "security": [
+      "bearer"
+    ],
+    "status_code": null,
+    "group": "api",
+    "domain": null
+  },
+  {
+    "methods": [
+      "GET"
+    ],
+    "path": "/api/announcement",
+    "name": "api.announcement",
+    "middleware": [],
+    "security": [],
+    "status_code": null,
+    "group": "api",
+    "domain": null
+  },
+  {
+    "methods": [
+      "GET"
+    ],
+    "path": "/api/banners",
+    "name": "api.banners.index",
+    "middleware": [],
+    "security": [],
+    "status_code": null,
+    "group": "api",
+    "domain": null
+  },
+  {
+    "methods": [
+      "GET"
+    ],
+    "path": "/api/cart",
+    "name": "api.cart.show",
+    "middleware": [],
+    "security": [],
+    "status_code": null,
+    "group": "api",
+    "domain": null
+  },
+  {
+    "methods": [
+      "POST"
+    ],
+    "path": "/api/cart/coupon",
+    "name": "api.cart.coupon.apply",
+    "middleware": [],
+    "security": [],
+    "status_code": 200,
+    "group": "api",
+    "domain": null
+  },
+  {
+    "methods": [
+      "DELETE"
+    ],
+    "path": "/api/cart/coupon",
+    "name": "api.cart.coupon.remove",
+    "middleware": [],
+    "security": [],
+    "status_code": 200,
+    "group": "api",
+    "domain": null
+  },
+  {
+    "methods": [
+      "POST"
+    ],
+    "path": "/api/cart/items",
+    "name": "api.cart.items.add",
+    "middleware": [],
+    "security": [],
+    "status_code": null,
+    "group": "api",
+    "domain": null
+  },
+  {
+    "methods": [
+      "DELETE"
+    ],
+    "path": "/api/cart/items/{id:int}",
+    "name": "api.cart.items.remove",
+    "middleware": [],
+    "security": [],
+    "status_code": null,
+    "group": "api",
+    "domain": null
+  },
+  {
+    "methods": [
+      "PATCH"
+    ],
+    "path": "/api/cart/items/{id:int}",
+    "name": "api.cart.items.update",
+    "middleware": [],
+    "security": [],
+    "status_code": null,
+    "group": "api",
+    "domain": null
+  },
+  {
+    "methods": [
+      "GET"
+    ],
+    "path": "/api/categories",
+    "name": "api.categories.index",
+    "middleware": [],
+    "security": [],
+    "status_code": null,
+    "group": "api",
+    "domain": null
+  },
+  {
+    "methods": [
+      "POST"
+    ],
+    "path": "/api/checkout",
+    "name": "api.checkout",
+    "middleware": [],
+    "security": [],
+    "status_code": null,
+    "group": "api",
+    "domain": null
+  },
+  {
+    "methods": [
+      "GET"
+    ],
+    "path": "/api/deals",
+    "name": "api.deals.index",
+    "middleware": [],
+    "security": [],
+    "status_code": null,
+    "group": "api",
+    "domain": null
+  },
+  {
+    "methods": [
+      "POST"
+    ],
+    "path": "/api/dev-gateway/charges",
+    "name": "api.dev_gateway.charges",
+    "middleware": [],
+    "security": [],
+    "status_code": null,
+    "group": "api",
+    "domain": null
+  },
+  {
+    "methods": [
+      "POST"
+    ],
+    "path": "/api/email/verification-notification",
+    "name": "api.email.verification.send",
+    "middleware": [
+      "Authenticate"
+    ],
+    "security": [
+      "bearer"
+    ],
+    "status_code": 200,
+    "group": "api",
+    "domain": null
+  },
+  {
+    "methods": [
+      "POST"
+    ],
+    "path": "/api/email/verify",
+    "name": "api.email.verify",
+    "middleware": [],
+    "security": [],
+    "status_code": 200,
+    "group": "api",
+    "domain": null
+  },
+  {
+    "methods": [
+      "POST"
+    ],
+    "path": "/api/forgot-password",
+    "name": "api.password.forgot",
+    "middleware": [],
+    "security": [],
+    "status_code": 200,
+    "group": "api",
+    "domain": null
+  },
+  {
+    "methods": [
+      "GET"
+    ],
+    "path": "/api/health",
+    "name": "api.health",
+    "middleware": [],
+    "security": [],
+    "status_code": null,
+    "group": "api",
+    "domain": null
+  },
+  {
+    "methods": [
+      "POST"
+    ],
+    "path": "/api/login",
+    "name": "api.login",
+    "middleware": [],
+    "security": [],
+    "status_code": 200,
+    "group": "api",
+    "domain": null
+  },
+  {
+    "methods": [
+      "POST"
+    ],
+    "path": "/api/logout",
+    "name": "api.logout",
+    "middleware": [],
+    "security": [
+      "bearer"
+    ],
+    "status_code": 200,
+    "group": "api",
+    "domain": null
+  },
+  {
+    "methods": [
+      "GET"
+    ],
+    "path": "/api/media/{id:int}",
+    "name": "api.media.show",
+    "middleware": [],
+    "security": [],
+    "status_code": null,
+    "group": "api",
+    "domain": null
+  },
+  {
+    "methods": [
+      "GET"
+    ],
+    "path": "/api/media/{id:int}/{conversion:str}",
+    "name": "api.media.conversion",
+    "middleware": [],
+    "security": [],
+    "status_code": null,
+    "group": "api",
+    "domain": null
+  },
+  {
+    "methods": [
+      "GET"
+    ],
+    "path": "/api/metrics/orders-placed",
+    "name": "api.metrics.orders_placed",
+    "middleware": [],
+    "security": [],
+    "status_code": null,
+    "group": "api",
+    "domain": null
+  },
+  {
+    "methods": [
+      "POST"
+    ],
+    "path": "/api/newsletter",
+    "name": "api.newsletter",
+    "middleware": [],
+    "security": [],
+    "status_code": 200,
+    "group": "api",
+    "domain": null
+  },
+  {
+    "methods": [
+      "GET"
+    ],
+    "path": "/api/notifications",
+    "name": "api.notifications.index",
+    "middleware": [
+      "Authenticate"
+    ],
+    "security": [
+      "bearer"
+    ],
+    "status_code": null,
+    "group": "api",
+    "domain": null
+  },
+  {
+    "methods": [
+      "POST"
+    ],
+    "path": "/api/notifications/read",
+    "name": "api.notifications.read",
+    "middleware": [
+      "Authenticate"
+    ],
+    "security": [
+      "bearer"
+    ],
+    "status_code": 200,
+    "group": "api",
+    "domain": null
+  },
+  {
+    "methods": [
+      "GET"
+    ],
+    "path": "/api/orders",
+    "name": "api.orders.index",
+    "middleware": [
+      "Authenticate"
+    ],
+    "security": [
+      "bearer"
+    ],
+    "status_code": null,
+    "group": "api",
+    "domain": null
+  },
+  {
+    "methods": [
+      "GET"
+    ],
+    "path": "/api/orders/{id:int}",
+    "name": "api.orders.show",
+    "middleware": [],
+    "security": [],
+    "status_code": null,
+    "group": "api",
+    "domain": null
+  },
+  {
+    "methods": [
+      "POST"
+    ],
+    "path": "/api/orders/{id:int}/cancel",
+    "name": "api.orders.cancel",
+    "middleware": [],
+    "security": [],
+    "status_code": 200,
+    "group": "api",
+    "domain": null
+  },
+  {
+    "methods": [
+      "GET"
+    ],
+    "path": "/api/orders/{id:int}/invoice",
+    "name": "api.orders.invoice",
+    "middleware": [],
+    "security": [],
+    "status_code": null,
+    "group": "api",
+    "domain": null
+  },
+  {
+    "methods": [
+      "POST"
+    ],
+    "path": "/api/orders/{id:int}/pay",
+    "name": "api.orders.pay",
+    "middleware": [],
+    "security": [],
+    "status_code": null,
+    "group": "api",
+    "domain": null
+  },
+  {
+    "methods": [
+      "GET"
+    ],
+    "path": "/api/products",
+    "name": "api.products.index",
+    "middleware": [],
+    "security": [],
+    "status_code": null,
+    "group": "api",
+    "domain": null
+  },
+  {
+    "methods": [
+      "GET"
+    ],
+    "path": "/api/products/feed",
+    "name": "api.products.feed",
+    "middleware": [],
+    "security": [],
+    "status_code": null,
+    "group": "api",
+    "domain": null
+  },
+  {
+    "methods": [
+      "GET"
+    ],
+    "path": "/api/products/{slug:str}",
+    "name": "api.products.show",
+    "middleware": [],
+    "security": [],
+    "status_code": null,
+    "group": "api",
+    "domain": null
+  },
+  {
+    "methods": [
+      "GET"
+    ],
+    "path": "/api/products/{slug:str}/reviews",
+    "name": "api.products.reviews.index",
+    "middleware": [],
+    "security": [],
+    "status_code": null,
+    "group": "api",
+    "domain": null
+  },
+  {
+    "methods": [
+      "POST"
+    ],
+    "path": "/api/products/{slug:str}/reviews",
+    "name": "api.products.reviews.store",
+    "middleware": [
+      "Authenticate"
+    ],
+    "security": [
+      "bearer"
+    ],
+    "status_code": null,
+    "group": "api",
+    "domain": null
+  },
+  {
+    "methods": [
+      "POST"
+    ],
+    "path": "/api/register",
+    "name": "api.register",
+    "middleware": [],
+    "security": [],
+    "status_code": null,
+    "group": "api",
+    "domain": null
+  },
+  {
+    "methods": [
+      "POST"
+    ],
+    "path": "/api/reset-password",
+    "name": "api.password.reset",
+    "middleware": [],
+    "security": [],
+    "status_code": 200,
+    "group": "api",
+    "domain": null
+  },
+  {
+    "methods": [
+      "GET"
+    ],
+    "path": "/api/settings",
+    "name": "api.settings",
+    "middleware": [],
+    "security": [],
+    "status_code": null,
+    "group": "api",
+    "domain": null
+  },
+  {
+    "methods": [
+      "GET"
+    ],
+    "path": "/api/user",
+    "name": "api.user",
+    "middleware": [],
+    "security": [
+      "bearer"
+    ],
+    "status_code": null,
+    "group": "api",
+    "domain": null
+  },
+  {
+    "methods": [
+      "PATCH"
+    ],
+    "path": "/api/user",
+    "name": "api.user.update",
+    "middleware": [
+      "Authenticate"
+    ],
+    "security": [
+      "bearer"
+    ],
+    "status_code": null,
+    "group": "api",
+    "domain": null
+  },
+  {
+    "methods": [
+      "PUT"
+    ],
+    "path": "/api/user/password",
+    "name": "api.user.password",
+    "middleware": [
+      "Authenticate"
+    ],
+    "security": [
+      "bearer"
+    ],
+    "status_code": 200,
+    "group": "api",
+    "domain": null
+  },
+  {
+    "methods": [
+      "POST"
+    ],
+    "path": "/api/variants/{id:int}/stock-alert",
+    "name": "api.variants.stock_alert.subscribe",
+    "middleware": [
+      "Authenticate"
+    ],
+    "security": [
+      "bearer"
+    ],
+    "status_code": 200,
+    "group": "api",
+    "domain": null
+  },
+  {
+    "methods": [
+      "DELETE"
+    ],
+    "path": "/api/variants/{id:int}/stock-alert",
+    "name": "api.variants.stock_alert.unsubscribe",
+    "middleware": [
+      "Authenticate"
+    ],
+    "security": [
+      "bearer"
+    ],
+    "status_code": 200,
+    "group": "api",
+    "domain": null
+  },
+  {
+    "methods": [
+      "POST"
+    ],
+    "path": "/api/webhooks/payment",
+    "name": "api.webhooks.payment",
+    "middleware": [],
+    "security": [],
+    "status_code": null,
+    "group": "api",
+    "domain": null
+  },
+  {
+    "methods": [
+      "GET"
+    ],
+    "path": "/api/wishlist",
+    "name": "api.wishlist.index",
+    "middleware": [
+      "Authenticate"
+    ],
+    "security": [
+      "bearer"
+    ],
+    "status_code": null,
+    "group": "api",
+    "domain": null
+  },
+  {
+    "methods": [
+      "POST"
+    ],
+    "path": "/api/wishlist/{product_id:int}",
+    "name": "api.wishlist.toggle",
+    "middleware": [
+      "Authenticate"
+    ],
+    "security": [
+      "bearer"
+    ],
+    "status_code": 200,
+    "group": "api",
+    "domain": null
+  },
+  {
+    "methods": [
+      "POST"
+    ],
+    "path": "/broadcasting/auth",
+    "name": "broadcasting.auth",
+    "middleware": [
+      "Authenticate"
+    ],
+    "security": [],
+    "status_code": null,
+    "group": null,
+    "domain": null
+  },
+  {
+    "methods": [
+      "GET"
+    ],
+    "path": "/{path:path}",
+    "name": "public",
+    "middleware": [],
+    "security": [],
+    "status_code": null,
+    "group": null,
+    "domain": null
+  }
+]
