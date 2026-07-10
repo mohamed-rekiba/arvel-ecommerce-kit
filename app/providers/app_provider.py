@@ -48,6 +48,16 @@ class AppServiceProvider(ServiceProvider):
 
     def boot(self) -> None:
         """Boot-time wiring (runs after every provider has registered)."""
+        # K14 — "promoted-deals": the storefront's Deals-of-the-Day rail ordered by best-discount
+        # first for an English-locale shopper (an i18n-gated rollout), soonest-ending-first
+        # otherwise. A guest (scope None) resolves to the control.
+        from arvel.features import Feature
+
+        def _promoted_deals_segment(user: Any) -> bool:
+            return getattr(user, "locale", None) == "en"
+
+        Feature.define("promoted-deals", _promoted_deals_segment)
+
         # Register authorization policies on the app-bound Gate.
         from app.models.product import Product
         from app.policies.product_policy import ProductPolicy

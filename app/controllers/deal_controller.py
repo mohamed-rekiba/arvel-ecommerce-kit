@@ -5,7 +5,9 @@ sold = Σ order-line quantity on paid/shipped/delivered orders)."""
 from typing import Any
 
 from arvel import DB
+from arvel.features import Feature
 from arvel.http import Request
+from arvel.support import current_user
 
 from app.controllers.catalog_controller import in_locale_relation, product_out
 from app.controllers.serializers import iso as _iso
@@ -83,4 +85,8 @@ async def index(request: Request) -> list[DealOut]:
                 product=await product_out(product, deal),
             )
         )
+    # K14 "promoted-deals": best-discount-first for the enabled segment; otherwise the control
+    # order above (soonest-ending-first) is left as-is.
+    if await Feature.active("promoted-deals", current_user.get()):
+        out.sort(key=lambda d: d.percent_off, reverse=True)
     return out
