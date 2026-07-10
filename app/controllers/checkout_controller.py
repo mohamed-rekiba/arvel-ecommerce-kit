@@ -21,7 +21,6 @@ from app.enums import (
     OrderStatus,
     PaymentStatus,
     Permission,
-    RefundStatus,
     can_transition,
     PaymentMethod,
 )
@@ -60,11 +59,6 @@ def _tax_cents(subtotal_cents: int, rate_bps: int) -> int:
     return Money(subtotal_cents, Currency.USD.value).times(rate).amount
 
 
-def _status_value(order: Order) -> OrderStatus:
-    status = order.status
-    return status if isinstance(status, OrderStatus) else OrderStatus(status)
-
-
 def _address_out(order: Order) -> AddressOut:
     return AddressOut(
         name=order.ship_name,
@@ -76,20 +70,11 @@ def _address_out(order: Order) -> AddressOut:
     )
 
 
-def _currency_value(order: Order) -> Currency:
-    currency = order.currency
-    return currency if isinstance(currency, Currency) else Currency(currency)
-
-
 async def _latest_payment_status(order: Order) -> PaymentStatus | None:
-    from app.enums import PaymentStatus
     from app.models.payment import Payment
 
     payment = await Payment.where("order_id", order.id).order_by("id", "desc").first()
-    if payment is None:
-        return None
-    status = payment.status
-    return status if isinstance(status, PaymentStatus) else PaymentStatus(status)
+    return payment.status if payment is not None else None  # cast by Payment.__casts__
 
 
 async def _latest_refund(order: Order) -> RefundOut | None:
@@ -100,14 +85,9 @@ async def _latest_refund(order: Order) -> RefundOut | None:
     refund = await Refund.where("order_id", order.id).order_by("id", "desc").first()
     if refund is None:
         return None
-    status = (
-        refund.status
-        if isinstance(refund.status, RefundStatus)
-        else RefundStatus(refund.status)
-    )
     return RefundOut(
         amount_cents=refund.amount_cents,
-        status=status,
+        status=refund.status,  # cast by Refund.__casts__
         created_at=_iso(refund.created_at),
     )
 
@@ -125,11 +105,6 @@ async def log_transition(order: Order, before: OrderStatus, after: OrderStatus) 
     )
 
 
-def _method_value(order: Order) -> PaymentMethod:
-    raw = getattr(order, "payment_method", None) or PaymentMethod.GATEWAY.value
-    return raw if isinstance(raw, PaymentMethod) else PaymentMethod(raw)
-
-
 async def _order_out(
     order: Order,
     items: list[OrderItem],
@@ -140,7 +115,7 @@ async def _order_out(
     looks = await line_presentation([i.product_variant_id for i in items])
     return OrderOut(
         id=order.id,
-        status=_status_value(order),
+        status=order.status,
         token=order.token,
         contact_email=order.contact_email,
         address=_address_out(order),
@@ -150,8 +125,8 @@ async def _order_out(
         coupon_code=order.coupon_code,
         discount_cents=order.discount_cents or 0,
         total_cents=order.total_cents,
-        currency=_currency_value(order),
-        payment_method=_method_value(order),
+        currency=order.currency,
+        payment_method=order.payment_method,
         payment_status=payment_status,
         shipping_method=order.shipping_method,
         tracking_number=order.tracking_number,
@@ -507,7 +482,7 @@ async def _timeline(order: Order) -> list[OrderTimelineOut]:
             if step.value in reached
         ]
         path.append(terminal)
-    elif _method_value(order) is PaymentMethod.COD:
+    elif order.payment_method is PaymentMethod.COD:
         path = [OrderStatus.PENDING, OrderStatus.SHIPPED, OrderStatus.DELIVERED]
     else:
         path = [
@@ -652,8 +627,6 @@ async def admin_order_show(request: Request, id: Order) -> AdminOrderDetailOut:
     from arvel.activitylog import Activity
 
     from app.controllers.serializers import iso as _iso
-    from app.enums import PaymentStatus as _PS
-    from app.enums import RefundStatus as _RS
     from app.models.payment import Payment
     from app.models.refund import Refund
     from app.schemas import (
@@ -689,7 +662,7 @@ async def admin_order_show(request: Request, id: Order) -> AdminOrderDetailOut:
 
     return AdminOrderDetailOut(
         id=order.id,
-        status=_status_value(order),
+        status=order.status,
         contact_email=order.contact_email,
         address=_address_out(order),
         subtotal_cents=order.subtotal_cents,
@@ -698,8 +671,8 @@ async def admin_order_show(request: Request, id: Order) -> AdminOrderDetailOut:
         coupon_code=order.coupon_code,
         discount_cents=order.discount_cents,
         total_cents=order.total_cents,
-        currency=_currency_value(order),
-        payment_method=_method_value(order),
+        currency=order.currency,
+        payment_method=order.payment_method,
         shipping_method=order.shipping_method,
         tracking_number=order.tracking_number,
         customer=customer,
@@ -720,7 +693,7 @@ async def admin_order_show(request: Request, id: Order) -> AdminOrderDetailOut:
                 id=p.id,
                 charge_id=p.gateway_charge_id,
                 amount_cents=p.amount_cents,
-                status=p.status if isinstance(p.status, _PS) else _PS(p.status),
+                status=p.status,
                 created_at=_iso(p.created_at),
             )
             for p in payments
@@ -731,7 +704,7 @@ async def admin_order_show(request: Request, id: Order) -> AdminOrderDetailOut:
                 gateway_charge_id=r.gateway_charge_id,
                 gateway_refund_id=r.gateway_refund_id,
                 amount_cents=r.amount_cents,
-                status=r.status if isinstance(r.status, _RS) else _RS(r.status),
+                status=r.status,
                 restock=r.restock,
                 created_at=_iso(r.created_at),
             )
@@ -795,7 +768,7 @@ async def update_status(request: Request, id: Order, data: OrderStatusIn) -> Ord
             {"status": [trans("shop.errors.use_refund_endpoint")]}
         )
     if not can_transition(
-        current, target, cod=_method_value(order) is PaymentMethod.COD
+        current, target, cod=order.payment_method is PaymentMethod.COD
     ):
         raise ValidationException(
             {

@@ -60,8 +60,7 @@ async def _has_purchased(user: User, product: Product) -> bool:
     eligible = {
         o.id
         for o in orders
-        if (o.status if isinstance(o.status, OrderStatus) else OrderStatus(o.status))
-        in _REVIEWABLE_STATUSES
+        if o.status in _REVIEWABLE_STATUSES  # cast by Order.__casts__
     }
     if not eligible:
         return False
