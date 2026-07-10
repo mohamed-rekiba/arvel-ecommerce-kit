@@ -14,6 +14,7 @@ import {
 import { type MessageKey, t } from '../locale'
 import { useAuth } from '../auth'
 import { useCart } from '../cart'
+import { type OrderPaidEvent, subscribe } from '../realtime'
 
 const { state, refresh, checkout } = useCart()
 const auth = useAuth()
@@ -39,11 +40,31 @@ const isCod = computed(() => order.value?.payment_method === 'cod')
 type PayState = 'unpaid' | 'processing' | 'paid' | 'failed'
 const payState = ref<PayState>('unpaid')
 const payError = ref<string | null>(null)
-let pollTimer: ReturnType<typeof setInterval> | null = null
+let stopRealtime: (() => void) | null = null
 
-function stopPolling() {
-  if (pollTimer !== null) clearInterval(pollTimer)
-  pollTimer = null
+function unsubscribeRealtime() {
+  stopRealtime?.()
+  stopRealtime = null
+}
+
+// The webhook confirms the charge asynchronously — no dead-end ceiling: a dropped/blocked socket
+// (or a guest, whose private channel arvel denies) does exactly one reconciliation fetch and
+// settles on a neutral state, never an unhandled rejection.
+async function reconcile(id: number, token: string) {
+  try {
+    const fresh = await api.order(id, token)
+    order.value = fresh
+    if (fresh.status === 'paid') {
+      payState.value = 'paid'
+    } else if (fresh.payment_status === 'failed') {
+      payState.value = 'failed'
+      payError.value = t('checkout.pay_failed')
+    } else {
+      payState.value = 'unpaid'
+    }
+  } catch {
+    payState.value = 'unpaid'
+  }
 }
 
 async function payNow() {
@@ -58,29 +79,22 @@ async function payNow() {
     payError.value = t('checkout.pay_start_error')
     return
   }
-  // the gateway confirms asynchronously (webhook) — poll the order until it flips
-  let attempts = 0
-  stopPolling()
-  pollTimer = setInterval(async () => {
-    attempts += 1
-    const fresh = await api.order(id, token)
-    order.value = fresh
-    if (fresh.status === 'paid') {
+  // the gateway confirms asynchronously (webhook) — subscribe to the order's private channel
+  // instead of polling for it
+  unsubscribeRealtime()
+  stopRealtime = subscribe<OrderPaidEvent>(
+    `private-order.${id}`,
+    () => {
       payState.value = 'paid'
-      stopPolling()
-    } else if (fresh.payment_status === 'failed') {
-      payState.value = 'failed'
-      payError.value = t('checkout.pay_failed')
-      stopPolling()
-    } else if (attempts >= 20) {
-      payState.value = 'failed'
-      payError.value = t('checkout.pay_slow')
-      stopPolling()
+      unsubscribeRealtime()
+    },
+    () => {
+      void reconcile(id, token)
     }
-  }, 1000)
+  )
 }
 
-onBeforeUnmount(stopPolling)
+onBeforeUnmount(unsubscribeRealtime)
 
 const form = reactive({
   email: '',

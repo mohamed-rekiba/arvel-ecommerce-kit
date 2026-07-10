@@ -114,3 +114,16 @@ class AppServiceProvider(ServiceProvider):
             events.listen("order.placed", send_order_confirmation)
             events.listen("order.placed", dispatch_fulfillment)
             events.listen(PasswordResetRequested, send_password_reset)
+
+        # K9 — the order's private broadcast channel authorizes only its owner; a non-owner (or a
+        # guest) gets a deny, which arvel's /broadcasting/auth turns into a 403.
+        if self.app.bound("broadcast"):
+            from app.models.order import Order
+
+            async def _order_owner(user: Any, order_id: str) -> bool:
+                if user is None:
+                    return False
+                order = await Order.find(int(order_id))
+                return order is not None and order.user_id == user.id
+
+            self.app.make("broadcast").channel("order.{id}", _order_owner)

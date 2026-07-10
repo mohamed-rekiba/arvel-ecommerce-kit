@@ -12,11 +12,18 @@ if (process.env.VITEST) {
 
 // One consolidated SPA (storefront + admin). In dev it proxies /api to the arvel server (arvel serve →
 // :8000). The admin section is split into its own chunk so a storefront visitor never downloads it.
+// K9: /broadcasting (arvel's channel-auth endpoint) and /ws (the BroadcastRelay) live outside
+// /api at the server's ASGI root, so they need their own proxy entries — /ws with `ws: true` for
+// the websocket upgrade. `vite preview` (the e2e harness) reuses this same `server.proxy` config.
 export default defineConfig({
   plugins: [vue()],
   server: {
     port: 5173,
-    proxy: { '/api': { target: 'http://localhost:8000', changeOrigin: true } }
+    proxy: {
+      '/api': { target: 'http://localhost:8000', changeOrigin: true },
+      '/broadcasting': { target: 'http://localhost:8000', changeOrigin: true },
+      '/ws': { target: 'http://localhost:8000', changeOrigin: true, ws: true }
+    }
   },
   build: {
     rollupOptions: {

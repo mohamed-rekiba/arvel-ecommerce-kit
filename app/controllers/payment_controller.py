@@ -7,14 +7,16 @@ import hashlib
 import hmac
 from typing import Any
 
-from arvel import DB, Http, abort
+from arvel import DB, Event, Http, abort
 from arvel.http import Request
 from arvel.support.facades import Config
 from arvel.validation import ValidationException
 
 from app.controllers.order_access import resolve_owned_order
+from app.controllers.serializers import iso
 
 from app.enums import OrderStatus, PaymentStatus, RefundStatus, can_transition
+from app.events.order_paid import OrderPaid
 from app.models.order import Order
 from app.models.payment import Payment
 from app.models.product_variant import ProductVariant
@@ -116,6 +118,12 @@ async def webhook(request: Request, data: WebhookIn) -> WebhookOut:
                         )
 
                         await log_transition(order, current, OrderStatus.PAID)
+                        # K9 — the SPA's checkout confirmation subscribes to this instead of
+                        # polling; rides ShouldBroadcast's after-commit queue, so a rolled-back
+                        # webhook never publishes.
+                        await Event.dispatch(
+                            OrderPaid(order_id=order.id, paid_at=iso(order.updated_at))
+                        )
         elif data.type == "charge.failed":
             # order stays PENDING so the customer can retry payment
             charge_id = data.data.get("charge_id")

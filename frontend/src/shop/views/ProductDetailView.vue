@@ -8,6 +8,7 @@ import { getCachedProduct } from '../product-cache'
 import CountdownTimer from '../components/CountdownTimer.vue'
 import { type MessageKey, t } from '../locale'
 import { pageTitle } from '../pageTitle'
+import { type StockChangedEvent, subscribe } from '../realtime'
 
 const route = useRoute()
 const router = useRouter()
@@ -139,6 +140,24 @@ async function addToCart() {
     adding.value = false
   }
 }
+
+// live stock: the product page reflects an admin stock adjustment without a reload, no polling.
+let stopStock: (() => void) | null = null
+function subscribeStock(variantId: number | null) {
+  stopStock?.()
+  stopStock = null
+  if (variantId == null) return
+  stopStock = subscribe<StockChangedEvent>(
+    `stock.${variantId}`,
+    (_event, data) => {
+      const variant = product.value?.variants?.find((v) => v.id === data.variant_id)
+      if (variant) variant.stock = data.stock
+    },
+    () => {} // public channel, nothing to authorize — a drop just means no live push until reload
+  )
+}
+watch(selectedVariantId, subscribeStock, { immediate: true })
+onBeforeUnmount(() => stopStock?.())
 
 onMounted(load)
 watch(() => route.params.slug, load)

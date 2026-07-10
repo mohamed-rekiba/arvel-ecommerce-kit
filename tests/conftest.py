@@ -6,6 +6,7 @@ import os
 # pointing at real infra — arvel's load_dotenv(override=False) won't clobber these.
 os.environ.setdefault("CACHE_STORE", "array")
 os.environ.setdefault("QUEUE_CONNECTION", "memory")
+os.environ.setdefault("BROADCAST_CONNECTION", "log")
 os.environ.setdefault("MAIL_MAILER", "log")
 os.environ.setdefault("SEARCH_DRIVER", "array")
 os.environ.setdefault("FILESYSTEM_DISK", "local")

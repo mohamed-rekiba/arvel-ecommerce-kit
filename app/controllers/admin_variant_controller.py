@@ -170,6 +170,10 @@ async def adjust_stock(
     from app.services.stock_alert_service import notify_back_in_stock
 
     await notify_back_in_stock(locked, before=before, after=target)
+    # K9 — the product page's live stock subscription
+    from app.events.stock_changed import broadcast_stock
+
+    await broadcast_stock(locked)
     return _out(locked)
 
 
