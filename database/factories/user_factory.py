@@ -20,5 +20,5 @@ class UserFactory(Factory[User]):
         }
 
     def admin(self) -> Factory[User]:
-        """A factory state for an admin user (Laravel factory state)."""
+        """A factory state for an admin user."""
         return self.state({"role": UserRole.ADMIN})

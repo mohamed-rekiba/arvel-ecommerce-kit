@@ -1,1 +1,1 @@
-"""App notifications (Laravel Notification classes)."""
+"""App notification classes."""

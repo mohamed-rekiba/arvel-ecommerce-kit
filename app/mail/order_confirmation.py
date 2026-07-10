@@ -1,4 +1,4 @@
-"""The order-confirmation email (Laravel Mailable), localized to the buyer's request locale.
+"""The order-confirmation email (a mailable), localized to the buyer's request locale.
 
 ``ShouldQueue``: checkout must never wait on — or 500 from — SMTP; delivery rides the worker
 (and the failed-jobs rail) like every other order-lifecycle mail.

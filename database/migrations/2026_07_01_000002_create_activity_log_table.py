@@ -1,4 +1,4 @@
-"""The activity_log table backing arvel's ActivityLogger (Spatie laravel-activitylog parity) — the
+"""The activity_log table backing arvel's ActivityLogger — the
 admin audit trail (who did what to which subject, with a property diff)."""
 
 from arvel.database import Blueprint, Migration, Schema

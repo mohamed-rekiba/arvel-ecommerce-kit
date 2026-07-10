@@ -1,4 +1,4 @@
-"""RBAC tables — roles, permissions, and the Spatie-style pivots arvel's HasRoles/Role use
+"""RBAC tables — roles, permissions, and the pivots arvel's HasRoles/Role use
 (``model_has_roles`` / ``model_has_permissions`` / ``role_has_permissions``)."""
 
 from arvel.database import Blueprint, Migration, Schema

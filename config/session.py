@@ -10,6 +10,6 @@ from arvel import env
 
 config = {
     "driver": env("SESSION_DRIVER", "redis"),  # cookie (in-process) | redis
-    "lifetime": 120,  # minutes (Laravel parity); x60 for cookie max-age
+    "lifetime": 120,  # minutes; x60 for cookie max-age
     "secure": env("SESSION_SECURE", False),
 }

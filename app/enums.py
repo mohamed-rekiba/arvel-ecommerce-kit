@@ -40,7 +40,7 @@ class UserRole(str, Enum):
 
 
 class Permission(str, Enum):
-    """The catalog/back-office permission set (Spatie-style dotted names; roles are grants of these)."""
+    """The catalog/back-office permission set (dotted names; roles are grants of these)."""
 
     CATALOG_VIEW = "catalog.view"
     CATALOG_CREATE = "catalog.create"

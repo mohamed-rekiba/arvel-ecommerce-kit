@@ -1,4 +1,4 @@
-"""Third-party service credentials / endpoints (cf. Laravel config/services.php)."""
+"""Third-party service credentials / endpoints."""
 
 from arvel import env
 

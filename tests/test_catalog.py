@@ -86,7 +86,7 @@ def test_products_index_paginates_active_only(client) -> None:
     resp = client.get("/api/products")
     assert resp.status_code == 200
     body = resp.json()
-    # Laravel length-aware paginator JSON shape
+    # the length-aware paginator JSON shape
     assert body["per_page"] == 15
     assert body["current_page"] == 1
     assert body["total"] == 25  # 25 retrievable; the unpublished draft is excluded
