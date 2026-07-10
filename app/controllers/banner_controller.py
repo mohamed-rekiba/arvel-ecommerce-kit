@@ -5,10 +5,13 @@ from typing import Any
 
 from arvel import abort
 from arvel.activitylog import activity
+from arvel.auth.middleware import Authorize
 from arvel.http import Request
+from arvel.routing import Controller, ControllerMiddleware
 from arvel.support import current_user
 from arvel.validation import ValidationException
 
+from app.enums import Permission
 from app.i18n import DEFAULT_LOCALE, SUPPORTED_LOCALES, active_locale
 from app.models.banner import HERO, Banner
 from app.models.user import User
@@ -118,52 +121,74 @@ async def _admin_out(banner: Banner) -> AdminBannerOut:
     )
 
 
-async def admin_index(request: Request) -> list[AdminBannerOut]:
-    # catalog.view is enforced by the route's Authorize middleware (DR-0055) — it runs before
-    # binding, so a denied caller gets a uniform 403 regardless of what the id would resolve to.
-    return [
-        await _admin_out(b) for b in await Banner.order_by("sort").order_by("id").get()
-    ]
+class BannerController(Controller):
+    """Admin banner CRUD. Every action here carries a declared ``Authorize`` (DR-0055) — reviewed
+    as a whole resource, not just the id-bound ones, so the surface has one consistent authz
+    posture; K5 relocates index/store/update/destroy's declaration from per-route to
+    per-controller. ``update`` used to stay an explicit route (see ``CategoryController``'s
+    docstring for why: arvel's resource generator bound ``update`` to both PUT and PATCH, which
+    tripped Litestar's OpenAPI operationId-uniqueness check); that's fixed at the framework level
+    now (DR-0057), so it's declared here like every other action."""
 
+    @classmethod
+    def middleware(cls) -> list[ControllerMiddleware]:
+        return [
+            ControllerMiddleware(
+                Authorize(Permission.CATALOG_VIEW.value), only=("index",)
+            ),
+            ControllerMiddleware(
+                Authorize(Permission.CATALOG_CREATE.value), only=("store",)
+            ),
+            ControllerMiddleware(
+                Authorize(Permission.CATALOG_UPDATE.value), only=("update",)
+            ),
+            ControllerMiddleware(
+                Authorize(Permission.CATALOG_DELETE.value), only=("destroy",)
+            ),
+        ]
 
-async def store(request: Request, data: BannerIn) -> AdminBannerOut:
-    user = _current_user()
-    translations = _validated_translations(data.translations)
-    banner = await Banner.create(
-        translations=translations,
-        cta_to=data.cta_to,
-        sort=data.sort,
-        active=data.active,
-    )
-    await activity().caused_by(user).performed_on(banner).log("created banner")
-    return await _admin_out(banner)
+    async def index(self, request: Request) -> list[AdminBannerOut]:
+        return [
+            await _admin_out(b)
+            for b in await Banner.order_by("sort").order_by("id").get()
+        ]
 
+    async def store(self, request: Request, data: BannerIn) -> AdminBannerOut:
+        user = _current_user()
+        translations = _validated_translations(data.translations)
+        banner = await Banner.create(
+            translations=translations,
+            cta_to=data.cta_to,
+            sort=data.sort,
+            active=data.active,
+        )
+        await activity().caused_by(user).performed_on(banner).log("created banner")
+        return await _admin_out(banner)
 
-async def update(request: Request, id: Banner, data: BannerUpdateIn) -> AdminBannerOut:
-    user = _current_user()
-    banner = id
-    translations = _validated_translations(data.translations)
-    if translations is not None:
-        banner.translations = translations
-    if data.cta_to is not None:
-        banner.cta_to = data.cta_to
-    if data.sort is not None:
-        banner.sort = data.sort
-    if data.active is not None:
-        banner.active = data.active
-    await banner.save()
-    await activity().caused_by(user).performed_on(banner).log("updated banner")
-    return await _admin_out(banner)
+    async def update(
+        self, request: Request, banner: Banner, data: BannerUpdateIn
+    ) -> AdminBannerOut:
+        user = _current_user()
+        translations = _validated_translations(data.translations)
+        if translations is not None:
+            banner.translations = translations
+        if data.cta_to is not None:
+            banner.cta_to = data.cta_to
+        if data.sort is not None:
+            banner.sort = data.sort
+        if data.active is not None:
+            banner.active = data.active
+        await banner.save()
+        await activity().caused_by(user).performed_on(banner).log("updated banner")
+        return await _admin_out(banner)
 
-
-async def destroy(request: Request, id: Banner) -> dict[str, str]:
-    user = _current_user()
-    banner = id
-    for media in await banner.get_media(HERO):
-        await banner.delete_media(media.id)
-    await banner.delete()
-    await activity().caused_by(user).performed_on(banner).log("deleted banner")
-    return {"status": "deleted"}
+    async def destroy(self, request: Request, banner: Banner) -> dict[str, str]:
+        user = _current_user()
+        for media in await banner.get_media(HERO):
+            await banner.delete_media(media.id)
+        await banner.delete()
+        await activity().caused_by(user).performed_on(banner).log("deleted banner")
+        return {"status": "deleted"}
 
 
 async def upload_image(request: Request, id: Banner) -> AdminBannerOut:

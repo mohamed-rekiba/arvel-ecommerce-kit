@@ -12,7 +12,10 @@ from app.enums import Permission
 
 
 class ProductPolicy:
-    def view_any(self, user: Any, *_: Any) -> bool:
+    # arvel's resource-ability convention names the index ability "viewAny" (Laravel-parity, ported
+    # literally — Gate._resolve does a plain getattr(policy, ability), no snake_case folding), so the
+    # method has to be spelled that exact way to be found; `view_any` silently no-ops to a 403 instead.
+    def viewAny(self, user: Any, *_: Any) -> bool:  # noqa: N802 — framework-mandated ability name
         return True
 
     def view(self, user: Any, *_: Any) -> bool:

@@ -6,6 +6,13 @@ middleware, per DR-0055) must keep denying uniformly — otherwise a logged-in c
 sharpest case). Covers one Authorize-middleware route per K4 conversion class (an order, a banner)
 plus the per-object deny-as-404 case (product update), which was already uniform before this DR
 and must stay that way.
+
+K5 folds the per-route Authorize into a per-controller declaration (``api_resource`` +
+``Controller.middleware()``/``authorize_resource``) — the parametrized cases below extend the same
+oracle-closed assertion to every converted resource's instance actions (update/destroy: the ones
+with an id in the path, so the only ones where "existing" vs "nonexistent" is even a question) for
+both an authenticated-unauthorized customer and a guest, proving the DR-0056 conversion carried the
+DR-0055 contract over rather than reopening it.
 """
 
 import asyncio
@@ -14,13 +21,17 @@ import pytest
 from litestar.testing import TestClient
 
 from arvel.database import ConnectionResolver, Migrator, discover_migrations
+from arvel.dates import Date
 
-from app.enums import ProductStatus, UserRole
+from app.enums import CouponType, ProductStatus, UserRole
 from app.models.banner import Banner
 from app.models.category import Category
+from app.models.coupon import Coupon
+from app.models.deal import Deal
 from app.models.product import Product
 from app.models.product_variant import ProductVariant
 from app.models.user import User
+from app.models.vendor import Vendor
 from tests.checkout_helpers import checkout_body
 from tests.rbac_helpers import seed_rbac
 
@@ -36,7 +47,8 @@ def client(tmp_path, monkeypatch):
         db = ConnectionResolver({"default": {"url": url}})
         await Migrator(db).run(discover_migrations(["database/migrations"]))
         await seed_rbac(db)
-        for model in (User, Category, Product, ProductVariant, Banner):
+        models = (User, Category, Product, ProductVariant, Banner, Vendor, Coupon, Deal)
+        for model in models:
             model.set_connection(db)
         await User.create(
             name="Cara",
@@ -69,7 +81,28 @@ def client(tmp_path, monkeypatch):
             sort=0,
             active=True,
         )
-        for model in (User, Category, Product, ProductVariant, Banner):
+        # K5: the class-permission resources newly converted to api_resource — one row each so
+        # their update/destroy uniformity cases below have a real id to compare against.
+        await Vendor.create(name="Acme", slug="acme", published=True)
+        await Coupon.create(
+            code="SAVE10",
+            type=CouponType.PERCENT,
+            value=10,
+            usage_limit=None,
+            per_customer_limit=None,
+            uses=0,
+            active=True,
+            announce=False,
+        )
+        now = Date.now()
+        await Deal.create(
+            product_id=product.id,
+            percent_off=20,
+            starts_at=now.subtract(hours=1),
+            ends_at=now.add(hours=1),
+            active=True,
+        )
+        for model in models:
             model.set_connection(None)
         await db.dispose()
 
@@ -121,6 +154,83 @@ def test_authorize_middleware_route_denies_uniformly_for_banners(client) -> None
         existing.status_code,
         missing.status_code,
     )
+
+
+# K5: the converted class-permission resources' instance actions (update/destroy — the ones with
+# an id in the path; index/store take no id, so there's no existing-vs-nonexistent question to ask
+# of them). Product and Banner already have dedicated cases above/below; this is the rest of the
+# conversion map (category, vendor, coupon, deal).
+_K5_INSTANCE_ROUTES = [
+    # `update` now registers through api_resource like every other action (DR-0057 fixed the
+    # PUT+PATCH operationId collision that used to force these onto an explicit single-verb
+    # route). Each case below still calls the resource's original verb — that verb still works,
+    # api_resource just also accepts the other one now.
+    pytest.param(
+        "put", "categories/{id}", {"published": False}, id="categories.update"
+    ),
+    pytest.param("delete", "categories/{id}", None, id="categories.destroy"),
+    pytest.param("put", "vendors/{id}", {"published": False}, id="vendors.update"),
+    pytest.param("patch", "coupons/{id}", {"active": False}, id="coupons.update"),
+    pytest.param("patch", "deals/{id}", {"active": False}, id="deals.update"),
+    pytest.param("delete", "deals/{id}", None, id="deals.destroy"),
+]
+
+
+@pytest.mark.parametrize(("method", "path", "body"), _K5_INSTANCE_ROUTES)
+def test_k5_converted_resources_deny_customer_uniformly(
+    client, method, path, body
+) -> None:
+    """Every class-permission resource K5 converted to ``api_resource`` +
+    ``Controller.middleware()`` still 403s an authenticated-unauthorized customer uniformly,
+    existing id vs nonexistent — the DR-0055 contract, now declared per-controller instead of
+    per-route (DR-0056), must still hold."""
+    customer = _auth(client, "cara@example.com", "secret-cara")
+    call = getattr(client, method)
+    kwargs = {"headers": customer, **({"json": body} if body is not None else {})}
+    existing = call(f"/api/admin/{path.format(id=1)}", **kwargs)
+    missing = call(f"/api/admin/{path.format(id=_NONEXISTENT)}", **kwargs)
+    assert existing.status_code == missing.status_code == 403, (
+        path,
+        existing.status_code,
+        missing.status_code,
+    )
+
+
+@pytest.mark.parametrize(("method", "path", "body"), _K5_INSTANCE_ROUTES)
+def test_k5_converted_resources_reject_guest_uniformly(
+    client, method, path, body
+) -> None:
+    """Same routes, no credentials: Authenticate still runs as group middleware before route-model
+    binding (K4/DR-0054, unaffected by folding Authorize into the controller), so a guest gets a
+    uniform 401 regardless of whether the id exists — never a binding-miss 404 leaking existence to
+    a caller with zero credentials."""
+    call = getattr(client, method)
+    kwargs = {"json": body} if body is not None else {}
+    existing = call(f"/api/admin/{path.format(id=1)}", **kwargs)
+    missing = call(f"/api/admin/{path.format(id=_NONEXISTENT)}", **kwargs)
+    assert existing.status_code == missing.status_code == 401, (
+        path,
+        existing.status_code,
+        missing.status_code,
+    )
+
+
+@pytest.mark.parametrize(
+    "path",
+    [
+        "products",
+        "categories",
+        "vendors",
+        "coupons",
+        "banners",
+        "deals",
+    ],
+)
+def test_k5_converted_resource_index_rejects_guest(client, path) -> None:
+    """The class actions (index/store — no id, so no existing/nonexistent dimension) still inherit
+    Authenticate from the group after the api_resource conversion; a guest never reaches the
+    controller's ``middleware()``/``authorize_resource`` at all."""
+    assert client.get(f"/api/admin/{path}").status_code == 401
 
 
 def test_per_object_policy_route_was_already_uniform(client) -> None:

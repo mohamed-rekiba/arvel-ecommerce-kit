@@ -145,7 +145,7 @@
     "methods": [
       "DELETE"
     ],
-    "path": "/api/admin/banners/{id:int}",
+    "path": "/api/admin/banners/{banner}",
     "name": "api.admin.banners.destroy",
     "middleware": [
       "Authenticate",
@@ -160,9 +160,10 @@
   },
   {
     "methods": [
-      "PATCH"
+      "PATCH",
+      "PUT"
     ],
-    "path": "/api/admin/banners/{id:int}",
+    "path": "/api/admin/banners/{banner}",
     "name": "api.admin.banners.update",
     "middleware": [
       "Authenticate",
@@ -199,7 +200,8 @@
     "path": "/api/admin/categories",
     "name": "api.admin.categories.index",
     "middleware": [
-      "Authenticate"
+      "Authenticate",
+      "Authorize('catalog.view')"
     ],
     "security": [
       "bearer"
@@ -215,7 +217,8 @@
     "path": "/api/admin/categories",
     "name": "api.admin.categories.store",
     "middleware": [
-      "Authenticate"
+      "Authenticate",
+      "Authorize('catalog.create')"
     ],
     "security": [
       "bearer"
@@ -228,7 +231,7 @@
     "methods": [
       "DELETE"
     ],
-    "path": "/api/admin/categories/{id:int}",
+    "path": "/api/admin/categories/{category}",
     "name": "api.admin.categories.destroy",
     "middleware": [
       "Authenticate",
@@ -237,15 +240,16 @@
     "security": [
       "bearer"
     ],
-    "status_code": 200,
+    "status_code": null,
     "group": "api",
     "domain": null
   },
   {
     "methods": [
+      "PATCH",
       "PUT"
     ],
-    "path": "/api/admin/categories/{id:int}",
+    "path": "/api/admin/categories/{category}",
     "name": "api.admin.categories.update",
     "middleware": [
       "Authenticate",
@@ -265,7 +269,8 @@
     "path": "/api/admin/coupons",
     "name": "api.admin.coupons.index",
     "middleware": [
-      "Authenticate"
+      "Authenticate",
+      "Authorize('catalog.view')"
     ],
     "security": [
       "bearer"
@@ -281,7 +286,8 @@
     "path": "/api/admin/coupons",
     "name": "api.admin.coupons.store",
     "middleware": [
-      "Authenticate"
+      "Authenticate",
+      "Authorize('catalog.create')"
     ],
     "security": [
       "bearer"
@@ -292,9 +298,10 @@
   },
   {
     "methods": [
-      "PATCH"
+      "PATCH",
+      "PUT"
     ],
-    "path": "/api/admin/coupons/{id:int}",
+    "path": "/api/admin/coupons/{coupon}",
     "name": "api.admin.coupons.update",
     "middleware": [
       "Authenticate",
@@ -314,7 +321,8 @@
     "path": "/api/admin/deals",
     "name": "api.admin.deals.index",
     "middleware": [
-      "Authenticate"
+      "Authenticate",
+      "Authorize('catalog.view')"
     ],
     "security": [
       "bearer"
@@ -330,7 +338,8 @@
     "path": "/api/admin/deals",
     "name": "api.admin.deals.store",
     "middleware": [
-      "Authenticate"
+      "Authenticate",
+      "Authorize('catalog.create')"
     ],
     "security": [
       "bearer"
@@ -343,7 +352,7 @@
     "methods": [
       "DELETE"
     ],
-    "path": "/api/admin/deals/{id:int}",
+    "path": "/api/admin/deals/{deal}",
     "name": "api.admin.deals.destroy",
     "middleware": [
       "Authenticate",
@@ -358,9 +367,10 @@
   },
   {
     "methods": [
-      "PATCH"
+      "PATCH",
+      "PUT"
     ],
-    "path": "/api/admin/deals/{id:int}",
+    "path": "/api/admin/deals/{deal}",
     "name": "api.admin.deals.update",
     "middleware": [
       "Authenticate",
@@ -506,7 +516,8 @@
     "path": "/api/admin/products",
     "name": "api.admin.products.index",
     "middleware": [
-      "Authenticate"
+      "Authenticate",
+      "Authorize('catalog.view')"
     ],
     "security": [
       "bearer"
@@ -521,54 +532,6 @@
     ],
     "path": "/api/admin/products",
     "name": "api.admin.products.store",
-    "middleware": [
-      "Authenticate"
-    ],
-    "security": [
-      "bearer"
-    ],
-    "status_code": null,
-    "group": "api",
-    "domain": null
-  },
-  {
-    "methods": [
-      "DELETE"
-    ],
-    "path": "/api/admin/products/{id:int}",
-    "name": "api.admin.products.destroy",
-    "middleware": [
-      "Authenticate"
-    ],
-    "security": [
-      "bearer"
-    ],
-    "status_code": null,
-    "group": "api",
-    "domain": null
-  },
-  {
-    "methods": [
-      "GET"
-    ],
-    "path": "/api/admin/products/{id:int}",
-    "name": "api.admin.products.show",
-    "middleware": [
-      "Authenticate"
-    ],
-    "security": [
-      "bearer"
-    ],
-    "status_code": null,
-    "group": "api",
-    "domain": null
-  },
-  {
-    "methods": [
-      "PUT"
-    ],
-    "path": "/api/admin/products/{id:int}",
-    "name": "api.admin.products.update",
     "middleware": [
       "Authenticate"
     ],
@@ -651,6 +614,104 @@
     ],
     "path": "/api/admin/products/{id:int}/variants",
     "name": "api.admin.variants.store",
+    "middleware": [
+      "Authenticate"
+    ],
+    "security": [
+      "bearer"
+    ],
+    "status_code": null,
+    "group": "api",
+    "domain": null
+  },
+  {
+    "methods": [
+      "DELETE"
+    ],
+    "path": "/api/admin/products/{id:int}/variants/{variant_id:int}",
+    "name": "api.admin.variants.destroy",
+    "middleware": [
+      "Authenticate"
+    ],
+    "security": [
+      "bearer"
+    ],
+    "status_code": 200,
+    "group": "api",
+    "domain": null
+  },
+  {
+    "methods": [
+      "PATCH"
+    ],
+    "path": "/api/admin/products/{id:int}/variants/{variant_id:int}",
+    "name": "api.admin.variants.update",
+    "middleware": [
+      "Authenticate"
+    ],
+    "security": [
+      "bearer"
+    ],
+    "status_code": null,
+    "group": "api",
+    "domain": null
+  },
+  {
+    "methods": [
+      "POST"
+    ],
+    "path": "/api/admin/products/{id:int}/variants/{variant_id:int}/stock",
+    "name": "api.admin.variants.stock",
+    "middleware": [
+      "Authenticate"
+    ],
+    "security": [
+      "bearer"
+    ],
+    "status_code": 200,
+    "group": "api",
+    "domain": null
+  },
+  {
+    "methods": [
+      "DELETE"
+    ],
+    "path": "/api/admin/products/{product}",
+    "name": "api.admin.products.destroy",
+    "middleware": [
+      "Authenticate"
+    ],
+    "security": [
+      "bearer"
+    ],
+    "status_code": null,
+    "group": "api",
+    "domain": null
+  },
+  {
+    "methods": [
+      "GET"
+    ],
+    "path": "/api/admin/products/{product}",
+    "name": "api.admin.products.show",
+    "middleware": [
+      "Authenticate",
+      "Authorize('catalog.view')"
+    ],
+    "security": [
+      "bearer"
+    ],
+    "status_code": null,
+    "group": "api",
+    "domain": null
+  },
+  {
+    "methods": [
+      "PATCH",
+      "PUT"
+    ],
+    "path": "/api/admin/products/{product}",
+    "name": "api.admin.products.update",
     "middleware": [
       "Authenticate"
     ],
@@ -828,60 +889,13 @@
   },
   {
     "methods": [
-      "DELETE"
-    ],
-    "path": "/api/admin/products/{id:int}/variants/{variant_id:int}",
-    "name": "api.admin.variants.destroy",
-    "middleware": [
-      "Authenticate"
-    ],
-    "security": [
-      "bearer"
-    ],
-    "status_code": 200,
-    "group": "api",
-    "domain": null
-  },
-  {
-    "methods": [
-      "PATCH"
-    ],
-    "path": "/api/admin/products/{id:int}/variants/{variant_id:int}",
-    "name": "api.admin.variants.update",
-    "middleware": [
-      "Authenticate"
-    ],
-    "security": [
-      "bearer"
-    ],
-    "status_code": null,
-    "group": "api",
-    "domain": null
-  },
-  {
-    "methods": [
-      "POST"
-    ],
-    "path": "/api/admin/products/{id:int}/variants/{variant_id:int}/stock",
-    "name": "api.admin.variants.stock",
-    "middleware": [
-      "Authenticate"
-    ],
-    "security": [
-      "bearer"
-    ],
-    "status_code": 200,
-    "group": "api",
-    "domain": null
-  },
-  {
-    "methods": [
       "GET"
     ],
     "path": "/api/admin/vendors",
     "name": "api.admin.vendors.index",
     "middleware": [
-      "Authenticate"
+      "Authenticate",
+      "Authorize('catalog.view')"
     ],
     "security": [
       "bearer"
@@ -897,7 +911,8 @@
     "path": "/api/admin/vendors",
     "name": "api.admin.vendors.store",
     "middleware": [
-      "Authenticate"
+      "Authenticate",
+      "Authorize('catalog.create')"
     ],
     "security": [
       "bearer"
@@ -908,9 +923,10 @@
   },
   {
     "methods": [
+      "PATCH",
       "PUT"
     ],
-    "path": "/api/admin/vendors/{id:int}",
+    "path": "/api/admin/vendors/{vendor}",
     "name": "api.admin.vendors.update",
     "middleware": [
       "Authenticate",

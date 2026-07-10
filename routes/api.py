@@ -243,10 +243,6 @@ with Route.group(prefix="/admin", name="api.admin."):
         # decides admin-vs-customer (403/404) inside the controller. Admin listings return
         # EVERY row (incl. hidden) with an is_visible flag — vs the storefront, which only
         # returns the retrievable set.
-        # catalog.update as route middleware (DR-0055): it runs in the pipeline before route-model
-        # binding resolves, so a denied caller gets a uniform 403 whether or not the product id
-        # exists — binding alone would otherwise 404 a nonexistent id before the handler's own
-        # check ever ran, leaking existence to any authenticated non-admin.
         Route.post(
             "/products/{id:int}/image", media.upload_image, name="products.image"
         ).middleware(Authorize(Permission.CATALOG_UPDATE.value))
@@ -255,36 +251,33 @@ with Route.group(prefix="/admin", name="api.admin."):
             media.delete_image,
             name="products.media.destroy",
         ).status(200).middleware(Authorize(Permission.CATALOG_UPDATE.value))
-        Route.get("/products", admin_products.products_index, name="products.index")
-        Route.get(
-            "/categories", admin_products.categories_index, name="categories.index"
-        )
-        Route.get("/products/{id:int}", admin_products.show, name="products.show")
-        Route.post("/products", admin_products.store, name="products.store")
-        Route.put("/products/{id:int}", admin_products.update, name="products.update")
-        Route.delete(
-            "/products/{id:int}", admin_products.destroy, name="products.destroy"
-        )
         Route.post(
             "/products/{id:int}/restore",
             admin_products.restore,
             name="products.restore",
         ).status(200)
+        # index/show/store/update/destroy (K5, DR-0057): route generation + authorization all
+        # fold into the controller — see AdminProductController for why it's authorize_resource,
+        # not a per-action Authorize (DR-0056). Runs inside this /admin group so name/path/
+        # middleware (Authenticate, bearer) still inherit exactly as the explicit routes above
+        # did. `update` used to be pulled out and registered as a single explicit PUT route
+        # because arvel's resource generator bound it to BOTH PUT and PATCH under one route name,
+        # and Litestar's OpenAPI export rejected two operations sharing one operationId
+        # (DR-0057 fix 1). That's fixed at the framework level now — `update` registers through
+        # api_resource like every other action, accepting both verbs.
+        _products = admin_products.AdminProductController()
+        Route.api_resource("products", _products)
 
         # Admin categories + vendors (the retrievability dimensions; catalog.* authority).
-        # update/destroy carry Authorize (DR-0055) — see the products.image comment above for why.
-        Route.post("/categories", taxonomy.category_store, name="categories.store")
-        Route.put(
-            "/categories/{id:int}", taxonomy.category_update, name="categories.update"
-        ).middleware(Authorize(Permission.CATALOG_UPDATE.value))
-        Route.delete(
-            "/categories/{id:int}", taxonomy.category_destroy, name="categories.destroy"
-        ).status(200).middleware(Authorize(Permission.CATALOG_DELETE.value))
-        Route.get("/vendors", taxonomy.vendors_index, name="vendors.index")
-        Route.post("/vendors", taxonomy.vendor_store, name="vendors.store")
-        Route.put(
-            "/vendors/{id:int}", taxonomy.vendor_update, name="vendors.update"
-        ).middleware(Authorize(Permission.CATALOG_UPDATE.value))
+        # K5: route generation + per-action Authorize both fold into CategoryController/
+        # VendorController (DR-0056 — no per-object policy, so api_resource + declared
+        # Controller.middleware, not authorize_resource). `update` folds in too now (DR-0057) —
+        # see the products comment above for why it no longer needs to be pulled out.
+        _categories = taxonomy.CategoryController()
+        Route.api_resource("categories", _categories)
+
+        _vendors = taxonomy.VendorController()
+        Route.api_resource("vendors", _vendors)
 
         # Admin variants + stock (nested under the product; catalog.update authority).
         Route.get(
@@ -348,40 +341,24 @@ with Route.group(prefix="/admin", name="api.admin."):
         Route.get("/media", media_library.index, name="media")
         Route.get("/newsletter", settings.newsletter_index, name="newsletter")
 
-        # Admin banners. Every action here carries Authorize (DR-0055) — reviewed as a whole
-        # resource, not just the id-bound ones, so the surface has one consistent authz posture.
-        Route.get("/banners", banners.admin_index, name="banners.index").middleware(
-            Authorize(Permission.CATALOG_VIEW.value)
-        )
-        Route.post("/banners", banners.store, name="banners.store").middleware(
-            Authorize(Permission.CATALOG_CREATE.value)
-        )
-        Route.patch(
-            "/banners/{id:int}", banners.update, name="banners.update"
-        ).middleware(Authorize(Permission.CATALOG_UPDATE.value))
-        Route.delete(
-            "/banners/{id:int}", banners.destroy, name="banners.destroy"
-        ).middleware(Authorize(Permission.CATALOG_DELETE.value))
+        # Admin banners: non-CRUD image upload stays an explicit route; index/store/update/destroy
+        # (K5) fold into BannerController's declared Authorize — one consistent authz posture,
+        # relocated per-controller instead of repeated per-route (DR-0055). `update` folds in too
+        # now (DR-0057) — see the products comment above for why.
         Route.post(
             "/banners/{id:int}/image", banners.upload_image, name="banners.image"
         ).middleware(Authorize(Permission.CATALOG_UPDATE.value))
+        _banners = banners.BannerController()
+        Route.api_resource("banners", _banners)
 
-        # Admin deals. update/destroy carry Authorize (DR-0055).
-        Route.get("/deals", admin_deals.index, name="deals.index")
-        Route.post("/deals", admin_deals.store, name="deals.store")
-        Route.patch(
-            "/deals/{id:int}", admin_deals.update, name="deals.update"
-        ).middleware(Authorize(Permission.CATALOG_UPDATE.value))
-        Route.delete(
-            "/deals/{id:int}", admin_deals.destroy, name="deals.destroy"
-        ).middleware(Authorize(Permission.CATALOG_DELETE.value))
+        # Admin deals (K5): index/store/update/destroy fold into DealController (DR-0057).
+        _deals = admin_deals.DealController()
+        Route.api_resource("deals", _deals)
 
-        # Admin coupons (catalog authority). update carries Authorize (DR-0055).
-        Route.get("/coupons", admin_coupons.index, name="coupons.index")
-        Route.post("/coupons", admin_coupons.store, name="coupons.store")
-        Route.patch(
-            "/coupons/{id:int}", admin_coupons.update, name="coupons.update"
-        ).middleware(Authorize(Permission.CATALOG_UPDATE.value))
+        # Admin coupons (K5): index/store/update fold into CouponController (no destroy — see
+        # CouponController's docstring).
+        _coupons = admin_coupons.CouponController()
+        Route.api_resource("coupons", _coupons)
 
         # Admin orders. show/status carry Authorize (DR-0055) — see the products.image comment
         # above for why a class-level admin check has to move ahead of route-model binding.

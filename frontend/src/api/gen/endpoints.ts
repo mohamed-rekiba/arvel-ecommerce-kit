@@ -31,18 +31,22 @@ import type {
   ApiAdminBannersDestroy400,
   ApiAdminBannersImage400,
   ApiAdminBannersStore400,
-  ApiAdminBannersUpdate400,
+  ApiAdminBannersUpdatePatch400,
+  ApiAdminBannersUpdatePut400,
   ApiAdminCategoriesDestroy400,
   ApiAdminCategoriesIndex400,
   ApiAdminCategoriesIndexParams,
   ApiAdminCategoriesStore400,
-  ApiAdminCategoriesUpdate400,
+  ApiAdminCategoriesUpdatePatch400,
+  ApiAdminCategoriesUpdatePut400,
   ApiAdminCouponsStore400,
-  ApiAdminCouponsUpdate400,
+  ApiAdminCouponsUpdatePatch400,
+  ApiAdminCouponsUpdatePut400,
   ApiAdminDealsDestroy200,
   ApiAdminDealsDestroy400,
   ApiAdminDealsStore400,
-  ApiAdminDealsUpdate400,
+  ApiAdminDealsUpdatePatch400,
+  ApiAdminDealsUpdatePut400,
   ApiAdminOrdersShow400,
   ApiAdminOrdersStatus400,
   ApiAdminProductsDestroy400,
@@ -53,7 +57,8 @@ import type {
   ApiAdminProductsRestore400,
   ApiAdminProductsShow400,
   ApiAdminProductsStore400,
-  ApiAdminProductsUpdate400,
+  ApiAdminProductsUpdatePatch400,
+  ApiAdminProductsUpdatePut400,
   ApiAdminReviewsIndex400,
   ApiAdminReviewsIndexParams,
   ApiAdminReviewsModerate400,
@@ -70,7 +75,8 @@ import type {
   ApiAdminVariantsStore400,
   ApiAdminVariantsUpdate400,
   ApiAdminVendorsStore400,
-  ApiAdminVendorsUpdate400,
+  ApiAdminVendorsUpdatePatch400,
+  ApiAdminVendorsUpdatePut400,
   ApiCartCouponApply400,
   ApiCartItemsAdd400,
   ApiCartItemsRemove400,
@@ -2437,6 +2443,52 @@ export const apiAdminProductsMediaDestroy = async (id: number,
 
 
 
+export type apiAdminProductsRestoreResponse200 = {
+  data: AdminProductOut
+  status: 200
+}
+
+export type apiAdminProductsRestoreResponse400 = {
+  data: ApiAdminProductsRestore400
+  status: 400
+}
+
+export type apiAdminProductsRestoreResponseSuccess = (apiAdminProductsRestoreResponse200) & {
+  headers: Headers;
+};
+export type apiAdminProductsRestoreResponseError = (apiAdminProductsRestoreResponse400) & {
+  headers: Headers;
+};
+
+export type apiAdminProductsRestoreResponse = (apiAdminProductsRestoreResponseSuccess | apiAdminProductsRestoreResponseError)
+
+export const getApiAdminProductsRestoreUrl = (id: number,) => {
+
+
+
+
+  return `/api/admin/products/${id}/restore`
+}
+
+/**
+ * Bring an archived product back — visibility flags are untouched, so a hidden product
+ * restores as hidden. Not a CRUD resource action (it targets a soft-deleted row `api_resource`'s
+ * binding would 404 on), so it stays an explicit route with its own in-handler check.
+ * @summary ApiAdminProductsRestore
+ */
+export const apiAdminProductsRestore = async (id: number, options?: RequestInit): Promise<apiAdminProductsRestoreResponse> => {
+
+  return apiFetch<apiAdminProductsRestoreResponse>(getApiAdminProductsRestoreUrl(id),
+  {
+    ...options,
+    method: 'POST'
+
+
+  }
+);}
+
+
+
 export type apiAdminProductsIndexResponse200 = {
   data: AdminProductPage
   status: 200
@@ -2529,6 +2581,191 @@ export const apiAdminProductsStore = async (productIn: ProductIn, options?: Requ
     method: 'POST',
     headers: { 'Content-Type': 'application/json', ...options?.headers },
     body: JSON.stringify(productIn)
+  }
+);}
+
+
+
+export type apiAdminProductsShowResponse200 = {
+  data: AdminProductDetailOut
+  status: 200
+}
+
+export type apiAdminProductsShowResponse400 = {
+  data: ApiAdminProductsShow400
+  status: 400
+}
+
+export type apiAdminProductsShowResponseSuccess = (apiAdminProductsShowResponse200) & {
+  headers: Headers;
+};
+export type apiAdminProductsShowResponseError = (apiAdminProductsShowResponse400) & {
+  headers: Headers;
+};
+
+export type apiAdminProductsShowResponse = (apiAdminProductsShowResponseSuccess | apiAdminProductsShowResponseError)
+
+export const getApiAdminProductsShowUrl = (product: string,) => {
+
+
+
+
+  return `/api/admin/products/${product}`
+}
+
+/**
+ * One product with variants + gallery — the editor's read (hidden products included).
+ * ``product`` is bound via the plain (non-visibility) query, so it's re-fetched through
+ * ``with_visibility()`` here to get the computed `is_visible` flag for the response.
+ * @summary ApiAdminProductsShow
+ */
+export const apiAdminProductsShow = async (product: string, options?: RequestInit): Promise<apiAdminProductsShowResponse> => {
+
+  return apiFetch<apiAdminProductsShowResponse>(getApiAdminProductsShowUrl(product),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+export type apiAdminProductsUpdatePutResponse200 = {
+  data: AdminProductOut
+  status: 200
+}
+
+export type apiAdminProductsUpdatePutResponse400 = {
+  data: ApiAdminProductsUpdatePut400
+  status: 400
+}
+
+export type apiAdminProductsUpdatePutResponseSuccess = (apiAdminProductsUpdatePutResponse200) & {
+  headers: Headers;
+};
+export type apiAdminProductsUpdatePutResponseError = (apiAdminProductsUpdatePutResponse400) & {
+  headers: Headers;
+};
+
+export type apiAdminProductsUpdatePutResponse = (apiAdminProductsUpdatePutResponseSuccess | apiAdminProductsUpdatePutResponseError)
+
+export const getApiAdminProductsUpdatePutUrl = (product: string,) => {
+
+
+
+
+  return `/api/admin/products/${product}`
+}
+
+/**
+ * Update a product — per-locale content, price, category, status, visibility.
+ * ``authorize_resource`` below already 404'd a non-admin before this body runs (deny-as-404,
+ * same policy as destroy).
+ * @summary ApiAdminProductsUpdate
+ */
+export const apiAdminProductsUpdatePut = async (product: string,
+    updateProductIn: UpdateProductIn, options?: RequestInit): Promise<apiAdminProductsUpdatePutResponse> => {
+
+  return apiFetch<apiAdminProductsUpdatePutResponse>(getApiAdminProductsUpdatePutUrl(product),
+  {
+    ...options,
+    method: 'PUT',
+    headers: { 'Content-Type': 'application/json', ...options?.headers },
+    body: JSON.stringify(updateProductIn)
+  }
+);}
+
+
+
+export type apiAdminProductsDestroyResponse200 = {
+  data: MessageOut
+  status: 200
+}
+
+export type apiAdminProductsDestroyResponse400 = {
+  data: ApiAdminProductsDestroy400
+  status: 400
+}
+
+export type apiAdminProductsDestroyResponseSuccess = (apiAdminProductsDestroyResponse200) & {
+  headers: Headers;
+};
+export type apiAdminProductsDestroyResponseError = (apiAdminProductsDestroyResponse400) & {
+  headers: Headers;
+};
+
+export type apiAdminProductsDestroyResponse = (apiAdminProductsDestroyResponseSuccess | apiAdminProductsDestroyResponseError)
+
+export const getApiAdminProductsDestroyUrl = (product: string,) => {
+
+
+
+
+  return `/api/admin/products/${product}`
+}
+
+/**
+ * ARCHIVE a product (soft delete — order history intact, restorable;
+ * ``authorize_resource`` below already 404'd a non-admin before this body runs).
+ * @summary ApiAdminProductsDestroy
+ */
+export const apiAdminProductsDestroy = async (product: string, options?: RequestInit): Promise<apiAdminProductsDestroyResponse> => {
+
+  return apiFetch<apiAdminProductsDestroyResponse>(getApiAdminProductsDestroyUrl(product),
+  {
+    ...options,
+    method: 'DELETE'
+
+
+  }
+);}
+
+
+
+export type apiAdminProductsUpdatePatchResponse200 = {
+  data: AdminProductOut
+  status: 200
+}
+
+export type apiAdminProductsUpdatePatchResponse400 = {
+  data: ApiAdminProductsUpdatePatch400
+  status: 400
+}
+
+export type apiAdminProductsUpdatePatchResponseSuccess = (apiAdminProductsUpdatePatchResponse200) & {
+  headers: Headers;
+};
+export type apiAdminProductsUpdatePatchResponseError = (apiAdminProductsUpdatePatchResponse400) & {
+  headers: Headers;
+};
+
+export type apiAdminProductsUpdatePatchResponse = (apiAdminProductsUpdatePatchResponseSuccess | apiAdminProductsUpdatePatchResponseError)
+
+export const getApiAdminProductsUpdatePatchUrl = (product: string,) => {
+
+
+
+
+  return `/api/admin/products/${product}`
+}
+
+/**
+ * Update a product — per-locale content, price, category, status, visibility.
+ * ``authorize_resource`` below already 404'd a non-admin before this body runs (deny-as-404,
+ * same policy as destroy).
+ * @summary ApiAdminProductsUpdate
+ */
+export const apiAdminProductsUpdatePatch = async (product: string,
+    updateProductIn: UpdateProductIn, options?: RequestInit): Promise<apiAdminProductsUpdatePatchResponse> => {
+
+  return apiFetch<apiAdminProductsUpdatePatchResponse>(getApiAdminProductsUpdatePatchUrl(product),
+  {
+    ...options,
+    method: 'PATCH',
+    headers: { 'Content-Type': 'application/json', ...options?.headers },
+    body: JSON.stringify(updateProductIn)
   }
 );}
 
@@ -2628,219 +2865,40 @@ export const apiAdminCategoriesStore = async (categoryIn: CategoryIn, options?: 
 
 
 
-export type apiAdminProductsShowResponse200 = {
-  data: AdminProductDetailOut
-  status: 200
-}
-
-export type apiAdminProductsShowResponse400 = {
-  data: ApiAdminProductsShow400
-  status: 400
-}
-
-export type apiAdminProductsShowResponseSuccess = (apiAdminProductsShowResponse200) & {
-  headers: Headers;
-};
-export type apiAdminProductsShowResponseError = (apiAdminProductsShowResponse400) & {
-  headers: Headers;
-};
-
-export type apiAdminProductsShowResponse = (apiAdminProductsShowResponseSuccess | apiAdminProductsShowResponseError)
-
-export const getApiAdminProductsShowUrl = (id: number,) => {
-
-
-
-
-  return `/api/admin/products/${id}`
-}
-
-/**
- * One product with variants + gallery — the editor's read (hidden products included).
- * @summary ApiAdminProductsShow
- */
-export const apiAdminProductsShow = async (id: number, options?: RequestInit): Promise<apiAdminProductsShowResponse> => {
-
-  return apiFetch<apiAdminProductsShowResponse>(getApiAdminProductsShowUrl(id),
-  {
-    ...options,
-    method: 'GET'
-
-
-  }
-);}
-
-
-
-export type apiAdminProductsUpdateResponse200 = {
-  data: AdminProductOut
-  status: 200
-}
-
-export type apiAdminProductsUpdateResponse400 = {
-  data: ApiAdminProductsUpdate400
-  status: 400
-}
-
-export type apiAdminProductsUpdateResponseSuccess = (apiAdminProductsUpdateResponse200) & {
-  headers: Headers;
-};
-export type apiAdminProductsUpdateResponseError = (apiAdminProductsUpdateResponse400) & {
-  headers: Headers;
-};
-
-export type apiAdminProductsUpdateResponse = (apiAdminProductsUpdateResponseSuccess | apiAdminProductsUpdateResponseError)
-
-export const getApiAdminProductsUpdateUrl = (id: number,) => {
-
-
-
-
-  return `/api/admin/products/${id}`
-}
-
-/**
- * Update a product — per-locale content, price, category, status, visibility (admins only;
- * 404 to non-admins so existence isn't leaked).
- * @summary ApiAdminProductsUpdate
- */
-export const apiAdminProductsUpdate = async (id: number,
-    updateProductIn: UpdateProductIn, options?: RequestInit): Promise<apiAdminProductsUpdateResponse> => {
-
-  return apiFetch<apiAdminProductsUpdateResponse>(getApiAdminProductsUpdateUrl(id),
-  {
-    ...options,
-    method: 'PUT',
-    headers: { 'Content-Type': 'application/json', ...options?.headers },
-    body: JSON.stringify(updateProductIn)
-  }
-);}
-
-
-
-export type apiAdminProductsDestroyResponse200 = {
-  data: MessageOut
-  status: 200
-}
-
-export type apiAdminProductsDestroyResponse400 = {
-  data: ApiAdminProductsDestroy400
-  status: 400
-}
-
-export type apiAdminProductsDestroyResponseSuccess = (apiAdminProductsDestroyResponse200) & {
-  headers: Headers;
-};
-export type apiAdminProductsDestroyResponseError = (apiAdminProductsDestroyResponse400) & {
-  headers: Headers;
-};
-
-export type apiAdminProductsDestroyResponse = (apiAdminProductsDestroyResponseSuccess | apiAdminProductsDestroyResponseError)
-
-export const getApiAdminProductsDestroyUrl = (id: number,) => {
-
-
-
-
-  return `/api/admin/products/${id}`
-}
-
-/**
- * ARCHIVE a product (soft delete — order history intact, restorable; 404 to non-admins).
- * @summary ApiAdminProductsDestroy
- */
-export const apiAdminProductsDestroy = async (id: number, options?: RequestInit): Promise<apiAdminProductsDestroyResponse> => {
-
-  return apiFetch<apiAdminProductsDestroyResponse>(getApiAdminProductsDestroyUrl(id),
-  {
-    ...options,
-    method: 'DELETE'
-
-
-  }
-);}
-
-
-
-export type apiAdminProductsRestoreResponse200 = {
-  data: AdminProductOut
-  status: 200
-}
-
-export type apiAdminProductsRestoreResponse400 = {
-  data: ApiAdminProductsRestore400
-  status: 400
-}
-
-export type apiAdminProductsRestoreResponseSuccess = (apiAdminProductsRestoreResponse200) & {
-  headers: Headers;
-};
-export type apiAdminProductsRestoreResponseError = (apiAdminProductsRestoreResponse400) & {
-  headers: Headers;
-};
-
-export type apiAdminProductsRestoreResponse = (apiAdminProductsRestoreResponseSuccess | apiAdminProductsRestoreResponseError)
-
-export const getApiAdminProductsRestoreUrl = (id: number,) => {
-
-
-
-
-  return `/api/admin/products/${id}/restore`
-}
-
-/**
- * Bring an archived product back — visibility flags are untouched, so a hidden product
- * restores as hidden.
- * @summary ApiAdminProductsRestore
- */
-export const apiAdminProductsRestore = async (id: number, options?: RequestInit): Promise<apiAdminProductsRestoreResponse> => {
-
-  return apiFetch<apiAdminProductsRestoreResponse>(getApiAdminProductsRestoreUrl(id),
-  {
-    ...options,
-    method: 'POST'
-
-
-  }
-);}
-
-
-
-export type apiAdminCategoriesUpdateResponse200 = {
+export type apiAdminCategoriesUpdatePutResponse200 = {
   data: AdminCategoryOut
   status: 200
 }
 
-export type apiAdminCategoriesUpdateResponse400 = {
-  data: ApiAdminCategoriesUpdate400
+export type apiAdminCategoriesUpdatePutResponse400 = {
+  data: ApiAdminCategoriesUpdatePut400
   status: 400
 }
 
-export type apiAdminCategoriesUpdateResponseSuccess = (apiAdminCategoriesUpdateResponse200) & {
+export type apiAdminCategoriesUpdatePutResponseSuccess = (apiAdminCategoriesUpdatePutResponse200) & {
   headers: Headers;
 };
-export type apiAdminCategoriesUpdateResponseError = (apiAdminCategoriesUpdateResponse400) & {
+export type apiAdminCategoriesUpdatePutResponseError = (apiAdminCategoriesUpdatePutResponse400) & {
   headers: Headers;
 };
 
-export type apiAdminCategoriesUpdateResponse = (apiAdminCategoriesUpdateResponseSuccess | apiAdminCategoriesUpdateResponseError)
+export type apiAdminCategoriesUpdatePutResponse = (apiAdminCategoriesUpdatePutResponseSuccess | apiAdminCategoriesUpdatePutResponseError)
 
-export const getApiAdminCategoriesUpdateUrl = (id: number,) => {
-
-
+export const getApiAdminCategoriesUpdatePutUrl = (category: string,) => {
 
 
-  return `/api/admin/categories/${id}`
+
+
+  return `/api/admin/categories/${category}`
 }
 
 /**
  * @summary ApiAdminCategoriesUpdate
  */
-export const apiAdminCategoriesUpdate = async (id: number,
-    categoryUpdateIn: CategoryUpdateIn, options?: RequestInit): Promise<apiAdminCategoriesUpdateResponse> => {
+export const apiAdminCategoriesUpdatePut = async (category: string,
+    categoryUpdateIn: CategoryUpdateIn, options?: RequestInit): Promise<apiAdminCategoriesUpdatePutResponse> => {
 
-  return apiFetch<apiAdminCategoriesUpdateResponse>(getApiAdminCategoriesUpdateUrl(id),
+  return apiFetch<apiAdminCategoriesUpdatePutResponse>(getApiAdminCategoriesUpdatePutUrl(category),
   {
     ...options,
     method: 'PUT',
@@ -2870,25 +2928,69 @@ export type apiAdminCategoriesDestroyResponseError = (apiAdminCategoriesDestroyR
 
 export type apiAdminCategoriesDestroyResponse = (apiAdminCategoriesDestroyResponseSuccess | apiAdminCategoriesDestroyResponseError)
 
-export const getApiAdminCategoriesDestroyUrl = (id: number,) => {
+export const getApiAdminCategoriesDestroyUrl = (category: string,) => {
 
 
 
 
-  return `/api/admin/categories/${id}`
+  return `/api/admin/categories/${category}`
 }
 
 /**
  * @summary ApiAdminCategoriesDestroy
  */
-export const apiAdminCategoriesDestroy = async (id: number, options?: RequestInit): Promise<apiAdminCategoriesDestroyResponse> => {
+export const apiAdminCategoriesDestroy = async (category: string, options?: RequestInit): Promise<apiAdminCategoriesDestroyResponse> => {
 
-  return apiFetch<apiAdminCategoriesDestroyResponse>(getApiAdminCategoriesDestroyUrl(id),
+  return apiFetch<apiAdminCategoriesDestroyResponse>(getApiAdminCategoriesDestroyUrl(category),
   {
     ...options,
     method: 'DELETE'
 
 
+  }
+);}
+
+
+
+export type apiAdminCategoriesUpdatePatchResponse200 = {
+  data: AdminCategoryOut
+  status: 200
+}
+
+export type apiAdminCategoriesUpdatePatchResponse400 = {
+  data: ApiAdminCategoriesUpdatePatch400
+  status: 400
+}
+
+export type apiAdminCategoriesUpdatePatchResponseSuccess = (apiAdminCategoriesUpdatePatchResponse200) & {
+  headers: Headers;
+};
+export type apiAdminCategoriesUpdatePatchResponseError = (apiAdminCategoriesUpdatePatchResponse400) & {
+  headers: Headers;
+};
+
+export type apiAdminCategoriesUpdatePatchResponse = (apiAdminCategoriesUpdatePatchResponseSuccess | apiAdminCategoriesUpdatePatchResponseError)
+
+export const getApiAdminCategoriesUpdatePatchUrl = (category: string,) => {
+
+
+
+
+  return `/api/admin/categories/${category}`
+}
+
+/**
+ * @summary ApiAdminCategoriesUpdate
+ */
+export const apiAdminCategoriesUpdatePatch = async (category: string,
+    categoryUpdateIn: CategoryUpdateIn, options?: RequestInit): Promise<apiAdminCategoriesUpdatePatchResponse> => {
+
+  return apiFetch<apiAdminCategoriesUpdatePatchResponse>(getApiAdminCategoriesUpdatePatchUrl(category),
+  {
+    ...options,
+    method: 'PATCH',
+    headers: { 'Content-Type': 'application/json', ...options?.headers },
+    body: JSON.stringify(categoryUpdateIn)
   }
 );}
 
@@ -2973,46 +3075,93 @@ export const apiAdminVendorsStore = async (vendorIn: VendorIn, options?: Request
 
 
 
-export type apiAdminVendorsUpdateResponse200 = {
+export type apiAdminVendorsUpdatePutResponse200 = {
   data: AdminVendorOut
   status: 200
 }
 
-export type apiAdminVendorsUpdateResponse400 = {
-  data: ApiAdminVendorsUpdate400
+export type apiAdminVendorsUpdatePutResponse400 = {
+  data: ApiAdminVendorsUpdatePut400
   status: 400
 }
 
-export type apiAdminVendorsUpdateResponseSuccess = (apiAdminVendorsUpdateResponse200) & {
+export type apiAdminVendorsUpdatePutResponseSuccess = (apiAdminVendorsUpdatePutResponse200) & {
   headers: Headers;
 };
-export type apiAdminVendorsUpdateResponseError = (apiAdminVendorsUpdateResponse400) & {
+export type apiAdminVendorsUpdatePutResponseError = (apiAdminVendorsUpdatePutResponse400) & {
   headers: Headers;
 };
 
-export type apiAdminVendorsUpdateResponse = (apiAdminVendorsUpdateResponseSuccess | apiAdminVendorsUpdateResponseError)
+export type apiAdminVendorsUpdatePutResponse = (apiAdminVendorsUpdatePutResponseSuccess | apiAdminVendorsUpdatePutResponseError)
 
-export const getApiAdminVendorsUpdateUrl = (id: number,) => {
-
-
+export const getApiAdminVendorsUpdatePutUrl = (vendor: string,) => {
 
 
-  return `/api/admin/vendors/${id}`
+
+
+  return `/api/admin/vendors/${vendor}`
 }
 
 /**
  * Rename or (un)publish a vendor — the publish flag gates the retrievability of every
  * product the vendor owns (recomputed by the debounced views refresh). catalog.update is
- * enforced by the route's Authorize middleware (DR-0055).
+ * enforced by this controller's Authorize middleware (DR-0055).
  * @summary ApiAdminVendorsUpdate
  */
-export const apiAdminVendorsUpdate = async (id: number,
-    vendorUpdateIn: VendorUpdateIn, options?: RequestInit): Promise<apiAdminVendorsUpdateResponse> => {
+export const apiAdminVendorsUpdatePut = async (vendor: string,
+    vendorUpdateIn: VendorUpdateIn, options?: RequestInit): Promise<apiAdminVendorsUpdatePutResponse> => {
 
-  return apiFetch<apiAdminVendorsUpdateResponse>(getApiAdminVendorsUpdateUrl(id),
+  return apiFetch<apiAdminVendorsUpdatePutResponse>(getApiAdminVendorsUpdatePutUrl(vendor),
   {
     ...options,
     method: 'PUT',
+    headers: { 'Content-Type': 'application/json', ...options?.headers },
+    body: JSON.stringify(vendorUpdateIn)
+  }
+);}
+
+
+
+export type apiAdminVendorsUpdatePatchResponse200 = {
+  data: AdminVendorOut
+  status: 200
+}
+
+export type apiAdminVendorsUpdatePatchResponse400 = {
+  data: ApiAdminVendorsUpdatePatch400
+  status: 400
+}
+
+export type apiAdminVendorsUpdatePatchResponseSuccess = (apiAdminVendorsUpdatePatchResponse200) & {
+  headers: Headers;
+};
+export type apiAdminVendorsUpdatePatchResponseError = (apiAdminVendorsUpdatePatchResponse400) & {
+  headers: Headers;
+};
+
+export type apiAdminVendorsUpdatePatchResponse = (apiAdminVendorsUpdatePatchResponseSuccess | apiAdminVendorsUpdatePatchResponseError)
+
+export const getApiAdminVendorsUpdatePatchUrl = (vendor: string,) => {
+
+
+
+
+  return `/api/admin/vendors/${vendor}`
+}
+
+/**
+ * Rename or (un)publish a vendor — the publish flag gates the retrievability of every
+ * product the vendor owns (recomputed by the debounced views refresh). catalog.update is
+ * enforced by this controller's Authorize middleware (DR-0055).
+ * @summary ApiAdminVendorsUpdate
+ */
+export const apiAdminVendorsUpdatePatch = async (vendor: string,
+    vendorUpdateIn: VendorUpdateIn, options?: RequestInit): Promise<apiAdminVendorsUpdatePatchResponse> => {
+
+  return apiFetch<apiAdminVendorsUpdatePatchResponse>(getApiAdminVendorsUpdatePatchUrl(vendor),
+  {
+    ...options,
+    method: 'PATCH',
     headers: { 'Content-Type': 'application/json', ...options?.headers },
     body: JSON.stringify(vendorUpdateIn)
   }
@@ -3844,6 +3993,50 @@ export const apiAdminNewsletter = async ( options?: RequestInit): Promise<apiAdm
 
 
 
+export type apiAdminBannersImageResponse201 = {
+  data: AdminBannerOut
+  status: 201
+}
+
+export type apiAdminBannersImageResponse400 = {
+  data: ApiAdminBannersImage400
+  status: 400
+}
+
+export type apiAdminBannersImageResponseSuccess = (apiAdminBannersImageResponse201) & {
+  headers: Headers;
+};
+export type apiAdminBannersImageResponseError = (apiAdminBannersImageResponse400) & {
+  headers: Headers;
+};
+
+export type apiAdminBannersImageResponse = (apiAdminBannersImageResponseSuccess | apiAdminBannersImageResponseError)
+
+export const getApiAdminBannersImageUrl = (id: number,) => {
+
+
+
+
+  return `/api/admin/banners/${id}/image`
+}
+
+/**
+ * Attach/replace the slide image (the previous one is removed — a slide has ONE image).
+ * @summary ApiAdminBannersImage
+ */
+export const apiAdminBannersImage = async (id: number, options?: RequestInit): Promise<apiAdminBannersImageResponse> => {
+
+  return apiFetch<apiAdminBannersImageResponse>(getApiAdminBannersImageUrl(id),
+  {
+    ...options,
+    method: 'POST'
+
+
+  }
+);}
+
+
+
 export type apiAdminBannersIndexResponse200 = {
   data: AdminBannerOut[]
   status: 200
@@ -3923,6 +4116,50 @@ export const apiAdminBannersStore = async (bannerIn: BannerIn, options?: Request
 
 
 
+export type apiAdminBannersUpdatePutResponse200 = {
+  data: AdminBannerOut
+  status: 200
+}
+
+export type apiAdminBannersUpdatePutResponse400 = {
+  data: ApiAdminBannersUpdatePut400
+  status: 400
+}
+
+export type apiAdminBannersUpdatePutResponseSuccess = (apiAdminBannersUpdatePutResponse200) & {
+  headers: Headers;
+};
+export type apiAdminBannersUpdatePutResponseError = (apiAdminBannersUpdatePutResponse400) & {
+  headers: Headers;
+};
+
+export type apiAdminBannersUpdatePutResponse = (apiAdminBannersUpdatePutResponseSuccess | apiAdminBannersUpdatePutResponseError)
+
+export const getApiAdminBannersUpdatePutUrl = (banner: string,) => {
+
+
+
+
+  return `/api/admin/banners/${banner}`
+}
+
+/**
+ * @summary ApiAdminBannersUpdate
+ */
+export const apiAdminBannersUpdatePut = async (banner: string,
+    bannerUpdateIn: BannerUpdateIn, options?: RequestInit): Promise<apiAdminBannersUpdatePutResponse> => {
+
+  return apiFetch<apiAdminBannersUpdatePutResponse>(getApiAdminBannersUpdatePutUrl(banner),
+  {
+    ...options,
+    method: 'PUT',
+    headers: { 'Content-Type': 'application/json', ...options?.headers },
+    body: JSON.stringify(bannerUpdateIn)
+  }
+);}
+
+
+
 export type apiAdminBannersDestroyResponse200 = {
   data: ApiAdminBannersDestroy200
   status: 200
@@ -3942,20 +4179,20 @@ export type apiAdminBannersDestroyResponseError = (apiAdminBannersDestroyRespons
 
 export type apiAdminBannersDestroyResponse = (apiAdminBannersDestroyResponseSuccess | apiAdminBannersDestroyResponseError)
 
-export const getApiAdminBannersDestroyUrl = (id: number,) => {
+export const getApiAdminBannersDestroyUrl = (banner: string,) => {
 
 
 
 
-  return `/api/admin/banners/${id}`
+  return `/api/admin/banners/${banner}`
 }
 
 /**
  * @summary ApiAdminBannersDestroy
  */
-export const apiAdminBannersDestroy = async (id: number, options?: RequestInit): Promise<apiAdminBannersDestroyResponse> => {
+export const apiAdminBannersDestroy = async (banner: string, options?: RequestInit): Promise<apiAdminBannersDestroyResponse> => {
 
-  return apiFetch<apiAdminBannersDestroyResponse>(getApiAdminBannersDestroyUrl(id),
+  return apiFetch<apiAdminBannersDestroyResponse>(getApiAdminBannersDestroyUrl(banner),
   {
     ...options,
     method: 'DELETE'
@@ -3966,89 +4203,45 @@ export const apiAdminBannersDestroy = async (id: number, options?: RequestInit):
 
 
 
-export type apiAdminBannersUpdateResponse200 = {
+export type apiAdminBannersUpdatePatchResponse200 = {
   data: AdminBannerOut
   status: 200
 }
 
-export type apiAdminBannersUpdateResponse400 = {
-  data: ApiAdminBannersUpdate400
+export type apiAdminBannersUpdatePatchResponse400 = {
+  data: ApiAdminBannersUpdatePatch400
   status: 400
 }
 
-export type apiAdminBannersUpdateResponseSuccess = (apiAdminBannersUpdateResponse200) & {
+export type apiAdminBannersUpdatePatchResponseSuccess = (apiAdminBannersUpdatePatchResponse200) & {
   headers: Headers;
 };
-export type apiAdminBannersUpdateResponseError = (apiAdminBannersUpdateResponse400) & {
+export type apiAdminBannersUpdatePatchResponseError = (apiAdminBannersUpdatePatchResponse400) & {
   headers: Headers;
 };
 
-export type apiAdminBannersUpdateResponse = (apiAdminBannersUpdateResponseSuccess | apiAdminBannersUpdateResponseError)
+export type apiAdminBannersUpdatePatchResponse = (apiAdminBannersUpdatePatchResponseSuccess | apiAdminBannersUpdatePatchResponseError)
 
-export const getApiAdminBannersUpdateUrl = (id: number,) => {
-
-
+export const getApiAdminBannersUpdatePatchUrl = (banner: string,) => {
 
 
-  return `/api/admin/banners/${id}`
+
+
+  return `/api/admin/banners/${banner}`
 }
 
 /**
  * @summary ApiAdminBannersUpdate
  */
-export const apiAdminBannersUpdate = async (id: number,
-    bannerUpdateIn: BannerUpdateIn, options?: RequestInit): Promise<apiAdminBannersUpdateResponse> => {
+export const apiAdminBannersUpdatePatch = async (banner: string,
+    bannerUpdateIn: BannerUpdateIn, options?: RequestInit): Promise<apiAdminBannersUpdatePatchResponse> => {
 
-  return apiFetch<apiAdminBannersUpdateResponse>(getApiAdminBannersUpdateUrl(id),
+  return apiFetch<apiAdminBannersUpdatePatchResponse>(getApiAdminBannersUpdatePatchUrl(banner),
   {
     ...options,
     method: 'PATCH',
     headers: { 'Content-Type': 'application/json', ...options?.headers },
     body: JSON.stringify(bannerUpdateIn)
-  }
-);}
-
-
-
-export type apiAdminBannersImageResponse201 = {
-  data: AdminBannerOut
-  status: 201
-}
-
-export type apiAdminBannersImageResponse400 = {
-  data: ApiAdminBannersImage400
-  status: 400
-}
-
-export type apiAdminBannersImageResponseSuccess = (apiAdminBannersImageResponse201) & {
-  headers: Headers;
-};
-export type apiAdminBannersImageResponseError = (apiAdminBannersImageResponse400) & {
-  headers: Headers;
-};
-
-export type apiAdminBannersImageResponse = (apiAdminBannersImageResponseSuccess | apiAdminBannersImageResponseError)
-
-export const getApiAdminBannersImageUrl = (id: number,) => {
-
-
-
-
-  return `/api/admin/banners/${id}/image`
-}
-
-/**
- * Attach/replace the slide image (the previous one is removed — a slide has ONE image).
- * @summary ApiAdminBannersImage
- */
-export const apiAdminBannersImage = async (id: number, options?: RequestInit): Promise<apiAdminBannersImageResponse> => {
-
-  return apiFetch<apiAdminBannersImageResponse>(getApiAdminBannersImageUrl(id),
-  {
-    ...options,
-    method: 'POST'
-
-
   }
 );}
 
@@ -4133,6 +4326,50 @@ export const apiAdminDealsStore = async (dealIn: DealIn, options?: RequestInit):
 
 
 
+export type apiAdminDealsUpdatePutResponse200 = {
+  data: AdminDealOut
+  status: 200
+}
+
+export type apiAdminDealsUpdatePutResponse400 = {
+  data: ApiAdminDealsUpdatePut400
+  status: 400
+}
+
+export type apiAdminDealsUpdatePutResponseSuccess = (apiAdminDealsUpdatePutResponse200) & {
+  headers: Headers;
+};
+export type apiAdminDealsUpdatePutResponseError = (apiAdminDealsUpdatePutResponse400) & {
+  headers: Headers;
+};
+
+export type apiAdminDealsUpdatePutResponse = (apiAdminDealsUpdatePutResponseSuccess | apiAdminDealsUpdatePutResponseError)
+
+export const getApiAdminDealsUpdatePutUrl = (deal: string,) => {
+
+
+
+
+  return `/api/admin/deals/${deal}`
+}
+
+/**
+ * @summary ApiAdminDealsUpdate
+ */
+export const apiAdminDealsUpdatePut = async (deal: string,
+    dealUpdateIn: DealUpdateIn, options?: RequestInit): Promise<apiAdminDealsUpdatePutResponse> => {
+
+  return apiFetch<apiAdminDealsUpdatePutResponse>(getApiAdminDealsUpdatePutUrl(deal),
+  {
+    ...options,
+    method: 'PUT',
+    headers: { 'Content-Type': 'application/json', ...options?.headers },
+    body: JSON.stringify(dealUpdateIn)
+  }
+);}
+
+
+
 export type apiAdminDealsDestroyResponse200 = {
   data: ApiAdminDealsDestroy200
   status: 200
@@ -4152,20 +4389,20 @@ export type apiAdminDealsDestroyResponseError = (apiAdminDealsDestroyResponse400
 
 export type apiAdminDealsDestroyResponse = (apiAdminDealsDestroyResponseSuccess | apiAdminDealsDestroyResponseError)
 
-export const getApiAdminDealsDestroyUrl = (id: number,) => {
+export const getApiAdminDealsDestroyUrl = (deal: string,) => {
 
 
 
 
-  return `/api/admin/deals/${id}`
+  return `/api/admin/deals/${deal}`
 }
 
 /**
  * @summary ApiAdminDealsDestroy
  */
-export const apiAdminDealsDestroy = async (id: number, options?: RequestInit): Promise<apiAdminDealsDestroyResponse> => {
+export const apiAdminDealsDestroy = async (deal: string, options?: RequestInit): Promise<apiAdminDealsDestroyResponse> => {
 
-  return apiFetch<apiAdminDealsDestroyResponse>(getApiAdminDealsDestroyUrl(id),
+  return apiFetch<apiAdminDealsDestroyResponse>(getApiAdminDealsDestroyUrl(deal),
   {
     ...options,
     method: 'DELETE'
@@ -4176,40 +4413,40 @@ export const apiAdminDealsDestroy = async (id: number, options?: RequestInit): P
 
 
 
-export type apiAdminDealsUpdateResponse200 = {
+export type apiAdminDealsUpdatePatchResponse200 = {
   data: AdminDealOut
   status: 200
 }
 
-export type apiAdminDealsUpdateResponse400 = {
-  data: ApiAdminDealsUpdate400
+export type apiAdminDealsUpdatePatchResponse400 = {
+  data: ApiAdminDealsUpdatePatch400
   status: 400
 }
 
-export type apiAdminDealsUpdateResponseSuccess = (apiAdminDealsUpdateResponse200) & {
+export type apiAdminDealsUpdatePatchResponseSuccess = (apiAdminDealsUpdatePatchResponse200) & {
   headers: Headers;
 };
-export type apiAdminDealsUpdateResponseError = (apiAdminDealsUpdateResponse400) & {
+export type apiAdminDealsUpdatePatchResponseError = (apiAdminDealsUpdatePatchResponse400) & {
   headers: Headers;
 };
 
-export type apiAdminDealsUpdateResponse = (apiAdminDealsUpdateResponseSuccess | apiAdminDealsUpdateResponseError)
+export type apiAdminDealsUpdatePatchResponse = (apiAdminDealsUpdatePatchResponseSuccess | apiAdminDealsUpdatePatchResponseError)
 
-export const getApiAdminDealsUpdateUrl = (id: number,) => {
-
-
+export const getApiAdminDealsUpdatePatchUrl = (deal: string,) => {
 
 
-  return `/api/admin/deals/${id}`
+
+
+  return `/api/admin/deals/${deal}`
 }
 
 /**
  * @summary ApiAdminDealsUpdate
  */
-export const apiAdminDealsUpdate = async (id: number,
-    dealUpdateIn: DealUpdateIn, options?: RequestInit): Promise<apiAdminDealsUpdateResponse> => {
+export const apiAdminDealsUpdatePatch = async (deal: string,
+    dealUpdateIn: DealUpdateIn, options?: RequestInit): Promise<apiAdminDealsUpdatePatchResponse> => {
 
-  return apiFetch<apiAdminDealsUpdateResponse>(getApiAdminDealsUpdateUrl(id),
+  return apiFetch<apiAdminDealsUpdatePatchResponse>(getApiAdminDealsUpdatePatchUrl(deal),
   {
     ...options,
     method: 'PATCH',
@@ -4299,43 +4536,90 @@ export const apiAdminCouponsStore = async (couponIn: CouponIn, options?: Request
 
 
 
-export type apiAdminCouponsUpdateResponse200 = {
+export type apiAdminCouponsUpdatePutResponse200 = {
   data: AdminCouponOut
   status: 200
 }
 
-export type apiAdminCouponsUpdateResponse400 = {
-  data: ApiAdminCouponsUpdate400
+export type apiAdminCouponsUpdatePutResponse400 = {
+  data: ApiAdminCouponsUpdatePut400
   status: 400
 }
 
-export type apiAdminCouponsUpdateResponseSuccess = (apiAdminCouponsUpdateResponse200) & {
+export type apiAdminCouponsUpdatePutResponseSuccess = (apiAdminCouponsUpdatePutResponse200) & {
   headers: Headers;
 };
-export type apiAdminCouponsUpdateResponseError = (apiAdminCouponsUpdateResponse400) & {
+export type apiAdminCouponsUpdatePutResponseError = (apiAdminCouponsUpdatePutResponse400) & {
   headers: Headers;
 };
 
-export type apiAdminCouponsUpdateResponse = (apiAdminCouponsUpdateResponseSuccess | apiAdminCouponsUpdateResponseError)
+export type apiAdminCouponsUpdatePutResponse = (apiAdminCouponsUpdatePutResponseSuccess | apiAdminCouponsUpdatePutResponseError)
 
-export const getApiAdminCouponsUpdateUrl = (id: number,) => {
-
-
+export const getApiAdminCouponsUpdatePutUrl = (coupon: string,) => {
 
 
-  return `/api/admin/coupons/${id}`
+
+
+  return `/api/admin/coupons/${coupon}`
 }
 
 /**
  * Activate/deactivate or adjust limits — deactivation takes effect immediately (checkout
- * re-validates every redemption). catalog.update is enforced by the route's Authorize
+ * re-validates every redemption). catalog.update is enforced by this controller's Authorize
  * middleware (DR-0055), so a denied caller 403s uniformly whether or not the id exists.
  * @summary ApiAdminCouponsUpdate
  */
-export const apiAdminCouponsUpdate = async (id: number,
-    couponUpdateIn: CouponUpdateIn, options?: RequestInit): Promise<apiAdminCouponsUpdateResponse> => {
+export const apiAdminCouponsUpdatePut = async (coupon: string,
+    couponUpdateIn: CouponUpdateIn, options?: RequestInit): Promise<apiAdminCouponsUpdatePutResponse> => {
 
-  return apiFetch<apiAdminCouponsUpdateResponse>(getApiAdminCouponsUpdateUrl(id),
+  return apiFetch<apiAdminCouponsUpdatePutResponse>(getApiAdminCouponsUpdatePutUrl(coupon),
+  {
+    ...options,
+    method: 'PUT',
+    headers: { 'Content-Type': 'application/json', ...options?.headers },
+    body: JSON.stringify(couponUpdateIn)
+  }
+);}
+
+
+
+export type apiAdminCouponsUpdatePatchResponse200 = {
+  data: AdminCouponOut
+  status: 200
+}
+
+export type apiAdminCouponsUpdatePatchResponse400 = {
+  data: ApiAdminCouponsUpdatePatch400
+  status: 400
+}
+
+export type apiAdminCouponsUpdatePatchResponseSuccess = (apiAdminCouponsUpdatePatchResponse200) & {
+  headers: Headers;
+};
+export type apiAdminCouponsUpdatePatchResponseError = (apiAdminCouponsUpdatePatchResponse400) & {
+  headers: Headers;
+};
+
+export type apiAdminCouponsUpdatePatchResponse = (apiAdminCouponsUpdatePatchResponseSuccess | apiAdminCouponsUpdatePatchResponseError)
+
+export const getApiAdminCouponsUpdatePatchUrl = (coupon: string,) => {
+
+
+
+
+  return `/api/admin/coupons/${coupon}`
+}
+
+/**
+ * Activate/deactivate or adjust limits — deactivation takes effect immediately (checkout
+ * re-validates every redemption). catalog.update is enforced by this controller's Authorize
+ * middleware (DR-0055), so a denied caller 403s uniformly whether or not the id exists.
+ * @summary ApiAdminCouponsUpdate
+ */
+export const apiAdminCouponsUpdatePatch = async (coupon: string,
+    couponUpdateIn: CouponUpdateIn, options?: RequestInit): Promise<apiAdminCouponsUpdatePatchResponse> => {
+
+  return apiFetch<apiAdminCouponsUpdatePatchResponse>(getApiAdminCouponsUpdatePatchUrl(coupon),
   {
     ...options,
     method: 'PATCH',
