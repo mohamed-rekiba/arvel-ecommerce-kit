@@ -24,6 +24,8 @@ let pollTimer: ReturnType<typeof setInterval> | null = null
 const cancellable = computed(
   () => order.value !== null && ['pending', 'paid'].includes(order.value.status)
 )
+// K15: a paid cancel is a refund, not a bare cancel — the confirm copy + button label say so
+const isPaidCancel = computed(() => order.value?.status === 'paid')
 const payable = computed(
   () => order.value?.status === 'pending' && order.value.payment_method === 'gateway'
 )
@@ -83,13 +85,17 @@ async function payNow() {
 
 async function cancelOrder() {
   if (!order.value) return
-  if (!window.confirm(t('order.cancel_confirm', { n: orderId }))) return
+  const confirmMsg = isPaidCancel.value
+    ? t('order.cancel_refund_confirm', { n: orderId })
+    : t('order.cancel_confirm', { n: orderId })
+  if (!window.confirm(confirmMsg)) return
   acting.value = true
   actionError.value = null
   try {
+    // same endpoint either way — a paid order routes server-side to a refund (DR-0065)
     order.value = await api.cancelOrder(orderId, token)
   } catch {
-    actionError.value = t('order.cancel_error')
+    actionError.value = isPaidCancel.value ? t('order.refund_error') : t('order.cancel_error')
   } finally {
     acting.value = false
   }
@@ -244,10 +250,13 @@ onBeforeUnmount(stopPolling)
           {{ t('account.order_invoice') }}
         </button>
         <button v-if="cancellable" class="act act--danger" :disabled="acting" @click="cancelOrder">
-          {{ t('order.cancel') }}
+          {{ isPaidCancel ? t('order.cancel_and_refund') : t('order.cancel') }}
         </button>
         <p v-if="order.status === 'cancelled'" class="muted">
           {{ t('order.cancelled_note') }}
+        </p>
+        <p v-if="order.status === 'refunded' && order.refund" class="muted">
+          {{ t('order.refunded_note', { amount: formatPrice(order.refund.amount_cents) }) }}
         </p>
       </section>
     </template>
@@ -294,7 +303,8 @@ onBeforeUnmount(stopPolling)
   color: var(--info-fg);
 }
 .chip--paid,
-.chip--delivered {
+.chip--delivered,
+.chip--refunded {
   background: var(--success-bg);
   color: var(--success-fg);
 }
@@ -305,6 +315,12 @@ onBeforeUnmount(stopPolling)
 .chip--shipped {
   background: var(--warn-bg);
   color: var(--warn-fg);
+}
+/* .chip--refund_pending is the base .chip color (--info-bg/--info-fg) already — explicit rule so
+   the mapping is documented, not just an accident of the default (K15). */
+.chip--refund_pending {
+  background: var(--info-bg);
+  color: var(--info-fg);
 }
 
 .panel {

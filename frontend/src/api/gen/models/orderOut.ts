@@ -12,6 +12,7 @@ import type { OrderStatus } from './orderStatus';
 import type { OrderTimelineOut } from './orderTimelineOut';
 import type { PaymentMethod } from './paymentMethod';
 import type { PaymentStatus } from './paymentStatus';
+import type { RefundOut } from './refundOut';
 
 export interface OrderOut {
   id: number;
@@ -33,4 +34,5 @@ export interface OrderOut {
   items: OrderLineOut[];
   placed_at?: string | null;
   timeline?: OrderTimelineOut[] | null;
+  refund?: RefundOut | null;
 }

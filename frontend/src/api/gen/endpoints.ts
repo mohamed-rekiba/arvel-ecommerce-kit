@@ -47,6 +47,7 @@ import type {
   ApiAdminDealsStore400,
   ApiAdminDealsUpdatePatch400,
   ApiAdminDealsUpdatePut400,
+  ApiAdminOrdersRefund400,
   ApiAdminOrdersShow400,
   ApiAdminOrdersStatus400,
   ApiAdminProductsDestroy400,
@@ -83,6 +84,7 @@ import type {
   ApiCartItemsUpdate400,
   ApiCheckout400,
   ApiDevGatewayCharges400,
+  ApiDevGatewayRefunds400,
   ApiEmailVerify400,
   ApiLogin400,
   ApiMediaConversion400,
@@ -127,6 +129,8 @@ import type {
   DealUpdateIn,
   DevChargeIn,
   DevChargeOut,
+  DevRefundIn,
+  DevRefundOut,
   ForgotPasswordIn,
   ForgotPasswordOut,
   GalleryImageOut,
@@ -1639,9 +1643,14 @@ export const getApiOrdersCancelUrl = (id: number,) => {
 }
 
 /**
- * Cancel the order (owner or token holder) while the state machine allows it — restoring the
- * decremented stock atomically. Cancelling a PAID order records the cancellation; refunding the
- * money is out of scope (documented limitation).
+ * Cancel the order (owner or token holder) while the state machine allows it. A PENDING
+ * (unpaid) cancel is a plain, synchronous CANCELLED + restock — unchanged. A PAID cancel is a
+ * REFUND (K15, DR-0065): money was captured, so it must come back — the customer keeps ONE
+ * action, routed to `refund_service.initiate_refund` (the same function the admin refund route
+ * uses). This first read is unlocked and only picks which path to take; each path re-validates
+ * the real state under its own `FOR UPDATE` before doing anything irreversible, so a race here
+ * (e.g. the order ships between this read and the lock) is caught by that path's own guard, not
+ * by this dispatch.
  * @summary ApiOrdersCancel
  */
 export const apiOrdersCancel = async (id: number, options?: RequestInit): Promise<apiOrdersCancelResponse> => {
@@ -4798,6 +4807,54 @@ export const apiAdminOrdersStatus = async (id: number,
 
 
 
+export type apiAdminOrdersRefundResponse200 = {
+  data: OrderOut
+  status: 200
+}
+
+export type apiAdminOrdersRefundResponse400 = {
+  data: ApiAdminOrdersRefund400
+  status: 400
+}
+
+export type apiAdminOrdersRefundResponseSuccess = (apiAdminOrdersRefundResponse200) & {
+  headers: Headers;
+};
+export type apiAdminOrdersRefundResponseError = (apiAdminOrdersRefundResponse400) & {
+  headers: Headers;
+};
+
+export type apiAdminOrdersRefundResponse = (apiAdminOrdersRefundResponseSuccess | apiAdminOrdersRefundResponseError)
+
+export const getApiAdminOrdersRefundUrl = (id: number,) => {
+
+
+
+
+  return `/api/admin/orders/${id}/refund`
+}
+
+/**
+ * Admin-issued refund/return (K15): PAID (a support cancel) or SHIPPED (the one documented
+ * return case) -> REFUND_PENDING via the same `refund_service.initiate_refund` the customer
+ * /cancel route uses — one money-moving code path, two entry points. orders.update is enforced
+ * by the route's Authorize middleware (DR-0055), so a denied caller 403s uniformly whether or
+ * not the id exists.
+ * @summary ApiAdminOrdersRefund
+ */
+export const apiAdminOrdersRefund = async (id: number, options?: RequestInit): Promise<apiAdminOrdersRefundResponse> => {
+
+  return apiFetch<apiAdminOrdersRefundResponse>(getApiAdminOrdersRefundUrl(id),
+  {
+    ...options,
+    method: 'POST'
+
+
+  }
+);}
+
+
+
 export type apiDevGatewayChargesResponse201 = {
   data: DevChargeOut
   status: 201
@@ -4837,6 +4894,51 @@ export const apiDevGatewayCharges = async (devChargeIn: DevChargeIn, options?: R
     method: 'POST',
     headers: { 'Content-Type': 'application/json', ...options?.headers },
     body: JSON.stringify(devChargeIn)
+  }
+);}
+
+
+
+export type apiDevGatewayRefundsResponse201 = {
+  data: DevRefundOut
+  status: 201
+}
+
+export type apiDevGatewayRefundsResponse400 = {
+  data: ApiDevGatewayRefunds400
+  status: 400
+}
+
+export type apiDevGatewayRefundsResponseSuccess = (apiDevGatewayRefundsResponse201) & {
+  headers: Headers;
+};
+export type apiDevGatewayRefundsResponseError = (apiDevGatewayRefundsResponse400) & {
+  headers: Headers;
+};
+
+export type apiDevGatewayRefundsResponse = (apiDevGatewayRefundsResponseSuccess | apiDevGatewayRefundsResponseError)
+
+export const getApiDevGatewayRefundsUrl = () => {
+
+
+
+
+  return `/api/dev-gateway/refunds`
+}
+
+/**
+ * Accept a reverse charge and queue the async ``charge.refunded`` webhook — the direct mirror
+ * of ``create_charge`` (K15).
+ * @summary ApiDevGatewayRefunds
+ */
+export const apiDevGatewayRefunds = async (devRefundIn: DevRefundIn, options?: RequestInit): Promise<apiDevGatewayRefundsResponse> => {
+
+  return apiFetch<apiDevGatewayRefundsResponse>(getApiDevGatewayRefundsUrl(),
+  {
+    ...options,
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...options?.headers },
+    body: JSON.stringify(devRefundIn)
   }
 );}
 

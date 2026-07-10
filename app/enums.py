@@ -101,15 +101,26 @@ class OrderStatus(str, Enum):
     SHIPPED = "shipped"
     DELIVERED = "delivered"
     CANCELLED = "cancelled"
+    REFUND_PENDING = "refund_pending"  # K15: a reverse charge is in flight
+    REFUNDED = "refunded"  # K15: terminal — the reverse charge succeeded
 
 
-# The order state machine: which transitions are legal from each state.
+# The order state machine: which transitions are legal from each state. PAID -> CANCELLED is
+# deliberately absent (K15): if money was captured, a cancel must return it, so a paid cancel
+# routes through REFUND_PENDING instead of a bare CANCELLED (see refund_service.initiate_refund).
 ORDER_TRANSITIONS: dict[OrderStatus, set[OrderStatus]] = {
     OrderStatus.PENDING: {OrderStatus.PAID, OrderStatus.CANCELLED},
-    OrderStatus.PAID: {OrderStatus.SHIPPED, OrderStatus.CANCELLED},
-    OrderStatus.SHIPPED: {OrderStatus.DELIVERED},
-    OrderStatus.DELIVERED: set(),
+    OrderStatus.PAID: {OrderStatus.SHIPPED, OrderStatus.REFUND_PENDING},
+    OrderStatus.SHIPPED: {
+        OrderStatus.DELIVERED,
+        OrderStatus.REFUND_PENDING,
+    },  # the one documented return case
+    OrderStatus.DELIVERED: set(),  # DELIVERED returns are anti-scope (RMA receiving)
     OrderStatus.CANCELLED: set(),
+    # REFUND_PENDING -> PAID exists ONLY for the synchronous reverse-call-failure recovery edge
+    # (refund_service.initiate_refund) — never reachable through the generic status-update route.
+    OrderStatus.REFUND_PENDING: {OrderStatus.REFUNDED, OrderStatus.PAID},
+    OrderStatus.REFUNDED: set(),
 }
 
 
@@ -140,6 +151,14 @@ class CouponType(str, Enum):
 
 class PaymentStatus(str, Enum):
     """A payment's state, mirrored from the gateway."""
+
+    PENDING = "pending"
+    SUCCEEDED = "succeeded"
+    FAILED = "failed"
+
+
+class RefundStatus(str, Enum):
+    """A refund's state, mirrored from the gateway (K15) — the reverse of PaymentStatus."""
 
     PENDING = "pending"
     SUCCEEDED = "succeeded"

@@ -14,9 +14,11 @@ from arvel.validation import ValidationException
 
 from app.controllers.order_access import resolve_owned_order
 
-from app.enums import OrderStatus, PaymentStatus, can_transition
+from app.enums import OrderStatus, PaymentStatus, RefundStatus, can_transition
 from app.models.order import Order
 from app.models.payment import Payment
+from app.models.product_variant import ProductVariant
+from app.models.refund import Refund
 from app.models.webhook_event import WebhookEvent
 from app.schemas import PaymentOut, WebhookIn, WebhookOut
 
@@ -121,4 +123,55 @@ async def webhook(request: Request, data: WebhookIn) -> WebhookOut:
             if payment is not None:
                 payment.status = PaymentStatus.FAILED
                 await payment.save()
+        elif data.type == "charge.refunded":
+            # K15 — the reverse of charge.succeeded above. `refund_service.initiate_refund`
+            # already moved the order to REFUND_PENDING (and created this PENDING Refund row)
+            # before the reverse call was even made, so a matching row is the only thing a
+            # genuine gateway event can complete; a forged event with no prior initiation finds
+            # nothing here and is a no-op.
+            charge_id = data.data.get("charge_id")
+            refund = (
+                await Refund.where("gateway_charge_id", charge_id)
+                .where("status", RefundStatus.PENDING.value)
+                .first()
+            )
+            if refund is not None:
+                order = (
+                    await Order.where("id", refund.order_id).lock_for_update().first()
+                )
+                if order is not None:
+                    current = (
+                        order.status
+                        if isinstance(order.status, OrderStatus)
+                        else OrderStatus(order.status)
+                    )
+                    if can_transition(current, OrderStatus.REFUNDED):
+                        refund.status = RefundStatus.SUCCEEDED
+                        await refund.save()
+                        order.status = OrderStatus.REFUNDED
+                        await order.save()
+                        from app.controllers.checkout_controller import (
+                            log_transition,
+                        )
+
+                        await log_transition(order, current, OrderStatus.REFUNDED)
+                        if refund.restock:
+                            # Restock lives ONLY here: inside the tx, gated by the
+                            # can_transition check above (terminal-state guard 3), under a
+                            # variant FOR UPDATE per line. A redelivered event never re-enters
+                            # this block (the event_id ledger, guard 2, already returned
+                            # already_processed above); a distinct event for the same charge
+                            # can't re-pass can_transition once REFUNDED is terminal — so this
+                            # runs at most once per refund.
+                            for item in await order.items().get():
+                                variant = (
+                                    await ProductVariant.where(
+                                        "id", item.product_variant_id
+                                    )
+                                    .lock_for_update()
+                                    .first()
+                                )
+                                if variant is not None:
+                                    variant.stock = variant.stock + item.quantity
+                                    await variant.save()
     return WebhookOut(status="processed")

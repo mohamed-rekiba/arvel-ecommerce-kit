@@ -18,4 +18,6 @@ export const OrderStatus = {
   shipped: 'shipped',
   delivered: 'delivered',
   cancelled: 'cancelled',
+  refund_pending: 'refund_pending',
+  refunded: 'refunded',
 } as const;

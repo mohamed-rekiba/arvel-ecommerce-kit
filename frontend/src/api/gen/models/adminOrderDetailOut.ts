@@ -9,6 +9,7 @@ import type { AddressOut } from './addressOut';
 import type { AdminOrderCustomerOut } from './adminOrderCustomerOut';
 import type { AdminOrderEventOut } from './adminOrderEventOut';
 import type { AdminOrderPaymentOut } from './adminOrderPaymentOut';
+import type { AdminOrderRefundOut } from './adminOrderRefundOut';
 import type { Currency } from './currency';
 import type { OrderLineOut } from './orderLineOut';
 import type { OrderStatus } from './orderStatus';
@@ -32,5 +33,6 @@ export interface AdminOrderDetailOut {
   customer: AdminOrderCustomerOut | null;
   items: OrderLineOut[];
   payments: AdminOrderPaymentOut[];
+  refunds: AdminOrderRefundOut[];
   history: AdminOrderEventOut[];
 }

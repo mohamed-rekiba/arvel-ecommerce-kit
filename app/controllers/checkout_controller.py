@@ -21,6 +21,7 @@ from app.enums import (
     OrderStatus,
     PaymentStatus,
     Permission,
+    RefundStatus,
     can_transition,
     PaymentMethod,
 )
@@ -44,6 +45,7 @@ from app.schemas import (
     OrderOut,
     OrderStatusIn,
     OrderTimelineOut,
+    RefundOut,
     ShippingMethodOut,
 )
 
@@ -90,6 +92,26 @@ async def _latest_payment_status(order: Order) -> PaymentStatus | None:
     return status if isinstance(status, PaymentStatus) else PaymentStatus(status)
 
 
+async def _latest_refund(order: Order) -> RefundOut | None:
+    """The customer-facing summary of the most recent refund attempt (None = never refunded) —
+    mirrors ``_latest_payment_status``'s minimal, id-free surface."""
+    from app.models.refund import Refund
+
+    refund = await Refund.where("order_id", order.id).order_by("id", "desc").first()
+    if refund is None:
+        return None
+    status = (
+        refund.status
+        if isinstance(refund.status, RefundStatus)
+        else RefundStatus(refund.status)
+    )
+    return RefundOut(
+        amount_cents=refund.amount_cents,
+        status=status,
+        created_at=_iso(refund.created_at),
+    )
+
+
 async def log_transition(order: Order, before: OrderStatus, after: OrderStatus) -> None:
     """Every status change lands in the activity trail — the admin history AND the customer's
     tracking timeline read from it."""
@@ -113,6 +135,7 @@ async def _order_out(
     items: list[OrderItem],
     payment_status: PaymentStatus | None = None,
     timeline: list[OrderTimelineOut] | None = None,
+    refund: RefundOut | None = None,
 ) -> OrderOut:
     looks = await line_presentation([i.product_variant_id for i in items])
     return OrderOut(
@@ -146,6 +169,7 @@ async def _order_out(
         ],
         placed_at=_iso(getattr(order, "created_at", None)),
         timeline=timeline,
+        refund=refund,
     )
 
 
@@ -450,14 +474,38 @@ async def show(request: Request) -> OrderOut:
         await order.items().get(),
         payment_status=await _latest_payment_status(order),
         timeline=await _timeline(order),
+        refund=await _latest_refund(order),
     )
 
 
 async def cancel(request: Request) -> OrderOut:
-    """Cancel the order (owner or token holder) while the state machine allows it — restoring the
-    decremented stock atomically. Cancelling a PAID order records the cancellation; refunding the
-    money is out of scope (documented limitation)."""
+    """Cancel the order (owner or token holder) while the state machine allows it. A PENDING
+    (unpaid) cancel is a plain, synchronous CANCELLED + restock — unchanged. A PAID cancel is a
+    REFUND (K15, DR-0065): money was captured, so it must come back — the customer keeps ONE
+    action, routed to `refund_service.initiate_refund` (the same function the admin refund route
+    uses). This first read is unlocked and only picks which path to take; each path re-validates
+    the real state under its own `FOR UPDATE` before doing anything irreversible, so a race here
+    (e.g. the order ships between this read and the lock) is caught by that path's own guard, not
+    by this dispatch."""
     order = await resolve_owned_order(request, int(request.path_param("id")))
+    current = (
+        order.status
+        if isinstance(order.status, OrderStatus)
+        else OrderStatus(order.status)
+    )
+    if current is OrderStatus.PAID:
+        from app.services.refund_service import initiate_refund
+
+        refund = await initiate_refund(order)
+        refunded = await Order.find(refund.order_id)
+        if refunded is None:
+            abort(404, "Order not found")
+        return await _order_out(
+            refunded,
+            await refunded.items().get(),
+            payment_status=await _latest_payment_status(refunded),
+            refund=await _latest_refund(refunded),
+        )
     async with DB.transaction():
         # re-read under FOR UPDATE: two concurrent cancels serialize here, so exactly one
         # transitions and restocks — the loser sees CANCELLED and 422s
@@ -547,12 +595,15 @@ async def admin_order_show(request: Request, id: Order) -> AdminOrderDetailOut:
 
     from app.controllers.serializers import iso as _iso
     from app.enums import PaymentStatus as _PS
+    from app.enums import RefundStatus as _RS
     from app.models.payment import Payment
+    from app.models.refund import Refund
     from app.schemas import (
         AdminOrderCustomerOut,
         AdminOrderDetailOut,
         AdminOrderEventOut,
         AdminOrderPaymentOut,
+        AdminOrderRefundOut,
     )
 
     # orders.view is enforced by the route's Authorize middleware (DR-0055) — it runs before
@@ -570,6 +621,7 @@ async def admin_order_show(request: Request, id: Order) -> AdminOrderDetailOut:
             )
 
     payments = await Payment.where("order_id", order.id).order_by("id").get()
+    refunds = await Refund.where("order_id", order.id).order_by("id").get()
     events = (
         await Activity.where("subject_type", "Order")
         .where("subject_id", order.id)
@@ -615,6 +667,18 @@ async def admin_order_show(request: Request, id: Order) -> AdminOrderDetailOut:
             )
             for p in payments
         ],
+        refunds=[
+            AdminOrderRefundOut(
+                id=r.id,
+                gateway_charge_id=r.gateway_charge_id,
+                gateway_refund_id=r.gateway_refund_id,
+                amount_cents=r.amount_cents,
+                status=r.status if isinstance(r.status, _RS) else _RS(r.status),
+                restock=r.restock,
+                created_at=_iso(r.created_at),
+            )
+            for r in refunds
+        ],
         history=[
             AdminOrderEventOut(
                 description=e.description,
@@ -649,6 +713,29 @@ async def update_status(request: Request, id: Order, data: OrderStatusIn) -> Ord
         if isinstance(order.status, OrderStatus)
         else OrderStatus(order.status)
     )
+    if (
+        OrderStatus.REFUND_PENDING in (target, current)
+        or target is OrderStatus.REFUNDED
+    ):
+        # Money-moving states MUST go through refund_service, in BOTH directions:
+        #   - target REFUND_PENDING/REFUNDED: only refund_service.initiate_refund /
+        #     the charge.refunded webhook may CREATE the Refund row + call the gateway + restock —
+        #     this endpoint only ever flips the status column.
+        #   - current REFUND_PENDING: REFUND_PENDING -> PAID exists in ORDER_TRANSITIONS ONLY for
+        #     refund_service's own synchronous reverse-call-failure recovery. Without this check
+        #     that edge was reachable here too (target="paid" isn't itself a rejected target), so
+        #     an admin could flip an order with a reverse charge already in flight straight to
+        #     PAID — the order reads fulfillable, the Refund row is orphaned PENDING forever (the
+        #     later charge.refunded webhook finds a non-REFUND_PENDING order and no-ops), and the
+        #     merchant both ships the goods AND has refunded the money. REFUND_PENDING is exited
+        #     ONLY by refund_service (webhook success -> REFUNDED, sync failure -> PAID) — never
+        #     by this generic route, regardless of target.
+        # REFUNDED is terminal in ORDER_TRANSITIONS anyway (can_transition below would already
+        # 422 any target from it), but the target-is-REFUNDED check above catches it earlier with
+        # the clearer message.
+        raise ValidationException(
+            {"status": ["Use the refund endpoint to issue a refund."]}
+        )
     if not can_transition(
         current, target, cod=_method_value(order) is PaymentMethod.COD
     ):
@@ -684,6 +771,26 @@ async def update_status(request: Request, id: Order, data: OrderStatusIn) -> Ord
                 OrderShippedNotification(order.id, order.tracking_number)
             )
     return await _order_out(order, await order.items().get())
+
+
+async def admin_refund(request: Request, id: Order) -> OrderOut:
+    """Admin-issued refund/return (K15): PAID (a support cancel) or SHIPPED (the one documented
+    return case) -> REFUND_PENDING via the same `refund_service.initiate_refund` the customer
+    /cancel route uses — one money-moving code path, two entry points. orders.update is enforced
+    by the route's Authorize middleware (DR-0055), so a denied caller 403s uniformly whether or
+    not the id exists."""
+    from app.services.refund_service import initiate_refund
+
+    refund = await initiate_refund(id)
+    order = await Order.find(refund.order_id)
+    if order is None:
+        abort(404, "Order not found")
+    return await _order_out(
+        order,
+        await order.items().get(),
+        payment_status=await _latest_payment_status(order),
+        refund=await _latest_refund(order),
+    )
 
 
 async def shipping_methods(request: Request) -> list[ShippingMethodOut]:

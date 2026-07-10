@@ -1564,5 +1564,34 @@
     "status_code": null,
     "group": null,
     "domain": null
+  },
+  {
+    "methods": [
+      "POST"
+    ],
+    "path": "/api/admin/orders/{id:int}/refund",
+    "name": "api.admin.orders.refund",
+    "middleware": [
+      "Authenticate",
+      "Authorize('orders.update')"
+    ],
+    "security": [
+      "bearer"
+    ],
+    "status_code": 200,
+    "group": "api",
+    "domain": null
+  },
+  {
+    "methods": [
+      "POST"
+    ],
+    "path": "/api/dev-gateway/refunds",
+    "name": "api.dev_gateway.refunds",
+    "middleware": [],
+    "security": [],
+    "status_code": null,
+    "group": "api",
+    "domain": null
   }
 ]

@@ -16,6 +16,7 @@ from app.enums import (
     Currency,
     OrderStatus,
     PaymentStatus,
+    RefundStatus,
     ReviewStatus,
     PaymentMethod,
 )
@@ -575,6 +576,15 @@ class AddressOut(Schema):
     country: CountryCode
 
 
+class RefundOut(Schema):
+    """The customer-facing view of a refund (K15) — no gateway ids, mirrors payment_status's
+    minimal surface."""
+
+    amount_cents: int
+    status: RefundStatus
+    created_at: str | None
+
+
 class OrderOut(Schema):
     id: int
     status: OrderStatus
@@ -597,6 +607,7 @@ class OrderOut(Schema):
     items: list[OrderLineOut]
     placed_at: str | None = None  # ISO created_at — the account order cards show it
     timeline: list[OrderTimelineOut] | None = None  # populated on the single-order read
+    refund: RefundOut | None = None  # latest refund attempt (None = never refunded)
 
 
 class ReviewIn(Schema):
@@ -668,6 +679,19 @@ class AdminOrderPaymentOut(Schema):
     created_at: str | None
 
 
+class AdminOrderRefundOut(Schema):
+    """The back-office view of one refund attempt (K15) — the full trail, incl. a FAILED one, so
+    support can see a stuck/retried refund the way ``payments`` shows every charge attempt."""
+
+    id: int
+    gateway_charge_id: str
+    gateway_refund_id: str | None
+    amount_cents: int
+    status: RefundStatus
+    restock: bool
+    created_at: str | None
+
+
 class AdminOrderEventOut(Schema):
     """One line of the order's history (from the activity trail)."""
 
@@ -701,6 +725,7 @@ class AdminOrderDetailOut(Schema):
     customer: AdminOrderCustomerOut | None  # None = a guest order
     items: list[OrderLineOut]
     payments: list[AdminOrderPaymentOut]
+    refunds: list[AdminOrderRefundOut]
     history: list[AdminOrderEventOut]
 
 
@@ -794,6 +819,18 @@ class DevChargeIn(Schema):
 class DevChargeOut(Schema):
     id: str
     client_secret: str
+
+
+class DevRefundIn(Schema):
+    """What the shop sends the (dev) gateway when reversing a charge (K15)."""
+
+    charge_id: str
+    amount: int
+    order_id: int
+
+
+class DevRefundOut(Schema):
+    id: str
 
 
 class PaymentOut(Schema):

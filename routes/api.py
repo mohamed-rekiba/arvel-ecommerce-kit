@@ -374,6 +374,11 @@ with Route.group(prefix="/admin", name="api.admin."):
         ).status(200).middleware(
             Authorize(Permission.ORDERS_UPDATE.value)
         )  # a transition, not a creation
+        # K15: the one money-moving admin action (refund_service.initiate_refund) — separate from
+        # the generic status route above, which explicitly refuses REFUND_PENDING/REFUNDED targets.
+        Route.post(
+            "/orders/{id:int}/refund", checkout.admin_refund, name="orders.refund"
+        ).status(200).middleware(Authorize(Permission.ORDERS_UPDATE.value))
 
 # --- Dev payment gateway (debug builds only) ---
 # A stand-in PSP so the payment loop runs live with no external account: charges succeed and the
@@ -385,4 +390,9 @@ if config("app.debug", False):
         "/dev-gateway/charges",
         dev_gateway.create_charge,
         name="api.dev_gateway.charges",
+    )
+    Route.post(
+        "/dev-gateway/refunds",
+        dev_gateway.create_refund,
+        name="api.dev_gateway.refunds",
     )

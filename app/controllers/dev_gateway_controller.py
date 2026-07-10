@@ -11,7 +11,7 @@ from uuid import uuid4
 from arvel.http import Request
 
 from app.jobs.deliver_gateway_webhook import DeliverGatewayWebhook
-from app.schemas import DevChargeIn, DevChargeOut
+from app.schemas import DevChargeIn, DevChargeOut, DevRefundIn, DevRefundOut
 
 
 async def create_charge(request: Request, data: DevChargeIn) -> DevChargeOut:
@@ -21,3 +21,13 @@ async def create_charge(request: Request, data: DevChargeIn) -> DevChargeOut:
         f"evt_{uuid4().hex[:12]}", "charge.succeeded", charge_id
     )
     return DevChargeOut(id=charge_id, client_secret=f"cs_dev_{uuid4().hex[:8]}")
+
+
+async def create_refund(request: Request, data: DevRefundIn) -> DevRefundOut:
+    """Accept a reverse charge and queue the async ``charge.refunded`` webhook — the direct mirror
+    of ``create_charge`` (K15)."""
+    refund_id = f"re_dev_{uuid4().hex[:12]}"
+    await DeliverGatewayWebhook.dispatch(
+        f"evt_{uuid4().hex[:12]}", "charge.refunded", data.charge_id
+    )
+    return DevRefundOut(id=refund_id)

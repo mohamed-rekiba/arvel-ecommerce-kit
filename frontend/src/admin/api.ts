@@ -11,6 +11,7 @@ import type {
   ActivityOut,
   AdminCategoryOut,
   AdminOrderDetailOut,
+  AdminOrderRefundOut,
   AdminReviewOut,
   AdminUserDetailOut,
   AdminUserOut,
@@ -60,6 +61,7 @@ export type ProductDetail = AdminProductDetailOut
 export type AdminCategory = AdminCategoryOut
 export type AdminUser = AdminUserOut
 export type AdminOrderDetail = AdminOrderDetailOut
+export type AdminOrderRefund = AdminOrderRefundOut
 export type AdminDeal = AdminDealOut
 export type AdminBanner = AdminBannerOut
 export type AdminReview = AdminReviewOut
@@ -81,14 +83,24 @@ export interface Paginated<T> {
   total: number
 }
 
-// The order state machine (mirrors app/enums.py ORDER_TRANSITIONS) — which status a given one can move to.
+// The order state machine (mirrors app/enums.py ORDER_TRANSITIONS) — which status a given one can
+// move to via the GENERIC status route. refund_pending/refunded are deliberately absent here even
+// though the backend state machine permits the edge: a refund is money-moving and MUST go through
+// refund_service (api.refundOrder), never a bare status flip — see the "Issue refund" control
+// instead of a generic "Advance" button for those two (K15, DR-0065).
 export const ORDER_TRANSITIONS: Record<OrderStatus, OrderStatus[]> = {
   pending: ['paid', 'cancelled'],
-  paid: ['shipped', 'cancelled'],
+  paid: ['shipped'],
   shipped: ['delivered'],
   delivered: [],
-  cancelled: []
+  cancelled: [],
+  refund_pending: [],
+  refunded: []
 }
+
+// Orders a refund/return can be issued against (K15) — the money-moving action, separate from the
+// generic status loop above.
+export const REFUNDABLE_STATUSES: OrderStatus[] = ['paid', 'shipped']
 
 // COD orders never pass through "paid" — they ship straight from pending (server can_transition(cod=True)).
 export function nextStates(order: {
@@ -248,7 +260,8 @@ export const api = {
     request<Order>('POST', `/admin/orders/${id}/status`, {
       status,
       ...(trackingNumber ? { tracking_number: trackingNumber } : {})
-    })
+    }),
+  refundOrder: (id: number) => request<Order>('POST', `/admin/orders/${id}/refund`)
 }
 
 export function name(p: AdminProduct): string {

@@ -8,6 +8,7 @@ import {
   ApiError,
   type AdminOrderDetail,
   type OrderStatus,
+  REFUNDABLE_STATUSES,
   api,
   formatPrice,
   nextStates as transitionsFor
@@ -27,6 +28,11 @@ const nextStates = computed<OrderStatus[]>(() => (order.value ? transitionsFor(o
 // the ship transition requires a tracking number (K16) — its own control, not the generic loop
 const otherStates = computed(() => nextStates.value.filter((s) => s !== 'shipped'))
 const canShip = computed(() => nextStates.value.includes('shipped'))
+// K15: refund/return is a money-moving action — its own control (act--danger), never the generic
+// status loop above (see ORDER_TRANSITIONS' comment in api.ts).
+const refundable = computed(
+  () => order.value !== null && REFUNDABLE_STATUSES.includes(order.value.status)
+)
 
 async function load() {
   loading.value = true
@@ -57,15 +63,35 @@ async function advance(next: OrderStatus, tracking?: string) {
   }
 }
 
+async function issueRefund() {
+  if (!order.value) return
+  if (!window.confirm(tr('orders.refund_confirm', { id: order.value.id }))) return
+  acting.value = true
+  notice.value = null
+  try {
+    await api.refundOrder(orderId)
+    await load()
+  } catch (e) {
+    notice.value =
+      e instanceof ApiError
+        ? (Object.values(e.errors)[0]?.[0] ?? tr('orders.refund_error'))
+        : tr('orders.refund_error')
+  } finally {
+    acting.value = false
+  }
+}
+
 const formatWhen = (iso: string | null) =>
   iso ? new Date(iso).toLocaleString(currentLocale()) : ''
 
 const severity = (status: string) =>
-  status === 'paid' || status === 'delivered'
+  status === 'paid' || status === 'delivered' || status === 'refunded'
     ? 'success'
     : status === 'cancelled'
       ? 'danger'
-      : 'secondary'
+      : status === 'refund_pending'
+        ? 'info'
+        : 'secondary'
 
 onMounted(load)
 </script>
@@ -124,6 +150,15 @@ onMounted(load)
               @click="advance('shipped', trackingNumber.trim())"
             />
           </span>
+          <Button
+            v-if="refundable"
+            :label="tr('orders.issue_refund')"
+            severity="danger"
+            outlined
+            size="small"
+            :disabled="acting"
+            @click="issueRefund"
+          />
         </div>
       </header>
 
@@ -195,6 +230,31 @@ onMounted(load)
                     p.status === 'succeeded'
                       ? 'success'
                       : p.status === 'failed'
+                        ? 'danger'
+                        : 'secondary'
+                  "
+                />
+              </span>
+            </li>
+          </ul>
+
+          <h2>{{ tr('orders.refunds') }}</h2>
+          <p v-if="order.refunds.length === 0" class="muted">
+            {{ tr('orders.no_refunds') }}
+          </p>
+          <ul class="lines">
+            <li v-for="r in order.refunds" :key="r.id">
+              <span
+                ><code>{{ r.gateway_charge_id }}</code></span
+              >
+              <span>
+                {{ formatPrice(r.amount_cents) }}
+                <Tag
+                  :value="tr(`payment.${r.status}` as MK)"
+                  :severity="
+                    r.status === 'succeeded'
+                      ? 'success'
+                      : r.status === 'failed'
                         ? 'danger'
                         : 'secondary'
                   "

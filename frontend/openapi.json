@@ -2034,7 +2034,7 @@
     "/api/orders/{id}/cancel": {
       "post": {
         "summary": "ApiOrdersCancel",
-        "description": "Cancel the order (owner or token holder) while the state machine allows it \u2014 restoring the\ndecremented stock atomically. Cancelling a PAID order records the cancellation; refunding the\nmoney is out of scope (documented limitation).",
+        "description": "Cancel the order (owner or token holder) while the state machine allows it. A PENDING\n(unpaid) cancel is a plain, synchronous CANCELLED + restock \u2014 unchanged. A PAID cancel is a\nREFUND (K15, DR-0065): money was captured, so it must come back \u2014 the customer keeps ONE\naction, routed to `refund_service.initiate_refund` (the same function the admin refund route\nuses). This first read is unlocked and only picks which path to take; each path re-validates\nthe real state under its own `FOR UPDATE` before doing anything irreversible, so a race here\n(e.g. the order ships between this read and the lock) is caught by that path's own guard, not\nby this dispatch.",
         "operationId": "api.orders.cancel",
         "parameters": [
           {
@@ -6986,6 +6986,81 @@
         ]
       }
     },
+    "/api/admin/orders/{id}/refund": {
+      "post": {
+        "summary": "ApiAdminOrdersRefund",
+        "description": "Admin-issued refund/return (K15): PAID (a support cancel) or SHIPPED (the one documented\nreturn case) -> REFUND_PENDING via the same `refund_service.initiate_refund` the customer\n/cancel route uses \u2014 one money-moving code path, two entry points. orders.update is enforced\nby the route's Authorize middleware (DR-0055), so a denied caller 403s uniformly whether or\nnot the id exists.",
+        "operationId": "api.admin.orders.refund",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "schema": {
+              "type": "integer"
+            },
+            "required": true,
+            "deprecated": false
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Request fulfilled, document follows",
+            "headers": {},
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/OrderOut"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request syntax or unsupported method",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "status_code": {
+                      "type": "integer"
+                    },
+                    "detail": {
+                      "type": "string"
+                    },
+                    "extra": {
+                      "additionalProperties": {},
+                      "type": [
+                        "null",
+                        "object",
+                        "array"
+                      ]
+                    }
+                  },
+                  "type": "object",
+                  "required": [
+                    "detail",
+                    "status_code"
+                  ],
+                  "description": "Validation Exception",
+                  "examples": [
+                    {
+                      "status_code": 400,
+                      "detail": "Bad Request",
+                      "extra": {}
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        },
+        "deprecated": false,
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ]
+      }
+    },
     "/api/dev-gateway/charges": {
       "post": {
         "summary": "ApiDevGatewayCharges",
@@ -7009,6 +7084,75 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/DevChargeOut"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request syntax or unsupported method",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "status_code": {
+                      "type": "integer"
+                    },
+                    "detail": {
+                      "type": "string"
+                    },
+                    "extra": {
+                      "additionalProperties": {},
+                      "type": [
+                        "null",
+                        "object",
+                        "array"
+                      ]
+                    }
+                  },
+                  "type": "object",
+                  "required": [
+                    "detail",
+                    "status_code"
+                  ],
+                  "description": "Validation Exception",
+                  "examples": [
+                    {
+                      "status_code": 400,
+                      "detail": "Bad Request",
+                      "extra": {}
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        },
+        "deprecated": false
+      }
+    },
+    "/api/dev-gateway/refunds": {
+      "post": {
+        "summary": "ApiDevGatewayRefunds",
+        "description": "Accept a reverse charge and queue the async ``charge.refunded`` webhook \u2014 the direct mirror\nof ``create_charge`` (K15).",
+        "operationId": "api.dev_gateway.refunds",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/DevRefundIn"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "description": "Document created, URL follows",
+            "headers": {},
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DevRefundOut"
                 }
               }
             }
@@ -7718,6 +7862,12 @@
             },
             "type": "array"
           },
+          "refunds": {
+            "items": {
+              "$ref": "#/components/schemas/AdminOrderRefundOut"
+            },
+            "type": "array"
+          },
           "history": {
             "items": {
               "$ref": "#/components/schemas/AdminOrderEventOut"
@@ -7738,6 +7888,7 @@
           "items",
           "payment_method",
           "payments",
+          "refunds",
           "shipping_cents",
           "shipping_method",
           "status",
@@ -7823,6 +7974,56 @@
           "status"
         ],
         "title": "AdminOrderPaymentOut"
+      },
+      "AdminOrderRefundOut": {
+        "properties": {
+          "id": {
+            "type": "integer"
+          },
+          "gateway_charge_id": {
+            "type": "string"
+          },
+          "gateway_refund_id": {
+            "oneOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "amount_cents": {
+            "type": "integer"
+          },
+          "status": {
+            "$ref": "#/components/schemas/RefundStatus"
+          },
+          "restock": {
+            "type": "boolean"
+          },
+          "created_at": {
+            "oneOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "type": "object",
+        "required": [
+          "amount_cents",
+          "created_at",
+          "gateway_charge_id",
+          "gateway_refund_id",
+          "id",
+          "restock",
+          "status"
+        ],
+        "title": "AdminOrderRefundOut"
       },
       "AdminProductDetailOut": {
         "properties": {
@@ -8970,6 +9171,38 @@
         ],
         "title": "DevChargeOut"
       },
+      "DevRefundIn": {
+        "properties": {
+          "charge_id": {
+            "type": "string"
+          },
+          "amount": {
+            "type": "integer"
+          },
+          "order_id": {
+            "type": "integer"
+          }
+        },
+        "type": "object",
+        "required": [
+          "amount",
+          "charge_id",
+          "order_id"
+        ],
+        "title": "DevRefundIn"
+      },
+      "DevRefundOut": {
+        "properties": {
+          "id": {
+            "type": "string"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id"
+        ],
+        "title": "DevRefundOut"
+      },
       "ForgotPasswordIn": {
         "properties": {
           "email": {
@@ -9351,6 +9584,16 @@
                 "type": "null"
               }
             ]
+          },
+          "refund": {
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/RefundOut"
+              },
+              {
+                "type": "null"
+              }
+            ]
           }
         },
         "type": "object",
@@ -9382,7 +9625,9 @@
           "paid",
           "shipped",
           "delivered",
-          "cancelled"
+          "cancelled",
+          "refund_pending",
+          "refunded"
         ],
         "title": "OrderStatus",
         "description": "An order's lifecycle state."
@@ -9813,6 +10058,43 @@
           "value"
         ],
         "title": "QueuedCookie"
+      },
+      "RefundOut": {
+        "properties": {
+          "amount_cents": {
+            "type": "integer"
+          },
+          "status": {
+            "$ref": "#/components/schemas/RefundStatus"
+          },
+          "created_at": {
+            "oneOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "type": "object",
+        "required": [
+          "amount_cents",
+          "created_at",
+          "status"
+        ],
+        "title": "RefundOut"
+      },
+      "RefundStatus": {
+        "type": "string",
+        "enum": [
+          "pending",
+          "succeeded",
+          "failed"
+        ],
+        "title": "RefundStatus",
+        "description": "A refund's state, mirrored from the gateway (K15) \u2014 the reverse of PaymentStatus."
       },
       "RegisterIn": {
         "properties": {
