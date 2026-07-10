@@ -44,14 +44,10 @@ from app.schemas import (
     OrderOut,
     OrderStatusIn,
     OrderTimelineOut,
+    ShippingMethodOut,
 )
 
-# Server-authoritative money rules (never trusted from the client): flat shipping, jurisdiction tax.
-SHIPPING_FLAT_CENTS = 500
-
-
-def _shipping_cents(subtotal_cents: int) -> int:
-    return SHIPPING_FLAT_CENTS
+# Server-authoritative money rules (never trusted from the client): shipping rate, jurisdiction tax.
 
 
 def _tax_cents(subtotal_cents: int, rate_bps: int) -> int:
@@ -134,6 +130,8 @@ async def _order_out(
         currency=_currency_value(order),
         payment_method=_method_value(order),
         payment_status=payment_status,
+        shipping_method=order.shipping_method,
+        tracking_number=order.tracking_number,
         items=[
             OrderLineOut(
                 product_variant_id=i.product_variant_id,
@@ -251,6 +249,7 @@ async def checkout(request: Request, data: CheckoutIn) -> OrderOut:
                 country=saved.country,
             ),
             payment_method=data.payment_method,
+            shipping_method=data.shipping_method,
         )
     contact_email, ship_fields = _validate_checkout(
         data, user.email if user is not None else None
@@ -259,8 +258,11 @@ async def checkout(request: Request, data: CheckoutIn) -> OrderOut:
         items
     )  # current-price-wins: stale deal snapshots never reach an order
     subtotal = sum(i.unit_price_cents * i.quantity for i in items)
-    shipping = _shipping_cents(subtotal)
-    from app.services import tax_service
+    from app.services import shipping_service, tax_service
+
+    # resolved from the client-selected CODE, never a client-sent rate — 422s (ValidationException)
+    # before the transaction opens if the method is unknown/inactive, so no stock is ever locked.
+    shipping = await shipping_service.resolve_rate_cents(data.shipping_method)
 
     # resolved ONCE from the server-validated ship_country — never a client-sent rate — and reused
     # for both the charge and the stored tax_rate_bps, so stored always matches charged.
@@ -352,6 +354,7 @@ async def checkout(request: Request, data: CheckoutIn) -> OrderOut:
                 discount_cents=discount,
                 subtotal_cents=subtotal,
                 shipping_cents=shipping,
+                shipping_method=data.shipping_method,
                 tax_cents=tax,
                 tax_rate_bps=tax_rate_bps,
                 total_cents=total,
@@ -587,6 +590,8 @@ async def admin_order_show(request: Request, id: Order) -> AdminOrderDetailOut:
         total_cents=order.total_cents,
         currency=_currency_value(order),
         payment_method=_method_value(order),
+        shipping_method=order.shipping_method,
+        tracking_number=order.tracking_number,
         customer=customer,
         items=[
             OrderLineOut(
@@ -650,6 +655,15 @@ async def update_status(request: Request, id: Order, data: OrderStatusIn) -> Ord
         raise ValidationException(
             {"status": [f"Cannot transition from {current.value} to {target.value}."]}
         )
+    if target is OrderStatus.SHIPPED:
+        # a tracking number is required to ship — the customer needs a way to follow the parcel;
+        # stored BEFORE save() so the mail/db notification below reads the persisted value.
+        tracking = (data.tracking_number or "").strip()
+        if not tracking:
+            raise ValidationException(
+                {"tracking_number": ["A tracking number is required to ship an order."]}
+            )
+        order.tracking_number = tracking
     order.status = target
     await order.save()
     from arvel.activitylog import activity
@@ -666,5 +680,17 @@ async def update_status(request: Request, id: Order, data: OrderStatusIn) -> Ord
     if target is OrderStatus.SHIPPED and order.user_id is not None:
         customer = await User.find(order.user_id)
         if customer is not None:
-            await customer.notify(OrderShippedNotification(order.id))
+            await customer.notify(
+                OrderShippedNotification(order.id, order.tracking_number)
+            )
     return await _order_out(order, await order.items().get())
+
+
+async def shipping_methods(request: Request) -> list[ShippingMethodOut]:
+    """The active shipping methods + their server rate, for the checkout method selector."""
+    from app.services import shipping_service
+
+    return [
+        ShippingMethodOut(code=m.code, name=m.name, rate_cents=m.rate_cents)
+        for m in await shipping_service.list_methods()
+    ]

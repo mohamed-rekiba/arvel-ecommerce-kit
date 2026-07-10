@@ -244,8 +244,11 @@ export const api = {
     }),
   newsletter: () => request<NewsletterSubscriberOut[]>('GET', '/admin/newsletter'),
   adminOrder: (id: number) => request<AdminOrderDetailOut>('GET', `/admin/orders/${id}`),
-  updateOrderStatus: (id: number, status: string) =>
-    request<Order>('POST', `/admin/orders/${id}/status`, { status })
+  updateOrderStatus: (id: number, status: string, trackingNumber?: string) =>
+    request<Order>('POST', `/admin/orders/${id}/status`, {
+      status,
+      ...(trackingNumber ? { tracking_number: trackingNumber } : {})
+    })
 }
 
 export function name(p: AdminProduct): string {

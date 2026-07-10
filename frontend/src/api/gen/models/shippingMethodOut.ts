@@ -6,7 +6,8 @@
  * OpenAPI spec version: 0.1.0
  */
 
-export interface OrderStatusIn {
-  status: string;
-  tracking_number?: string | null;
+export interface ShippingMethodOut {
+  code: string;
+  name: string;
+  rate_cents: number;
 }

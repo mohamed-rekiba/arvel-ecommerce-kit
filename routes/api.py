@@ -144,6 +144,9 @@ Route.get("/announcement", announcement.show, name="api.announcement")
 Route.get("/settings", settings.public_settings, name="api.settings")
 Route.post("/newsletter", settings.subscribe, name="api.newsletter").status(200)
 
+# --- Shipping methods (checkout selector) ---
+Route.get("/shipping-methods", checkout.shipping_methods, name="api.shipping_methods")
+
 # --- Hero banners ---
 Route.get("/banners", banners.index, name="api.banners.index")
 

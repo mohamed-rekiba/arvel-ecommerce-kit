@@ -28,6 +28,8 @@ export interface OrderOut {
   currency: Currency;
   payment_method: PaymentMethod;
   payment_status: PaymentStatus | null;
+  shipping_method: string;
+  tracking_number: string | null;
   items: OrderLineOut[];
   placed_at?: string | null;
   timeline?: OrderTimelineOut[] | null;

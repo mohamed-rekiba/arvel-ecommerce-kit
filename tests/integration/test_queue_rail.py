@@ -23,13 +23,14 @@ from app.enums import ProductStatus, UserRole
 from app.models.category import Category
 from app.models.product import Product
 from app.models.product_variant import ProductVariant
+from app.models.shipping_method import ShippingMethod
 from app.models.user import User
 from tests.rbac_helpers import seed_rbac
 from tests.checkout_helpers import checkout_body
 
 pytestmark = pytest.mark.integration
 
-_MODELS = (User, Category, Product, ProductVariant)
+_MODELS = (User, Category, Product, ProductVariant, ShippingMethod)
 
 
 async def _seed_shop(url: str) -> None:
@@ -76,6 +77,9 @@ async def _seed_shop(url: str) -> None:
             price_adjustment_cents=0,
             stock=100,
         )
+        await ShippingMethod.create(
+            code="standard", name="Standard", rate_cents=500, active=True, sort=0
+        )
         # on PG the retrievable_* views are MATERIALIZED — recompute so storefront reads see the seed
         import sqlalchemy as sa
         from sqlalchemy.ext.asyncio import create_async_engine
@@ -117,8 +121,11 @@ def _place_and_ship(client: Any) -> int:
         ]
     )
     for nxt in ("paid", "shipped"):
+        body = {"status": nxt}
+        if nxt == "shipped":
+            body["tracking_number"] = "1Z999AA10123456784"
         resp = client.post(
-            f"/api/admin/orders/{order_id}/status", json={"status": nxt}, headers=admin
+            f"/api/admin/orders/{order_id}/status", json=body, headers=admin
         )
         assert resp.status_code == 200, resp.text
     return order_id

@@ -545,15 +545,25 @@ class AddressIn(Schema):
     country: str | None = None
 
 
+class ShippingMethodOut(Schema):
+    """A selectable shipping method + its server rate (public GET /shipping-methods)."""
+
+    code: str
+    name: str
+    rate_cents: int
+
+
 class CheckoutIn(Schema):
     """Checkout submission: contact email (required for guests; defaults to the account email for
     signed-in customers) + shipping address — inline, or a saved address-book id (owned), plus
-    the payment method (gateway = pay after placing; cod = collect on delivery)."""
+    the payment method (gateway = pay after placing; cod = collect on delivery) and the shipping
+    method CODE (the rate is resolved server-side from it — never sent by the client, DR-0064)."""
 
     email: str | None = None
     address: AddressIn | None = None
     address_id: int | None = None  # a saved address-book entry (signed-in customers)
     payment_method: "PaymentMethod" = PaymentMethod.GATEWAY
+    shipping_method: str = "standard"
 
 
 class AddressOut(Schema):
@@ -582,6 +592,8 @@ class OrderOut(Schema):
     payment_status: (
         PaymentStatus | None
     )  # latest payment attempt (None = never attempted)
+    shipping_method: str
+    tracking_number: str | None
     items: list[OrderLineOut]
     placed_at: str | None = None  # ISO created_at — the account order cards show it
     timeline: list[OrderTimelineOut] | None = None  # populated on the single-order read
@@ -622,6 +634,9 @@ class AdminReviewOut(Schema):
 
 class OrderStatusIn(Schema):
     status: str
+    tracking_number: str | None = (
+        None  # required (non-blank) only when the target is SHIPPED
+    )
 
 
 class MetricsOut(Schema):
@@ -681,6 +696,8 @@ class AdminOrderDetailOut(Schema):
     total_cents: int
     currency: Currency
     payment_method: "PaymentMethod"
+    shipping_method: str
+    tracking_number: str | None
     customer: AdminOrderCustomerOut | None  # None = a guest order
     items: list[OrderLineOut]
     payments: list[AdminOrderPaymentOut]

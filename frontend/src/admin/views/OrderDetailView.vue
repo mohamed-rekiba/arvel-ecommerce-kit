@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import Button from 'primevue/button'
+import InputText from 'primevue/inputtext'
 import Tag from 'primevue/tag'
 import { computed, onMounted, ref } from 'vue'
 import { useRoute } from 'vue-router'
@@ -20,8 +21,12 @@ const order = ref<AdminOrderDetail | null>(null)
 const loading = ref(true)
 const notice = ref<string | null>(null)
 const acting = ref(false)
+const trackingNumber = ref('')
 
 const nextStates = computed<OrderStatus[]>(() => (order.value ? transitionsFor(order.value) : []))
+// the ship transition requires a tracking number (K16) — its own control, not the generic loop
+const otherStates = computed(() => nextStates.value.filter((s) => s !== 'shipped'))
+const canShip = computed(() => nextStates.value.includes('shipped'))
 
 async function load() {
   loading.value = true
@@ -35,11 +40,12 @@ async function load() {
   }
 }
 
-async function advance(next: OrderStatus) {
+async function advance(next: OrderStatus, tracking?: string) {
   acting.value = true
   notice.value = null
   try {
-    await api.updateOrderStatus(orderId, next)
+    await api.updateOrderStatus(orderId, next, tracking)
+    trackingNumber.value = ''
     await load()
   } catch (e) {
     notice.value =
@@ -93,7 +99,7 @@ onMounted(load)
         </div>
         <div class="actions">
           <Button
-            v-for="next in nextStates"
+            v-for="next in otherStates"
             :key="next"
             :label="tr(`order.${next}` as MK)"
             :severity="next === 'cancelled' ? 'danger' : 'secondary'"
@@ -102,6 +108,22 @@ onMounted(load)
             :disabled="acting"
             @click="advance(next)"
           />
+          <span v-if="canShip" class="ship">
+            <InputText
+              v-model="trackingNumber"
+              size="small"
+              :placeholder="tr('orders.tracking_placeholder')"
+              :aria-label="tr('orders.tracking_placeholder')"
+            />
+            <Button
+              :label="tr('order.shipped' as MK)"
+              severity="secondary"
+              outlined
+              size="small"
+              :disabled="acting || !trackingNumber.trim()"
+              @click="advance('shipped', trackingNumber.trim())"
+            />
+          </span>
         </div>
       </header>
 
@@ -152,6 +174,9 @@ onMounted(load)
             {{ order.address.city }}, {{ order.address.postal_code }}
             {{ order.address.country }}
           </address>
+          <p v-if="order.tracking_number" class="muted">
+            {{ tr('orders.tracking', { number: order.tracking_number }) }}
+          </p>
 
           <h2>{{ tr('orders.payments') }}</h2>
           <p v-if="order.payments.length === 0" class="muted">
@@ -228,6 +253,11 @@ onMounted(load)
   display: flex;
   gap: var(--space-2);
   flex-wrap: wrap;
+}
+.ship {
+  display: inline-flex;
+  gap: var(--space-2);
+  align-items: center;
 }
 .grid {
   display: grid;

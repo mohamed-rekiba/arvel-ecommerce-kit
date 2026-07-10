@@ -14,6 +14,7 @@ from app.enums import ProductStatus, UserRole
 from app.models.category import Category
 from app.models.product import Product
 from app.models.product_variant import ProductVariant
+from app.models.shipping_method import ShippingMethod
 from app.models.user import User
 from tests.rbac_helpers import seed_rbac
 from tests.checkout_helpers import checkout_body
@@ -27,7 +28,7 @@ def client(tmp_path, monkeypatch):
     async def migrate_and_seed() -> None:
         db = ConnectionResolver({"default": {"url": url}})
         await Migrator(db).run(discover_migrations(["database/migrations"]))
-        for model in (User, Category, Product, ProductVariant):
+        for model in (User, Category, Product, ProductVariant, ShippingMethod):
             model.set_connection(db)
         await seed_rbac(db)
         await User.create(
@@ -58,7 +59,10 @@ def client(tmp_path, monkeypatch):
         await ProductVariant.create(
             product_id=p.id, sku="TEE-S", name="S", price_adjustment_cents=0, stock=100
         )
-        for model in (User, Category, Product, ProductVariant):
+        await ShippingMethod.create(
+            code="standard", name="Standard", rate_cents=500, active=True, sort=0
+        )
+        for model in (User, Category, Product, ProductVariant, ShippingMethod):
             model.set_connection(None)
         await db.dispose()
 
@@ -184,8 +188,11 @@ def test_order_state_machine(client) -> None:
 
     # legal path: pending -> paid -> shipped -> delivered
     for nxt in ("paid", "shipped", "delivered"):
+        body = {"status": nxt}
+        if nxt == "shipped":
+            body["tracking_number"] = "1Z999AA10123456784"
         resp = client.post(
-            f"/api/admin/orders/{order_id}/status", json={"status": nxt}, headers=admin
+            f"/api/admin/orders/{order_id}/status", json=body, headers=admin
         )
         assert resp.status_code == 200
         assert resp.json()["status"] == nxt
@@ -253,10 +260,13 @@ def test_shipping_an_order_notifies_the_customer(client) -> None:
 
     # advance pending → paid → shipped (the shipped transition notifies)
     for nxt in ("paid", "shipped"):
+        body = {"status": nxt}
+        if nxt == "shipped":
+            body["tracking_number"] = "1Z999AA10123456784"
         assert (
             client.post(
                 f"/api/admin/orders/{order_id}/status",
-                json={"status": nxt},
+                json=body,
                 headers=admin,
             ).status_code
             == 200
@@ -325,9 +335,10 @@ def test_cancel_denies_non_owners_and_shipped_orders(client) -> None:
 
     # ship it (admin) — now the customer can no longer cancel
     for nxt in ("paid", "shipped"):
-        client.post(
-            f"/api/admin/orders/{order_id}/status", json={"status": nxt}, headers=admin
-        )
+        body = {"status": nxt}
+        if nxt == "shipped":
+            body["tracking_number"] = "1Z999AA10123456784"
+        client.post(f"/api/admin/orders/{order_id}/status", json=body, headers=admin)
     resp = client.post(f"/api/orders/{order_id}/cancel", headers=customer)
     assert resp.status_code == 422
     assert "no longer" in resp.json()["errors"]["order"][0]

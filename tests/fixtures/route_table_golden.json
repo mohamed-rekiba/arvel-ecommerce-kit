@@ -1409,6 +1409,18 @@
     "methods": [
       "GET"
     ],
+    "path": "/api/shipping-methods",
+    "name": "api.shipping_methods",
+    "middleware": [],
+    "security": [],
+    "status_code": null,
+    "group": "api",
+    "domain": null
+  },
+  {
+    "methods": [
+      "GET"
+    ],
     "path": "/api/user",
     "name": "api.user",
     "middleware": [],

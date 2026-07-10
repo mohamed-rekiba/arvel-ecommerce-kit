@@ -13,6 +13,7 @@ from app.enums import ProductStatus, UserRole
 from app.models.category import Category
 from app.models.product import Product
 from app.models.product_variant import ProductVariant
+from app.models.shipping_method import ShippingMethod
 from app.models.user import User
 from tests.checkout_helpers import checkout_body
 from tests.rbac_helpers import seed_rbac
@@ -27,7 +28,7 @@ def client(tmp_path, monkeypatch):
         db = ConnectionResolver({"default": {"url": url}})
         await Migrator(db).run(discover_migrations(["database/migrations"]))
         await seed_rbac(db)
-        for model in (User, Category, Product, ProductVariant):
+        for model in (User, Category, Product, ProductVariant, ShippingMethod):
             model.set_connection(db)
         await User.create(
             name="Cara",
@@ -57,7 +58,10 @@ def client(tmp_path, monkeypatch):
         await ProductVariant.create(
             product_id=p.id, sku="TEE-S", name="S", price_adjustment_cents=0, stock=50
         )
-        for model in (User, Category, Product, ProductVariant):
+        await ShippingMethod.create(
+            code="standard", name="Standard", rate_cents=500, active=True, sort=0
+        )
+        for model in (User, Category, Product, ProductVariant, ShippingMethod):
             model.set_connection(None)
         await db.dispose()
 

@@ -157,6 +157,7 @@ import type {
   SavedAddressOut,
   SettingsIn,
   SettingsOut,
+  ShippingMethodOut,
   StockAdjustIn,
   TokenOut,
   UpdateItemIn,
@@ -1362,6 +1363,43 @@ export const apiNewsletter = async (newsletterIn: NewsletterIn, options?: Reques
     method: 'POST',
     headers: { 'Content-Type': 'application/json', ...options?.headers },
     body: JSON.stringify(newsletterIn)
+  }
+);}
+
+
+
+export type apiShippingMethodsResponse200 = {
+  data: ShippingMethodOut[]
+  status: 200
+}
+
+export type apiShippingMethodsResponseSuccess = (apiShippingMethodsResponse200) & {
+  headers: Headers;
+};
+;
+
+export type apiShippingMethodsResponse = (apiShippingMethodsResponseSuccess)
+
+export const getApiShippingMethodsUrl = () => {
+
+
+
+
+  return `/api/shipping-methods`
+}
+
+/**
+ * The active shipping methods + their server rate, for the checkout method selector.
+ * @summary ApiShippingMethods
+ */
+export const apiShippingMethods = async ( options?: RequestInit): Promise<apiShippingMethodsResponse> => {
+
+  return apiFetch<apiShippingMethodsResponse>(getApiShippingMethodsUrl(),
+  {
+    ...options,
+    method: 'GET'
+
+
   }
 );}
 

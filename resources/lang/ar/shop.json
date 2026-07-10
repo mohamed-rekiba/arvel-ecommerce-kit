@@ -8,7 +8,8 @@
     "shipped": {
       "subject": "تم شحن طلبك رقم {order}",
       "title": "في الطريق إليك!",
-      "body": "شُحن الطلب رقم {order} وهو في طريقه إليك."
+      "body": "شُحن الطلب رقم {order} وهو في طريقه إليك.",
+      "tracking": "رقم التتبع: {tracking}"
     },
     "back_in_stock": {
       "subject": "عاد إلى المخزون: {product}",

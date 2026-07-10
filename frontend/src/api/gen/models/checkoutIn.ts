@@ -13,4 +13,5 @@ export interface CheckoutIn {
   address?: AddressIn | null;
   address_id?: number | null;
   payment_method?: PaymentMethod;
+  shipping_method?: string;
 }

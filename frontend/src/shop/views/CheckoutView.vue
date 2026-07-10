@@ -7,6 +7,7 @@ import {
   type Order,
   SHIPPING_COUNTRY_CODES,
   type SavedAddress,
+  type ShippingMethod,
   api,
   formatPrice
 } from '../api'
@@ -26,6 +27,10 @@ const fieldErrors = ref<Record<string, string[]>>({})
 const saved = ref<SavedAddress[]>([])
 const selectedAddress = ref<number | 'new'>('new')
 const useSaved = computed(() => selectedAddress.value !== 'new')
+
+// --- shipping method (server rate; the SPA never computes or sends one, K16) ---
+const shippingMethods = ref<ShippingMethod[]>([])
+const shippingMethod = ref('standard')
 
 // --- payment method ---
 const paymentMethod = ref<'gateway' | 'cod'>('gateway')
@@ -112,7 +117,8 @@ async function placeOrder() {
               country: form.country
             }
           }),
-      payment_method: paymentMethod.value
+      payment_method: paymentMethod.value,
+      shipping_method: shippingMethod.value
     })
   } catch (e) {
     if (e instanceof ApiError && e.status === 422 && Object.keys(e.errors).length > 0) {
@@ -128,6 +134,12 @@ async function placeOrder() {
 
 onMounted(async () => {
   await refresh()
+  try {
+    shippingMethods.value = await api.shippingMethods()
+    if (shippingMethods.value[0]) shippingMethod.value = shippingMethods.value[0].code
+  } catch {
+    shippingMethods.value = []
+  }
   await auth.restore()
   if (auth.state.customer) {
     form.email = auth.state.customer.email
@@ -372,6 +384,24 @@ onMounted(async () => {
               fieldError('country')
             }}</small>
           </label>
+        </fieldset>
+
+        <fieldset v-if="shippingMethods.length" class="fields">
+          <legend>{{ t('checkout.shipping_method') }}</legend>
+          <div class="radios">
+            <label
+              v-for="m in shippingMethods"
+              :key="m.code"
+              class="radio"
+              :class="{ on: shippingMethod === m.code }"
+            >
+              <input v-model="shippingMethod" type="radio" name="sm" :value="m.code" />
+              <span class="radio__meta">
+                <b>{{ m.name }}</b>
+                <i>{{ formatPrice(m.rate_cents) }}</i>
+              </span>
+            </label>
+          </div>
         </fieldset>
 
         <fieldset class="fields">

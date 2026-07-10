@@ -25,7 +25,8 @@ import type {
   PaymentMethod,
   SavedAddressIn,
   SavedAddressOut,
-  SettingsOutValues
+  SettingsOutValues,
+  ShippingMethodOut
 } from '../api/gen/models'
 
 export { ApiError } from '../api/http'
@@ -54,6 +55,7 @@ export type ReviewList = ReviewListOut
 export type SavedAddress = SavedAddressOut
 export type SavedAddressPayload = SavedAddressIn
 export type TimelineStep = OrderTimelineOut
+export type ShippingMethod = ShippingMethodOut
 export type { PaymentMethod }
 export type PublicSettings = SettingsOutValues
 
@@ -152,6 +154,9 @@ export const api = {
   },
   banners() {
     return get<Banner[]>(`/banners`)
+  },
+  shippingMethods() {
+    return get<ShippingMethod[]>(`/shipping-methods`)
   },
   deals() {
     return get<Deal[]>(`/deals`)

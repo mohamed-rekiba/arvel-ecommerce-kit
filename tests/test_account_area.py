@@ -13,6 +13,7 @@ from app.enums import ProductStatus, UserRole
 from app.models.category import Category
 from app.models.product import Product
 from app.models.product_variant import ProductVariant
+from app.models.shipping_method import ShippingMethod
 from app.models.user import User
 from tests.rbac_helpers import seed_rbac
 
@@ -37,7 +38,7 @@ def client(tmp_path, monkeypatch):
         db = ConnectionResolver({"default": {"url": url}})
         await Migrator(db).run(discover_migrations(["database/migrations"]))
         await seed_rbac(db)
-        models = (User, Category, Product, ProductVariant)
+        models = (User, Category, Product, ProductVariant, ShippingMethod)
         for model in models:
             model.set_connection(db)
         await User.create(
@@ -73,6 +74,9 @@ def client(tmp_path, monkeypatch):
         )
         await ProductVariant.create(
             product_id=p.id, sku="W-1", name="One", price_adjustment_cents=0, stock=50
+        )
+        await ShippingMethod.create(
+            code="standard", name="Standard", rate_cents=500, active=True, sort=0
         )
         for model in models:
             model.set_connection(None)
@@ -190,7 +194,7 @@ def test_cash_on_delivery_flow(client) -> None:
     # COD ships straight from PENDING (settled at the door)…
     shipped = client.post(
         f"/api/admin/orders/{order['id']}/status",
-        json={"status": "shipped"},
+        json={"status": "shipped", "tracking_number": "1Z999AA10123456784"},
         headers=admin,
     )
     assert shipped.status_code == 200, shipped.text
@@ -275,7 +279,7 @@ def test_order_timeline_tracks_transitions(client) -> None:
 
     client.post(
         f"/api/admin/orders/{order['id']}/status",
-        json={"status": "shipped"},
+        json={"status": "shipped", "tracking_number": "1Z999AA10123456784"},
         headers=admin,
     )
     timeline = client.get(f"/api/orders/{order['id']}", headers=cara).json()["timeline"]
@@ -388,7 +392,7 @@ def test_server_side_localization(client) -> None:
     admin = _auth(client, "admin@example.com", "secret-admin")
     client.post(
         f"/api/admin/orders/{order['id']}/status",
-        json={"status": "shipped"},
+        json={"status": "shipped", "tracking_number": "1Z999AA10123456784"},
         headers=admin,
     )
     import time

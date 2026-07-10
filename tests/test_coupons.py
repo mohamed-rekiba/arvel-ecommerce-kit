@@ -15,6 +15,7 @@ from app.models.category import Category
 from app.models.coupon import Coupon
 from app.models.product import Product
 from app.models.product_variant import ProductVariant
+from app.models.shipping_method import ShippingMethod
 from app.models.user import User
 from tests.checkout_helpers import checkout_body
 from tests.rbac_helpers import seed_rbac
@@ -29,7 +30,7 @@ def client(tmp_path, monkeypatch):
         db = ConnectionResolver({"default": {"url": url}})
         await Migrator(db).run(discover_migrations(["database/migrations"]))
         await seed_rbac(db)
-        for model in (User, Category, Product, ProductVariant, Coupon):
+        for model in (User, Category, Product, ProductVariant, ShippingMethod, Coupon):
             model.set_connection(db)
         await User.create(
             name="Cara",
@@ -119,7 +120,10 @@ def client(tmp_path, monkeypatch):
             uses=0,
             active=True,
         )
-        for model in (User, Category, Product, ProductVariant, Coupon):
+        await ShippingMethod.create(
+            code="standard", name="Standard", rate_cents=500, active=True, sort=0
+        )
+        for model in (User, Category, Product, ProductVariant, ShippingMethod, Coupon):
             model.set_connection(None)
         await db.dispose()
 

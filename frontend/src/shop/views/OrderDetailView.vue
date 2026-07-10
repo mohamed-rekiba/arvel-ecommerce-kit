@@ -226,6 +226,9 @@ onBeforeUnmount(stopPolling)
         <p class="muted">
           {{ t('order.updates_to', { email: order.contact_email }) }}
         </p>
+        <p v-if="order.tracking_number" class="muted">
+          {{ t('order.tracking', { number: order.tracking_number }) }}
+        </p>
       </section>
 
       <section class="actions" aria-live="polite">

@@ -1755,6 +1755,30 @@
         "deprecated": false
       }
     },
+    "/api/shipping-methods": {
+      "get": {
+        "summary": "ApiShippingMethods",
+        "description": "The active shipping methods + their server rate, for the checkout method selector.",
+        "operationId": "api.shipping_methods",
+        "responses": {
+          "200": {
+            "description": "Request fulfilled, document follows",
+            "headers": {},
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/ShippingMethodOut"
+                  },
+                  "type": "array"
+                }
+              }
+            }
+          }
+        },
+        "deprecated": false
+      }
+    },
     "/api/banners": {
       "get": {
         "summary": "ApiBannersIndex",
@@ -7659,6 +7683,19 @@
           "payment_method": {
             "$ref": "#/components/schemas/PaymentMethod"
           },
+          "shipping_method": {
+            "type": "string"
+          },
+          "tracking_number": {
+            "oneOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
           "customer": {
             "oneOf": [
               {
@@ -7702,10 +7739,12 @@
           "payment_method",
           "payments",
           "shipping_cents",
+          "shipping_method",
           "status",
           "subtotal_cents",
           "tax_cents",
-          "total_cents"
+          "total_cents",
+          "tracking_number"
         ],
         "title": "AdminOrderDetailOut"
       },
@@ -8623,6 +8662,10 @@
           },
           "payment_method": {
             "$ref": "#/components/schemas/PaymentMethod"
+          },
+          "shipping_method": {
+            "type": "string",
+            "default": "standard"
           }
         },
         "type": "object",
@@ -9267,6 +9310,19 @@
               }
             ]
           },
+          "shipping_method": {
+            "type": "string"
+          },
+          "tracking_number": {
+            "oneOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
           "items": {
             "items": {
               "$ref": "#/components/schemas/OrderLineOut"
@@ -9309,11 +9365,13 @@
           "payment_method",
           "payment_status",
           "shipping_cents",
+          "shipping_method",
           "status",
           "subtotal_cents",
           "tax_cents",
           "token",
-          "total_cents"
+          "total_cents",
+          "tracking_number"
         ],
         "title": "OrderOut"
       },
@@ -9333,6 +9391,16 @@
         "properties": {
           "status": {
             "type": "string"
+          },
+          "tracking_number": {
+            "oneOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ]
           }
         },
         "type": "object",
@@ -10133,6 +10201,26 @@
           "values"
         ],
         "title": "SettingsOut"
+      },
+      "ShippingMethodOut": {
+        "properties": {
+          "code": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "rate_cents": {
+            "type": "integer"
+          }
+        },
+        "type": "object",
+        "required": [
+          "code",
+          "name",
+          "rate_cents"
+        ],
+        "title": "ShippingMethodOut"
       },
       "StockAdjustIn": {
         "properties": {

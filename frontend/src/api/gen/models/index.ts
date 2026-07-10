@@ -265,6 +265,7 @@ export * from './settingsIn';
 export * from './settingsInValues';
 export * from './settingsOut';
 export * from './settingsOutValues';
+export * from './shippingMethodOut';
 export * from './stockAdjustIn';
 export * from './tokenOut';
 export * from './translate';

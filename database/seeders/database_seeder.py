@@ -31,6 +31,7 @@ from app.services.product_image_service import ProductImageService
 from database.factories.product_variant_factory import ProductVariantFactory
 from database.factories.user_factory import UserFactory
 from database.seeders.roles_permissions_seeder import RolesPermissionsSeeder
+from database.seeders.shipping_methods_seeder import ShippingMethodsSeeder
 from database.seeders.tax_rates_seeder import TaxRatesSeeder
 
 # Curated, content-verified electronics photos (Unsplash CDN) per product type. Harvested from Unsplash
@@ -141,6 +142,7 @@ class DatabaseSeeder(Seeder):
             RolesPermissionsSeeder().run()
         )  # permissions, roles, one back-office user per role
         await TaxRatesSeeder().run()  # jurisdiction rates (K17) — EG omitted on purpose
+        await ShippingMethodsSeeder().run()  # standard/express rates (K16)
         test_user = await UserFactory().create(
             name="Test User", email="test@example.com"
         )

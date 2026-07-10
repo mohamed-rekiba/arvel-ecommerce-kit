@@ -19,7 +19,9 @@ EXCLUDED = {"--bp-sm", "--bp-lg"}
 
 def css_token_names() -> set[str]:
     text = TOKENS_CSS.read_text()
-    names = {m.group(1) for m in re.finditer(r"^\s*(--[a-z0-9-]+)\s*:", text, re.MULTILINE)}
+    names = {
+        m.group(1) for m in re.finditer(r"^\s*(--[a-z0-9-]+)\s*:", text, re.MULTILINE)
+    }
     return names - EXCLUDED
 
 

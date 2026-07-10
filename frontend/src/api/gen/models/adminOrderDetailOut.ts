@@ -27,6 +27,8 @@ export interface AdminOrderDetailOut {
   total_cents: number;
   currency: Currency;
   payment_method: PaymentMethod;
+  shipping_method: string;
+  tracking_number: string | null;
   customer: AdminOrderCustomerOut | null;
   items: OrderLineOut[];
   payments: AdminOrderPaymentOut[];

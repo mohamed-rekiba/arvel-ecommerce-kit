@@ -31,6 +31,8 @@ class Order(Model):
         "tax_rate_bps": int,
         "total_cents": int,
         "currency": str,
+        "shipping_method": str,
+        "tracking_number": str,
     }
     __fillable__: ClassVar[list[str]] = [
         "user_id",
@@ -52,6 +54,8 @@ class Order(Model):
         "tax_rate_bps",
         "total_cents",
         "currency",
+        "shipping_method",
+        "tracking_number",
     ]
     __casts__: ClassVar[dict[str, Any]] = {"status": OrderStatus, "currency": Currency}
 

@@ -8,7 +8,8 @@
     "shipped": {
       "subject": "Your order #{order} has shipped",
       "title": "On its way!",
-      "body": "Order #{order} has shipped and is en route to you."
+      "body": "Order #{order} has shipped and is en route to you.",
+      "tracking": "Tracking number: {tracking}"
     },
     "back_in_stock": {
       "subject": "Back in stock: {product}",

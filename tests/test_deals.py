@@ -18,6 +18,7 @@ from app.models.order import Order
 from app.models.order_item import OrderItem
 from app.models.product import Product
 from app.models.product_variant import ProductVariant
+from app.models.shipping_method import ShippingMethod
 from app.models.user import User
 from tests.checkout_helpers import checkout_body
 from tests.rbac_helpers import seed_rbac
@@ -32,7 +33,16 @@ def client(tmp_path, monkeypatch):
         db = ConnectionResolver({"default": {"url": url}})
         await Migrator(db).run(discover_migrations(["database/migrations"]))
         await seed_rbac(db)
-        models = (User, Category, Product, ProductVariant, Deal, Order, OrderItem)
+        models = (
+            User,
+            Category,
+            Product,
+            ProductVariant,
+            ShippingMethod,
+            Deal,
+            Order,
+            OrderItem,
+        )
         for model in models:
             model.set_connection(db)
         await User.create(
@@ -168,6 +178,9 @@ def client(tmp_path, monkeypatch):
             variant_name="500ml",
             quantity=5,
             unit_price_cents=3000,
+        )
+        await ShippingMethod.create(
+            code="standard", name="Standard", rate_cents=500, active=True, sort=0
         )
         for model in models:
             model.set_connection(None)

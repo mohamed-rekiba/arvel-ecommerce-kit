@@ -59,6 +59,12 @@ async function transition(order: Order, next: string) {
 function itemCount(o: Order): number {
   return o.items.reduce((n, i) => n + i.quantity, 0)
 }
+
+// the ship transition requires a tracking number (K16) — no room for that input in a table row,
+// so "shipped" is excluded from the quick actions here; ship from the order detail page instead.
+function quickStates(o: Order) {
+  return nextStates(o).filter((s) => s !== 'shipped')
+}
 watch(statusFilter, load)
 watch(q, () => {
   if (debounce) clearTimeout(debounce)
@@ -151,9 +157,9 @@ onMounted(load)
         </Column>
         <Column :header="t('orders.advance')">
           <template #body="{ data }">
-            <div v-if="nextStates(data).length" class="actions">
+            <div v-if="quickStates(data).length" class="actions">
               <Button
-                v-for="next in nextStates(data)"
+                v-for="next in quickStates(data)"
                 :key="next"
                 :label="t(`order.${next}` as MessageKey)"
                 size="small"
