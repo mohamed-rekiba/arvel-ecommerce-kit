@@ -13,7 +13,7 @@ from arvel.validation import ValidationException, Validator
 
 from app.controllers.cart_controller import line_presentation, resolve_cart
 from app.controllers.serializers import iso as _iso
-from app.i18n import active_locale
+from app.i18n import active_locale, trans
 from app.controllers.order_access import resolve_owned_order
 from app.enums import (
     CountryCode,
@@ -254,6 +254,10 @@ async def checkout(request: Request, data: CheckoutIn) -> OrderOut:
         abort(422, "Your cart is empty.")
 
     user = current_user.get()
+    # a signed-in customer must have a verified email before placing an order; guest checkout
+    # (no account) is unaffected
+    if user is not None and not user.has_verified_email():
+        abort(403, trans("shop.checkout.unverified_email"))
     if data.address_id is not None:
         if user is None:
             abort(401, "Sign in to use a saved address.")

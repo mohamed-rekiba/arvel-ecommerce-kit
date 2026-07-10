@@ -46,5 +46,8 @@
     "footer": "Thank you for shopping with ArvelShop — built on the arvel framework.",
     "gateway": "Paid online (gateway)",
     "cod": "Cash on delivery"
+  },
+  "checkout": {
+    "unverified_email": "Please verify your email address before placing an order."
   }
 }

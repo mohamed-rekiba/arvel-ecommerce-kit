@@ -44,12 +44,13 @@ def client(tmp_path, monkeypatch):
             role=UserRole.ADMIN,
         )
         await admin.assign_role("super-admin")  # catalog.update authority (bypasses)
-        await User.create(
+        _verified_customer = await User.create(
             name="Cara",
             email="cara@example.com",
             password="secret-cara",
             role=UserRole.CUSTOMER,
         )
+        await _verified_customer.mark_email_as_verified()
         cat = await Category.create(
             translations={"en": {"name": "Shirts"}}, slug="shirts", published=True
         )

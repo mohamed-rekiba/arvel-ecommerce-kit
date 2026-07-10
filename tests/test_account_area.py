@@ -41,18 +41,20 @@ def client(tmp_path, monkeypatch):
         models = (User, Category, Product, ProductVariant, ShippingMethod)
         for model in models:
             model.set_connection(db)
-        await User.create(
+        _verified_customer = await User.create(
             name="Cara",
             email="cara@example.com",
             password="secret-cara",
             role=UserRole.CUSTOMER,
         )
-        await User.create(
+        await _verified_customer.mark_email_as_verified()
+        _verified_customer = await User.create(
             name="Rival",
             email="rival@example.com",
             password="secret-rival",
             role=UserRole.CUSTOMER,
         )
+        await _verified_customer.mark_email_as_verified()
         admin = await User.create(
             name="Ada",
             email="admin@example.com",

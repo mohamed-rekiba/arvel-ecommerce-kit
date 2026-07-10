@@ -45,6 +45,7 @@ async def _seed(url: str) -> dict[str, int]:
             role=UserRole.CUSTOMER,
             locale="en",
         )
+        await amina.mark_email_as_verified()
         bilal = await User.create(
             name="Bilal",
             email="bilal@example.com",
@@ -52,6 +53,7 @@ async def _seed(url: str) -> dict[str, int]:
             role=UserRole.CUSTOMER,
             locale="ar",
         )
+        await bilal.mark_email_as_verified()
         cat = await Category.create(
             translations={"en": {"name": "Gear"}}, slug="gear", published=True
         )

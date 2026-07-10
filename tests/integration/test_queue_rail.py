@@ -45,12 +45,13 @@ async def _seed_shop(url: str) -> None:
     for model in _MODELS:
         model.set_connection(db)
     try:
-        await User.create(
+        _verified_customer = await User.create(
             name="Cara",
             email="cara@example.com",
             password="secret-cara",
             role=UserRole.CUSTOMER,
         )
+        await _verified_customer.mark_email_as_verified()
         admin = await User.create(
             name="Ada",
             email="admin@example.com",

@@ -61,12 +61,13 @@ def client(tmp_path, monkeypatch):
         )
         for model in models:
             model.set_connection(db)
-        await User.create(
+        _verified_customer = await User.create(
             name="Cara",
             email="cara@example.com",
             password="secret-cara",
             role=UserRole.CUSTOMER,  # authenticated, but no admin permission whatsoever
         )
+        await _verified_customer.mark_email_as_verified()
         cat = await Category.create(
             translations={"en": {"name": "Shirts"}}, slug="shirts", published=True
         )

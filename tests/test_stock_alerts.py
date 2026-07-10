@@ -26,18 +26,20 @@ def client(tmp_path, monkeypatch):
         await seed_rbac(db)
         for model in (User, Category, Product, ProductVariant):
             model.set_connection(db)
-        await User.create(
+        _verified_customer = await User.create(
             name="Cara",
             email="cara@example.com",
             password="secret-cara",
             role=UserRole.CUSTOMER,
         )
-        await User.create(
+        await _verified_customer.mark_email_as_verified()
+        _verified_customer = await User.create(
             name="Noah",
             email="noah@example.com",
             password="secret-noah",
             role=UserRole.CUSTOMER,
         )
+        await _verified_customer.mark_email_as_verified()
         admin = await User.create(
             name="Ada",
             email="admin@example.com",

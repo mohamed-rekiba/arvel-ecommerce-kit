@@ -47,18 +47,20 @@ def app_and_client(tmp_path, monkeypatch):
         await Migrator(db).run(discover_migrations(["database/migrations"]))
         for model in (User, Category, Product, ProductVariant, ShippingMethod):
             model.set_connection(db)
-        await User.create(
+        _verified_customer = await User.create(
             name="Cara",
             email="cara@example.com",
             password="secret-cara",
             role=UserRole.CUSTOMER,
         )
-        await User.create(
+        await _verified_customer.mark_email_as_verified()
+        _verified_customer = await User.create(
             name="Bea",
             email="bea@example.com",
             password="secret-bea",
             role=UserRole.CUSTOMER,
         )
+        await _verified_customer.mark_email_as_verified()
         cat = await Category.create(
             translations={"en": {"name": "Shirts"}}, slug="shirts"
         )

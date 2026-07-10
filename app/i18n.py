@@ -27,3 +27,9 @@ def trans_in(locale: str, key: str, **replace: object) -> str:
     loc = locale if locale in SUPPORTED_LOCALES else DEFAULT_LOCALE
     result: str = app("translator").get(key, dict(replace), loc)
     return result
+
+
+def trans(key: str, **replace: object) -> str:
+    """Request-scoped translation — resolves ``key`` against the active request locale. Use in
+    controllers/middleware; ``trans_in`` is for the worker, where there is no request locale."""
+    return trans_in(active_locale(), key, **replace)

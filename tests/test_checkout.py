@@ -31,12 +31,13 @@ def client(tmp_path, monkeypatch):
         for model in (User, Category, Product, ProductVariant, ShippingMethod):
             model.set_connection(db)
         await seed_rbac(db)
-        await User.create(
+        _verified_customer = await User.create(
             name="Cara",
             email="cara@example.com",
             password="secret-cara",
             role=UserRole.CUSTOMER,
         )
+        await _verified_customer.mark_email_as_verified()
         admin = await User.create(
             name="Admin",
             email="admin@example.com",
@@ -451,3 +452,32 @@ def test_admin_orders_filter_and_search(client) -> None:
 
     # an unknown status is a validation error, not a silent empty list
     assert client.get("/api/admin/orders?status=nope", headers=admin).status_code == 422
+
+
+def test_checkout_requires_a_verified_email_for_signed_in_customers(client) -> None:
+    """A signed-in customer must verify their email before ordering (403); a guest — no account to
+    verify — checks out normally."""
+    reg = client.post(
+        "/api/register",
+        json={"name": "New", "email": "new@example.com", "password": "secret-new"},
+    )
+    headers = {
+        "Authorization": f"Bearer {reg.json()['token']}"
+    }  # freshly registered = unverified
+    client.post(
+        "/api/cart/items",
+        json={"product_variant_id": 1, "quantity": 1},
+        headers=headers,
+    )
+    blocked = client.post("/api/checkout", json=checkout_body(), headers=headers)
+    assert blocked.status_code == 403
+
+    guest_cart = client.post(
+        "/api/cart/items", json={"product_variant_id": 1, "quantity": 1}
+    ).json()["cart_token"]
+    guest = client.post(
+        "/api/checkout",
+        json=checkout_body(email="guest@example.com"),
+        headers={"X-Cart-Token": guest_cart},
+    )
+    assert guest.status_code == 201

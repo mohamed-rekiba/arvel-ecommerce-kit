@@ -46,5 +46,8 @@
     "footer": "Merci d'avoir choisi ArvelShop — construit sur le framework arvel.",
     "gateway": "Payé en ligne (passerelle)",
     "cod": "Paiement à la livraison"
+  },
+  "checkout": {
+    "unverified_email": "Veuillez vérifier votre adresse e-mail avant de passer commande."
   }
 }
