@@ -11,7 +11,7 @@ from arvel.support import current_user
 
 from app.controllers.serializers import iso as _iso
 from app.enums import Permission
-from app.media_url import media_serving_url as _media_url
+from app.models.media import AppMedia
 from app.models.banner import Banner
 from app.models.product import Product
 from app.models.user import User
@@ -54,7 +54,7 @@ async def index() -> list[MediaItemOut]:
     user = current_user.get()
     if user is None or not await user.can(Permission.CATALOG_VIEW.value):
         abort(403, "You may not browse the media library.")
-    rows = await Media.order_by("id", "desc").get()
+    rows = await AppMedia.order_by("id", "desc").get()
     labels = await _owner_labels(rows)
     out: list[MediaItemOut] = []
     for m in rows:
@@ -71,9 +71,9 @@ async def index() -> list[MediaItemOut]:
                 file_name=m.file_name,
                 mime_type=m.mime_type,
                 size=m.size,
-                url=_media_url(m, None),
+                url=m.serving_url(),
                 thumb_url=(
-                    _media_url(m, conversion)
+                    m.serving_url(conversion)
                     if conversion and m.has_generated_conversion(conversion)
                     else None
                 ),

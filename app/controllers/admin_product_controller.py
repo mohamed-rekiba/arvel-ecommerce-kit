@@ -13,7 +13,6 @@ from typing import Any
 from arvel import abort
 from arvel.auth.middleware import Authorize
 from arvel.http import Request
-from arvel.media import Media
 from arvel.routing import Controller, ControllerMiddleware
 from arvel.support import Str, current_user
 from arvel.validation import ValidationException, Validator
@@ -22,7 +21,7 @@ from arvel.activitylog import activity
 
 from app.enums import Permission, ProductStatus
 from app.i18n import SUPPORTED_LOCALES, active_locale
-from app.media_url import media_serving_url as _media_url
+from app.models.media import AppMedia
 from app.models.category import Category
 from app.models.product import IMAGES, Product
 from app.models.product_variant import ProductVariant
@@ -90,7 +89,7 @@ async def _list_extras(ids: list[int]) -> dict[int, dict[str, Any]]:
             row["variants"] += 1
     seen: set[int] = set()
     media = (
-        await Media.where("model_type", "Product")
+        await AppMedia.where("model_type", "Product")
         .where_in("model_id", ids)
         .where("collection_name", IMAGES)
         .order_by("id")
@@ -102,7 +101,7 @@ async def _list_extras(ids: list[int]) -> dict[int, dict[str, Any]]:
         seen.add(m.model_id)
         row = extras.get(m.model_id)
         if row is not None:
-            row["thumb"] = _media_url(m, "thumb")
+            row["thumb"] = m.serving_url("thumb")
     return extras
 
 

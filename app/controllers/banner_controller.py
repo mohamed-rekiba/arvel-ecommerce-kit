@@ -1,7 +1,7 @@
 """Hero banners — the public carousel feed (active slides, sorted, projected to the request
 locale with an en fallback) and the admin CRUD + image upload that manages it."""
 
-from typing import Any
+from typing import Any, cast
 
 from arvel import abort
 from arvel.activitylog import activity
@@ -13,6 +13,7 @@ from arvel.validation import ValidationException
 
 from app.enums import Permission
 from app.i18n import DEFAULT_LOCALE, SUPPORTED_LOCALES, active_locale
+from app.models.media import AppMedia
 from app.models.banner import HERO, Banner
 from app.models.user import User
 from app.schemas import (
@@ -25,19 +26,14 @@ from app.schemas import (
 from app.services.product_image_service import ProductImageService
 
 
-def _image_url(media: Any, conversion: str | None) -> str | None:
-    if media is None:
-        return None
-    url: str | None = media.get_url(conversion)
-    if url and url.startswith(("http://", "https://")):
-        return url
-    suffix = f"/{conversion}" if conversion else ""
-    return f"/api/media/{media.id}{suffix}"
+def _image_url(media: AppMedia | None, conversion: str | None) -> str | None:
+    return media.serving_url(conversion) if media is not None else None
 
 
-async def _first_media(banner: Banner) -> Any | None:
+async def _first_media(banner: Banner) -> AppMedia | None:
+    # get_media() is typed to base Media, but Banner.__media_model__ makes the rows AppMedia
     media = await banner.get_media(HERO)
-    return media[0] if media else None
+    return cast("AppMedia", media[0]) if media else None
 
 
 def _text(banner: Banner, locale: str) -> dict[str, Any]:

@@ -6,12 +6,16 @@ from arvel import Model
 from arvel.media import HasMedia, MediaConversion
 
 from app.casts.translations import LocaleMapCast
+from app.models.media import AppMedia
 
 HERO = "hero"  # the banner's single-image media collection
 
 
 class Banner(HasMedia, Model):
     __table_name__ = "banners"
+    __media_model__ = (
+        AppMedia  # hero/mobile expose serving_url() (media.md → extending Media)
+    )
     __fields__: ClassVar[dict[str, type]] = {
         "translations": dict,  # locale-major {"en": {"title", "subtitle", "chip", "cta_label"}}
         "cta_to": str,

@@ -10,29 +10,30 @@ Product points at this via ``__media_model__``.
 from typing import Any
 
 from arvel import Attribute
-from arvel.media import Media
+
+from app.models.media import AppMedia
 
 
-class ProductMedia(Media):
+class ProductMedia(AppMedia):
     __table_name__ = (
         "media"  # share the one media table (arvel builds a table per class otherwise)
     )
     __appends__ = ["url", "thumb", "preview"]  # serialize these in to_dict()/JSON
 
     def url(self) -> Attribute:
-        def get(value: Any, attrs: dict[str, Any]) -> str | None:
-            return self.get_url()
+        def get(value: Any, attrs: dict[str, Any]) -> str:
+            return self.serving_url()
 
         return Attribute(get=get)
 
     def thumb(self) -> Attribute:
-        def get(value: Any, attrs: dict[str, Any]) -> str | None:
-            return self.get_url("thumb")
+        def get(value: Any, attrs: dict[str, Any]) -> str:
+            return self.serving_url("thumb")
 
         return Attribute(get=get)
 
     def preview(self) -> Attribute:
-        def get(value: Any, attrs: dict[str, Any]) -> str | None:
-            return self.get_url("preview")
+        def get(value: Any, attrs: dict[str, Any]) -> str:
+            return self.serving_url("preview")
 
         return Attribute(get=get)

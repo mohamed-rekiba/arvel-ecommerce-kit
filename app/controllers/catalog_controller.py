@@ -1,10 +1,12 @@
 """Catalog read API — categories + product browsing (search, filter, pagination)."""
 
-from typing import Any
+from typing import Any, cast
 
 from arvel import config
 from arvel.http import Request
 from arvel.media import Media
+
+from app.models.media import AppMedia
 
 from app.enums import ProductStatus
 from app.controllers.serializers import iso as _iso
@@ -61,23 +63,15 @@ def category_out(c: Category) -> CategoryOut:
 
 
 def gallery_image_out(media: Media) -> GalleryImageOut:
-    """A media-library item → its serving URLs (original + thumb/preview conversions).
-
-    Product images are public: ``get_url`` returns a public bucket/CDN URL when the disk has one
-    configured (config/filesystems → s3 ``url``); the ``local`` disk has no url base, so we fall
-    back to the app-streamed ``/api/media`` route."""
-    mid = media.id
-
-    def _url(conversion: str | None) -> str:
-        url = media.get_url(conversion)
-        if url and url.startswith(("http://", "https://")):
-            return url  # public bucket / CDN URL
-        return f"/api/media/{mid}" + (
-            f"/{conversion}" if conversion else ""
-        )  # local-disk fallback
-
+    """A media-library item → its serving URLs (original + thumb/preview conversions), each resolved
+    through the media model's own serving_url() rule (public bucket URL else the /api/media proxy).
+    get_media() is typed to the base Media, but the rows are the AppMedia __media_model__ subclass."""
+    m = cast("AppMedia", media)
     return GalleryImageOut(
-        id=mid, url=_url(None), thumb_url=_url("thumb"), preview_url=_url("preview")
+        id=m.id,
+        url=m.serving_url(),
+        thumb_url=m.serving_url("thumb"),
+        preview_url=m.serving_url("preview"),
     )
 
 

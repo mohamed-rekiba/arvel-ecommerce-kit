@@ -33,11 +33,10 @@ def _me(request: Request) -> User:
 
 async def avatar_url(user: User, conversion: str = "profile") -> str | None:
     """The user's avatar (a one-image media collection), as a serving URL."""
-    from app.media_url import media_serving_url
     from app.models.user import AVATAR
 
     media = await user.get_media(AVATAR)
-    return media_serving_url(media[0], conversion) if media else None
+    return media[0].serving_url(conversion) if media else None
 
 
 async def user_out(user: User) -> UserOut:

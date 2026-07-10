@@ -9,12 +9,16 @@ from arvel.media import HasMedia, MediaConversion
 from arvel.notifications import Notifiable
 
 from app.enums import UserRole
+from app.models.media import AppMedia
 
 AVATAR = "avatar"  # single-image media collection
 
 
 class User(HasMedia, Authenticatable, HasRoles, Notifiable, Model):
     __table_name__ = "users"
+    __media_model__ = (
+        AppMedia  # avatars expose serving_url() (media.md → extending Media)
+    )
     __fields__: ClassVar[dict[str, type]] = {
         "name": str,
         "email": str,
