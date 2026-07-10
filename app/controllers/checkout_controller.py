@@ -258,6 +258,11 @@ async def checkout(request: Request, data: CheckoutIn) -> OrderOut:
     # (no account) is unaffected
     if user is not None and not user.has_verified_email():
         abort(403, trans("shop.checkout.unverified_email"))
+    # a newly-typed address (vs a saved one) gets added to the book below — capture the intent
+    # before `data` is rebuilt from the saved entry
+    new_address = (
+        user is not None and data.address_id is None and data.address is not None
+    )
     if data.address_id is not None:
         if user is None:
             abort(401, "Sign in to use a saved address.")
@@ -421,6 +426,29 @@ async def checkout(request: Request, data: CheckoutIn) -> OrderOut:
                 )
             await CartItem.where("cart_id", cart.id).delete()
             await cart.delete()
+
+            # save a first-time/new shipping address to the customer's book (first becomes default),
+            # atomically with the order
+            if new_address and user is not None:
+                from app.controllers.address_controller import save_for
+
+                name = ship_fields["ship_name"]
+                line1 = ship_fields["ship_line1"]
+                city = ship_fields["ship_city"]
+                postal = ship_fields["ship_postal_code"]
+                country = ship_fields["ship_country"]
+                # required address parts are validated non-empty; the truthiness check both narrows
+                # the shared str | None dict type and skips saving a blank entry
+                if name and line1 and city and postal and country:
+                    await save_for(
+                        user,
+                        name=name,
+                        line1=line1,
+                        line2=ship_fields["ship_line2"],
+                        city=city,
+                        postal_code=postal,
+                        country=country,
+                    )
 
     # the listener (record_order_metrics) reacts — the controller doesn't know about it
     await Event.dispatch(

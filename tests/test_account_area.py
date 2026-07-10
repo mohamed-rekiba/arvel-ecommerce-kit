@@ -306,6 +306,35 @@ def test_order_timeline_tracks_transitions(client) -> None:
     assert timeline[-1]["at"] is not None
 
 
+def test_checkout_saves_a_new_address_as_the_default(client) -> None:
+    """A signed-in customer's newly-typed checkout address is added to their book, and the first one
+    becomes the default; a later saved-address checkout does not duplicate it."""
+    from tests.checkout_helpers import checkout_body
+
+    cara = _auth(client)
+    assert client.get("/api/account/addresses", headers=cara).json() == []  # empty book
+
+    client.post(
+        "/api/cart/items", json={"product_variant_id": 1, "quantity": 1}, headers=cara
+    )
+    assert (
+        client.post("/api/checkout", json=checkout_body(), headers=cara).status_code
+        == 201
+    )
+
+    addrs = client.get("/api/account/addresses", headers=cara).json()
+    assert len(addrs) == 1
+    assert addrs[0]["is_default"] is True
+    assert addrs[0]["city"] == "Portland"
+
+    # a second checkout reusing the SAVED address must not create a duplicate entry
+    client.post(
+        "/api/cart/items", json={"product_variant_id": 1, "quantity": 1}, headers=cara
+    )
+    client.post("/api/checkout", json={"address_id": addrs[0]["id"]}, headers=cara)
+    assert len(client.get("/api/account/addresses", headers=cara).json()) == 1
+
+
 def test_invoice_renders_server_side_html(client) -> None:
     """v6.1 — the printable invoice exercises arvel.views (Jinja): owner-guarded, localized,
     carries the order lines + totals."""

@@ -59,23 +59,52 @@ async def index(request: Request) -> list[SavedAddressOut]:
     return [_out(a) for a in rows]
 
 
-async def store(request: Request, data: SavedAddressIn) -> SavedAddressOut:
-    user = _customer()
+async def save_for(
+    user: User,
+    *,
+    name: str,
+    line1: str,
+    line2: str | None,
+    city: str,
+    postal_code: str,
+    country: str,
+    label: str | None = None,
+    phone: str | None = None,
+    is_default: bool = False,
+) -> Address:
+    """Persist an address to ``user``'s book. The first address (or an explicit default) becomes the
+    default, clearing any previous one. Shared by the address book and checkout."""
     existing = await Address.where("user_id", user.id).get()
-    make_default = data.is_default or not existing  # the first address is the default
+    make_default = is_default or not existing  # the first address is the default
     if make_default:
         await _clear_default(user)
-    address = await Address.create(
+    return await Address.create(
         user_id=user.id,
-        label=data.label,
+        label=label,
+        name=name,
+        line1=line1,
+        line2=line2,
+        city=city,
+        postal_code=postal_code,
+        country=country,
+        phone=phone,
+        is_default=make_default,
+    )
+
+
+async def store(request: Request, data: SavedAddressIn) -> SavedAddressOut:
+    user = _customer()
+    address = await save_for(
+        user,
         name=data.name,
         line1=data.line1,
         line2=data.line2,
         city=data.city,
         postal_code=data.postal_code,
         country=data.country.value,
+        label=data.label,
         phone=data.phone,
-        is_default=make_default,
+        is_default=data.is_default,
     )
     return _out(address)
 
