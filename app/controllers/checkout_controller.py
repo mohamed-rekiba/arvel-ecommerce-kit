@@ -455,6 +455,24 @@ async def _timeline(order: Order) -> list[OrderTimelineOut]:
             reached[str(target)] = _iso(event.created_at)
     if OrderStatus.CANCELLED.value in reached:
         path = [OrderStatus.PENDING, OrderStatus.CANCELLED]
+    elif (
+        OrderStatus.REFUNDED.value in reached
+        or OrderStatus.REFUND_PENDING.value in reached
+    ):
+        # terminal money-returned branch (K15): show only the states actually reached and end at
+        # the refund state — never grey out future shipped/delivered, the order isn't progressing
+        # to delivery. Includes shipped only if it happened (a shipped return still refunds).
+        terminal = (
+            OrderStatus.REFUNDED
+            if OrderStatus.REFUNDED.value in reached
+            else OrderStatus.REFUND_PENDING
+        )
+        path = [
+            step
+            for step in (OrderStatus.PENDING, OrderStatus.PAID, OrderStatus.SHIPPED)
+            if step.value in reached
+        ]
+        path.append(terminal)
     elif _method_value(order) is PaymentMethod.COD:
         path = [OrderStatus.PENDING, OrderStatus.SHIPPED, OrderStatus.DELIVERED]
     else:

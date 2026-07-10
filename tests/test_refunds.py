@@ -430,3 +430,29 @@ def test_refund_authz_owner_and_permission_scoped(gw) -> None:
         == 403
     )
     assert len(gw.refund_calls) == 0
+
+
+def test_refund_timeline_collapses_to_a_terminal_branch(gw) -> None:
+    """The tracking stepper must not imply a refund is still heading to delivery: a refund collapses
+    the path to placed -> paid -> refund_pending, then -> refunded — never the greyed
+    shipped/delivered steps that showed a delivery tracker on a refunded order."""
+    order_id, cara, _paid = _place_and_pay(gw, quantity=1)
+
+    gw.client.post(f"/api/orders/{order_id}/cancel", headers=cara)
+    timeline = gw.client.get(f"/api/orders/{order_id}", headers=cara).json()["timeline"]
+    assert [s["status"] for s in timeline] == ["pending", "paid", "refund_pending"]
+    assert all(
+        s["at"] is not None for s in timeline
+    )  # a terminal branch has no unreached steps
+
+    _post_webhook(
+        gw.client,
+        {
+            "id": "evt_refund_tl",
+            "type": "charge.refunded",
+            "data": {"charge_id": "ch_test_123"},
+        },
+    )
+    timeline = gw.client.get(f"/api/orders/{order_id}", headers=cara).json()["timeline"]
+    assert [s["status"] for s in timeline] == ["pending", "paid", "refunded"]
+    assert all(s["at"] is not None for s in timeline)

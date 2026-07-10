@@ -145,15 +145,23 @@ onBeforeUnmount(stopPolling)
             :class="{
               'step--done': s.at !== null,
               'step--current': s.at !== null && i === doneCount - 1,
-              'step--cancelled': s.status === 'cancelled'
+              'step--cancelled': s.status === 'cancelled',
+              'step--refund': s.status === 'refunded' || s.status === 'refund_pending'
             }"
           >
             <span class="step__dot" aria-hidden="true">
-              <svg v-if="s.at !== null && s.status !== 'cancelled'" viewBox="0 0 24 24">
+              <svg
+                v-if="s.at !== null && s.status !== 'cancelled' && s.status !== 'refunded' && s.status !== 'refund_pending'"
+                viewBox="0 0 24 24"
+              >
                 <path d="M5 12l5 5 9-10" />
               </svg>
               <svg v-else-if="s.status === 'cancelled'" viewBox="0 0 24 24">
                 <path d="M6 6l12 12M18 6L6 18" />
+              </svg>
+              <!-- refunded: a return arrow; refund_pending: no glyph, the info dot reads as in-flight -->
+              <svg v-else-if="s.status === 'refunded'" viewBox="0 0 24 24">
+                <path d="M9 7H5v4M5 7a9 9 0 1 1-2 6" />
               </svg>
             </span>
             <span class="step__meta">
@@ -402,6 +410,13 @@ onBeforeUnmount(stopPolling)
   background: var(--danger-bg);
   color: var(--danger-fg);
 }
+/* refunded / refund-in-progress: a neutral money-returned state, not a green success step —
+   mirrors the .chip--refund_pending info treatment. After .step--done so it wins the dot color. */
+.step--refund .step__dot {
+  border-color: var(--info-fg);
+  background: var(--info-bg);
+  color: var(--info-fg);
+}
 .step__meta {
   display: flex;
   flex-direction: column;
@@ -418,6 +433,9 @@ onBeforeUnmount(stopPolling)
 }
 .step--cancelled .step__meta b {
   color: var(--danger-fg);
+}
+.step--refund .step__meta b {
+  color: var(--info-fg);
 }
 .step__meta i {
   font-style: normal;
