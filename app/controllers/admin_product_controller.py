@@ -22,6 +22,7 @@ from arvel.activitylog import activity
 
 from app.enums import Permission, ProductStatus
 from app.i18n import SUPPORTED_LOCALES, active_locale
+from app.media_url import media_serving_url as _media_url
 from app.models.category import Category
 from app.models.product import IMAGES, Product
 from app.models.product_variant import ProductVariant
@@ -73,15 +74,6 @@ def _page(
         per_page=result.per_page(),
         total=result.total(),
     )
-
-
-def _media_url(media: Media, conversion: str | None) -> str:
-    """Public storage/CDN URL when the disk exposes one, else the /api/media proxy fallback."""
-    url: str | None = media.get_url(conversion)
-    if url and url.startswith(("http://", "https://")):
-        return url
-    suffix = f"/{conversion}" if conversion else ""
-    return f"/api/media/{media.id}{suffix}"
 
 
 async def _list_extras(ids: list[int]) -> dict[int, dict[str, Any]]:

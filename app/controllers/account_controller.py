@@ -32,17 +32,12 @@ def _me(request: Request) -> User:
 
 
 async def avatar_url(user: User, conversion: str = "profile") -> str | None:
-    """The user's avatar (a one-image media collection), as a serving URL — public-bucket URL
-    when the disk exposes one, else the app-streamed /api/media route."""
+    """The user's avatar (a one-image media collection), as a serving URL."""
+    from app.media_url import media_serving_url
     from app.models.user import AVATAR
 
     media = await user.get_media(AVATAR)
-    if not media:
-        return None
-    url = media[0].get_url(conversion)
-    if url and url.startswith(("http://", "https://")):
-        return url
-    return f"/api/media/{media[0].id}/{conversion}"
+    return media_serving_url(media[0], conversion) if media else None
 
 
 async def user_out(user: User) -> UserOut:

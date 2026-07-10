@@ -11,6 +11,7 @@ from arvel.support import current_user
 
 from app.controllers.serializers import iso as _iso
 from app.enums import Permission
+from app.media_url import media_serving_url as _media_url
 from app.models.banner import Banner
 from app.models.product import Product
 from app.models.user import User
@@ -47,17 +48,6 @@ async def _owner_labels(rows: Sequence[Media]) -> dict[tuple[str, int], str]:
 
 def _thumb_conversion(model_type: str) -> str:
     return {"Product": "thumb", "Banner": "mobile", "User": "chip"}.get(model_type, "")
-
-
-def _media_url(media: Media, conversion: str | None) -> str:
-    """Serving URL for a media row — the public storage/CDN URL when the disk exposes one (s3/RustFS),
-    else the app-streamed /api/media fallback. Same rule the storefront/banner/avatar serializers use;
-    the library must not force the proxy on top of an already-public bucket URL."""
-    url: str | None = media.get_url(conversion)
-    if url and url.startswith(("http://", "https://")):
-        return url
-    suffix = f"/{conversion}" if conversion else ""
-    return f"/api/media/{media.id}{suffix}"
 
 
 async def index() -> list[MediaItemOut]:
