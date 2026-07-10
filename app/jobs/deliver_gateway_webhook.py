@@ -15,6 +15,13 @@ from arvel.support.facades import Config
 
 
 class DeliverGatewayWebhook(Job):
+    # A timeout here means the POST is stuck in flight — we genuinely don't know if the shop
+    # received it. That's worth surfacing to an operator immediately rather than quietly retrying
+    # a send that may have already landed; the receiver's event_id ledger (app/controllers/payment_controller.py)
+    # already dedupes redeliveries, so this isn't about preventing double-processing (DR-0058).
+    timeout = 10
+    fail_on_timeout = True
+
     def __init__(self, event_id: str, event_type: str, charge_id: str) -> None:
         self.event_id = event_id
         self.event_type = event_type
