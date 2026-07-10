@@ -1,4 +1,4 @@
-"""Global HTTP middleware (cf. Laravel's withMiddleware).
+"""Global HTTP middleware — the app's middleware stack.
 
 List middleware classes/instances here; they run for every request, in order. Add your own — or
 arvel's built-ins — to the list.
