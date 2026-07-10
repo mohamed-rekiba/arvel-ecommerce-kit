@@ -6,7 +6,7 @@ from typing import Any, ClassVar
 
 from arvel import Model
 
-from app.enums import Currency, OrderStatus
+from app.enums import Currency, OrderStatus, PaymentMethod
 
 
 class Order(Model):
@@ -57,7 +57,11 @@ class Order(Model):
         "shipping_method",
         "tracking_number",
     ]
-    __casts__: ClassVar[dict[str, Any]] = {"status": OrderStatus, "currency": Currency}
+    __casts__: ClassVar[dict[str, Any]] = {
+        "status": OrderStatus,
+        "currency": Currency,
+        "payment_method": PaymentMethod,
+    }
 
     def items(self) -> Any:
         from app.models.order_item import OrderItem
