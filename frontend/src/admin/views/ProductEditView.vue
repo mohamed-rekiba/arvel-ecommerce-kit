@@ -193,7 +193,7 @@ async function addVariant() {
 async function setStock(variant: Variant) {
   error.value = null
   try {
-    const updated = await api.adjustStock(variant.id, {
+    const updated = await api.adjustStock(productId.value as number, variant.id, {
       set: stockDrafts[variant.id],
       reason: 'manual adjustment (admin console)'
     })
@@ -208,7 +208,7 @@ async function removeVariant(variant: Variant) {
   if (!window.confirm(t('pedit.variant_delete_confirm', { sku: variant.sku }))) return
   error.value = null
   try {
-    await api.deleteVariant(variant.id)
+    await api.deleteVariant(productId.value as number, variant.id)
     variants.value = variants.value.filter((v) => v.id !== variant.id)
   } catch (e) {
     fail(e, t('pedit.variant_ordered'))

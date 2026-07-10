@@ -96,7 +96,7 @@ async def product_out(p: Product, deal: Any | None = None) -> ProductOut:
     category = p.relation(
         "category"
     )  # eager-loaded with in_locale → carries .translation
-    variants = p.relation("variants")
+    variants = p.relation("product_variants")
     images = await p.get_media(
         IMAGES
     )  # uses the eager-loaded `media` relation when present
@@ -217,7 +217,7 @@ async def _visible_products_query(
     Scopes: only-visible (EXISTS filter), in_locale (project the active locale's `translation`); the
     eager-loaded category is also locale-projected so its translation comes along."""
     query = (
-        Product.with_("variants", "media", category=_in_locale)
+        Product.with_("product_variants", "media", category=_in_locale)
         .with_visibility(only_visible=True)
         .in_locale()
     )
@@ -299,7 +299,7 @@ async def products_show(request: Request) -> ProductOut:
     slug = request.path_param("slug")
     # first_or_fail raises ModelNotFound → the kernel renders it 404 (a non-retrievable product 404s)
     product = (
-        await Product.with_("variants", "media", category=_in_locale)
+        await Product.with_("product_variants", "media", category=_in_locale)
         .where("slug", slug)
         .with_visibility(only_visible=True)
         .in_locale()

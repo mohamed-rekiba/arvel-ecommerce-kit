@@ -58,13 +58,11 @@ async def index(
     )
 
 
-async def show(request: Request) -> AdminUserDetailOut:
-    """One user: profile basics, roles, and an order summary."""
-    viewer = _current_user()
-    await _require_users_view(viewer)
-    user = await User.find(int(request.path_param("id")))
-    if user is None:
-        abort(404, "User not found")
+async def show(request: Request, id: User) -> AdminUserDetailOut:
+    """One user: profile basics, roles, and an order summary. users.view is enforced by the
+    route's Authorize middleware (DR-0055), so a denied caller 403s uniformly whether or not the
+    user id exists."""
+    user = id
     orders = await Order.where("user_id", user.id).get()
     base = await _user_out(user)
     return AdminUserDetailOut(

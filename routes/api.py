@@ -12,7 +12,7 @@ subtree instead of repeated on every route (DR-0052 lets a group carry ``secure=
 """
 
 from arvel import Route, Schema, abort, config
-from arvel.auth.middleware import Authenticate
+from arvel.auth.middleware import Authenticate, Authorize
 from arvel.auth.tokens import TokenGuard, create_token
 from arvel.http import Request
 from arvel.security import Hasher
@@ -43,6 +43,7 @@ from app.controllers import media_controller as media
 from app.controllers import notification_controller as notifications
 from app.controllers import wishlist_controller as wishlist
 from app.controllers import payment_controller as payment
+from app.enums import Permission
 from app.models.user import User
 from app.schemas import CredentialsIn, TokenOut, UserOut
 
@@ -242,14 +243,18 @@ with Route.group(prefix="/admin", name="api.admin."):
         # decides admin-vs-customer (403/404) inside the controller. Admin listings return
         # EVERY row (incl. hidden) with an is_visible flag — vs the storefront, which only
         # returns the retrievable set.
+        # catalog.update as route middleware (DR-0055): it runs in the pipeline before route-model
+        # binding resolves, so a denied caller gets a uniform 403 whether or not the product id
+        # exists — binding alone would otherwise 404 a nonexistent id before the handler's own
+        # check ever ran, leaking existence to any authenticated non-admin.
         Route.post(
             "/products/{id:int}/image", media.upload_image, name="products.image"
-        )
+        ).middleware(Authorize(Permission.CATALOG_UPDATE.value))
         Route.delete(
             "/products/{id:int}/media/{media_id:int}",
             media.delete_image,
             name="products.media.destroy",
-        ).status(200)
+        ).status(200).middleware(Authorize(Permission.CATALOG_UPDATE.value))
         Route.get("/products", admin_products.products_index, name="products.index")
         Route.get(
             "/categories", admin_products.categories_index, name="categories.index"
@@ -267,16 +272,19 @@ with Route.group(prefix="/admin", name="api.admin."):
         ).status(200)
 
         # Admin categories + vendors (the retrievability dimensions; catalog.* authority).
+        # update/destroy carry Authorize (DR-0055) — see the products.image comment above for why.
         Route.post("/categories", taxonomy.category_store, name="categories.store")
         Route.put(
             "/categories/{id:int}", taxonomy.category_update, name="categories.update"
-        )
+        ).middleware(Authorize(Permission.CATALOG_UPDATE.value))
         Route.delete(
             "/categories/{id:int}", taxonomy.category_destroy, name="categories.destroy"
-        ).status(200)
+        ).status(200).middleware(Authorize(Permission.CATALOG_DELETE.value))
         Route.get("/vendors", taxonomy.vendors_index, name="vendors.index")
         Route.post("/vendors", taxonomy.vendor_store, name="vendors.store")
-        Route.put("/vendors/{id:int}", taxonomy.vendor_update, name="vendors.update")
+        Route.put(
+            "/vendors/{id:int}", taxonomy.vendor_update, name="vendors.update"
+        ).middleware(Authorize(Permission.CATALOG_UPDATE.value))
 
         # Admin variants + stock (nested under the product; catalog.update authority).
         Route.get(
@@ -285,41 +293,54 @@ with Route.group(prefix="/admin", name="api.admin."):
         Route.post(
             "/products/{id:int}/variants", admin_variants.store, name="variants.store"
         )
-        Route.patch("/variants/{id:int}", admin_variants.update, name="variants.update")
+        # nested under the product so a variant id belonging to a DIFFERENT product 404s via the
+        # scoped binding itself (E6), not a controller re-check.
+        Route.patch(
+            "/products/{id:int}/variants/{variant_id:int}",
+            admin_variants.update,
+            name="variants.update",
+        ).scope_bindings()
         Route.post(
-            "/variants/{id:int}/stock",
+            "/products/{id:int}/variants/{variant_id:int}/stock",
             admin_variants.adjust_stock,
             name="variants.stock",
-        ).status(200)
+        ).status(200).scope_bindings()
         Route.delete(
-            "/variants/{id:int}", admin_variants.destroy, name="variants.destroy"
-        ).status(200)
+            "/products/{id:int}/variants/{variant_id:int}",
+            admin_variants.destroy,
+            name="variants.destroy",
+        ).status(200).scope_bindings()
 
-        # Admin user directory (users.view; role mutations stay on roles.manage).
+        # Admin user directory (users.view; role mutations stay on roles.manage). Authorize
+        # (DR-0055) on the id-bound routes — see the products.image comment above for why.
         Route.get("/users", admin_users.index, name="users.index")
-        Route.get("/users/{id:int}", admin_users.show, name="users.show")
+        Route.get("/users/{id:int}", admin_users.show, name="users.show").middleware(
+            Authorize(Permission.USERS_VIEW.value)
+        )
 
         # Admin RBAC + audit (roles.manage / audit.view; super-admin bypasses).
         Route.get("/roles", rbac.roles_index, name="roles.index")
         Route.get("/permissions", rbac.permissions_index, name="permissions.index")
-        Route.get("/users/{id:int}/roles", rbac.user_roles, name="users.roles")
+        Route.get(
+            "/users/{id:int}/roles", rbac.user_roles, name="users.roles"
+        ).middleware(Authorize(Permission.ROLES_MANAGE.value))
         Route.post(
             "/users/{id:int}/roles", rbac.assign_role, name="users.roles.assign"
-        ).status(200)
+        ).status(200).middleware(Authorize(Permission.ROLES_MANAGE.value))
         Route.delete(
             "/users/{id:int}/roles/{role:str}",
             rbac.revoke_role,
             name="users.roles.revoke",
-        ).status(200)
+        ).status(200).middleware(Authorize(Permission.ROLES_MANAGE.value))
         Route.get("/audit", rbac.audit_index, name="audit.index")
 
-        # Admin reviews.
+        # Admin reviews. moderate carries Authorize (DR-0055).
         Route.get("/reviews", reviews.admin_index, name="reviews.index")
         Route.post(
             "/reviews/{id:int}/{decision:str}",
             reviews.moderate,
             name="reviews.moderate",
-        ).status(200)
+        ).status(200).middleware(Authorize(Permission.REVIEWS_MODERATE.value))
 
         # Admin settings + media + newsletter.
         Route.get("/settings", settings.admin_settings, name="settings")
@@ -327,32 +348,52 @@ with Route.group(prefix="/admin", name="api.admin."):
         Route.get("/media", media_library.index, name="media")
         Route.get("/newsletter", settings.newsletter_index, name="newsletter")
 
-        # Admin banners.
-        Route.get("/banners", banners.admin_index, name="banners.index")
-        Route.post("/banners", banners.store, name="banners.store")
-        Route.patch("/banners/{id:int}", banners.update, name="banners.update")
-        Route.delete("/banners/{id:int}", banners.destroy, name="banners.destroy")
+        # Admin banners. Every action here carries Authorize (DR-0055) — reviewed as a whole
+        # resource, not just the id-bound ones, so the surface has one consistent authz posture.
+        Route.get("/banners", banners.admin_index, name="banners.index").middleware(
+            Authorize(Permission.CATALOG_VIEW.value)
+        )
+        Route.post("/banners", banners.store, name="banners.store").middleware(
+            Authorize(Permission.CATALOG_CREATE.value)
+        )
+        Route.patch(
+            "/banners/{id:int}", banners.update, name="banners.update"
+        ).middleware(Authorize(Permission.CATALOG_UPDATE.value))
+        Route.delete(
+            "/banners/{id:int}", banners.destroy, name="banners.destroy"
+        ).middleware(Authorize(Permission.CATALOG_DELETE.value))
         Route.post(
             "/banners/{id:int}/image", banners.upload_image, name="banners.image"
-        )
+        ).middleware(Authorize(Permission.CATALOG_UPDATE.value))
 
-        # Admin deals.
+        # Admin deals. update/destroy carry Authorize (DR-0055).
         Route.get("/deals", admin_deals.index, name="deals.index")
         Route.post("/deals", admin_deals.store, name="deals.store")
-        Route.patch("/deals/{id:int}", admin_deals.update, name="deals.update")
-        Route.delete("/deals/{id:int}", admin_deals.destroy, name="deals.destroy")
+        Route.patch(
+            "/deals/{id:int}", admin_deals.update, name="deals.update"
+        ).middleware(Authorize(Permission.CATALOG_UPDATE.value))
+        Route.delete(
+            "/deals/{id:int}", admin_deals.destroy, name="deals.destroy"
+        ).middleware(Authorize(Permission.CATALOG_DELETE.value))
 
-        # Admin coupons (catalog authority).
+        # Admin coupons (catalog authority). update carries Authorize (DR-0055).
         Route.get("/coupons", admin_coupons.index, name="coupons.index")
         Route.post("/coupons", admin_coupons.store, name="coupons.store")
-        Route.patch("/coupons/{id:int}", admin_coupons.update, name="coupons.update")
+        Route.patch(
+            "/coupons/{id:int}", admin_coupons.update, name="coupons.update"
+        ).middleware(Authorize(Permission.CATALOG_UPDATE.value))
 
-        # Admin orders.
+        # Admin orders. show/status carry Authorize (DR-0055) — see the products.image comment
+        # above for why a class-level admin check has to move ahead of route-model binding.
         Route.get("/orders", checkout.admin_orders_index, name="orders.index")
-        Route.get("/orders/{id:int}", checkout.admin_order_show, name="orders.show")
+        Route.get(
+            "/orders/{id:int}", checkout.admin_order_show, name="orders.show"
+        ).middleware(Authorize(Permission.ORDERS_VIEW.value))
         Route.post(
             "/orders/{id:int}/status", checkout.update_status, name="orders.status"
-        ).status(200)  # a transition, not a creation
+        ).status(200).middleware(
+            Authorize(Permission.ORDERS_UPDATE.value)
+        )  # a transition, not a creation
 
 # --- Dev payment gateway (debug builds only) ---
 # A stand-in PSP so the payment loop runs live with no external account: charges succeed and the

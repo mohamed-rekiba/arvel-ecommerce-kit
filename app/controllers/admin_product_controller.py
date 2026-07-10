@@ -314,11 +314,13 @@ async def store(request: Request, data: ProductIn) -> AdminProductOut:
     return _admin_product_out(product, is_visible=False)  # a new draft is never visible
 
 
-async def update(request: Request, data: UpdateProductIn) -> AdminProductOut:
+async def update(
+    request: Request, id: Product, data: UpdateProductIn
+) -> AdminProductOut:
     """Update a product — per-locale content, price, category, status, visibility (admins only;
     404 to non-admins so existence isn't leaked)."""
     user = _current_user()
-    product = await Product.find_or_fail(int(request.path_param("id")))
+    product = id
     if not await user.can("update", product):
         abort(404, "Product not found")
     translations = validated_translations(data.translations)
@@ -398,10 +400,10 @@ async def restore(request: Request) -> AdminProductOut:
     )
 
 
-async def destroy(request: Request) -> MessageOut:
+async def destroy(request: Request, id: Product) -> MessageOut:
     """ARCHIVE a product (soft delete — order history intact, restorable; 404 to non-admins)."""
     user = _current_user()
-    product = await Product.find_or_fail(int(request.path_param("id")))
+    product = id
     if not await user.can("delete", product):
         abort(404, "Product not found")
     await (

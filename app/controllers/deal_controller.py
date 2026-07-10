@@ -55,7 +55,9 @@ async def index(request: Request) -> list[DealOut]:
     product_ids = [d.product_id for d in live]
     products = {
         p.id: p
-        for p in await Product.with_("variants", "media", category=in_locale_relation)
+        for p in await Product.with_(
+            "product_variants", "media", category=in_locale_relation
+        )
         .with_visibility(only_visible=True)
         .in_locale()
         .where_in("id", product_ids)
@@ -67,7 +69,7 @@ async def index(request: Request) -> list[DealOut]:
         product = products.get(deal.product_id)
         if product is None:
             continue  # the product left the storefront; its deal goes with it
-        variants: list[Any] = list(product.relation("variants") or [])
+        variants: list[Any] = list(product.relation("product_variants") or [])
         out.append(
             DealOut(
                 id=deal.id,

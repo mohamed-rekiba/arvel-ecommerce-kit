@@ -2371,7 +2371,9 @@ export const getApiAdminProductsImageUrl = (id: number,) => {
 }
 
 /**
- * Attach an uploaded image to the product gallery (catalog.update); returns the updated gallery.
+ * Attach an uploaded image to the product gallery. catalog.update is enforced by the route's
+ * Authorize middleware (DR-0055) — it runs before binding, so a denied caller 403s uniformly
+ * whether or not the product id exists; returns the updated gallery.
  * @summary ApiAdminProductsImage
  */
 export const apiAdminProductsImage = async (id: number, options?: RequestInit): Promise<apiAdminProductsImageResponse> => {
@@ -2417,7 +2419,8 @@ export const getApiAdminProductsMediaDestroyUrl = (id: number,
 
 /**
  * Remove ONE gallery image (row + stored files via HasMedia.delete_media); returns the
- * updated gallery. catalog.update authority; a foreign media id can't cross products.
+ * updated gallery. catalog.update is enforced by the route's Authorize middleware (DR-0055);
+ * a foreign media id can't cross products.
  * @summary ApiAdminProductsMediaDestroy
  */
 export const apiAdminProductsMediaDestroy = async (id: number,
@@ -2999,7 +3002,8 @@ export const getApiAdminVendorsUpdateUrl = (id: number,) => {
 
 /**
  * Rename or (un)publish a vendor — the publish flag gates the retrievability of every
- * product the vendor owns (recomputed by the debounced views refresh).
+ * product the vendor owns (recomputed by the debounced views refresh). catalog.update is
+ * enforced by the route's Authorize middleware (DR-0055).
  * @summary ApiAdminVendorsUpdate
  */
 export const apiAdminVendorsUpdate = async (id: number,
@@ -3122,12 +3126,13 @@ export type apiAdminVariantsDestroyResponseError = (apiAdminVariantsDestroyRespo
 
 export type apiAdminVariantsDestroyResponse = (apiAdminVariantsDestroyResponseSuccess | apiAdminVariantsDestroyResponseError)
 
-export const getApiAdminVariantsDestroyUrl = (id: number,) => {
+export const getApiAdminVariantsDestroyUrl = (id: number,
+    variantId: number,) => {
 
 
 
 
-  return `/api/admin/variants/${id}`
+  return `/api/admin/products/${id}/variants/${variantId}`
 }
 
 /**
@@ -3135,9 +3140,10 @@ export const getApiAdminVariantsDestroyUrl = (id: number,) => {
  * cart lines holding it are removed — the cart re-renders without the dead line.
  * @summary ApiAdminVariantsDestroy
  */
-export const apiAdminVariantsDestroy = async (id: number, options?: RequestInit): Promise<apiAdminVariantsDestroyResponse> => {
+export const apiAdminVariantsDestroy = async (id: number,
+    variantId: number, options?: RequestInit): Promise<apiAdminVariantsDestroyResponse> => {
 
-  return apiFetch<apiAdminVariantsDestroyResponse>(getApiAdminVariantsDestroyUrl(id),
+  return apiFetch<apiAdminVariantsDestroyResponse>(getApiAdminVariantsDestroyUrl(id,variantId),
   {
     ...options,
     method: 'DELETE'
@@ -3167,21 +3173,23 @@ export type apiAdminVariantsUpdateResponseError = (apiAdminVariantsUpdateRespons
 
 export type apiAdminVariantsUpdateResponse = (apiAdminVariantsUpdateResponseSuccess | apiAdminVariantsUpdateResponseError)
 
-export const getApiAdminVariantsUpdateUrl = (id: number,) => {
+export const getApiAdminVariantsUpdateUrl = (id: number,
+    variantId: number,) => {
 
 
 
 
-  return `/api/admin/variants/${id}`
+  return `/api/admin/products/${id}/variants/${variantId}`
 }
 
 /**
  * @summary ApiAdminVariantsUpdate
  */
 export const apiAdminVariantsUpdate = async (id: number,
+    variantId: number,
     variantUpdateIn: VariantUpdateIn, options?: RequestInit): Promise<apiAdminVariantsUpdateResponse> => {
 
-  return apiFetch<apiAdminVariantsUpdateResponse>(getApiAdminVariantsUpdateUrl(id),
+  return apiFetch<apiAdminVariantsUpdateResponse>(getApiAdminVariantsUpdateUrl(id,variantId),
   {
     ...options,
     method: 'PATCH',
@@ -3211,12 +3219,13 @@ export type apiAdminVariantsStockResponseError = (apiAdminVariantsStockResponse4
 
 export type apiAdminVariantsStockResponse = (apiAdminVariantsStockResponseSuccess | apiAdminVariantsStockResponseError)
 
-export const getApiAdminVariantsStockUrl = (id: number,) => {
+export const getApiAdminVariantsStockUrl = (id: number,
+    variantId: number,) => {
 
 
 
 
-  return `/api/admin/variants/${id}/stock`
+  return `/api/admin/products/${id}/variants/${variantId}/stock`
 }
 
 /**
@@ -3225,9 +3234,10 @@ export const getApiAdminVariantsStockUrl = (id: number,) => {
  * @summary ApiAdminVariantsStock
  */
 export const apiAdminVariantsStock = async (id: number,
+    variantId: number,
     stockAdjustIn: StockAdjustIn, options?: RequestInit): Promise<apiAdminVariantsStockResponse> => {
 
-  return apiFetch<apiAdminVariantsStockResponse>(getApiAdminVariantsStockUrl(id),
+  return apiFetch<apiAdminVariantsStockResponse>(getApiAdminVariantsStockUrl(id,variantId),
   {
     ...options,
     method: 'POST',
@@ -3317,7 +3327,9 @@ export const getApiAdminUsersShowUrl = (id: number,) => {
 }
 
 /**
- * One user: profile basics, roles, and an order summary.
+ * One user: profile basics, roles, and an order summary. users.view is enforced by the
+ * route's Authorize middleware (DR-0055), so a denied caller 403s uniformly whether or not the
+ * user id exists.
  * @summary ApiAdminUsersShow
  */
 export const apiAdminUsersShow = async (id: number, options?: RequestInit): Promise<apiAdminUsersShowResponse> => {
@@ -3435,7 +3447,8 @@ export const getApiAdminUsersRolesUrl = (id: number,) => {
 }
 
 /**
- * The roles currently assigned to a user.
+ * The roles currently assigned to a user. roles.manage is enforced by the route's Authorize
+ * middleware (DR-0055), so a denied caller 403s uniformly whether or not the user id exists.
  * @summary ApiAdminUsersRoles
  */
 export const apiAdminUsersRoles = async (id: number, options?: RequestInit): Promise<apiAdminUsersRolesResponse> => {
@@ -3479,7 +3492,8 @@ export const getApiAdminUsersRolesAssignUrl = (id: number,) => {
 }
 
 /**
- * Assign a role to a user (roles.manage), recording it in the audit log.
+ * Assign a role to a user (roles.manage, enforced by the route's Authorize middleware —
+ * DR-0055), recording it in the audit log.
  * @summary ApiAdminUsersRolesAssign
  */
 export const apiAdminUsersRolesAssign = async (id: number,
@@ -3525,7 +3539,8 @@ export const getApiAdminUsersRolesRevokeUrl = (id: number,
 }
 
 /**
- * Revoke a role from a user (roles.manage), recording it in the audit log.
+ * Revoke a role from a user (roles.manage, enforced by the route's Authorize middleware —
+ * DR-0055), recording it in the audit log.
  * @summary ApiAdminUsersRolesRevoke
  */
 export const apiAdminUsersRolesRevoke = async (id: number,
@@ -3659,7 +3674,9 @@ export const getApiAdminReviewsModerateUrl = (id: number,
 
 /**
  * Approve or reject (the path decides); approval feeds the denormalized aggregate — all
- * transitions keep it exact (approve adds, un-approve subtracts).
+ * transitions keep it exact (approve adds, un-approve subtracts). reviews.moderate is enforced
+ * by the route's Authorize middleware (DR-0055), so a denied caller 403s uniformly whether or
+ * not the review id exists.
  * @summary ApiAdminReviewsModerate
  */
 export const apiAdminReviewsModerate = async (id: number,
@@ -4311,7 +4328,8 @@ export const getApiAdminCouponsUpdateUrl = (id: number,) => {
 
 /**
  * Activate/deactivate or adjust limits — deactivation takes effect immediately (checkout
- * re-validates every redemption).
+ * re-validates every redemption). catalog.update is enforced by the route's Authorize
+ * middleware (DR-0055), so a denied caller 403s uniformly whether or not the id exists.
  * @summary ApiAdminCouponsUpdate
  */
 export const apiAdminCouponsUpdate = async (id: number,
@@ -4440,7 +4458,8 @@ export const getApiAdminOrdersStatusUrl = (id: number,) => {
 }
 
 /**
- * Transition an order, enforcing the state machine. Requires orders.update (guests already 401'd).
+ * Transition an order, enforcing the state machine. orders.update is enforced by the route's
+ * Authorize middleware (DR-0055), so a denied caller 403s uniformly whether or not the id exists.
  * @summary ApiAdminOrdersStatus
  */
 export const apiAdminOrdersStatus = async (id: number,

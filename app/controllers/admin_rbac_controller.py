@@ -29,6 +29,17 @@ async def _require(permission: Permission) -> User:
     return user
 
 
+def _current_user() -> User:
+    """The acting admin, for routes whose roles.manage check now lives in the route's Authorize
+    middleware (DR-0055) — this only fetches the causer for the audit log, it doesn't authorize."""
+    user: User | None = current_user.get()
+    if user is None:
+        abort(
+            401, "Unauthenticated"
+        )  # unreachable post-Authorize; keeps `user` narrowed
+    return user
+
+
 async def _role_out(role: Any) -> RoleOut:
     return RoleOut(
         id=role.id,
@@ -49,21 +60,22 @@ async def permissions_index(request: Request) -> list[PermissionOut]:
     return [PermissionOut(id=p.id, name=p.name) for p in await PermissionModel.all()]
 
 
-async def user_roles(request: Request) -> UserRolesOut:
-    """The roles currently assigned to a user."""
-    await _require(Permission.ROLES_MANAGE)
-    user = await User.find_or_fail(int(request.path_param("id")))
+async def user_roles(request: Request, id: User) -> UserRolesOut:
+    """The roles currently assigned to a user. roles.manage is enforced by the route's Authorize
+    middleware (DR-0055), so a denied caller 403s uniformly whether or not the user id exists."""
+    user = id
     return UserRolesOut(
         user_id=user.id, roles=sorted(r.name for r in await user.roles())
     )
 
 
-async def assign_role(request: Request, data: AssignRoleIn) -> UserRolesOut:
-    """Assign a role to a user (roles.manage), recording it in the audit log."""
-    admin = await _require(Permission.ROLES_MANAGE)
+async def assign_role(request: Request, id: User, data: AssignRoleIn) -> UserRolesOut:
+    """Assign a role to a user (roles.manage, enforced by the route's Authorize middleware —
+    DR-0055), recording it in the audit log."""
+    admin = _current_user()
     if await Role.where("name", data.role).first() is None:
         abort(422, f"Unknown role: {data.role}")
-    user = await User.find_or_fail(int(request.path_param("id")))
+    user = id
     await user.assign_role(data.role)
     await (
         activity()
@@ -77,10 +89,11 @@ async def assign_role(request: Request, data: AssignRoleIn) -> UserRolesOut:
     )
 
 
-async def revoke_role(request: Request) -> UserRolesOut:
-    """Revoke a role from a user (roles.manage), recording it in the audit log."""
-    admin = await _require(Permission.ROLES_MANAGE)
-    user = await User.find_or_fail(int(request.path_param("id")))
+async def revoke_role(request: Request, id: User) -> UserRolesOut:
+    """Revoke a role from a user (roles.manage, enforced by the route's Authorize middleware —
+    DR-0055), recording it in the audit log."""
+    admin = _current_user()
+    user = id
     role = request.path_param("role")
     await user.remove_role(role)
     await (

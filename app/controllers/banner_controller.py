@@ -9,7 +9,6 @@ from arvel.http import Request
 from arvel.support import current_user
 from arvel.validation import ValidationException
 
-from app.enums import Permission
 from app.i18n import DEFAULT_LOCALE, SUPPORTED_LOCALES, active_locale
 from app.models.banner import HERO, Banner
 from app.models.user import User
@@ -120,9 +119,8 @@ async def _admin_out(banner: Banner) -> AdminBannerOut:
 
 
 async def admin_index(request: Request) -> list[AdminBannerOut]:
-    user = _current_user()
-    if not await user.can(Permission.CATALOG_VIEW.value):
-        abort(403, "You lack catalog access.")
+    # catalog.view is enforced by the route's Authorize middleware (DR-0055) — it runs before
+    # binding, so a denied caller gets a uniform 403 regardless of what the id would resolve to.
     return [
         await _admin_out(b) for b in await Banner.order_by("sort").order_by("id").get()
     ]
@@ -130,8 +128,6 @@ async def admin_index(request: Request) -> list[AdminBannerOut]:
 
 async def store(request: Request, data: BannerIn) -> AdminBannerOut:
     user = _current_user()
-    if not await user.can(Permission.CATALOG_CREATE.value):
-        abort(403, "You lack catalog access.")
     translations = _validated_translations(data.translations)
     banner = await Banner.create(
         translations=translations,
@@ -143,11 +139,9 @@ async def store(request: Request, data: BannerIn) -> AdminBannerOut:
     return await _admin_out(banner)
 
 
-async def update(request: Request, data: BannerUpdateIn) -> AdminBannerOut:
+async def update(request: Request, id: Banner, data: BannerUpdateIn) -> AdminBannerOut:
     user = _current_user()
-    if not await user.can(Permission.CATALOG_UPDATE.value):
-        abort(403, "You lack catalog access.")
-    banner = await Banner.find_or_fail(int(request.path_param("id")))
+    banner = id
     translations = _validated_translations(data.translations)
     if translations is not None:
         banner.translations = translations
@@ -162,11 +156,9 @@ async def update(request: Request, data: BannerUpdateIn) -> AdminBannerOut:
     return await _admin_out(banner)
 
 
-async def destroy(request: Request) -> dict[str, str]:
+async def destroy(request: Request, id: Banner) -> dict[str, str]:
     user = _current_user()
-    if not await user.can(Permission.CATALOG_DELETE.value):
-        abort(403, "You lack catalog access.")
-    banner = await Banner.find_or_fail(int(request.path_param("id")))
+    banner = id
     for media in await banner.get_media(HERO):
         await banner.delete_media(media.id)
     await banner.delete()
@@ -174,12 +166,9 @@ async def destroy(request: Request) -> dict[str, str]:
     return {"status": "deleted"}
 
 
-async def upload_image(request: Request) -> AdminBannerOut:
+async def upload_image(request: Request, id: Banner) -> AdminBannerOut:
     """Attach/replace the slide image (the previous one is removed — a slide has ONE image)."""
-    user = _current_user()
-    if not await user.can(Permission.CATALOG_UPDATE.value):
-        abort(403, "You may not modify banner media.")
-    banner = await Banner.find_or_fail(int(request.path_param("id")))
+    banner = id
     upload = await request.file("image")
     if upload is None:
         raise ValidationException({"image": ["An image file is required."]})

@@ -108,7 +108,7 @@ def test_restock_edge_notifies_subscribers_exactly_once(client) -> None:
 
     # restock 0→7 → both subscribers get the database notification (mail leg covered in integration)
     client.post(
-        "/api/admin/variants/1/stock",
+        "/api/admin/products/1/variants/1/stock",
         json={"set": 7, "reason": "restock"},
         headers=admin,
     )
@@ -124,11 +124,17 @@ def test_restock_edge_notifies_subscribers_exactly_once(client) -> None:
 
     # a second adjustment while already >0 does NOT re-notify (edge-triggered + one-shot)
     client.post(
-        "/api/admin/variants/1/stock", json={"set": 20, "reason": "more"}, headers=admin
+        "/api/admin/products/1/variants/1/stock",
+        json={"set": 20, "reason": "more"},
+        headers=admin,
     )
     # even a fresh 0→positive cycle is quiet — the subscriptions were consumed
-    client.post("/api/admin/variants/1/stock", json={"set": 0}, headers=admin)
-    client.post("/api/admin/variants/1/stock", json={"set": 5}, headers=admin)
+    client.post(
+        "/api/admin/products/1/variants/1/stock", json={"set": 0}, headers=admin
+    )
+    client.post(
+        "/api/admin/products/1/variants/1/stock", json={"set": 5}, headers=admin
+    )
     import time
 
     time.sleep(
@@ -143,7 +149,9 @@ def test_unsubscribe_prevents_the_alert(client) -> None:
     admin = _auth(client, "admin@example.com", "secret-admin")
     client.post("/api/variants/1/stock-alert", headers=cara)
     client.delete("/api/variants/1/stock-alert", headers=cara)
-    client.post("/api/admin/variants/1/stock", json={"set": 3}, headers=admin)
+    client.post(
+        "/api/admin/products/1/variants/1/stock", json={"set": 3}, headers=admin
+    )
     import time
 
     time.sleep(0.3)

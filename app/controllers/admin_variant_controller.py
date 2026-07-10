@@ -41,19 +41,13 @@ def _out(variant: ProductVariant) -> VariantOut:
     )
 
 
-async def _authorized_product(user: User, product_id: int) -> Product:
+async def _authorize(user: User, product: Product) -> None:
     """Variants are part of the product: mutating them needs update rights on the product
-    (404 to non-admins so existence isn't leaked)."""
-    product = await Product.find_or_fail(product_id)
+    (404 to non-admins so existence isn't leaked). ``product`` is already route-bound — on the
+    update/stock/destroy routes it's resolved via ``.scope_bindings()``, which is also what makes
+    a variant id from a DIFFERENT product 404 before this check ever runs."""
     if not await user.can("update", product):
         abort(404, "Product not found")
-    return product
-
-
-async def _resolve_variant(request: Request, user: User) -> ProductVariant:
-    variant = await ProductVariant.find_or_fail(int(request.path_param("id")))
-    await _authorized_product(user, variant.product_id)
-    return variant
 
 
 async def _sku_taken(
@@ -66,16 +60,17 @@ async def _sku_taken(
     return await query.first() is not None
 
 
-async def index(request: Request) -> list[VariantOut]:
+async def index(request: Request, id: Product) -> list[VariantOut]:
     user = _current_user()
-    product = await _authorized_product(user, int(request.path_param("id")))
-    variants = await ProductVariant.where("product_id", product.id).order_by("id").get()
+    await _authorize(user, id)
+    variants = await ProductVariant.where("product_id", id.id).order_by("id").get()
     return [_out(v) for v in variants]
 
 
-async def store(request: Request, data: VariantIn) -> VariantOut:
+async def store(request: Request, id: Product, data: VariantIn) -> VariantOut:
     user = _current_user()
-    product = await _authorized_product(user, int(request.path_param("id")))
+    product = id
+    await _authorize(user, product)
     validator = Validator(
         {"sku": data.sku, "name": data.name},
         {"sku": "required|string", "name": "required|string"},
@@ -103,9 +98,12 @@ async def store(request: Request, data: VariantIn) -> VariantOut:
     return _out(variant)
 
 
-async def update(request: Request, data: VariantUpdateIn) -> VariantOut:
+async def update(
+    request: Request, id: Product, variant_id: ProductVariant, data: VariantUpdateIn
+) -> VariantOut:
     user = _current_user()
-    variant = await _resolve_variant(request, user)
+    await _authorize(user, id)
+    variant = variant_id
     if data.sku is not None:
         if await _sku_taken(variant.product_id, data.sku, ignore_id=variant.id):
             raise ValidationException(
@@ -135,11 +133,14 @@ async def update(request: Request, data: VariantUpdateIn) -> VariantOut:
     return _out(variant)
 
 
-async def adjust_stock(request: Request, data: StockAdjustIn) -> VariantOut:
+async def adjust_stock(
+    request: Request, id: Product, variant_id: ProductVariant, data: StockAdjustIn
+) -> VariantOut:
     """Set or shift a variant's stock — an explicit, audited operation, serialized under a row
     lock so concurrent adjustments are deterministic."""
     user = _current_user()
-    variant = await _resolve_variant(request, user)
+    await _authorize(user, id)
+    variant = variant_id
     if (data.set is None) == (data.delta is None):
         raise ValidationException(
             {"stock": ["Provide exactly one of 'set' or 'delta'."]}
@@ -172,11 +173,14 @@ async def adjust_stock(request: Request, data: StockAdjustIn) -> VariantOut:
     return _out(locked)
 
 
-async def destroy(request: Request) -> MessageOut:
+async def destroy(
+    request: Request, id: Product, variant_id: ProductVariant
+) -> MessageOut:
     """Delete a variant. Order history can never dangle (422 when order lines reference it);
     cart lines holding it are removed — the cart re-renders without the dead line."""
     user = _current_user()
-    variant = await _resolve_variant(request, user)
+    await _authorize(user, id)
+    variant = variant_id
     if await OrderItem.where("product_variant_id", variant.id).first() is not None:
         raise ValidationException(
             {

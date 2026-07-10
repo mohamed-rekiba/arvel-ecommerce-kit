@@ -2990,7 +2990,7 @@
     "/api/admin/products/{id}/image": {
       "post": {
         "summary": "ApiAdminProductsImage",
-        "description": "Attach an uploaded image to the product gallery (catalog.update); returns the updated gallery.",
+        "description": "Attach an uploaded image to the product gallery. catalog.update is enforced by the route's\nAuthorize middleware (DR-0055) \u2014 it runs before binding, so a denied caller 403s uniformly\nwhether or not the product id exists; returns the updated gallery.",
         "operationId": "api.admin.products.image",
         "parameters": [
           {
@@ -3068,7 +3068,7 @@
     "/api/admin/products/{id}/media/{media_id}": {
       "delete": {
         "summary": "ApiAdminProductsMediaDestroy",
-        "description": "Remove ONE gallery image (row + stored files via HasMedia.delete_media); returns the\nupdated gallery. catalog.update authority; a foreign media id can't cross products.",
+        "description": "Remove ONE gallery image (row + stored files via HasMedia.delete_media); returns the\nupdated gallery. catalog.update is enforced by the route's Authorize middleware (DR-0055);\na foreign media id can't cross products.",
         "operationId": "api.admin.products.media.destroy",
         "parameters": [
           {
@@ -4171,7 +4171,7 @@
     "/api/admin/vendors/{id}": {
       "put": {
         "summary": "ApiAdminVendorsUpdate",
-        "description": "Rename or (un)publish a vendor \u2014 the publish flag gates the retrievability of every\nproduct the vendor owns (recomputed by the debounced views refresh).",
+        "description": "Rename or (un)publish a vendor \u2014 the publish flag gates the retrievability of every\nproduct the vendor owns (recomputed by the debounced views refresh). catalog.update is\nenforced by the route's Authorize middleware (DR-0055).",
         "operationId": "api.admin.vendors.update",
         "parameters": [
           {
@@ -4412,7 +4412,7 @@
         ]
       }
     },
-    "/api/admin/variants/{id}": {
+    "/api/admin/products/{id}/variants/{variant_id}": {
       "delete": {
         "summary": "ApiAdminVariantsDestroy",
         "description": "Delete a variant. Order history can never dangle (422 when order lines reference it);\ncart lines holding it are removed \u2014 the cart re-renders without the dead line.",
@@ -4420,6 +4420,15 @@
         "parameters": [
           {
             "name": "id",
+            "in": "path",
+            "schema": {
+              "type": "integer"
+            },
+            "required": true,
+            "deprecated": false
+          },
+          {
+            "name": "variant_id",
             "in": "path",
             "schema": {
               "type": "integer"
@@ -4498,6 +4507,15 @@
             },
             "required": true,
             "deprecated": false
+          },
+          {
+            "name": "variant_id",
+            "in": "path",
+            "schema": {
+              "type": "integer"
+            },
+            "required": true,
+            "deprecated": false
           }
         ],
         "requestBody": {
@@ -4569,7 +4587,7 @@
         ]
       }
     },
-    "/api/admin/variants/{id}/stock": {
+    "/api/admin/products/{id}/variants/{variant_id}/stock": {
       "post": {
         "summary": "ApiAdminVariantsStock",
         "description": "Set or shift a variant's stock \u2014 an explicit, audited operation, serialized under a row\nlock so concurrent adjustments are deterministic.",
@@ -4577,6 +4595,15 @@
         "parameters": [
           {
             "name": "id",
+            "in": "path",
+            "schema": {
+              "type": "integer"
+            },
+            "required": true,
+            "deprecated": false
+          },
+          {
+            "name": "variant_id",
             "in": "path",
             "schema": {
               "type": "integer"
@@ -4759,7 +4786,7 @@
     "/api/admin/users/{id}": {
       "get": {
         "summary": "ApiAdminUsersShow",
-        "description": "One user: profile basics, roles, and an order summary.",
+        "description": "One user: profile basics, roles, and an order summary. users.view is enforced by the\nroute's Authorize middleware (DR-0055), so a denied caller 403s uniformly whether or not the\nuser id exists.",
         "operationId": "api.admin.users.show",
         "parameters": [
           {
@@ -4892,7 +4919,7 @@
     "/api/admin/users/{id}/roles": {
       "get": {
         "summary": "ApiAdminUsersRoles",
-        "description": "The roles currently assigned to a user.",
+        "description": "The roles currently assigned to a user. roles.manage is enforced by the route's Authorize\nmiddleware (DR-0055), so a denied caller 403s uniformly whether or not the user id exists.",
         "operationId": "api.admin.users.roles",
         "parameters": [
           {
@@ -4965,7 +4992,7 @@
       },
       "post": {
         "summary": "ApiAdminUsersRolesAssign",
-        "description": "Assign a role to a user (roles.manage), recording it in the audit log.",
+        "description": "Assign a role to a user (roles.manage, enforced by the route's Authorize middleware \u2014\nDR-0055), recording it in the audit log.",
         "operationId": "api.admin.users.roles.assign",
         "parameters": [
           {
@@ -5050,7 +5077,7 @@
     "/api/admin/users/{id}/roles/{role}": {
       "delete": {
         "summary": "ApiAdminUsersRolesRevoke",
-        "description": "Revoke a role from a user (roles.manage), recording it in the audit log.",
+        "description": "Revoke a role from a user (roles.manage, enforced by the route's Authorize middleware \u2014\nDR-0055), recording it in the audit log.",
         "operationId": "api.admin.users.roles.revoke",
         "parameters": [
           {
@@ -5243,7 +5270,7 @@
     "/api/admin/reviews/{id}/{decision}": {
       "post": {
         "summary": "ApiAdminReviewsModerate",
-        "description": "Approve or reject (the path decides); approval feeds the denormalized aggregate \u2014 all\ntransitions keep it exact (approve adds, un-approve subtracts).",
+        "description": "Approve or reject (the path decides); approval feeds the denormalized aggregate \u2014 all\ntransitions keep it exact (approve adds, un-approve subtracts). reviews.moderate is enforced\nby the route's Authorize middleware (DR-0055), so a denied caller 403s uniformly whether or\nnot the review id exists.",
         "operationId": "api.admin.reviews.moderate",
         "parameters": [
           {
@@ -6169,7 +6196,7 @@
     "/api/admin/coupons/{id}": {
       "patch": {
         "summary": "ApiAdminCouponsUpdate",
-        "description": "Activate/deactivate or adjust limits \u2014 deactivation takes effect immediately (checkout\nre-validates every redemption).",
+        "description": "Activate/deactivate or adjust limits \u2014 deactivation takes effect immediately (checkout\nre-validates every redemption). catalog.update is enforced by the route's Authorize\nmiddleware (DR-0055), so a denied caller 403s uniformly whether or not the id exists.",
         "operationId": "api.admin.coupons.update",
         "parameters": [
           {
@@ -6358,7 +6385,7 @@
     "/api/admin/orders/{id}/status": {
       "post": {
         "summary": "ApiAdminOrdersStatus",
-        "description": "Transition an order, enforcing the state machine. Requires orders.update (guests already 401'd).",
+        "description": "Transition an order, enforcing the state machine. orders.update is enforced by the route's\nAuthorize middleware (DR-0055), so a denied caller 403s uniformly whether or not the id exists.",
         "operationId": "api.admin.orders.status",
         "parameters": [
           {

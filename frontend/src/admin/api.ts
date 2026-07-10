@@ -185,11 +185,12 @@ export const api = {
     request<VariantOut[]>('GET', `/admin/products/${productId}/variants`),
   createVariant: (productId: number, body: VariantIn) =>
     request<VariantOut>('POST', `/admin/products/${productId}/variants`, body),
-  updateVariant: (id: number, body: VariantUpdateIn) =>
-    request<VariantOut>('PATCH', `/admin/variants/${id}`, body),
-  adjustStock: (id: number, body: StockAdjustIn) =>
-    request<VariantOut>('POST', `/admin/variants/${id}/stock`, body),
-  deleteVariant: (id: number) => request<{ message: string }>('DELETE', `/admin/variants/${id}`),
+  updateVariant: (productId: number, id: number, body: VariantUpdateIn) =>
+    request<VariantOut>('PATCH', `/admin/products/${productId}/variants/${id}`, body),
+  adjustStock: (productId: number, id: number, body: StockAdjustIn) =>
+    request<VariantOut>('POST', `/admin/products/${productId}/variants/${id}/stock`, body),
+  deleteVariant: (productId: number, id: number) =>
+    request<{ message: string }>('DELETE', `/admin/products/${productId}/variants/${id}`),
   uploadImage: (productId: number, file: File) => {
     const form = new FormData()
     form.append('image', file)

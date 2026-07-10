@@ -68,7 +68,7 @@ def test_fanout_rides_the_worker(
             "Authorization": f"Bearer {client.post('/api/login', json={'email': 'admin@example.com', 'password': 'secret-admin'}).json()['token']}"
         }
         client.post(
-            "/api/admin/variants/1/stock",
+            "/api/admin/products/1/variants/1/stock",
             json={"set": 6, "reason": "container arrived"},
             headers=admin,
         )

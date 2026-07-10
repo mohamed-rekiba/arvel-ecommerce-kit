@@ -32,7 +32,7 @@ def test_concurrent_deltas_never_lose_an_update(
         def _adjust() -> None:
             results.append(
                 client.post(
-                    "/api/admin/variants/1/stock",
+                    "/api/admin/products/1/variants/1/stock",
                     json={"delta": -5, "reason": "race test"},
                     headers=admin,
                 ).status_code

@@ -8,22 +8,19 @@ from arvel import abort
 from arvel.http import Request, Response
 from arvel.kernel import app
 from arvel.media import Media
-from arvel.support import current_user
 from arvel.validation import ValidationException
 
 from app.controllers.catalog_controller import gallery_image_out
-from app.enums import Permission
 from app.models.product import IMAGES, Product
 from app.schemas import GalleryImageOut
 from app.services.product_image_service import ProductImageService
 
 
-async def upload_image(request: Request) -> list[GalleryImageOut]:
-    """Attach an uploaded image to the product gallery (catalog.update); returns the updated gallery."""
-    user = current_user.get()
-    if user is None or not await user.can(Permission.CATALOG_UPDATE.value):
-        abort(403, "You may not modify product media.")
-    product = await Product.find_or_fail(int(request.path_param("id")))
+async def upload_image(request: Request, id: Product) -> list[GalleryImageOut]:
+    """Attach an uploaded image to the product gallery. catalog.update is enforced by the route's
+    Authorize middleware (DR-0055) — it runs before binding, so a denied caller 403s uniformly
+    whether or not the product id exists; returns the updated gallery."""
+    product = id
 
     upload = await request.file("image")
     if upload is None:
@@ -44,13 +41,11 @@ async def upload_image(request: Request) -> list[GalleryImageOut]:
     return [gallery_image_out(m) for m in await product.get_media(IMAGES)]
 
 
-async def delete_image(request: Request) -> list[GalleryImageOut]:
+async def delete_image(request: Request, id: Product) -> list[GalleryImageOut]:
     """Remove ONE gallery image (row + stored files via HasMedia.delete_media); returns the
-    updated gallery. catalog.update authority; a foreign media id can't cross products."""
-    user = current_user.get()
-    if user is None or not await user.can(Permission.CATALOG_UPDATE.value):
-        abort(403, "You may not modify product media.")
-    product = await Product.find_or_fail(int(request.path_param("id")))
+    updated gallery. catalog.update is enforced by the route's Authorize middleware (DR-0055);
+    a foreign media id can't cross products."""
+    product = id
     if not await product.delete_media(int(request.path_param("media_id"))):
         abort(404, "Media not found")
     return [gallery_image_out(m) for m in await product.get_media(IMAGES)]

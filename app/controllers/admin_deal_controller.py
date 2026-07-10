@@ -89,11 +89,11 @@ async def store(request: Request, data: DealIn) -> AdminDealOut:
     return await _out(deal)
 
 
-async def update(request: Request, data: DealUpdateIn) -> AdminDealOut:
+async def update(request: Request, id: Deal, data: DealUpdateIn) -> AdminDealOut:
+    # catalog.update is enforced by the route's Authorize middleware (DR-0055), so a denied
+    # caller 403s uniformly whether or not the id exists.
     user = _current_user()
-    if not await user.can(Permission.CATALOG_UPDATE.value):
-        abort(403, "You lack catalog access.")
-    deal = await Deal.find_or_fail(int(request.path_param("id")))
+    deal = id
     if data.percent_off is not None:
         _validate_percent(data.percent_off)
         deal.percent_off = data.percent_off
@@ -114,11 +114,10 @@ async def update(request: Request, data: DealUpdateIn) -> AdminDealOut:
     return await _out(deal)
 
 
-async def destroy(request: Request) -> dict[str, str]:
+async def destroy(request: Request, id: Deal) -> dict[str, str]:
+    # catalog.delete is enforced by the route's Authorize middleware (DR-0055).
     user = _current_user()
-    if not await user.can(Permission.CATALOG_DELETE.value):
-        abort(403, "You lack catalog access.")
-    deal = await Deal.find_or_fail(int(request.path_param("id")))
+    deal = id
     await deal.delete()
     await activity().caused_by(user).performed_on(deal).log("deleted deal")
     return {"status": "deleted"}

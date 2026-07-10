@@ -175,6 +175,25 @@ def test_review_lifecycle_and_aggregate(client) -> None:
 
 def test_moderation_requires_the_permission(client) -> None:
     cara = _auth(client, "cara@example.com", "secret-cara")
+
+    # a real review to moderate — route-model binding resolves it before the permission check
+    # runs, so a target that doesn't exist would 404 before the gate is ever reached
+    async def _seed_review() -> None:
+        from app.models.review import Review
+
+        await Review.create(
+            subject_type="Product",
+            subject_id=1,
+            user_id=1,
+            rating=4,
+            title="Fine",
+            body="It's fine.",
+            status="pending",
+        )
+
+    with client.portal() as portal:
+        portal.call(_seed_review)
+
     assert client.get("/api/admin/reviews", headers=cara).status_code == 403
     assert client.post("/api/admin/reviews/1/approve", headers=cara).status_code == 403
     assert client.get("/api/admin/reviews").status_code == 401

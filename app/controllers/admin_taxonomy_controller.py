@@ -98,10 +98,13 @@ async def category_store(request: Request, data: CategoryIn) -> AdminCategoryOut
     return _category_out(category)
 
 
-async def category_update(request: Request, data: CategoryUpdateIn) -> AdminCategoryOut:
+async def category_update(
+    request: Request, id: Category, data: CategoryUpdateIn
+) -> AdminCategoryOut:
+    # catalog.update is enforced by the route's Authorize middleware (DR-0055) — it runs before
+    # binding, so a denied caller 403s uniformly whether or not the id exists.
     user = _current_user()
-    await _require(user, Permission.CATALOG_UPDATE)
-    category = await Category.find_or_fail(int(request.path_param("id")))
+    category = id
     translations = validated_translations(data.translations)
     if translations is not None:
         category.translations = translations
@@ -134,10 +137,10 @@ async def category_update(request: Request, data: CategoryUpdateIn) -> AdminCate
     return _category_out(category)
 
 
-async def category_destroy(request: Request) -> MessageOut:
+async def category_destroy(request: Request, id: Category) -> MessageOut:
+    # catalog.delete is enforced by the route's Authorize middleware (DR-0055).
     user = _current_user()
-    await _require(user, Permission.CATALOG_DELETE)
-    category = await Category.find_or_fail(int(request.path_param("id")))
+    category = id
     if await Product.where("category_id", category.id).first() is not None:
         raise ValidationException(
             {"category": ["This category still has products — move them first."]}
@@ -188,12 +191,14 @@ async def vendor_store(request: Request, data: VendorIn) -> AdminVendorOut:
     return _vendor_out(vendor)
 
 
-async def vendor_update(request: Request, data: VendorUpdateIn) -> AdminVendorOut:
+async def vendor_update(
+    request: Request, id: Vendor, data: VendorUpdateIn
+) -> AdminVendorOut:
     """Rename or (un)publish a vendor — the publish flag gates the retrievability of every
-    product the vendor owns (recomputed by the debounced views refresh)."""
+    product the vendor owns (recomputed by the debounced views refresh). catalog.update is
+    enforced by the route's Authorize middleware (DR-0055)."""
     user = _current_user()
-    await _require(user, Permission.CATALOG_UPDATE)
-    vendor = await Vendor.find_or_fail(int(request.path_param("id")))
+    vendor = id
     if data.name is not None:
         if not data.name.strip():
             raise ValidationException({"name": ["The vendor name can't be empty."]})

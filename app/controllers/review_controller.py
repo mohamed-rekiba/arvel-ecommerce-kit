@@ -182,16 +182,16 @@ async def admin_index(
     ]
 
 
-async def moderate(request: Request) -> AdminReviewOut:
+async def moderate(request: Request, id: Review) -> AdminReviewOut:
     """Approve or reject (the path decides); approval feeds the denormalized aggregate — all
-    transitions keep it exact (approve adds, un-approve subtracts)."""
+    transitions keep it exact (approve adds, un-approve subtracts). reviews.moderate is enforced
+    by the route's Authorize middleware (DR-0055), so a denied caller 403s uniformly whether or
+    not the review id exists."""
     user = _current_user()
-    if not await user.can(Permission.REVIEWS_MODERATE.value):
-        abort(403, "You may not moderate reviews.")
     decision = request.path_param("decision")
     if decision not in ("approve", "reject"):
         abort(404, "Unknown decision")
-    review = await Review.find_or_fail(int(request.path_param("id")))
+    review = id
     target = ReviewStatus.APPROVED if decision == "approve" else ReviewStatus.REJECTED
     previous = _status(review)
     if target is not previous:

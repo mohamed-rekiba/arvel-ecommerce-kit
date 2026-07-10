@@ -82,13 +82,12 @@ async def store(request: Request, data: CouponIn) -> AdminCouponOut:
     return _out(coupon)
 
 
-async def update(request: Request, data: CouponUpdateIn) -> AdminCouponOut:
+async def update(request: Request, id: Coupon, data: CouponUpdateIn) -> AdminCouponOut:
     """Activate/deactivate or adjust limits — deactivation takes effect immediately (checkout
-    re-validates every redemption)."""
+    re-validates every redemption). catalog.update is enforced by the route's Authorize
+    middleware (DR-0055), so a denied caller 403s uniformly whether or not the id exists."""
     user = _current_user()
-    if not await user.can(Permission.CATALOG_UPDATE.value):
-        abort(403, "You lack catalog access.")
-    coupon = await Coupon.find_or_fail(int(request.path_param("id")))
+    coupon = id
     if data.active is not None:
         coupon.active = data.active
     if data.usage_limit is not None:

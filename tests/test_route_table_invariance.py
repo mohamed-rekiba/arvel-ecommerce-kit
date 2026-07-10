@@ -65,7 +65,9 @@ def test_route_table_is_set_equal_to_the_pre_refactor_golden() -> None:
 
     # length check first: set-equality alone would pass vacuously if a route were registered
     # twice with an identical canonical tuple (the duplicate collapses in the set).
-    assert len(live) == len(golden), f"route count changed: {len(golden)} -> {len(live)}"
+    assert len(live) == len(golden), (
+        f"route count changed: {len(golden)} -> {len(live)}"
+    )
 
     missing = golden_set - live_set  # routes the refactor dropped or changed
     added = live_set - golden_set  # routes the refactor introduced or changed

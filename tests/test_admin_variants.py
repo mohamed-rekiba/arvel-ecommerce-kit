@@ -104,20 +104,24 @@ def test_variant_crud_and_stock_adjustment(client) -> None:
 
     # update
     renamed = client.patch(
-        f"/api/admin/variants/{variant_id}", json={"name": "Medium"}, headers=admin
+        f"/api/admin/products/1/variants/{variant_id}",
+        json={"name": "Medium"},
+        headers=admin,
     )
     assert renamed.json()["name"] == "Medium"
 
     # explicit stock ops: set, then delta; negative result → 422; both-or-neither → 422
     assert (
         client.post(
-            f"/api/admin/variants/{variant_id}/stock", json={"set": 10}, headers=admin
+            f"/api/admin/products/1/variants/{variant_id}/stock",
+            json={"set": 10},
+            headers=admin,
         ).json()["stock"]
         == 10
     )
     assert (
         client.post(
-            f"/api/admin/variants/{variant_id}/stock",
+            f"/api/admin/products/1/variants/{variant_id}/stock",
             json={"delta": -3, "reason": "damaged units"},
             headers=admin,
         ).json()["stock"]
@@ -125,7 +129,7 @@ def test_variant_crud_and_stock_adjustment(client) -> None:
     )
     assert (
         client.post(
-            f"/api/admin/variants/{variant_id}/stock",
+            f"/api/admin/products/1/variants/{variant_id}/stock",
             json={"delta": -99},
             headers=admin,
         ).status_code
@@ -133,7 +137,7 @@ def test_variant_crud_and_stock_adjustment(client) -> None:
     )
     assert (
         client.post(
-            f"/api/admin/variants/{variant_id}/stock", json={}, headers=admin
+            f"/api/admin/products/1/variants/{variant_id}/stock", json={}, headers=admin
         ).status_code
         == 422
     )
@@ -165,7 +169,7 @@ def test_variant_deletion_guards_history_and_cleans_carts(client) -> None:
         headers=customer,
     )
     client.post("/api/checkout", json=checkout_body(), headers=customer)
-    blocked = client.delete("/api/admin/variants/1", headers=admin)
+    blocked = client.delete("/api/admin/products/1/variants/1", headers=admin)
     assert blocked.status_code == 422 and "variant" in blocked.json()["errors"]
 
     # a merely-carted variant deletes cleanly and takes the cart line with it
@@ -180,7 +184,9 @@ def test_variant_deletion_guards_history_and_cleans_carts(client) -> None:
         headers=customer,
     )
     assert (
-        client.delete(f"/api/admin/variants/{fresh['id']}", headers=admin).status_code
+        client.delete(
+            f"/api/admin/products/1/variants/{fresh['id']}", headers=admin
+        ).status_code
         == 200
     )
     assert client.get("/api/cart", headers=customer).json()["items"] == []
@@ -192,9 +198,9 @@ def test_variant_endpoints_deny_non_catalog_roles(client) -> None:
     cases = [
         ("GET", "/api/admin/products/1/variants", None),
         ("POST", "/api/admin/products/1/variants", {"sku": "X", "name": "X"}),
-        ("PATCH", "/api/admin/variants/1", {"name": "X"}),
-        ("POST", "/api/admin/variants/1/stock", {"set": 1}),
-        ("DELETE", "/api/admin/variants/1", None),
+        ("PATCH", "/api/admin/products/1/variants/1", {"name": "X"}),
+        ("POST", "/api/admin/products/1/variants/1/stock", {"set": 1}),
+        ("DELETE", "/api/admin/products/1/variants/1", None),
     ]
     for method, path, body in cases:
         resp = client.request(method, path, json=body, headers=support)

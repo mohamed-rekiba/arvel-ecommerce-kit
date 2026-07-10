@@ -33,7 +33,7 @@ async def index(request: Request) -> list[ProductOut]:
     if not ids:
         return []
     products = (
-        await Product.with_("variants", "media", category=_in_locale)
+        await Product.with_("product_variants", "media", category=_in_locale)
         .where_in("id", ids)
         .with_visibility(only_visible=True)
         .in_locale()

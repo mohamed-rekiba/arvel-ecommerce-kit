@@ -123,7 +123,10 @@ class Product(HasMedia, Searchable, Model, SoftDeletes):
 
         return self.morph_many(Review, "subject")
 
-    def variants(self) -> Any:
+    def product_variants(self) -> Any:
+        # named for the child class (ProductVariant -> product_variants), not just "variants": the
+        # framework's route-model scope_bindings derives the parent relation from that convention,
+        # so the nested /admin/products/{id}/variants/{variant_id} route can 404 a cross-parent id.
         from app.models.product_variant import ProductVariant
 
         return self.has_many(ProductVariant)

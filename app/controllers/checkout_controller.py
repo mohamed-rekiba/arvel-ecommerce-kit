@@ -525,7 +525,7 @@ async def admin_orders_index(request: Request) -> list[OrderOut]:
     return [await _order_out(o, await o.items().get()) for o in orders]
 
 
-async def admin_order_show(request: Request) -> AdminOrderDetailOut:
+async def admin_order_show(request: Request, id: Order) -> AdminOrderDetailOut:
     """Everything a staff member needs on one order: lines (purchase snapshots), breakdown,
     address + contact, the customer link (or guest label), payment + webhook-backed states, and
     the transition history from the activity trail. Requires orders.view."""
@@ -541,10 +541,9 @@ async def admin_order_show(request: Request) -> AdminOrderDetailOut:
         AdminOrderPaymentOut,
     )
 
-    user = current_user.get()
-    if user is None or not await user.can(Permission.ORDERS_VIEW.value):
-        abort(403, "You may not view orders.")
-    order = await Order.find_or_fail(int(request.path_param("id")))
+    # orders.view is enforced by the route's Authorize middleware (DR-0055) — it runs before
+    # binding, so a denied caller gets a uniform 403 whether or not the order id exists.
+    order = id
     items = await order.items().get()
     looks = await line_presentation([i.product_variant_id for i in items])
 
@@ -614,12 +613,15 @@ async def admin_order_show(request: Request) -> AdminOrderDetailOut:
     )
 
 
-async def update_status(request: Request, data: OrderStatusIn) -> OrderOut:
-    """Transition an order, enforcing the state machine. Requires orders.update (guests already 401'd)."""
+async def update_status(request: Request, id: Order, data: OrderStatusIn) -> OrderOut:
+    """Transition an order, enforcing the state machine. orders.update is enforced by the route's
+    Authorize middleware (DR-0055), so a denied caller 403s uniformly whether or not the id exists."""
     user = current_user.get()
-    if user is None or not await user.can(Permission.ORDERS_UPDATE.value):
-        abort(403, "You may not change order status.")
-    order = await Order.find_or_fail(int(request.path_param("id")))
+    if user is None:
+        abort(
+            401, "Unauthenticated"
+        )  # unreachable post-Authorize; keeps `user` narrowed below
+    order = id
     try:
         target = OrderStatus(data.status)
     except ValueError:
