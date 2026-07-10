@@ -1,6 +1,7 @@
 """Store settings — a cached key/value layer over the settings table. Reads ride
-``Cache.remember`` (one query per cold key); every write invalidates. The PUBLIC set is the
-whitelist the storefront may see; everything else is admin-only."""
+stale-while-revalidate (``Cache.flexible``): a just-expired key serves the last value instantly
+and refreshes once in the background instead of blocking the request; every write invalidates.
+The PUBLIC set is the whitelist the storefront may see; everything else is admin-only."""
 
 from arvel import Cache
 
@@ -24,7 +25,11 @@ async def all_settings() -> dict[str, str]:
         stored = {r.key: r.value for r in rows}
         return {key: stored.get(key, default) for key, default in DEFAULTS.items()}
 
-    return dict(await Cache.remember(_CACHE_KEY, 300, _load))
+    # stale-while-revalidate: within 300s serve fresh; 300-600s serve the last value instantly and
+    # refresh once in the background instead of blocking on Setting.all(). Accepted tradeoff: a
+    # revalidation whose read races an admin edit can briefly resurrect the pre-edit value (bounded by
+    # the 300s fresh window, self-heals on the next edit) — fine for low-stakes display settings.
+    return dict(await Cache.flexible(_CACHE_KEY, (300, 600), _load))
 
 
 async def update_settings(values: dict[str, str]) -> dict[str, str]:
