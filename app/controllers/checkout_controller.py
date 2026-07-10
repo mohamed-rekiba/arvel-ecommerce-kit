@@ -46,18 +46,19 @@ from app.schemas import (
     OrderTimelineOut,
 )
 
-# Server-authoritative money rules (never trusted from the client): flat shipping, flat tax rate.
+# Server-authoritative money rules (never trusted from the client): flat shipping, jurisdiction tax.
 SHIPPING_FLAT_CENTS = 500
-TAX_RATE_PERCENT = 10
 
 
 def _shipping_cents(subtotal_cents: int) -> int:
     return SHIPPING_FLAT_CENTS
 
 
-def _tax_cents(subtotal_cents: int) -> int:
+def _tax_cents(subtotal_cents: int, rate_bps: int) -> int:
     # Money.times rounds the minor units half-up (currency-correct) vs the old integer floor.
-    rate = Decimal(TAX_RATE_PERCENT) / Decimal(100)
+    # rate_bps is resolved server-side from the shipping country (tax_service) — never from the
+    # request — and converted to Decimal only here, at the multiply (no floats in the money path).
+    rate = Decimal(rate_bps) / Decimal(10000)
     return Money(subtotal_cents, Currency.USD.value).times(rate).amount
 
 
@@ -259,7 +260,16 @@ async def checkout(request: Request, data: CheckoutIn) -> OrderOut:
     )  # current-price-wins: stale deal snapshots never reach an order
     subtotal = sum(i.unit_price_cents * i.quantity for i in items)
     shipping = _shipping_cents(subtotal)
-    tax = _tax_cents(subtotal)
+    from app.services import tax_service
+
+    # resolved ONCE from the server-validated ship_country — never a client-sent rate — and reused
+    # for both the charge and the stored tax_rate_bps, so stored always matches charged.
+    # ship_country is always set here (the Validator above requires "country"); the dict's value
+    # type is a plain str | None because ship_line2 (the only optional address part) shares it.
+    ship_country = ship_fields["ship_country"]
+    assert ship_country is not None
+    tax_rate_bps = await tax_service.resolve_rate_bps(ship_country)
+    tax = _tax_cents(subtotal, tax_rate_bps)
     total = (
         subtotal + shipping + tax
     )  # a cart coupon is re-validated + applied inside the tx
@@ -343,6 +353,7 @@ async def checkout(request: Request, data: CheckoutIn) -> OrderOut:
                 subtotal_cents=subtotal,
                 shipping_cents=shipping,
                 tax_cents=tax,
+                tax_rate_bps=tax_rate_bps,
                 total_cents=total,
                 currency=Currency.USD,
                 **ship_fields,

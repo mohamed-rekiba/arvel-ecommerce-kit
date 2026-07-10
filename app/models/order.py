@@ -28,6 +28,7 @@ class Order(Model):
         "subtotal_cents": int,
         "shipping_cents": int,
         "tax_cents": int,
+        "tax_rate_bps": int,
         "total_cents": int,
         "currency": str,
     }
@@ -48,6 +49,7 @@ class Order(Model):
         "subtotal_cents",
         "shipping_cents",
         "tax_cents",
+        "tax_rate_bps",
         "total_cents",
         "currency",
     ]
