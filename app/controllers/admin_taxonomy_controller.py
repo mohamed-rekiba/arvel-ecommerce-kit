@@ -10,6 +10,7 @@ name or force a 403→404 contract flip these resources never asked for.
 """
 
 from arvel import abort
+from app.i18n import trans
 from arvel.activitylog import activity
 from arvel.auth.middleware import Authorize
 from arvel.http import Request
@@ -39,7 +40,7 @@ from app.services.catalog_visibility_service import CatalogVisibilityService
 def _current_user() -> User:
     user: User | None = current_user.get()
     if user is None:
-        abort(401, "Unauthenticated")
+        abort(401, trans("shop.errors.unauthenticated"))
     return user
 
 
@@ -194,11 +195,11 @@ class CategoryController(Controller):
         user = _current_user()
         if await Product.where("category_id", category.id).first() is not None:
             raise ValidationException(
-                {"category": ["This category still has products — move them first."]}
+                {"category": [trans("shop.errors.category_has_products")]}
             )
         if await Category.where("parent_id", category.id).first() is not None:
             raise ValidationException(
-                {"category": ["This category has sub-categories — move them first."]}
+                {"category": [trans("shop.errors.category_has_children")]}
             )
         await (
             activity()
@@ -243,7 +244,9 @@ class VendorController(Controller):
     async def store(self, request: Request, data: VendorIn) -> AdminVendorOut:
         user = _current_user()
         if not data.name.strip():
-            raise ValidationException({"name": ["The vendor name is required."]})
+            raise ValidationException(
+                {"name": [trans("shop.errors.vendor_name_required")]}
+            )
         slug = Str.slug(data.name)
         if await _slug_taken(Vendor, slug):
             raise ValidationException(
@@ -271,7 +274,9 @@ class VendorController(Controller):
         user = _current_user()
         if data.name is not None:
             if not data.name.strip():
-                raise ValidationException({"name": ["The vendor name can't be empty."]})
+                raise ValidationException(
+                    {"name": [trans("shop.errors.vendor_name_empty")]}
+                )
             vendor.name = data.name
         if data.published is not None:
             vendor.published = data.published

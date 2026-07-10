@@ -5,6 +5,7 @@ first add (echo it in `X-Cart-Token` next time); an authenticated user's cart fo
 """
 
 from arvel import Cache, abort
+from app.i18n import trans
 from arvel.http import Request
 from arvel.support import Str, current_user
 from arvel.validation import ValidationException
@@ -168,13 +169,13 @@ async def show(request: Request) -> CartOut:
 async def add_item(request: Request, data: AddItemIn) -> CartOut:
     """Add a variant to the cart (or bump its quantity if already present)."""
     if data.quantity < 1:
-        raise ValidationException({"quantity": ["Quantity must be at least 1."]})
+        raise ValidationException({"quantity": [trans("shop.errors.quantity_min")]})
     variant = await ProductVariant.find(data.product_variant_id)
     if variant is None:
-        abort(404, "Product variant not found")
+        abort(404, trans("shop.errors.variant_not_found"))
     product = await Product.find(variant.product_id)
     if product is None:
-        abort(404, "Product not found")
+        abort(404, trans("shop.errors.product_not_found"))
     from app.services import deal_service
 
     unit_price = await deal_service.current_unit_price_cents(
@@ -205,10 +206,10 @@ async def update_item(request: Request, data: UpdateItemIn) -> CartOut:
     """Set a line's quantity (0 removes it)."""
     cart, _ = await resolve_cart(request, create=False)
     if cart is None:
-        abort(404, "Cart not found")
+        abort(404, trans("shop.errors.cart_not_found"))
     item = await CartItem.find(int(request.path_param("id")))
     if item is None or item.cart_id != cart.id:
-        abort(404, "Item not found")
+        abort(404, trans("shop.errors.item_not_found"))
     if data.quantity <= 0:
         await item.delete()
     else:
@@ -222,10 +223,10 @@ async def remove_item(request: Request) -> CartOut:
     """Remove a line from the cart."""
     cart, _ = await resolve_cart(request, create=False)
     if cart is None:
-        abort(404, "Cart not found")
+        abort(404, trans("shop.errors.cart_not_found"))
     item = await CartItem.find(int(request.path_param("id")))
     if item is None or item.cart_id != cart.id:
-        abort(404, "Item not found")
+        abort(404, trans("shop.errors.item_not_found"))
     await item.delete()
     await Cache.forget(_cart_total_key(cart.id))
     return await _serialize(cart)

@@ -229,7 +229,9 @@ def _validate_checkout(
     )
     errors = dict(validator.errors()) if validator.fails() else {}
     if payload["country"] and payload["country"] not in {c.value for c in CountryCode}:
-        errors["country"] = [f"We don't ship to '{payload['country']}'."]
+        errors["country"] = [
+            trans("shop.errors.country_not_shipped", country=payload["country"])
+        ]
     if errors:
         raise ValidationException(errors)
     fields = {
@@ -248,10 +250,10 @@ async def checkout(request: Request, data: CheckoutIn) -> OrderOut:
     capturing the contact email + shipping address and the server-computed money breakdown."""
     cart, _ = await resolve_cart(request, create=False)
     if cart is None:
-        abort(422, "Your cart is empty.")
+        abort(422, trans("shop.errors.cart_empty"))
     items = await cart.items().get()
     if not items:
-        abort(422, "Your cart is empty.")
+        abort(422, trans("shop.errors.cart_empty"))
 
     user = current_user.get()
     # a signed-in customer must have a verified email before placing an order; guest checkout
@@ -265,12 +267,12 @@ async def checkout(request: Request, data: CheckoutIn) -> OrderOut:
     )
     if data.address_id is not None:
         if user is None:
-            abort(401, "Sign in to use a saved address.")
+            abort(401, trans("shop.errors.signin_for_saved_address"))
         from app.models.address import Address
 
         saved = await Address.find(data.address_id)
         if saved is None or saved.user_id != user.id:
-            abort(404, "Address not found")
+            abort(404, trans("shop.errors.address_not_found"))
         data = CheckoutIn(
             email=data.email,
             address=AddressIn(
@@ -355,7 +357,7 @@ async def checkout(request: Request, data: CheckoutIn) -> OrderOut:
                     .first()
                 )
                 if variant is None:
-                    abort(404, "Product variant not found")
+                    abort(404, trans("shop.errors.variant_not_found"))
                 if await Product.find(variant.product_id) is None:
                     # the product was archived while sitting in the cart — the line is dead
                     raise ValidationException(
@@ -413,7 +415,7 @@ async def checkout(request: Request, data: CheckoutIn) -> OrderOut:
                     await Product.in_locale().where("id", variant.product_id).first()
                 )
                 if product is None:  # a variant always belongs to a product
-                    abort(404, "Product not found")
+                    abort(404, trans("shop.errors.product_not_found"))
                 order_items.append(
                     await OrderItem.create(
                         order_id=order.id,
@@ -551,7 +553,7 @@ async def cancel(request: Request) -> OrderOut:
         refund = await initiate_refund(order)
         refunded = await Order.find(refund.order_id)
         if refunded is None:
-            abort(404, "Order not found")
+            abort(404, trans("shop.errors.order_not_found"))
         return await _order_out(
             refunded,
             await refunded.items().get(),
@@ -563,7 +565,7 @@ async def cancel(request: Request) -> OrderOut:
         # transitions and restocks — the loser sees CANCELLED and 422s
         locked = await Order.where("id", order.id).lock_for_update().first()
         if locked is None:
-            abort(404, "Order not found")
+            abort(404, trans("shop.errors.order_not_found"))
         current = (
             locked.status
             if isinstance(locked.status, OrderStatus)
@@ -571,7 +573,11 @@ async def cancel(request: Request) -> OrderOut:
         )
         if not can_transition(current, OrderStatus.CANCELLED):
             raise ValidationException(
-                {"order": [f"A {current.value} order can no longer be cancelled."]},
+                {
+                    "order": [
+                        trans("shop.errors.order_not_cancellable", status=current.value)
+                    ]
+                },
                 status=422,
             )
         items = await locked.items().get()
@@ -609,7 +615,7 @@ async def my_orders(request: Request) -> list[OrderOut]:
     """The authenticated user's orders (newest first)."""
     user = current_user.get()
     if user is None:
-        abort(401, "Unauthenticated")
+        abort(401, trans("shop.errors.unauthenticated"))
     orders = await Order.where("user_id", user.id).order_by("id", "desc").get()
     return [await _order_out(o, await o.items().get()) for o in orders]
 
@@ -619,14 +625,14 @@ async def admin_orders_index(request: Request) -> list[OrderOut]:
     by ``?q=`` (order id, or a case-insensitive contact-email fragment). Requires orders.view."""
     user = current_user.get()
     if user is None or not await user.can(Permission.ORDERS_VIEW.value):
-        abort(403, "You may not view orders.")
+        abort(403, trans("shop.errors.no_orders_view"))
     query = Order.order_by("id", "desc")
     status = str(request.query("status", "") or "")
     if status:
         try:
             query = query.where("status", OrderStatus(status).value)
         except ValueError:
-            abort(422, f"Unknown status '{status}'")
+            abort(422, trans("shop.errors.unknown_status", status=status))
     q = str(request.query("q", "") or "").strip()
     if q:
         if q.isdigit():
@@ -751,14 +757,14 @@ async def update_status(request: Request, id: Order, data: OrderStatusIn) -> Ord
     user = current_user.get()
     if user is None:
         abort(
-            401, "Unauthenticated"
+            401, trans("shop.errors.unauthenticated")
         )  # unreachable post-Authorize; keeps `user` narrowed below
     order = id
     try:
         target = OrderStatus(data.status)
     except ValueError:
         raise ValidationException(
-            {"status": [f"Unknown status '{data.status}'."]}
+            {"status": [trans("shop.errors.unknown_status", status=data.status)]}
         ) from None
     current = (
         order.status
@@ -786,13 +792,21 @@ async def update_status(request: Request, id: Order, data: OrderStatusIn) -> Ord
         # 422 any target from it), but the target-is-REFUNDED check above catches it earlier with
         # the clearer message.
         raise ValidationException(
-            {"status": ["Use the refund endpoint to issue a refund."]}
+            {"status": [trans("shop.errors.use_refund_endpoint")]}
         )
     if not can_transition(
         current, target, cod=_method_value(order) is PaymentMethod.COD
     ):
         raise ValidationException(
-            {"status": [f"Cannot transition from {current.value} to {target.value}."]}
+            {
+                "status": [
+                    trans(
+                        "shop.errors.invalid_transition",
+                        from_status=current.value,
+                        to_status=target.value,
+                    )
+                ]
+            }
         )
     if target is OrderStatus.SHIPPED:
         # a tracking number is required to ship — the customer needs a way to follow the parcel;
@@ -836,7 +850,7 @@ async def admin_refund(request: Request, id: Order) -> OrderOut:
     refund = await initiate_refund(id)
     order = await Order.find(refund.order_id)
     if order is None:
-        abort(404, "Order not found")
+        abort(404, trans("shop.errors.order_not_found"))
     return await _order_out(
         order,
         await order.items().get(),

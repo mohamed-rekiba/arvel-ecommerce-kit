@@ -7,7 +7,7 @@ from arvel.validation import ValidationException, Validator
 
 from app.controllers.serializers import iso as _iso
 from app.enums import Permission
-from app.i18n import active_locale
+from app.i18n import active_locale, trans
 from app.models.newsletter_subscriber import NewsletterSubscriber
 from app.models.user import User
 from app.schemas import (
@@ -39,25 +39,32 @@ async def subscribe(request: Request, data: NewsletterIn) -> MessageOut:
 def _admin() -> User:
     user: User | None = current_user.get()
     if user is None:
-        abort(401, "Unauthenticated")
+        abort(401, trans("shop.errors.unauthenticated"))
     return user
 
 
 async def admin_settings(request: Request) -> SettingsOut:
     user = _admin()
     if not await user.can(Permission.CATALOG_VIEW.value):
-        abort(403, "You lack catalog access.")
+        abort(403, trans("shop.errors.no_catalog_access"))
     return SettingsOut(values=await settings_service.all_settings())
 
 
 async def update_settings(request: Request, data: SettingsIn) -> SettingsOut:
     user = _admin()
     if not await user.can(Permission.CATALOG_UPDATE.value):
-        abort(403, "You lack catalog access.")
+        abort(403, trans("shop.errors.no_catalog_access"))
     unknown = [k for k in data.values if k not in settings_service.DEFAULTS]
     if unknown:
         raise ValidationException(
-            {"values": [f"Unknown setting(s): {', '.join(sorted(unknown))}."]}
+            {
+                "values": [
+                    trans(
+                        "shop.errors.unknown_settings",
+                        settings=", ".join(sorted(unknown)),
+                    )
+                ]
+            }
         )
     return SettingsOut(values=await settings_service.update_settings(data.values))
 
@@ -65,7 +72,7 @@ async def update_settings(request: Request, data: SettingsIn) -> SettingsOut:
 async def newsletter_index(request: Request) -> list[NewsletterSubscriberOut]:
     user = _admin()
     if not await user.can(Permission.CATALOG_VIEW.value):
-        abort(403, "You lack catalog access.")
+        abort(403, trans("shop.errors.no_catalog_access"))
     rows = await NewsletterSubscriber.order_by("id", "desc").get()
     return [
         NewsletterSubscriberOut(

@@ -3,6 +3,7 @@ signed-in customer (list + mark-all-read). Bearer-guarded; a customer only ever 
 (Notifiable scopes by notifiable_type + id)."""
 
 from typing import Any, cast
+from app.i18n import trans
 
 from arvel import abort
 from arvel.http import Request
@@ -29,7 +30,7 @@ def _out(row: Any) -> NotificationOut:
 def _customer() -> User:
     user: User | None = current_user.get()
     if user is None:
-        abort(401, "Unauthenticated")
+        abort(401, trans("shop.errors.unauthenticated"))
     return user
 
 

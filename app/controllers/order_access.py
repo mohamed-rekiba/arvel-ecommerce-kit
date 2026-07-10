@@ -9,6 +9,7 @@ Deny model: no credentials at all → 401; credentials that don't own the order 
 that the id exists)."""
 
 import hmac
+from app.i18n import trans
 
 from arvel import abort
 from arvel.http import Request
@@ -27,13 +28,15 @@ async def resolve_owned_order(
     user = current_user.get()
     provided_token = request.header(ORDER_TOKEN_HEADER, "") or query_token
     if user is None and not provided_token:
-        abort(401, "Unauthenticated")
+        abort(401, trans("shop.errors.unauthenticated"))
     order = await Order.find(order_id)
     if order is None:
-        abort(404, "Order not found")
+        abort(404, trans("shop.errors.order_not_found"))
     if user is not None and order.user_id == user.id:
         return order
     if provided_token and hmac.compare_digest(provided_token, order.token):
         return order
-    abort(404, "Order not found")  # authenticated-but-not-owner: don't leak existence
+    abort(
+        404, trans("shop.errors.order_not_found")
+    )  # authenticated-but-not-owner: don't leak existence
     raise AssertionError("unreachable")  # abort() raises; keeps the return type honest

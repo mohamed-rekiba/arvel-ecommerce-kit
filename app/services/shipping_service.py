@@ -2,8 +2,10 @@
 (the only caller today). The client sends a method CODE only; the rate is always read from the
 `shipping_methods` table, never from the request (DR-0064)."""
 
-from app.models.shipping_method import ShippingMethod
 from arvel.validation import ValidationException
+
+from app.i18n import trans
+from app.models.shipping_method import ShippingMethod
 
 DEFAULT_SHIPPING_METHOD = "standard"  # CheckoutIn default; = today's flat 500c behavior
 
@@ -15,7 +17,11 @@ async def resolve_rate_cents(code: str) -> int:
     row = await ShippingMethod.where("code", code).where("active", True).first()
     if row is None:
         raise ValidationException(
-            {"shipping_method": [f"'{code}' is not an available shipping method."]}
+            {
+                "shipping_method": [
+                    trans("shop.errors.shipping_method_unavailable", code=code)
+                ]
+            }
         )
     return int(row.rate_cents)
 

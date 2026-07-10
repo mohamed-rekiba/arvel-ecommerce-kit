@@ -7,6 +7,7 @@ rather than ``authorize_resource``.
 """
 
 from arvel import abort
+from app.i18n import trans
 from arvel.activitylog import activity
 from arvel.auth.middleware import Authorize
 from arvel.http import Request
@@ -24,7 +25,7 @@ from app.services.coupon_service import normalize_code
 def _current_user() -> User:
     user: User | None = current_user.get()
     if user is None:
-        abort(401, "Unauthenticated")
+        abort(401, trans("shop.errors.unauthenticated"))
     return user
 
 
@@ -75,13 +76,19 @@ class CouponController(Controller):
         user = _current_user()
         code = normalize_code(data.code)
         if not code:
-            raise ValidationException({"code": ["The code is required."]})
+            raise ValidationException(
+                {"code": [trans("shop.errors.coupon_code_required")]}
+            )
         if data.type is CouponType.PERCENT and not (1 <= data.value <= 100):
             raise ValidationException({"value": ["A percent coupon must be 1–100."]})
         if data.value <= 0:
-            raise ValidationException({"value": ["The value must be positive."]})
+            raise ValidationException(
+                {"value": [trans("shop.errors.value_not_positive")]}
+            )
         if await Coupon.where("code", code).first() is not None:
-            raise ValidationException({"code": ["This code already exists."]})
+            raise ValidationException(
+                {"code": [trans("shop.errors.coupon_code_exists")]}
+            )
         coupon = await Coupon.create(
             code=code,
             type=data.type,

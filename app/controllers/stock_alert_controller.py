@@ -2,6 +2,7 @@
 stock_alert_service (invoked by the admin stock adjustment on the 0→positive edge)."""
 
 from arvel import abort
+from app.i18n import trans
 from arvel.http import Request
 from arvel.support import current_user
 from arvel.validation import ValidationException
@@ -15,7 +16,7 @@ from app.schemas import MessageOut
 def _current_user() -> User:
     user: User | None = current_user.get()
     if user is None:
-        abort(401, "Unauthenticated")
+        abort(401, trans("shop.errors.unauthenticated"))
     return user
 
 
@@ -24,9 +25,7 @@ async def subscribe(request: Request) -> MessageOut:
     user = _current_user()
     variant = await ProductVariant.find_or_fail(int(request.path_param("id")))
     if variant.stock > 0:
-        raise ValidationException(
-            {"variant": ["This variant is in stock — add it to your cart."]}
-        )
+        raise ValidationException({"variant": [trans("shop.errors.variant_in_stock")]})
     existing = (
         await StockAlert.where("product_variant_id", variant.id)
         .where("user_id", user.id)

@@ -3,6 +3,7 @@
 which the storefront treats as "no bar"."""
 
 from arvel import abort
+from app.i18n import trans
 from arvel.dates import Date
 from arvel.http import Request
 
@@ -30,4 +31,4 @@ async def show(request: Request) -> AnnouncementOut:
             else CouponType(coupon.type)
         )
         return AnnouncementOut(code=coupon.code, type=kind, value=coupon.value)
-    abort(404, "Nothing announced")
+    abort(404, trans("shop.errors.nothing_announced"))

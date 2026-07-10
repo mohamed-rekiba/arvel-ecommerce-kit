@@ -5,6 +5,7 @@ role mutations stay on the existing ``roles.manage`` endpoints. Responses expose
 schema — never password hashes, tokens, or reset material."""
 
 from arvel import abort
+from app.i18n import trans
 from arvel.http import Request
 from arvel.support import current_user
 from app.controllers.account_controller import avatar_url
@@ -18,13 +19,13 @@ from app.schemas import AdminUserDetailOut, AdminUserOut, AdminUserPage
 def _current_user() -> User:
     user: User | None = current_user.get()
     if user is None:
-        abort(401, "Unauthenticated")
+        abort(401, trans("shop.errors.unauthenticated"))
     return user
 
 
 async def _require_users_view(user: User) -> None:
     if not await user.can(Permission.USERS_VIEW.value):
-        abort(403, "You may not browse users.")
+        abort(403, trans("shop.errors.no_users_browse"))
 
 
 async def _user_out(user: User) -> AdminUserOut:

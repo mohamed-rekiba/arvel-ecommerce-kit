@@ -20,7 +20,7 @@ from arvel.validation import ValidationException, Validator
 from arvel.activitylog import activity
 
 from app.enums import Permission, ProductStatus
-from app.i18n import SUPPORTED_LOCALES, active_locale
+from app.i18n import SUPPORTED_LOCALES, active_locale, trans
 from app.models.media import AppMedia
 from app.models.category import Category
 from app.models.product import IMAGES, Product
@@ -42,7 +42,7 @@ def _current_user() -> User:
     # The Authenticate route middleware guarantees a user is present (401'd otherwise).
     user: User | None = current_user.get()
     if user is None:
-        abort(401, "Unauthenticated")
+        abort(401, trans("shop.errors.unauthenticated"))
     return user
 
 
@@ -134,16 +134,27 @@ def validated_translations(
     bad = [locale for locale in payload if locale not in SUPPORTED_LOCALES]
     if bad:
         raise ValidationException(
-            {"translations": [f"Unsupported locale(s): {', '.join(sorted(bad))}."]}
+            {
+                "translations": [
+                    trans(
+                        "shop.errors.unsupported_locales",
+                        locales=", ".join(sorted(bad)),
+                    )
+                ]
+            }
         )
     if "en" not in payload:
         raise ValidationException(
-            {"translations": ["English (en) content is required."]}
+            {"translations": [trans("shop.errors.english_required")]}
         )
     for locale, fields in payload.items():
         if not fields.name.strip():
             raise ValidationException(
-                {"translations": [f"The {locale} name can't be empty."]}
+                {
+                    "translations": [
+                        trans("shop.errors.translation_name_empty", lang=locale)
+                    ]
+                }
             )
     return {
         locale: {"name": fields.name, "description": fields.description}
@@ -316,7 +327,7 @@ class AdminProductController(Controller):
         if data.price_cents is not None:
             if data.price_cents < 0:
                 raise ValidationException(
-                    {"price_cents": ["The price can't be negative."]}
+                    {"price_cents": [trans("shop.errors.price_negative")]}
                 )
             product.price_cents = data.price_cents
         if data.status is not None:
@@ -389,9 +400,9 @@ async def restore(request: Request) -> AdminProductOut:
         await Product.only_trashed().where("id", int(request.path_param("id"))).first()
     )
     if product is None:
-        abort(404, "Product not found")
+        abort(404, trans("shop.errors.product_not_found"))
     if not await user.can("update", product):
-        abort(404, "Product not found")
+        abort(404, trans("shop.errors.product_not_found"))
     await product.restore()
     from app.services.catalog_visibility_service import CatalogVisibilityService
 

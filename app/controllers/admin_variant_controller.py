@@ -5,6 +5,7 @@ SELECT..FOR UPDATE so concurrent changes serialize deterministically.
 """
 
 from arvel import DB, abort
+from app.i18n import trans
 from arvel.activitylog import activity
 from arvel.http import Request
 from arvel.support import current_user
@@ -27,7 +28,7 @@ from app.schemas import (
 def _current_user() -> User:
     user: User | None = current_user.get()
     if user is None:
-        abort(401, "Unauthenticated")
+        abort(401, trans("shop.errors.unauthenticated"))
     return user
 
 
@@ -47,7 +48,7 @@ async def _authorize(user: User, product: Product) -> None:
     update/stock/destroy routes it's resolved via ``.scope_bindings()``, which is also what makes
     a variant id from a DIFFERENT product 404 before this check ever runs."""
     if not await user.can("update", product):
-        abort(404, "Product not found")
+        abort(404, trans("shop.errors.product_not_found"))
 
 
 async def _sku_taken(
@@ -78,9 +79,9 @@ async def store(request: Request, id: Product, data: VariantIn) -> VariantOut:
     if validator.fails():
         raise ValidationException(validator.errors())
     if data.stock < 0:
-        raise ValidationException({"stock": ["Stock can't be negative."]})
+        raise ValidationException({"stock": [trans("shop.errors.stock_negative")]})
     if await _sku_taken(product.id, data.sku):
-        raise ValidationException({"sku": ["This SKU already exists on the product."]})
+        raise ValidationException({"sku": [trans("shop.errors.sku_exists")]})
     variant = await ProductVariant.create(
         product_id=product.id,
         sku=data.sku,
@@ -106,9 +107,7 @@ async def update(
     variant = variant_id
     if data.sku is not None:
         if await _sku_taken(variant.product_id, data.sku, ignore_id=variant.id):
-            raise ValidationException(
-                {"sku": ["This SKU already exists on the product."]}
-            )
+            raise ValidationException({"sku": [trans("shop.errors.sku_exists")]})
         variant.sku = data.sku
     if data.name is not None:
         variant.name = data.name
@@ -142,9 +141,7 @@ async def adjust_stock(
     await _authorize(user, id)
     variant = variant_id
     if (data.set is None) == (data.delta is None):
-        raise ValidationException(
-            {"stock": ["Provide exactly one of 'set' or 'delta'."]}
-        )
+        raise ValidationException({"stock": [trans("shop.errors.set_or_delta")]})
     async with DB.transaction():
         locked = (
             await ProductVariant.where("id", variant.id)
@@ -154,7 +151,9 @@ async def adjust_stock(
         before = locked.stock
         target = data.set if data.set is not None else before + (data.delta or 0)
         if target < 0:
-            raise ValidationException({"stock": ["Stock can't go negative."]})
+            raise ValidationException(
+                {"stock": [trans("shop.errors.stock_would_go_negative")]}
+            )
         locked.stock = target
         await locked.save()
     await (

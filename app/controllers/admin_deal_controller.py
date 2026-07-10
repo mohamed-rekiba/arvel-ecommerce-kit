@@ -6,6 +6,7 @@ a declared ``Authorize`` per action rather than ``authorize_resource`` (K5/DR-00
 """
 
 from typing import Any
+from app.i18n import trans
 
 from arvel import abort
 from arvel.activitylog import activity
@@ -28,7 +29,7 @@ from app.services import deal_service
 def _current_user() -> User:
     user: User | None = current_user.get()
     if user is None:
-        abort(401, "Unauthenticated")
+        abort(401, trans("shop.errors.unauthenticated"))
     return user
 
 
@@ -41,7 +42,9 @@ def _parse_when(value: str, field: str) -> Any:
     try:
         return Date.parse(value)
     except Exception:
-        raise ValidationException({field: ["Not a valid ISO-8601 datetime."]}) from None
+        raise ValidationException(
+            {field: [trans("shop.errors.invalid_datetime")]}
+        ) from None
 
 
 async def _out(deal: Deal) -> AdminDealOut:
@@ -87,12 +90,14 @@ class DealController(Controller):
         user = _current_user()
         _validate_percent(data.percent_off)
         if await Product.find(data.product_id) is None:
-            raise ValidationException({"product_id": ["Unknown product."]})
+            raise ValidationException(
+                {"product_id": [trans("shop.errors.unknown_product")]}
+            )
         starts = _parse_when(data.starts_at, "starts_at")
         ends = _parse_when(data.ends_at, "ends_at")
         if ends <= starts:
             raise ValidationException(
-                {"ends_at": ["The deal must end after it starts."]}
+                {"ends_at": [trans("shop.errors.deal_end_before_start")]}
             )
         deal = await Deal.create(
             product_id=data.product_id,

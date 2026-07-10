@@ -19,17 +19,18 @@ def active_locale() -> str:
     return locale if locale in SUPPORTED_LOCALES else DEFAULT_LOCALE
 
 
-def trans_in(locale: str, key: str, **replace: object) -> str:
+def trans_in(_locale: str, _key: str, **replace: object) -> str:
     """A translation resolved for an EXPLICIT locale (mail/notifications render on the worker
-    where no request locale exists — the recipient's stored locale drives the language)."""
+    where no request locale exists — the recipient's stored locale drives the language). The
+    leading-underscore params keep ``{locale}``/``{key}`` usable as replacement placeholders."""
     from arvel.kernel import app
 
-    loc = locale if locale in SUPPORTED_LOCALES else DEFAULT_LOCALE
-    result: str = app("translator").get(key, dict(replace), loc)
+    loc = _locale if _locale in SUPPORTED_LOCALES else DEFAULT_LOCALE
+    result: str = app("translator").get(_key, dict(replace), loc)
     return result
 
 
-def trans(key: str, **replace: object) -> str:
-    """Request-scoped translation — resolves ``key`` against the active request locale. Use in
+def trans(_key: str, **replace: object) -> str:
+    """Request-scoped translation — resolves ``_key`` against the active request locale. Use in
     controllers/middleware; ``trans_in`` is for the worker, where there is no request locale."""
-    return trans_in(active_locale(), key, **replace)
+    return trans_in(active_locale(), _key, **replace)

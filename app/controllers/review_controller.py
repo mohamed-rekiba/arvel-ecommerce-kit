@@ -2,6 +2,7 @@
 APPROVED reviews and the denormalized aggregate."""
 
 from arvel import DB, abort
+from app.i18n import trans
 from arvel.activitylog import activity
 from arvel.http import Request
 from arvel.support import current_user
@@ -24,7 +25,7 @@ _REVIEWABLE_STATUSES = {OrderStatus.DELIVERED}
 def _current_user() -> User:
     user: User | None = current_user.get()
     if user is None:
-        abort(401, "Unauthenticated")
+        abort(401, trans("shop.errors.unauthenticated"))
     return user
 
 
@@ -114,11 +115,11 @@ async def store(request: Request, data: ReviewIn) -> ReviewOut:
     user = _current_user()
     product = await Product.where("slug", request.path_param("slug")).first_or_fail()
     if not (1 <= data.rating <= 5):
-        raise ValidationException({"rating": ["The rating must be between 1 and 5."]})
+        raise ValidationException({"rating": [trans("shop.errors.rating_range")]})
     if not data.body.strip():
-        raise ValidationException({"body": ["Say a few words about the product."]})
+        raise ValidationException({"body": [trans("shop.errors.review_body_required")]})
     if not await _has_purchased(user, product):
-        abort(403, "Only verified purchasers can review this product.")
+        abort(403, trans("shop.errors.review_requires_purchase"))
     existing = (
         await Review.where("subject_type", "Product")
         .where("subject_id", product.id)
@@ -126,7 +127,7 @@ async def store(request: Request, data: ReviewIn) -> ReviewOut:
         .first()
     )
     if existing is not None:
-        raise ValidationException({"review": ["You've already reviewed this product."]})
+        raise ValidationException({"review": [trans("shop.errors.already_reviewed")]})
     review = await Review.create(
         subject_type="Product",
         subject_id=product.id,
@@ -144,11 +145,13 @@ async def admin_index(
 ) -> list[AdminReviewOut]:
     user = _current_user()
     if not await user.can(Permission.REVIEWS_MODERATE.value):
-        abort(403, "You may not moderate reviews.")
+        abort(403, trans("shop.errors.no_reviews_moderate"))
     try:
         wanted = ReviewStatus(status)
     except ValueError:
-        raise ValidationException({"status": ["Unknown review status."]}) from None
+        raise ValidationException(
+            {"status": [trans("shop.errors.unknown_review_status")]}
+        ) from None
     reviews = await Review.where("status", wanted.value).order_by("id").get()
     products = (
         {
@@ -190,7 +193,7 @@ async def moderate(request: Request, id: Review) -> AdminReviewOut:
     user = _current_user()
     decision = request.path_param("decision")
     if decision not in ("approve", "reject"):
-        abort(404, "Unknown decision")
+        abort(404, trans("shop.errors.unknown_decision"))
     review = id
     target = ReviewStatus.APPROVED if decision == "approve" else ReviewStatus.REJECTED
     previous = _status(review)

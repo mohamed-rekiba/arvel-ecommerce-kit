@@ -4,6 +4,7 @@ so the money invariant (refund at most once) lives in exactly one place, not two
 """
 
 from typing import Any
+from app.i18n import trans
 
 from arvel import DB, Http, abort
 from arvel.support.facades import Config
@@ -37,11 +38,16 @@ async def initiate_refund(order: Order) -> Refund:
     async with DB.transaction():
         locked = await Order.where("id", order.id).lock_for_update().first()
         if locked is None:
-            abort(404, "Order not found")
+            abort(404, trans("shop.errors.order_not_found"))
         current = _status(locked)
         if not can_transition(current, OrderStatus.REFUND_PENDING):
             raise ValidationException(
-                {"order": [f"A {current.value} order cannot be refunded."]}, status=409
+                {
+                    "order": [
+                        trans("shop.errors.order_not_refundable", status=current.value)
+                    ]
+                },
+                status=409,
             )
         # the latest SUCCEEDED payment is the money to reverse. A COD order (never charged
         # online) has none, so it 422s here with no state change and no gateway call — the same
@@ -55,7 +61,7 @@ async def initiate_refund(order: Order) -> Refund:
         )
         if payment is None:
             raise ValidationException(
-                {"order": ["Nothing to refund — no successful payment on this order."]},
+                {"order": [trans("shop.errors.nothing_to_refund")]},
                 status=422,
             )
         refund = await Refund.create(
@@ -108,7 +114,7 @@ async def initiate_refund(order: Order) -> Refund:
                     from app.controllers.checkout_controller import log_transition
 
                     await log_transition(retry_locked, retry_current, OrderStatus.PAID)
-        abort(502, "Refund gateway error.")
+        abort(502, trans("shop.errors.refund_gateway_error"))
 
     refund_response: dict[str, Any] = response.json()
     refund.gateway_refund_id = refund_response.get("id")

@@ -5,6 +5,7 @@ password-reset flow.
 from typing import Any
 
 from arvel import abort
+from app.i18n import trans
 from arvel.auth.flows import email_verification_token
 from arvel.auth.password_reset import PasswordBroker, PasswordResetStatus
 from arvel.auth.tokens import TokenGuard, create_token
@@ -53,7 +54,7 @@ async def register(request: Request, data: RegisterIn) -> TokenOut:
     if validator.fails():
         raise ValidationException(validator.errors())
     if await User.where("email", data.email).first() is not None:
-        raise ValidationException({"email": ["This email is already registered."]})
+        raise ValidationException({"email": [trans("shop.errors.email_taken")]})
     from app.i18n import active_locale
 
     user = await User.create(
@@ -77,7 +78,7 @@ async def logout(request: Request) -> MessageOut:
     """Revoke only the current token (Sanctum currentAccessToken()->delete())."""
     token = await TokenGuard().token(request)
     if token is None:
-        abort(401, "Unauthenticated")
+        abort(401, trans("shop.errors.unauthenticated"))
     await token.delete()
     return MessageOut(message="Logged out.")
 
@@ -105,13 +106,11 @@ async def reset_password(request: Request, data: ResetPasswordIn) -> MessageOut:
     """Consume the single-use reset token and set the new (hashed) password."""
     if len(data.password) < 8:
         raise ValidationException(
-            {"password": ["The password must be at least 8 characters."]}
+            {"password": [trans("shop.errors.password_too_short")]}
         )
     status = await _password_broker().reset(
         data.email, data.token, data.password, _set_password
     )
     if status is not PasswordResetStatus.RESET_SUCCESS:
-        raise ValidationException(
-            {"token": ["This password reset token is invalid or has expired."]}
-        )
+        raise ValidationException({"token": [trans("shop.errors.reset_token_invalid")]})
     return MessageOut(message="Password has been reset.")

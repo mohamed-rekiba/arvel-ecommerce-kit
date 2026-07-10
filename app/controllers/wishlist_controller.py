@@ -2,6 +2,7 @@
 a customer only ever sees/edits their own saved items."""
 
 from arvel import abort
+from app.i18n import trans
 from arvel.http import Request
 from arvel.support import current_user
 
@@ -21,7 +22,7 @@ def _in_locale(query: Any) -> Any:
 def _customer() -> User:
     user: User | None = current_user.get()
     if user is None:
-        abort(401, "Unauthenticated")
+        abort(401, trans("shop.errors.unauthenticated"))
     return user
 
 

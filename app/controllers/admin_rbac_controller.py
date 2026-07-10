@@ -6,6 +6,7 @@ Gate.before hook. Every mutation here is itself recorded in the activity log.
 """
 
 from typing import Any
+from app.i18n import trans
 
 from arvel import abort
 from arvel.activitylog import Activity, activity
@@ -23,9 +24,9 @@ from app.schemas import ActivityOut, AssignRoleIn, PermissionOut, RoleOut, UserR
 async def _require(permission: Permission) -> User:
     user: User | None = current_user.get()
     if user is None:
-        abort(401, "Unauthenticated")
+        abort(401, trans("shop.errors.unauthenticated"))
     if not await user.can(permission.value):
-        abort(403, "Insufficient permissions.")
+        abort(403, trans("shop.errors.insufficient_permissions"))
     return user
 
 
@@ -35,7 +36,7 @@ def _current_user() -> User:
     user: User | None = current_user.get()
     if user is None:
         abort(
-            401, "Unauthenticated"
+            401, trans("shop.errors.unauthenticated")
         )  # unreachable post-Authorize; keeps `user` narrowed
     return user
 
@@ -74,7 +75,7 @@ async def assign_role(request: Request, id: User, data: AssignRoleIn) -> UserRol
     DR-0055), recording it in the audit log."""
     admin = _current_user()
     if await Role.where("name", data.role).first() is None:
-        abort(422, f"Unknown role: {data.role}")
+        abort(422, trans("shop.errors.unknown_role", role=data.role))
     user = id
     await user.assign_role(data.role)
     await (

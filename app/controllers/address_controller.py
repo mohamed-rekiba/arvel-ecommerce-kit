@@ -3,6 +3,7 @@
 reference an entry by id; ownership is enforced everywhere (a foreign id is a 404)."""
 
 from arvel import abort
+from app.i18n import trans
 from arvel.http import Request
 from arvel.support import current_user
 
@@ -14,7 +15,7 @@ from app.schemas import SavedAddressIn, SavedAddressOut
 def _customer() -> User:
     user: User | None = current_user.get()
     if user is None:
-        abort(401, "Unauthenticated")
+        abort(401, trans("shop.errors.unauthenticated"))
     return user
 
 
@@ -36,7 +37,7 @@ def _out(address: Address) -> SavedAddressOut:
 async def _owned(user: User, address_id: int) -> Address:
     address = await Address.find(address_id)
     if address is None or address.user_id != user.id:
-        abort(404, "Address not found")
+        abort(404, trans("shop.errors.address_not_found"))
     return address
 
 

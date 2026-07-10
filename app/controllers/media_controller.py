@@ -5,6 +5,7 @@ serving streams a media item (original or a named conversion) from its disk.
 """
 
 from arvel import abort
+from app.i18n import trans
 from arvel.http import Request, Response
 from arvel.kernel import app
 from arvel.media import Media
@@ -24,7 +25,7 @@ async def upload_image(request: Request, id: Product) -> list[GalleryImageOut]:
 
     upload = await request.file("image")
     if upload is None:
-        raise ValidationException({"image": ["An image file is required."]})
+        raise ValidationException({"image": [trans("shop.errors.image_required")]})
     raw = await upload.read()
     try:
         await ProductImageService().attach_uploaded(
@@ -35,7 +36,7 @@ async def upload_image(request: Request, id: Product) -> list[GalleryImageOut]:
         )
     except Exception as exc:  # noqa: BLE001 — any decode/store failure is a client error
         raise ValidationException(
-            {"image": ["The file is not a valid image."]}
+            {"image": [trans("shop.errors.file_not_image")]}
         ) from exc
 
     return [gallery_image_out(m) for m in await product.get_media(IMAGES)]
@@ -47,7 +48,7 @@ async def delete_image(request: Request, id: Product) -> list[GalleryImageOut]:
     a foreign media id can't cross products."""
     product = id
     if not await product.delete_media(int(request.path_param("media_id"))):
-        abort(404, "Media not found")
+        abort(404, trans("shop.errors.media_not_found"))
     return [gallery_image_out(m) for m in await product.get_media(IMAGES)]
 
 
@@ -57,10 +58,10 @@ async def serve_media(request: Request) -> Response:
     conversion = request.path_param("conversion", None)
     path = media.get_path(conversion)
     if path is None:
-        abort(404, "Media not found")
+        abort(404, trans("shop.errors.media_not_found"))
     disk = app("filesystem").disk(media.disk)
     if not await disk.exists(path):
-        abort(404, "Media not found")
+        abort(404, trans("shop.errors.media_not_found"))
     data = await disk.get(path)
     # a conversion's type follows its stored extension (webp/jpeg/png); the original keeps its mime
     if conversion:

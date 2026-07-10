@@ -5,6 +5,7 @@ Phone is stored via the `encrypted` cast (ciphertext at rest); password checks g
 """
 
 from arvel import abort
+from app.i18n import trans
 from arvel.auth.flows import email_verification_token, verify_email_token
 from arvel.dates import Date
 from arvel.http import Request
@@ -27,7 +28,7 @@ from app.schemas import (
 def _me(request: Request) -> User:
     user: User | None = current_user.get()
     if user is None:
-        abort(401, "Unauthenticated")
+        abort(401, trans("shop.errors.unauthenticated"))
     return user
 
 
@@ -77,7 +78,7 @@ async def update_profile(request: Request, data: ProfileIn) -> UserOut:
         email_changed
         and await User.where("email", payload["email"]).first() is not None
     ):
-        raise ValidationException({"email": ["This email is already registered."]})
+        raise ValidationException({"email": [trans("shop.errors.email_taken")]})
 
     user.name = payload["name"]
     user.email = payload["email"]
@@ -96,11 +97,11 @@ async def change_password(request: Request, data: ChangePasswordIn) -> MessageOu
     user = _me(request)
     if len(data.password) < 8:
         raise ValidationException(
-            {"password": ["The password must be at least 8 characters."]}
+            {"password": [trans("shop.errors.password_too_short")]}
         )
     if not Hasher().check(data.current_password, user.password):
         raise ValidationException(
-            {"current_password": ["That doesn't match your password."]}
+            {"current_password": [trans("shop.errors.password_mismatch")]}
         )
     user.password = data.password  # the `hashed` cast argon2-hashes on assignment
     await user.save()
@@ -129,7 +130,7 @@ async def verify_email(request: Request, data: VerifyEmailIn) -> MessageOut:
     # verify_email_token returns the id in string form (so UUID/ULID keys work), so compare as str
     if user is None or verified_id != str(user.id):
         raise ValidationException(
-            {"token": ["This verification link is invalid or has expired."]}
+            {"token": [trans("shop.errors.verification_link_invalid")]}
         )
     if user.email_verified_at is None:
         user.email_verified_at = Date.now()
@@ -147,7 +148,7 @@ async def upload_avatar(request: Request) -> UserOut:
     user = _me(request)
     upload = await request.file("image")
     if upload is None:
-        raise ValidationException({"image": ["An image file is required."]})
+        raise ValidationException({"image": [trans("shop.errors.image_required")]})
     raw = await upload.read()
     previous = await user.get_media(AVATAR)
     try:
@@ -160,7 +161,7 @@ async def upload_avatar(request: Request) -> UserOut:
         )
     except Exception as exc:  # noqa: BLE001 — any decode/store failure is a client error
         raise ValidationException(
-            {"image": ["The file is not a valid image."]}
+            {"image": [trans("shop.errors.file_not_image")]}
         ) from exc
     for media in previous:
         await user.delete_media(media.id)

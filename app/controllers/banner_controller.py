@@ -12,7 +12,7 @@ from arvel.support import current_user
 from arvel.validation import ValidationException
 
 from app.enums import Permission
-from app.i18n import DEFAULT_LOCALE, SUPPORTED_LOCALES, active_locale
+from app.i18n import DEFAULT_LOCALE, SUPPORTED_LOCALES, active_locale, trans
 from app.models.media import AppMedia
 from app.models.banner import HERO, Banner
 from app.models.user import User
@@ -24,10 +24,6 @@ from app.schemas import (
     BannerUpdateIn,
 )
 from app.services.product_image_service import ProductImageService
-
-
-def _image_url(media: AppMedia | None, conversion: str | None) -> str | None:
-    return media.serving_url(conversion) if media is not None else None
 
 
 async def _first_media(banner: Banner) -> AppMedia | None:
@@ -51,8 +47,8 @@ async def _public_out(banner: Banner, locale: str) -> BannerOut:
         chip=text.get("chip"),
         cta_label=text.get("cta_label"),
         cta_to=banner.cta_to or "/catalog",
-        image_url=_image_url(media, "hero"),
-        mobile_image_url=_image_url(media, "mobile"),
+        image_url=media.serving_url("hero") if media else None,
+        mobile_image_url=media.serving_url("mobile") if media else None,
     )
 
 
@@ -68,7 +64,7 @@ async def index(request: Request) -> list[BannerOut]:
 def _current_user() -> User:
     user: User | None = current_user.get()
     if user is None:
-        abort(401, "Unauthenticated")
+        abort(401, trans("shop.errors.unauthenticated"))
     return user
 
 
@@ -80,11 +76,22 @@ def _validated_translations(
     bad = [locale for locale in payload if locale not in SUPPORTED_LOCALES]
     if bad:
         raise ValidationException(
-            {"translations": [f"Unsupported locale(s): {', '.join(sorted(bad))}."]}
+            {
+                "translations": [
+                    trans(
+                        "shop.errors.unsupported_locales",
+                        locales=", ".join(sorted(bad)),
+                    )
+                ]
+            }
         )
     if DEFAULT_LOCALE not in payload:
         raise ValidationException(
-            {"translations": [f"The {DEFAULT_LOCALE} copy is required."]}
+            {
+                "translations": [
+                    trans("shop.errors.default_copy_required", lang=DEFAULT_LOCALE)
+                ]
+            }
         )
     return {
         locale: {
@@ -99,6 +106,7 @@ def _validated_translations(
 
 async def _admin_out(banner: Banner) -> AdminBannerOut:
     translations: dict[str, Any] = banner.translations or {}
+    media = await _first_media(banner)
     return AdminBannerOut(
         id=banner.id,
         translations={
@@ -113,7 +121,7 @@ async def _admin_out(banner: Banner) -> AdminBannerOut:
         cta_to=banner.cta_to or "/catalog",
         sort=banner.sort or 0,
         active=bool(banner.active),
-        image_url=_image_url(await _first_media(banner), "hero"),
+        image_url=media.serving_url("hero") if media else None,
     )
 
 
@@ -192,7 +200,7 @@ async def upload_image(request: Request, id: Banner) -> AdminBannerOut:
     banner = id
     upload = await request.file("image")
     if upload is None:
-        raise ValidationException({"image": ["An image file is required."]})
+        raise ValidationException({"image": [trans("shop.errors.image_required")]})
     raw = await upload.read()
     previous = await banner.get_media(HERO)
     try:
@@ -205,7 +213,7 @@ async def upload_image(request: Request, id: Banner) -> AdminBannerOut:
         )
     except Exception as exc:  # noqa: BLE001 — any decode/store failure is a client error
         raise ValidationException(
-            {"image": ["The file is not a valid image."]}
+            {"image": [trans("shop.errors.file_not_image")]}
         ) from exc
     for media in previous:
         await banner.delete_media(media.id)

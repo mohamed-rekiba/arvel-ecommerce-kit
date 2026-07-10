@@ -6,6 +6,7 @@ JIT-provisions a local admin ``User`` keyed by the OIDC subject. The verifier is
 """
 
 from typing import Any, cast
+from app.i18n import trans
 
 from arvel import abort
 from arvel.http import Request
@@ -49,12 +50,12 @@ async def resolve_admin(request: Request, *, persist_roles: bool = False) -> Use
     guard = app("admin_oidc_guard")
     principal = await guard.verify(request)
     if principal is None:
-        abort(401, "Invalid or missing OIDC token.")
+        abort(401, trans("shop.errors.oidc_token_invalid"))
 
     admin_role = Config.get("auth.oidc")["admin_role"]
     claims = cast("dict[str, Any]", dict(principal.claims))
     if admin_role not in _realm_roles(claims):
-        abort(403, "This account is not an administrator.")
+        abort(403, trans("shop.errors.not_an_admin"))
 
     # JIT-provision by email; Keycloak is the source of truth.
     email = principal.email or f"{principal.subject}@oidc.local"

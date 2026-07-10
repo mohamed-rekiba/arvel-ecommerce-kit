@@ -4,6 +4,7 @@ unique idempotency-ledger row dedupes it).
 """
 
 import hashlib
+from app.i18n import trans
 import hmac
 from typing import Any
 
@@ -34,13 +35,13 @@ async def _verify_signature(request: Request) -> None:
     # fail closed outside debug: the shipped "test-secret" default is publicly known, so a deploy
     # that forgot to set PAYMENT_GATEWAY_SECRET must not verify forged webhooks against it
     if secret == "test-secret" and not Config.get("app.debug", False):  # nosec B105
-        abort(401, "Invalid webhook signature.")
+        abort(401, trans("shop.errors.webhook_signature_invalid"))
     provided = request.header(SIGNATURE_HEADER, "") or ""
     expected = hmac.new(
         secret.encode(), await request.body(), hashlib.sha256
     ).hexdigest()
     if not secret or not hmac.compare_digest(provided, expected):
-        abort(401, "Invalid webhook signature.")
+        abort(401, trans("shop.errors.webhook_signature_invalid"))
 
 
 async def pay(request: Request) -> PaymentOut:
@@ -49,7 +50,7 @@ async def pay(request: Request) -> PaymentOut:
     order = await resolve_owned_order(request, int(request.path_param("id")))
     method = getattr(order, "payment_method", None) or "gateway"
     if str(method) == "cod" or getattr(method, "value", "") == "cod":
-        abort(422, "This order is cash on delivery — nothing to pay online.")
+        abort(422, trans("shop.errors.order_is_cod"))
     status = (
         order.status
         if isinstance(order.status, OrderStatus)
@@ -57,7 +58,8 @@ async def pay(request: Request) -> PaymentOut:
     )
     if status is not OrderStatus.PENDING:
         raise ValidationException(
-            {"order": [f"Order is already {status.value}."]}, status=409
+            {"order": [trans("shop.errors.order_already_status", status=status.value)]},
+            status=409,
         )
 
     gateway = Config.get("services.payment_gateway.url")
@@ -68,7 +70,7 @@ async def pay(request: Request) -> PaymentOut:
         json={"amount": order.total_cents, "currency": "usd", "order_id": order.id},
     )
     if not response.successful():  # a charge POST may answer 201, not just 200
-        abort(502, "Payment gateway error.")
+        abort(502, trans("shop.errors.payment_gateway_error"))
     charge: dict[str, Any] = response.json()
 
     payment = await Payment.create(
@@ -90,7 +92,7 @@ async def webhook(request: Request, data: WebhookIn) -> WebhookOut:
     request must carry a valid gateway signature (authenticity) before any side effects run."""
     await _verify_signature(request)
     if not data.id or not data.type:
-        abort(400, "Malformed webhook.")
+        abort(400, trans("shop.errors.webhook_malformed"))
 
     if await WebhookEvent.where("event_id", data.id).first() is not None:
         return WebhookOut(status="already_processed")
