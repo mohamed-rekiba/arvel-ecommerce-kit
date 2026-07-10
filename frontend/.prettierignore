@@ -1,0 +1,7 @@
+# Generated — the orval client is machine-emitted from openapi.json; formatting it is noise
+# and its style is the generator's, not ours.
+src/api/gen/
+openapi.json
+
+# Build output
+dist/

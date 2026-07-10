@@ -308,8 +308,8 @@ onMounted(async () => {
                 <stop offset="1" stop-color="var(--accent)" stop-opacity="0" />
               </linearGradient>
               <linearGradient id="gOrd" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="0" stop-color="#7b5cff" stop-opacity="0.22" />
-                <stop offset="1" stop-color="#7b5cff" stop-opacity="0" />
+                <stop offset="0" stop-color="var(--chart-purple)" stop-opacity="0.22" />
+                <stop offset="1" stop-color="var(--chart-purple)" stop-opacity="0" />
               </linearGradient>
             </defs>
             <path :d="chart.ord.area" fill="url(#gOrd)" />
@@ -317,7 +317,7 @@ onMounted(async () => {
             <path
               :d="chart.ord.line"
               fill="none"
-              stroke="#7b5cff"
+              stroke="var(--chart-purple)"
               stroke-width="2"
               stroke-linejoin="round"
               stroke-linecap="round"
@@ -427,7 +427,7 @@ onMounted(async () => {
           <path
             :d="ordWave.line"
             fill="none"
-            stroke="#fff"
+            stroke="var(--white)"
             stroke-width="2"
             vector-effect="non-scaling-stroke"
           />
@@ -507,17 +507,18 @@ onMounted(async () => {
 </template>
 
 <style scoped>
-/* vibrant card palette — matches the analytics reference, per design direction */
+/* vibrant card palette — matches the analytics reference, per design direction.
+   Aliased to the tokens.css dataviz tokens (single source of truth for the values). */
 .dash {
-  --g-pink: linear-gradient(135deg, #f2618f, #c0206a);
-  --g-violet: linear-gradient(135deg, #8b62f0, #5b3fd6);
-  --g-blue: linear-gradient(135deg, #3fb9e6, #2a86d6);
-  --g-orange: linear-gradient(135deg, #fbab3c, #f47b20);
-  --c-pink: #d83b7c;
-  --c-violet: #6f4fe0;
-  --c-blue: #2f9fd8;
-  --c-orange: #f2871f;
-  --c-teal: #16b8a6; /* 5th hue so order-status segments extend the KPI palette */
+  --g-pink: var(--chart-g-pink);
+  --g-violet: var(--chart-g-violet);
+  --g-blue: var(--chart-g-blue);
+  --g-orange: var(--chart-g-orange);
+  --c-pink: var(--chart-pink);
+  --c-violet: var(--chart-violet);
+  --c-blue: var(--chart-blue);
+  --c-orange: var(--chart-orange);
+  --c-teal: var(--chart-teal); /* 5th hue so order-status segments extend the KPI palette */
 }
 .eyebrow {
   font-size: 11px;
@@ -645,7 +646,7 @@ onMounted(async () => {
   background: var(--accent);
 }
 .d--ord {
-  background: #7b5cff;
+  background: var(--chart-purple);
 }
 .range {
   display: inline-flex;
@@ -694,7 +695,7 @@ onMounted(async () => {
   background: var(--accent);
 }
 .dot--ord {
-  background: #7b5cff;
+  background: var(--chart-purple);
 }
 .chart__empty {
   position: absolute;
@@ -762,19 +763,19 @@ onMounted(async () => {
 }
 .t-pink {
   background: var(--g-pink);
-  color: #fff;
+  color: var(--white);
 }
 .t-violet {
   background: var(--g-violet);
-  color: #fff;
+  color: var(--white);
 }
 .t-blue {
   background: var(--g-blue);
-  color: #fff;
+  color: var(--white);
 }
 .t-orange {
   background: var(--g-orange);
-  color: #fff;
+  color: var(--white);
 }
 
 /* ── donut ── */
@@ -866,7 +867,7 @@ onMounted(async () => {
   position: relative;
   border-radius: var(--radius-lg);
   padding: 18px 18px 16px;
-  color: #fff;
+  color: var(--white);
   overflow: hidden;
   min-height: 132px;
   display: flex;
@@ -934,7 +935,7 @@ onMounted(async () => {
   display: block;
   height: 100%;
   border-radius: 999px;
-  background: #fff;
+  background: var(--white);
 }
 
 /* ── bottom row ── */

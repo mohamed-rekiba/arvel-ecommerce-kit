@@ -202,13 +202,13 @@
   border-radius: 999px;
 }
 .apage .s-green {
-  background: #22c55e;
+  background: var(--stock-good);
 }
 .apage .s-amber {
-  background: #f59e0b;
+  background: var(--stock-low);
 }
 .apage .s-red {
-  background: #ef4444;
+  background: var(--stock-out);
 }
 .apage .stock__n {
   font-size: 12px;
@@ -426,6 +426,10 @@
 }
 
 /* responsive */
+/* design-exception: third breakpoint (720px) + max-width query, off the documented two-tier
+   640/1024 min-width scale (DESIGN.md §2.12). Admin-only narrow-viewport tweak (2-col filters,
+   stacked add-button, single-col form row); pre-existing, tracked as DESIGN.md Finding 4 debt,
+   not fixed in K1 to avoid a rendered-layout change outside the spec's scope. */
 @media (max-width: 720px) {
   .apage .filters {
     grid-template-columns: 1fr 1fr;

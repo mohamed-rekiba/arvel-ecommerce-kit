@@ -367,6 +367,6 @@ onMounted(refresh)
   margin: 0 0 var(--space-2);
 }
 .summary__row--discount {
-  color: var(--color-success, #2e7d32);
+  color: var(--color-success);
 }
 </style>

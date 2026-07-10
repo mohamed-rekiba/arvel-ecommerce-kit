@@ -699,7 +699,7 @@ watch(() => route.params.slug, load)
   align-items: baseline;
 }
 .review__stars {
-  color: var(--color-warning, #b45309);
+  color: var(--star);
   letter-spacing: 2px;
 }
 .review__author {
@@ -764,7 +764,7 @@ watch(() => route.params.slug, load)
   color: var(--color-text);
 }
 .pdp__alert-ok {
-  color: var(--color-success, #2e7d32);
+  color: var(--color-success);
   font-size: var(--text-sm);
 }
 .pdp__alert-note {

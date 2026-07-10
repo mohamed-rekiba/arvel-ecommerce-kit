@@ -302,9 +302,12 @@ watch(() => route.query, load)
   color: var(--text);
 }
 .cat.on {
+  /* solid accent fill + --on-accent text, not --accent-as-text on a tint: the tint measured
+     3.9:1 (axe color-contrast, below AA 4.5:1) — --accent is a fill color, not a text color
+     (DESIGN.md §4.1). The on-accent/accent pairing is the tested-AA button treatment. */
   border-color: var(--accent);
-  background: color-mix(in srgb, var(--accent) 14%, transparent);
-  color: var(--accent);
+  background: var(--accent);
+  color: var(--on-accent);
   font-weight: 600;
 }
 

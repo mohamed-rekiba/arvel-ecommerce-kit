@@ -1,5 +1,5 @@
 /* arvel-ecommerce-kit — design tokens (v6 "BestShop"). Single source of truth; mirrors
-   projects/arvel-ecommerce-kit/design/DESIGN.md. One file, two registers (.shop / .console),
+   frontend/DESIGN.md. One file, two registers (.shop / .console),
    full light + dark theme ([data-theme]). Never hardcode color/space/radius/type in a component.
 
    Reference: a conversion-first marketplace theme — white base on a cool-neutral canvas,
@@ -68,6 +68,25 @@
   --sale: #c62828;
   --sale-bg: #fdebea;
   --focus: var(--orange-600);
+
+  /* stock-level indicator (admin product list bar) — graphic fill, AA-exempt (§4.1) */
+  --stock-good: #22c55e;
+  --stock-low: #f59e0b;
+  --stock-out: #ef4444;
+
+  /* dataviz — admin dashboard chart/KPI-card palette; graphic-only, not brand accent,
+     exempt from the accent-text rule (§4.1). Values match the existing "vibrant card
+     palette per design direction" unchanged. */
+  --chart-pink: #d83b7c;
+  --chart-violet: #6f4fe0;
+  --chart-blue: #2f9fd8;
+  --chart-orange: #f2871f;
+  --chart-teal: #16b8a6;
+  --chart-purple: #7b5cff; /* orders trend line + donut accent */
+  --chart-g-pink: linear-gradient(135deg, #f2618f, #c0206a);
+  --chart-g-violet: linear-gradient(135deg, #8b62f0, #5b3fd6);
+  --chart-g-blue: linear-gradient(135deg, #3fb9e6, #2a86d6);
+  --chart-g-orange: linear-gradient(135deg, #fbab3c, #f47b20);
 
   /* category tiles (ink text on linen; ≥24px bold text) */
   --cat-violet: #6b5a70;

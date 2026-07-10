@@ -436,7 +436,10 @@ onBeforeUnmount(() => document.removeEventListener('click', onDocClick))
   margin-inline-start: auto;
 }
 .tb__cur {
-  color: var(--text-subtle);
+  /* text-muted, not text-subtle: text-subtle drops to 4.42:1 on --surface-2 in dark — below
+     AA for this normal-size, non-decorative label (DESIGN.md §4.1: text-subtle must not carry
+     essential copy where it would fall below 4.5:1). */
+  color: var(--text-muted);
   font-weight: 600;
   letter-spacing: 0.04em;
 }

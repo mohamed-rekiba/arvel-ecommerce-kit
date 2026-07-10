@@ -33,7 +33,7 @@ def _parse_blocks(css: str) -> tuple[dict[str, str], dict[str, str]]:
         return out
 
     light = block(css.index(":root"))
-    dark = block(css.index('[data-theme="dark"]'))
+    dark = block(css.index("[data-theme='dark']"))
     return light, dark
 
 

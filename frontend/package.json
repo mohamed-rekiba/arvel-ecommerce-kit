@@ -7,7 +7,11 @@
     "build": "vue-tsc --noEmit && vite build",
     "preview": "vite preview",
     "format": "prettier . --write",
-    "api:generate": "orval --config orval.config.ts"
+    "api:generate": "orval --config orval.config.ts",
+    "check:tokens": "python3 scripts/check-tokens.py",
+    "check:colors": "bash scripts/check-hardcoded-colors.sh",
+    "check:contrast": "python3 scripts/wcag-audit.py",
+    "a11y": "node scripts/a11y.mjs"
   },
   "dependencies": {
     "@primeuix/themes": "^2.0.3",
@@ -17,8 +21,10 @@
     "vue-router": "^5.1.0"
   },
   "devDependencies": {
+    "@axe-core/playwright": "^4.12.1",
     "@vitejs/plugin-vue": "^6.0.7",
     "orval": "^8.19.0",
+    "playwright": "^1.61.1",
     "prettier": "^3.9.4",
     "typescript": "^6.0.3",
     "vite": "^8.1.3",
