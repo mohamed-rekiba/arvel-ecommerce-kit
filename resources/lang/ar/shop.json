@@ -20,5 +20,31 @@
   "notif": {
     "shipped": "تم شحن طلبك رقم {order}.",
     "back_in_stock": "{product} عاد إلى المخزون."
+  },
+  "invoice": {
+    "invoice": "فاتورة",
+    "status": {
+      "pending": "قيد الانتظار",
+      "paid": "مدفوع",
+      "shipped": "تم الشحن",
+      "delivered": "تم التسليم",
+      "cancelled": "ملغى",
+      "refund_pending": "جارٍ استرداد المبلغ",
+      "refunded": "تم الاسترداد"
+    },
+    "bill_to": "الفوترة / الشحن إلى",
+    "payment": "الدفع",
+    "item": "المنتج",
+    "qty": "الكمية",
+    "unit": "سعر الوحدة",
+    "amount": "المبلغ",
+    "subtotal": "المجموع الفرعي",
+    "shipping": "الشحن",
+    "tax": "الضريبة",
+    "discount": "الخصم",
+    "total": "الإجمالي",
+    "footer": "شكرًا لتسوقك من ArvelShop — مبني على إطار عمل arvel.",
+    "gateway": "مدفوع عبر الإنترنت",
+    "cod": "الدفع عند الاستلام"
   }
 }

@@ -20,5 +20,31 @@
   "notif": {
     "shipped": "Your order #{order} has shipped.",
     "back_in_stock": "{product} is back in stock."
+  },
+  "invoice": {
+    "invoice": "Invoice",
+    "status": {
+      "pending": "pending",
+      "paid": "paid",
+      "shipped": "shipped",
+      "delivered": "delivered",
+      "cancelled": "cancelled",
+      "refund_pending": "refund in progress",
+      "refunded": "refunded"
+    },
+    "bill_to": "Bill / ship to",
+    "payment": "Payment",
+    "item": "Item",
+    "qty": "Qty",
+    "unit": "Unit price",
+    "amount": "Amount",
+    "subtotal": "Subtotal",
+    "shipping": "Shipping",
+    "tax": "Tax",
+    "discount": "Discount",
+    "total": "Total",
+    "footer": "Thank you for shopping with ArvelShop — built on the arvel framework.",
+    "gateway": "Paid online (gateway)",
+    "cod": "Cash on delivery"
   }
 }

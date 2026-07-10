@@ -1,6 +1,7 @@
 """The printable order invoice — server-rendered HTML via arvel.views (Jinja). Owner-or-token
-guarded like every order read; strings are shaped per the request locale here (the template stays
-logic-free)."""
+guarded like every order read. User-facing strings come from the framework translator
+(resources/lang/<locale>/shop.json, ``invoice`` group), so the controller holds no copy — the
+template stays logic-free."""
 
 from typing import Any
 
@@ -11,88 +12,25 @@ from app.controllers.cart_controller import line_presentation
 from app.controllers.order_access import resolve_owned_order
 from app.controllers.serializers import iso as _iso
 from app.enums import OrderStatus, PaymentMethod
-from app.i18n import active_locale
+from app.i18n import active_locale, trans_in
 
-_STRINGS: dict[str, dict[str, str]] = {
-    "en": {
-        "invoice": "Invoice",
-        "status": "Status",
-        "bill_to": "Bill / ship to",
-        "payment": "Payment",
-        "item": "Item",
-        "qty": "Qty",
-        "unit": "Unit price",
-        "amount": "Amount",
-        "subtotal": "Subtotal",
-        "shipping": "Shipping",
-        "tax": "Tax",
-        "discount": "Discount",
-        "total": "Total",
-        "footer": "Thank you for shopping with ArvelShop — built on the arvel framework.",
-        "gateway": "Paid online (gateway)",
-        "cod": "Cash on delivery",
-    },
-    "fr": {
-        "invoice": "Facture",
-        "status": "Statut",
-        "bill_to": "Facturation / livraison",
-        "payment": "Paiement",
-        "item": "Article",
-        "qty": "Qté",
-        "unit": "Prix unitaire",
-        "amount": "Montant",
-        "subtotal": "Sous-total",
-        "shipping": "Livraison",
-        "tax": "Taxes",
-        "discount": "Réduction",
-        "total": "Total",
-        "footer": "Merci d'avoir choisi ArvelShop — construit sur le framework arvel.",
-        "gateway": "Payé en ligne (passerelle)",
-        "cod": "Paiement à la livraison",
-    },
-    "ar": {
-        "invoice": "فاتورة",
-        "status": "الحالة",
-        "bill_to": "الفوترة / الشحن إلى",
-        "payment": "الدفع",
-        "item": "المنتج",
-        "qty": "الكمية",
-        "unit": "سعر الوحدة",
-        "amount": "المبلغ",
-        "subtotal": "المجموع الفرعي",
-        "shipping": "الشحن",
-        "tax": "الضريبة",
-        "discount": "الخصم",
-        "total": "الإجمالي",
-        "footer": "شكرًا لتسوقك من ArvelShop — مبني على إطار عمل arvel.",
-        "gateway": "مدفوع عبر الإنترنت",
-        "cod": "الدفع عند الاستلام",
-    },
-}
-
-_STATUS_LABELS: dict[str, dict[str, str]] = {
-    "en": {
-        "pending": "pending",
-        "paid": "paid",
-        "shipped": "shipped",
-        "delivered": "delivered",
-        "cancelled": "cancelled",
-    },
-    "fr": {
-        "pending": "en attente",
-        "paid": "payée",
-        "shipped": "expédiée",
-        "delivered": "livrée",
-        "cancelled": "annulée",
-    },
-    "ar": {
-        "pending": "قيد الانتظار",
-        "paid": "مدفوع",
-        "shipped": "تم الشحن",
-        "delivered": "تم التسليم",
-        "cancelled": "ملغى",
-    },
-}
+# the flat invoice UI strings under shop.invoice.* (status labels + payment methods are nested)
+_LABELS = (
+    "invoice",
+    "status",
+    "bill_to",
+    "payment",
+    "item",
+    "qty",
+    "unit",
+    "amount",
+    "subtotal",
+    "shipping",
+    "tax",
+    "discount",
+    "total",
+    "footer",
+)
 
 
 def _money(cents: int) -> str:
@@ -107,7 +45,7 @@ async def show(request: Request) -> Response:
     )
     items = await order.items().get()
     locale = active_locale()
-    t = dict(_STRINGS[locale])
+    t: dict[str, str] = {k: trans_in(locale, f"shop.invoice.{k}") for k in _LABELS}
     status = (
         order.status
         if isinstance(order.status, OrderStatus)
@@ -119,8 +57,10 @@ async def show(request: Request) -> Response:
         if isinstance(raw_method, PaymentMethod)
         else PaymentMethod(str(raw_method))
     )
-    t["status_label"] = _STATUS_LABELS[locale][status.value]
-    t["method_label"] = t[method.value]
+    # the translator returns the key itself on a miss, so an unmapped status degrades to a readable
+    # fallback instead of 500-ing the invoice
+    t["status_label"] = trans_in(locale, f"shop.invoice.status.{status.value}")
+    t["method_label"] = trans_in(locale, f"shop.invoice.{method.value}")
 
     looks = await line_presentation([i.product_variant_id for i in items])
     lines: list[dict[str, Any]] = [

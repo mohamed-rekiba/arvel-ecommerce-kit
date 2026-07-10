@@ -432,6 +432,25 @@ def test_refund_authz_owner_and_permission_scoped(gw) -> None:
     assert len(gw.refund_calls) == 0
 
 
+def test_refunded_order_invoice_renders_not_500(gw) -> None:
+    """A refunded order's invoice must render (showing the refunded status), not KeyError -> 500 —
+    the status-label lookup was missing the refund states."""
+    order_id, cara, _paid = _place_and_pay(gw, quantity=1)
+    gw.client.post(f"/api/orders/{order_id}/cancel", headers=cara)
+    _post_webhook(
+        gw.client,
+        {
+            "id": "evt_refund_inv",
+            "type": "charge.refunded",
+            "data": {"charge_id": "ch_test_123"},
+        },
+    )
+
+    page = gw.client.get(f"/api/orders/{order_id}/invoice", headers=cara)
+    assert page.status_code == 200, page.text
+    assert "refunded" in page.text.lower()
+
+
 def test_refund_timeline_collapses_to_a_terminal_branch(gw) -> None:
     """The tracking stepper must not imply a refund is still heading to delivery: a refund collapses
     the path to placed -> paid -> refund_pending, then -> refunded — never the greyed

@@ -151,7 +151,12 @@ onBeforeUnmount(stopPolling)
           >
             <span class="step__dot" aria-hidden="true">
               <svg
-                v-if="s.at !== null && s.status !== 'cancelled' && s.status !== 'refunded' && s.status !== 'refund_pending'"
+                v-if="
+                  s.at !== null &&
+                  s.status !== 'cancelled' &&
+                  s.status !== 'refunded' &&
+                  s.status !== 'refund_pending'
+                "
                 viewBox="0 0 24 24"
               >
                 <path d="M5 12l5 5 9-10" />

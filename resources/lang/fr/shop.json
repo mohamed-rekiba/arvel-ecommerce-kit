@@ -20,5 +20,31 @@
   "notif": {
     "shipped": "Votre commande n°{order} a été expédiée.",
     "back_in_stock": "{product} est de retour en stock."
+  },
+  "invoice": {
+    "invoice": "Facture",
+    "status": {
+      "pending": "en attente",
+      "paid": "payée",
+      "shipped": "expédiée",
+      "delivered": "livrée",
+      "cancelled": "annulée",
+      "refund_pending": "remboursement en cours",
+      "refunded": "remboursée"
+    },
+    "bill_to": "Facturation / livraison",
+    "payment": "Paiement",
+    "item": "Article",
+    "qty": "Qté",
+    "unit": "Prix unitaire",
+    "amount": "Montant",
+    "subtotal": "Sous-total",
+    "shipping": "Livraison",
+    "tax": "Taxes",
+    "discount": "Réduction",
+    "total": "Total",
+    "footer": "Merci d'avoir choisi ArvelShop — construit sur le framework arvel.",
+    "gateway": "Payé en ligne (passerelle)",
+    "cod": "Paiement à la livraison"
   }
 }
