@@ -14,6 +14,8 @@ node_modules/
 dist/
 .aios/
 .repowise/
+frontend/test-results/
+frontend/playwright-report/
 
 # populated at Docker build time from frontend/dist/ (bootstrap/app.py's with_public_dir(...),
 # arvel's Laravel-`public/`-parity static front door) — source of truth is frontend/public/ + the

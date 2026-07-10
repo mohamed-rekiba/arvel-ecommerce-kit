@@ -11,7 +11,10 @@
     "check:tokens": "python3 scripts/check-tokens.py",
     "check:colors": "bash scripts/check-hardcoded-colors.sh",
     "check:contrast": "python3 scripts/wcag-audit.py",
-    "a11y": "node scripts/a11y.mjs"
+    "a11y": "node scripts/a11y.mjs",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "e2e": "playwright test"
   },
   "dependencies": {
     "@primeuix/themes": "^2.0.3",
@@ -23,11 +26,14 @@
   "devDependencies": {
     "@axe-core/playwright": "^4.12.1",
     "@vitejs/plugin-vue": "^6.0.7",
+    "@vue/test-utils": "^2.4.11",
+    "happy-dom": "^20.10.6",
     "orval": "^8.19.0",
     "playwright": "^1.61.1",
     "prettier": "^3.9.4",
     "typescript": "^6.0.3",
     "vite": "^8.1.3",
+    "vitest": "^4.1.10",
     "vue-tsc": "^3.3.6"
   }
 }

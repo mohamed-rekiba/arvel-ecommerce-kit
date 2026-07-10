@@ -1,6 +1,6 @@
 # arvel-ecommerce-kit — common tasks. `make help` lists them.
 .DEFAULT_GOAL := help
-.PHONY: help install env up down setup migrate fresh seed bucket serve front front-build worker schedule openapi openapi-check test test-integration typecheck lint check hooks pre-commit clean
+.PHONY: help install env up down setup migrate fresh seed bucket serve front front-build front-test worker schedule openapi openapi-check test test-integration typecheck lint check e2e hooks pre-commit clean
 
 help: ## Show this help
 	@grep -hE '^[a-zA-Z_-]+:.*?## ' $(MAKEFILE_LIST) | awk 'BEGIN{FS=":.*?## "}{printf "  \033[36m%-12s\033[0m %s\n", $$1, $$2}'
@@ -46,6 +46,9 @@ front: ## Run the consolidated storefront + admin SPA (http://localhost:5173 —
 front-build: ## Type-check + production-build the frontend (vue-tsc + vite)
 	cd frontend && npm install && npm run build
 
+front-test: ## Run the frontend component tests (vitest, in-process, no infra)
+	cd frontend && npm install && npm run test
+
 worker: ## Run a queue worker
 	uv run arvel queue:work
 
@@ -74,7 +77,20 @@ typecheck: ## Strict type-check the app code
 lint: ## Lint + format check
 	uv run ruff check . && uv run ruff format --check .
 
-check: lint typecheck test front-build ## Lint + types + tests + frontend build (vue-tsc)
+check: lint typecheck test front-build front-test ## Lint + types + tests + frontend build (vue-tsc) + frontend component tests
+
+e2e: ## Playwright checkout e2e: full infra + debug backend (LOCAL) + a queue worker + the served SPA
+	$(MAKE) up
+	@echo "waiting for Postgres..." && until docker compose exec -T db pg_isready -U arvel -d arvel_ecommerce_kit >/dev/null 2>&1; do sleep 1; done
+	uv run arvel key:generate
+	uv run arvel migrate:fresh
+	uv run python tools/setup_bucket.py
+	uv run arvel db:seed
+	uv run arvel serve > /tmp/arvel-e2e-serve.log 2>&1 &
+	uv run arvel queue:work > /tmp/arvel-e2e-worker.log 2>&1 &
+	@echo "waiting for the API..." && until curl -sf http://127.0.0.1:8000/api/products >/dev/null 2>&1; do sleep 1; done
+	trap 'pkill -f "granian --interface asgi --host 127.0.0.1 --port 8000" 2>/dev/null; pkill -f "arvel queue:work" 2>/dev/null' INT TERM EXIT; \
+		cd frontend && npm install && npx playwright install --with-deps chromium && npm run build && npm run e2e
 
 hooks:  ## Install pre-commit git hooks
 	$(RUN) pre-commit install
