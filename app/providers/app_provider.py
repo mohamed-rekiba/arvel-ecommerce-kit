@@ -15,7 +15,11 @@ if TYPE_CHECKING:
 class AppServiceProvider(ServiceProvider):
     def register(self) -> None:
         from app.auth.admin_oidc import build_admin_oidc_guard
+        from app.console.search_reindex import SearchReindexCommand
         from database.seeders.database_seeder import DatabaseSeeder
+
+        # A Command class (not a routes/console.py closure) — see search_reindex.py for why.
+        self.commands(SearchReindexCommand)
 
         def _seeder(_app: Any) -> DatabaseSeeder:
             return DatabaseSeeder()
