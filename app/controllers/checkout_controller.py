@@ -292,8 +292,10 @@ async def checkout(request: Request, data: CheckoutIn) -> OrderOut:
     # for both the charge and the stored tax_rate_bps, so stored always matches charged.
     # ship_country is always set here (the Validator above requires "country"); the dict's value
     # type is a plain str | None because ship_line2 (the only optional address part) shares it.
+    # Guard rather than assert — asserts strip under -O, and this is a money/tax path.
     ship_country = ship_fields["ship_country"]
-    assert ship_country is not None
+    if ship_country is None:
+        raise ValidationException({"ship_country": ["A shipping country is required."]})
     tax_rate_bps = await tax_service.resolve_rate_bps(ship_country)
     tax = _tax_cents(subtotal, tax_rate_bps)
     total = (

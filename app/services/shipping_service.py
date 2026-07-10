@@ -17,7 +17,7 @@ async def resolve_rate_cents(code: str) -> int:
         raise ValidationException(
             {"shipping_method": [f"'{code}' is not an available shipping method."]}
         )
-    return row.rate_cents
+    return int(row.rate_cents)
 
 
 async def list_methods() -> list[ShippingMethod]:
