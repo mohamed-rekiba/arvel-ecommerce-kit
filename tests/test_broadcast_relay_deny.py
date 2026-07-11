@@ -1,15 +1,13 @@
-"""K9 — the relay's own enforcement of a private-channel subscribe (`_handle_subscribe`'s
-`verify_channel_auth` branch in `app/realtime/broadcast_relay.py`): a forged or non-ASCII
+"""K9 — the framework relay's enforcement of a private-channel subscribe (the
+`verify_channel_auth` branch in `arvel.routing.broadcast_websocket`): a forged or non-ASCII
 (DR-0067's fail-closed guard) token gets `subscribe_error`, never a subscription. This is the
 actual gate — a client can't fabricate a token to subscribe — distinct from the HTTP-side 403
 `/broadcasting/auth` returns (proven in `test_order_broadcast.py`). Hermetic: no Docker, no real
-redis (a denied private channel never touches it).
+redis (a denied private channel never touches it). The `/ws` transport is a framework route now.
 """
 
 import pytest
 from litestar.testing import TestClient
-
-from app.realtime.broadcast_relay import BroadcastRelay
 
 
 @pytest.fixture
@@ -17,8 +15,7 @@ def relay_client():
     from bootstrap.app import create_app
 
     app = create_app()
-    asgi = BroadcastRelay(app, app.as_asgi())
-    with TestClient(app=asgi) as client:
+    with TestClient(app=app.as_asgi()) as client:
         yield client
 
 

@@ -1,5 +1,5 @@
 // A tiny typed native-WebSocket client for K9's order/stock live-update relay
-// (app/realtime/broadcast_relay.py). Connects to `/ws`; a private channel first exchanges
+// (the framework relay `arvel.routing.broadcast_websocket`). Connects to `/ws`; a private channel first exchanges
 // arvel's own POST /broadcasting/auth for a signed token (a cross-user/guest request is denied
 // there — this client never decides ownership), a public channel needs none.
 import { apiFetch } from '../api/http'

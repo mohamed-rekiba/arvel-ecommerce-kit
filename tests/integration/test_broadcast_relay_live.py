@@ -1,5 +1,5 @@
 """K9 — the live push, no mocks: a real Postgres + Valkey + RabbitMQ, the served app wrapped by
-`BroadcastRelay` (the K9 websocket transport, DR-0066), and a SEPARATE `arvel queue:work` process
+the framework broadcast relay (`arvel.routing.broadcast_websocket`, a first-class `/ws` route), and a SEPARATE `arvel queue:work` process
 (production topology — arvel's global app-per-process design means the worker genuinely must be a
 separate OS process, not a second Application booted in-thread) consuming the queued
 `StockChanged` broadcast off the real broker. An admin stock adjustment publishes over arvel's own
@@ -14,7 +14,6 @@ import os
 import subprocess
 import time
 from pathlib import Path
-from typing import Any
 
 import pytest
 
@@ -95,8 +94,6 @@ def test_stock_changed_travels_redis_to_the_relay_to_a_real_websocket(
 ) -> None:
     from litestar.testing import TestClient
 
-    from app.realtime.broadcast_relay import BroadcastRelay
-
     env = {
         "DATABASE_URL": postgres_url,
         "REDIS_URL": valkey_url,
@@ -110,8 +107,9 @@ def test_stock_changed_travels_redis_to_the_relay_to_a_real_websocket(
 
     from bootstrap.app import create_app
 
-    app: Any = create_app()
-    asgi = BroadcastRelay(app, app.as_asgi())
+    asgi = (
+        create_app().as_asgi()
+    )  # /ws is a framework websocket route now — no app-owned relay wrapper
 
     worker = _start_worker(env)
     try:

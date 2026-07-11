@@ -2,9 +2,6 @@
 
 from bootstrap.app import create_app
 
-from app.realtime.broadcast_relay import BroadcastRelay
-
-_app = create_app()
-# BroadcastRelay wraps the served app at this same seam arvel's own MethodOverride uses (non-HTTP
-# scopes pass straight through) — it's the K9 websocket transport (DR-0066), not a framework route.
-asgi_app = BroadcastRelay(_app, _app.as_asgi())
+# The realtime websocket transport is a framework route now (`Route.websocket("/ws",
+# broadcast_websocket)` in routes/api.py), so the app is served directly — no app-owned relay wrapper.
+asgi_app = create_app().as_asgi()
