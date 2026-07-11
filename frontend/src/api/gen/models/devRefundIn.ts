@@ -7,9 +7,10 @@
  */
 
 /**
- * One locale's content for a product/category.
+ * What the shop sends the (dev) gateway when reversing a charge (K15).
  */
-export interface TranslationFieldsIn {
-  name: string;
-  description?: string | null;
+export interface DevRefundIn {
+  charge_id: string;
+  amount: number;
+  order_id: number;
 }

@@ -6,8 +6,6 @@
  * OpenAPI spec version: 0.1.0
  */
 
-export type ApiAdminUsersIndexParams = {
-page?: number;
-per_page?: number;
-q?: string;
-};
+export interface DevRefundOut {
+  id: string;
+}

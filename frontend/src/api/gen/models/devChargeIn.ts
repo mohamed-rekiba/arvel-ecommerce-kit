@@ -7,6 +7,10 @@
  */
 
 /**
- * @nullable
+ * What the shop sends the (dev) gateway when creating a charge.
  */
-export type ApiAdminProductsDestroy400Extra = {[key: string]: unknown} | unknown[] | null;
+export interface DevChargeIn {
+  amount: number;
+  currency: string;
+  order_id: number;
+}

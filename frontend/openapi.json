@@ -58,16 +58,6 @@
         "summary": "ApiLogin",
         "description": "Verify credentials and issue a personal access token (merging any guest cart the request\ncarries \u2014 build-a-cart-then-sign-in must never strand items).",
         "operationId": "api.login",
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/CredentialsIn"
-              }
-            }
-          },
-          "required": true
-        },
         "responses": {
           "200": {
             "description": "Request fulfilled, document follows",
@@ -79,47 +69,19 @@
                 }
               }
             }
-          },
-          "400": {
-            "description": "Bad request syntax or unsupported method",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "properties": {
-                    "status_code": {
-                      "type": "integer"
-                    },
-                    "detail": {
-                      "type": "string"
-                    },
-                    "extra": {
-                      "additionalProperties": {},
-                      "type": [
-                        "null",
-                        "object",
-                        "array"
-                      ]
-                    }
-                  },
-                  "type": "object",
-                  "required": [
-                    "detail",
-                    "status_code"
-                  ],
-                  "description": "Validation Exception",
-                  "examples": [
-                    {
-                      "status_code": 400,
-                      "detail": "Bad Request",
-                      "extra": {}
-                    }
-                  ]
-                }
+          }
+        },
+        "deprecated": false,
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CredentialsIn"
               }
             }
           }
-        },
-        "deprecated": false
+        }
       }
     },
     "/api/user": {
@@ -151,16 +113,6 @@
         "summary": "ApiUserUpdate",
         "description": "Update name/email/phone. Changing the email un-verifies the account and re-sends the\nverification link to the NEW address.",
         "operationId": "api.user.update",
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/ProfileIn"
-              }
-            }
-          },
-          "required": true
-        },
         "responses": {
           "200": {
             "description": "Request fulfilled, document follows",
@@ -172,44 +124,6 @@
                 }
               }
             }
-          },
-          "400": {
-            "description": "Bad request syntax or unsupported method",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "properties": {
-                    "status_code": {
-                      "type": "integer"
-                    },
-                    "detail": {
-                      "type": "string"
-                    },
-                    "extra": {
-                      "additionalProperties": {},
-                      "type": [
-                        "null",
-                        "object",
-                        "array"
-                      ]
-                    }
-                  },
-                  "type": "object",
-                  "required": [
-                    "detail",
-                    "status_code"
-                  ],
-                  "description": "Validation Exception",
-                  "examples": [
-                    {
-                      "status_code": 400,
-                      "detail": "Bad Request",
-                      "extra": {}
-                    }
-                  ]
-                }
-              }
-            }
           }
         },
         "deprecated": false,
@@ -217,7 +131,17 @@
           {
             "bearerAuth": []
           }
-        ]
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ProfileIn"
+              }
+            }
+          }
+        }
       }
     },
     "/api/register": {
@@ -225,16 +149,6 @@
         "summary": "ApiRegister",
         "description": "Register a customer and issue a scoped API token.",
         "operationId": "api.register",
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/RegisterIn"
-              }
-            }
-          },
-          "required": true
-        },
         "responses": {
           "201": {
             "description": "Document created, URL follows",
@@ -246,47 +160,19 @@
                 }
               }
             }
-          },
-          "400": {
-            "description": "Bad request syntax or unsupported method",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "properties": {
-                    "status_code": {
-                      "type": "integer"
-                    },
-                    "detail": {
-                      "type": "string"
-                    },
-                    "extra": {
-                      "additionalProperties": {},
-                      "type": [
-                        "null",
-                        "object",
-                        "array"
-                      ]
-                    }
-                  },
-                  "type": "object",
-                  "required": [
-                    "detail",
-                    "status_code"
-                  ],
-                  "description": "Validation Exception",
-                  "examples": [
-                    {
-                      "status_code": 400,
-                      "detail": "Bad Request",
-                      "extra": {}
-                    }
-                  ]
-                }
+          }
+        },
+        "deprecated": false,
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RegisterIn"
               }
             }
           }
-        },
-        "deprecated": false
+        }
       }
     },
     "/api/logout": {
@@ -320,16 +206,6 @@
         "summary": "ApiPasswordForgot",
         "description": "Store a single-use reset token and email its link. Always 200 (non-enumerating).",
         "operationId": "api.password.forgot",
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/ForgotPasswordIn"
-              }
-            }
-          },
-          "required": true
-        },
         "responses": {
           "200": {
             "description": "Request fulfilled, document follows",
@@ -341,47 +217,19 @@
                 }
               }
             }
-          },
-          "400": {
-            "description": "Bad request syntax or unsupported method",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "properties": {
-                    "status_code": {
-                      "type": "integer"
-                    },
-                    "detail": {
-                      "type": "string"
-                    },
-                    "extra": {
-                      "additionalProperties": {},
-                      "type": [
-                        "null",
-                        "object",
-                        "array"
-                      ]
-                    }
-                  },
-                  "type": "object",
-                  "required": [
-                    "detail",
-                    "status_code"
-                  ],
-                  "description": "Validation Exception",
-                  "examples": [
-                    {
-                      "status_code": 400,
-                      "detail": "Bad Request",
-                      "extra": {}
-                    }
-                  ]
-                }
+          }
+        },
+        "deprecated": false,
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ForgotPasswordIn"
               }
             }
           }
-        },
-        "deprecated": false
+        }
       }
     },
     "/api/reset-password": {
@@ -389,16 +237,6 @@
         "summary": "ApiPasswordReset",
         "description": "Consume the single-use reset token and set the new (hashed) password.",
         "operationId": "api.password.reset",
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/ResetPasswordIn"
-              }
-            }
-          },
-          "required": true
-        },
         "responses": {
           "200": {
             "description": "Request fulfilled, document follows",
@@ -410,47 +248,19 @@
                 }
               }
             }
-          },
-          "400": {
-            "description": "Bad request syntax or unsupported method",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "properties": {
-                    "status_code": {
-                      "type": "integer"
-                    },
-                    "detail": {
-                      "type": "string"
-                    },
-                    "extra": {
-                      "additionalProperties": {},
-                      "type": [
-                        "null",
-                        "object",
-                        "array"
-                      ]
-                    }
-                  },
-                  "type": "object",
-                  "required": [
-                    "detail",
-                    "status_code"
-                  ],
-                  "description": "Validation Exception",
-                  "examples": [
-                    {
-                      "status_code": 400,
-                      "detail": "Bad Request",
-                      "extra": {}
-                    }
-                  ]
-                }
+          }
+        },
+        "deprecated": false,
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ResetPasswordIn"
               }
             }
           }
-        },
-        "deprecated": false
+        }
       }
     },
     "/api/email/verify": {
@@ -458,16 +268,6 @@
         "summary": "ApiEmailVerify",
         "description": "Mark the account verified from a signed token (purpose-bound: a reset token won't pass).\nThe token is bound to the email it was issued for, so it stops verifying once the address\nchanges \u2014 we load the user the link names, then check the token against their current email.",
         "operationId": "api.email.verify",
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/VerifyEmailIn"
-              }
-            }
-          },
-          "required": true
-        },
         "responses": {
           "200": {
             "description": "Request fulfilled, document follows",
@@ -479,47 +279,19 @@
                 }
               }
             }
-          },
-          "400": {
-            "description": "Bad request syntax or unsupported method",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "properties": {
-                    "status_code": {
-                      "type": "integer"
-                    },
-                    "detail": {
-                      "type": "string"
-                    },
-                    "extra": {
-                      "additionalProperties": {},
-                      "type": [
-                        "null",
-                        "object",
-                        "array"
-                      ]
-                    }
-                  },
-                  "type": "object",
-                  "required": [
-                    "detail",
-                    "status_code"
-                  ],
-                  "description": "Validation Exception",
-                  "examples": [
-                    {
-                      "status_code": 400,
-                      "detail": "Bad Request",
-                      "extra": {}
-                    }
-                  ]
-                }
+          }
+        },
+        "deprecated": false,
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/VerifyEmailIn"
               }
             }
           }
-        },
-        "deprecated": false
+        }
       }
     },
     "/api/categories": {
@@ -1229,16 +1001,6 @@
             "deprecated": false
           }
         ],
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/ReviewIn"
-              }
-            }
-          },
-          "required": true
-        },
         "responses": {
           "201": {
             "description": "Document created, URL follows",
@@ -1295,7 +1057,17 @@
           {
             "bearerAuth": []
           }
-        ]
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ReviewIn"
+              }
+            }
+          }
+        }
       }
     },
     "/api/cart": {
@@ -1324,16 +1096,6 @@
         "summary": "ApiCartItemsAdd",
         "description": "Add a variant to the cart (or bump its quantity if already present).",
         "operationId": "api.cart.items.add",
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/AddItemIn"
-              }
-            }
-          },
-          "required": true
-        },
         "responses": {
           "201": {
             "description": "Document created, URL follows",
@@ -1345,47 +1107,19 @@
                 }
               }
             }
-          },
-          "400": {
-            "description": "Bad request syntax or unsupported method",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "properties": {
-                    "status_code": {
-                      "type": "integer"
-                    },
-                    "detail": {
-                      "type": "string"
-                    },
-                    "extra": {
-                      "additionalProperties": {},
-                      "type": [
-                        "null",
-                        "object",
-                        "array"
-                      ]
-                    }
-                  },
-                  "type": "object",
-                  "required": [
-                    "detail",
-                    "status_code"
-                  ],
-                  "description": "Validation Exception",
-                  "examples": [
-                    {
-                      "status_code": 400,
-                      "detail": "Bad Request",
-                      "extra": {}
-                    }
-                  ]
-                }
+          }
+        },
+        "deprecated": false,
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AddItemIn"
               }
             }
           }
-        },
-        "deprecated": false
+        }
       }
     },
     "/api/cart/items/{id}": {
@@ -1472,16 +1206,6 @@
             "deprecated": false
           }
         ],
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/UpdateItemIn"
-              }
-            }
-          },
-          "required": true
-        },
         "responses": {
           "200": {
             "description": "Request fulfilled, document follows",
@@ -1533,7 +1257,17 @@
             }
           }
         },
-        "deprecated": false
+        "deprecated": false,
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateItemIn"
+              }
+            }
+          }
+        }
       }
     },
     "/api/cart/coupon": {
@@ -1541,16 +1275,6 @@
         "summary": "ApiCartCouponApply",
         "description": "Attach a coupon to the cart with immediate validation (checkout re-validates\nauthoritatively \u2014 a code can expire between apply and place-order).",
         "operationId": "api.cart.coupon.apply",
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/ApplyCouponIn"
-              }
-            }
-          },
-          "required": true
-        },
         "responses": {
           "200": {
             "description": "Request fulfilled, document follows",
@@ -1562,47 +1286,19 @@
                 }
               }
             }
-          },
-          "400": {
-            "description": "Bad request syntax or unsupported method",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "properties": {
-                    "status_code": {
-                      "type": "integer"
-                    },
-                    "detail": {
-                      "type": "string"
-                    },
-                    "extra": {
-                      "additionalProperties": {},
-                      "type": [
-                        "null",
-                        "object",
-                        "array"
-                      ]
-                    }
-                  },
-                  "type": "object",
-                  "required": [
-                    "detail",
-                    "status_code"
-                  ],
-                  "description": "Validation Exception",
-                  "examples": [
-                    {
-                      "status_code": 400,
-                      "detail": "Bad Request",
-                      "extra": {}
-                    }
-                  ]
-                }
+          }
+        },
+        "deprecated": false,
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ApplyCouponIn"
               }
             }
           }
-        },
-        "deprecated": false
+        }
       },
       "delete": {
         "summary": "ApiCartCouponRemove",
@@ -1691,16 +1387,6 @@
         "summary": "ApiNewsletter",
         "description": "Idempotent newsletter signup \u2014 re-subscribing an existing email is a friendly 200.",
         "operationId": "api.newsletter",
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/NewsletterIn"
-              }
-            }
-          },
-          "required": true
-        },
         "responses": {
           "200": {
             "description": "Request fulfilled, document follows",
@@ -1712,47 +1398,19 @@
                 }
               }
             }
-          },
-          "400": {
-            "description": "Bad request syntax or unsupported method",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "properties": {
-                    "status_code": {
-                      "type": "integer"
-                    },
-                    "detail": {
-                      "type": "string"
-                    },
-                    "extra": {
-                      "additionalProperties": {},
-                      "type": [
-                        "null",
-                        "object",
-                        "array"
-                      ]
-                    }
-                  },
-                  "type": "object",
-                  "required": [
-                    "detail",
-                    "status_code"
-                  ],
-                  "description": "Validation Exception",
-                  "examples": [
-                    {
-                      "status_code": 400,
-                      "detail": "Bad Request",
-                      "extra": {}
-                    }
-                  ]
-                }
+          }
+        },
+        "deprecated": false,
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/NewsletterIn"
               }
             }
           }
-        },
-        "deprecated": false
+        }
       }
     },
     "/api/shipping-methods": {
@@ -1807,16 +1465,6 @@
         "summary": "ApiCheckout",
         "description": "Convert the current cart into a PENDING order, atomically (stock locked, cart cleared),\ncapturing the contact email + shipping address and the server-computed money breakdown.",
         "operationId": "api.checkout",
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/CheckoutIn"
-              }
-            }
-          },
-          "required": true
-        },
         "responses": {
           "201": {
             "description": "Document created, URL follows",
@@ -1828,47 +1476,19 @@
                 }
               }
             }
-          },
-          "400": {
-            "description": "Bad request syntax or unsupported method",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "properties": {
-                    "status_code": {
-                      "type": "integer"
-                    },
-                    "detail": {
-                      "type": "string"
-                    },
-                    "extra": {
-                      "additionalProperties": {},
-                      "type": [
-                        "null",
-                        "object",
-                        "array"
-                      ]
-                    }
-                  },
-                  "type": "object",
-                  "required": [
-                    "detail",
-                    "status_code"
-                  ],
-                  "description": "Validation Exception",
-                  "examples": [
-                    {
-                      "status_code": 400,
-                      "detail": "Bad Request",
-                      "extra": {}
-                    }
-                  ]
-                }
+          }
+        },
+        "deprecated": false,
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CheckoutIn"
               }
             }
           }
-        },
-        "deprecated": false
+        }
       }
     },
     "/api/metrics/orders-placed": {
@@ -2176,16 +1796,6 @@
         "summary": "ApiWebhooksPayment",
         "description": "Idempotently process a gateway webhook \u2014 a redelivery of the same event id is a no-op. The\nrequest must carry a valid gateway signature (authenticity) before any side effects run.",
         "operationId": "api.webhooks.payment",
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/WebhookIn"
-              }
-            }
-          },
-          "required": true
-        },
         "responses": {
           "201": {
             "description": "Document created, URL follows",
@@ -2197,47 +1807,19 @@
                 }
               }
             }
-          },
-          "400": {
-            "description": "Bad request syntax or unsupported method",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "properties": {
-                    "status_code": {
-                      "type": "integer"
-                    },
-                    "detail": {
-                      "type": "string"
-                    },
-                    "extra": {
-                      "additionalProperties": {},
-                      "type": [
-                        "null",
-                        "object",
-                        "array"
-                      ]
-                    }
-                  },
-                  "type": "object",
-                  "required": [
-                    "detail",
-                    "status_code"
-                  ],
-                  "description": "Validation Exception",
-                  "examples": [
-                    {
-                      "status_code": 400,
-                      "detail": "Bad Request",
-                      "extra": {}
-                    }
-                  ]
-                }
+          }
+        },
+        "deprecated": false,
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/WebhookIn"
               }
             }
           }
-        },
-        "deprecated": false
+        }
       }
     },
     "/api/user/password": {
@@ -2245,16 +1827,6 @@
         "summary": "ApiUserPassword",
         "description": "Set a new password \u2014 only with the current one in hand (credential-change confirmation).",
         "operationId": "api.user.password",
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/ChangePasswordIn"
-              }
-            }
-          },
-          "required": true
-        },
         "responses": {
           "200": {
             "description": "Request fulfilled, document follows",
@@ -2266,44 +1838,6 @@
                 }
               }
             }
-          },
-          "400": {
-            "description": "Bad request syntax or unsupported method",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "properties": {
-                    "status_code": {
-                      "type": "integer"
-                    },
-                    "detail": {
-                      "type": "string"
-                    },
-                    "extra": {
-                      "additionalProperties": {},
-                      "type": [
-                        "null",
-                        "object",
-                        "array"
-                      ]
-                    }
-                  },
-                  "type": "object",
-                  "required": [
-                    "detail",
-                    "status_code"
-                  ],
-                  "description": "Validation Exception",
-                  "examples": [
-                    {
-                      "status_code": 400,
-                      "detail": "Bad Request",
-                      "extra": {}
-                    }
-                  ]
-                }
-              }
-            }
           }
         },
         "deprecated": false,
@@ -2311,7 +1845,17 @@
           {
             "bearerAuth": []
           }
-        ]
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ChangePasswordIn"
+              }
+            }
+          }
+        }
       }
     },
     "/api/email/verification-notification": {
@@ -2425,16 +1969,6 @@
       "post": {
         "summary": "ApiAccountAddressesStore",
         "operationId": "api.account.addresses.store",
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/SavedAddressIn"
-              }
-            }
-          },
-          "required": true
-        },
         "responses": {
           "201": {
             "description": "Document created, URL follows",
@@ -2446,44 +1980,6 @@
                 }
               }
             }
-          },
-          "400": {
-            "description": "Bad request syntax or unsupported method",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "properties": {
-                    "status_code": {
-                      "type": "integer"
-                    },
-                    "detail": {
-                      "type": "string"
-                    },
-                    "extra": {
-                      "additionalProperties": {},
-                      "type": [
-                        "null",
-                        "object",
-                        "array"
-                      ]
-                    }
-                  },
-                  "type": "object",
-                  "required": [
-                    "detail",
-                    "status_code"
-                  ],
-                  "description": "Validation Exception",
-                  "examples": [
-                    {
-                      "status_code": 400,
-                      "detail": "Bad Request",
-                      "extra": {}
-                    }
-                  ]
-                }
-              }
-            }
           }
         },
         "deprecated": false,
@@ -2491,7 +1987,17 @@
           {
             "bearerAuth": []
           }
-        ]
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SavedAddressIn"
+              }
+            }
+          }
+        }
       }
     },
     "/api/account/addresses/{id}": {
@@ -2584,16 +2090,6 @@
             "deprecated": false
           }
         ],
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/SavedAddressIn"
-              }
-            }
-          },
-          "required": true
-        },
         "responses": {
           "200": {
             "description": "Request fulfilled, document follows",
@@ -2650,7 +2146,17 @@
           {
             "bearerAuth": []
           }
-        ]
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SavedAddressIn"
+              }
+            }
+          }
+        }
       }
     },
     "/api/notifications": {
@@ -3476,16 +2982,6 @@
         "summary": "ApiAdminProductsStore",
         "description": "Create a product (admins only) with per-locale content (en required).",
         "operationId": "api.admin.products.store",
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/ProductIn"
-              }
-            }
-          },
-          "required": true
-        },
         "responses": {
           "201": {
             "description": "Document created, URL follows",
@@ -3497,44 +2993,6 @@
                 }
               }
             }
-          },
-          "400": {
-            "description": "Bad request syntax or unsupported method",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "properties": {
-                    "status_code": {
-                      "type": "integer"
-                    },
-                    "detail": {
-                      "type": "string"
-                    },
-                    "extra": {
-                      "additionalProperties": {},
-                      "type": [
-                        "null",
-                        "object",
-                        "array"
-                      ]
-                    }
-                  },
-                  "type": "object",
-                  "required": [
-                    "detail",
-                    "status_code"
-                  ],
-                  "description": "Validation Exception",
-                  "examples": [
-                    {
-                      "status_code": 400,
-                      "detail": "Bad Request",
-                      "extra": {}
-                    }
-                  ]
-                }
-              }
-            }
           }
         },
         "deprecated": false,
@@ -3542,7 +3000,17 @@
           {
             "bearerAuth": []
           }
-        ]
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ProductIn"
+              }
+            }
+          }
+        }
       }
     },
     "/api/admin/products/{product}": {
@@ -3634,16 +3102,6 @@
             "deprecated": false
           }
         ],
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/UpdateProductIn"
-              }
-            }
-          },
-          "required": true
-        },
         "responses": {
           "200": {
             "description": "Request fulfilled, document follows",
@@ -3700,7 +3158,17 @@
           {
             "bearerAuth": []
           }
-        ]
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateProductIn"
+              }
+            }
+          }
+        }
       },
       "delete": {
         "summary": "ApiAdminProductsDestroy",
@@ -3790,16 +3258,6 @@
             "deprecated": false
           }
         ],
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/UpdateProductIn"
-              }
-            }
-          },
-          "required": true
-        },
         "responses": {
           "200": {
             "description": "Request fulfilled, document follows",
@@ -3856,7 +3314,17 @@
           {
             "bearerAuth": []
           }
-        ]
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateProductIn"
+              }
+            }
+          }
+        }
       }
     },
     "/api/admin/categories": {
@@ -3951,16 +3419,6 @@
       "post": {
         "summary": "ApiAdminCategoriesStore",
         "operationId": "api.admin.categories.store",
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/CategoryIn"
-              }
-            }
-          },
-          "required": true
-        },
         "responses": {
           "201": {
             "description": "Document created, URL follows",
@@ -3972,44 +3430,6 @@
                 }
               }
             }
-          },
-          "400": {
-            "description": "Bad request syntax or unsupported method",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "properties": {
-                    "status_code": {
-                      "type": "integer"
-                    },
-                    "detail": {
-                      "type": "string"
-                    },
-                    "extra": {
-                      "additionalProperties": {},
-                      "type": [
-                        "null",
-                        "object",
-                        "array"
-                      ]
-                    }
-                  },
-                  "type": "object",
-                  "required": [
-                    "detail",
-                    "status_code"
-                  ],
-                  "description": "Validation Exception",
-                  "examples": [
-                    {
-                      "status_code": 400,
-                      "detail": "Bad Request",
-                      "extra": {}
-                    }
-                  ]
-                }
-              }
-            }
           }
         },
         "deprecated": false,
@@ -4017,7 +3437,17 @@
           {
             "bearerAuth": []
           }
-        ]
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CategoryIn"
+              }
+            }
+          }
+        }
       }
     },
     "/api/admin/categories/{category}": {
@@ -4035,16 +3465,6 @@
             "deprecated": false
           }
         ],
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/CategoryUpdateIn"
-              }
-            }
-          },
-          "required": true
-        },
         "responses": {
           "200": {
             "description": "Request fulfilled, document follows",
@@ -4101,7 +3521,17 @@
           {
             "bearerAuth": []
           }
-        ]
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CategoryUpdateIn"
+              }
+            }
+          }
+        }
       },
       "delete": {
         "summary": "ApiAdminCategoriesDestroy",
@@ -4189,16 +3619,6 @@
             "deprecated": false
           }
         ],
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/CategoryUpdateIn"
-              }
-            }
-          },
-          "required": true
-        },
         "responses": {
           "200": {
             "description": "Request fulfilled, document follows",
@@ -4255,7 +3675,17 @@
           {
             "bearerAuth": []
           }
-        ]
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CategoryUpdateIn"
+              }
+            }
+          }
+        }
       }
     },
     "/api/admin/vendors": {
@@ -4288,16 +3718,6 @@
       "post": {
         "summary": "ApiAdminVendorsStore",
         "operationId": "api.admin.vendors.store",
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/VendorIn"
-              }
-            }
-          },
-          "required": true
-        },
         "responses": {
           "201": {
             "description": "Document created, URL follows",
@@ -4309,44 +3729,6 @@
                 }
               }
             }
-          },
-          "400": {
-            "description": "Bad request syntax or unsupported method",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "properties": {
-                    "status_code": {
-                      "type": "integer"
-                    },
-                    "detail": {
-                      "type": "string"
-                    },
-                    "extra": {
-                      "additionalProperties": {},
-                      "type": [
-                        "null",
-                        "object",
-                        "array"
-                      ]
-                    }
-                  },
-                  "type": "object",
-                  "required": [
-                    "detail",
-                    "status_code"
-                  ],
-                  "description": "Validation Exception",
-                  "examples": [
-                    {
-                      "status_code": 400,
-                      "detail": "Bad Request",
-                      "extra": {}
-                    }
-                  ]
-                }
-              }
-            }
           }
         },
         "deprecated": false,
@@ -4354,7 +3736,17 @@
           {
             "bearerAuth": []
           }
-        ]
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/VendorIn"
+              }
+            }
+          }
+        }
       }
     },
     "/api/admin/vendors/{vendor}": {
@@ -4373,16 +3765,6 @@
             "deprecated": false
           }
         ],
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/VendorUpdateIn"
-              }
-            }
-          },
-          "required": true
-        },
         "responses": {
           "200": {
             "description": "Request fulfilled, document follows",
@@ -4439,7 +3821,17 @@
           {
             "bearerAuth": []
           }
-        ]
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/VendorUpdateIn"
+              }
+            }
+          }
+        }
       },
       "patch": {
         "summary": "ApiAdminVendorsUpdate",
@@ -4456,16 +3848,6 @@
             "deprecated": false
           }
         ],
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/VendorUpdateIn"
-              }
-            }
-          },
-          "required": true
-        },
         "responses": {
           "200": {
             "description": "Request fulfilled, document follows",
@@ -4522,7 +3904,17 @@
           {
             "bearerAuth": []
           }
-        ]
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/VendorUpdateIn"
+              }
+            }
+          }
+        }
       }
     },
     "/api/admin/products/{id}/variants": {
@@ -4615,16 +4007,6 @@
             "deprecated": false
           }
         ],
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/VariantIn"
-              }
-            }
-          },
-          "required": true
-        },
         "responses": {
           "201": {
             "description": "Document created, URL follows",
@@ -4681,7 +4063,17 @@
           {
             "bearerAuth": []
           }
-        ]
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/VariantIn"
+              }
+            }
+          }
+        }
       }
     },
     "/api/admin/products/{id}/variants/{variant_id}": {
@@ -4790,16 +4182,6 @@
             "deprecated": false
           }
         ],
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/VariantUpdateIn"
-              }
-            }
-          },
-          "required": true
-        },
         "responses": {
           "200": {
             "description": "Request fulfilled, document follows",
@@ -4856,7 +4238,17 @@
           {
             "bearerAuth": []
           }
-        ]
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/VariantUpdateIn"
+              }
+            }
+          }
+        }
       }
     },
     "/api/admin/products/{id}/variants/{variant_id}/stock": {
@@ -4884,16 +4276,6 @@
             "deprecated": false
           }
         ],
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/StockAdjustIn"
-              }
-            }
-          },
-          "required": true
-        },
         "responses": {
           "200": {
             "description": "Request fulfilled, document follows",
@@ -4950,7 +4332,17 @@
           {
             "bearerAuth": []
           }
-        ]
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/StockAdjustIn"
+              }
+            }
+          }
+        }
       }
     },
     "/api/admin/users": {
@@ -5277,16 +4669,6 @@
             "deprecated": false
           }
         ],
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/AssignRoleIn"
-              }
-            }
-          },
-          "required": true
-        },
         "responses": {
           "200": {
             "description": "Request fulfilled, document follows",
@@ -5343,7 +4725,17 @@
           {
             "bearerAuth": []
           }
-        ]
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AssignRoleIn"
+              }
+            }
+          }
+        }
       }
     },
     "/api/admin/users/{id}/roles/{role}": {
@@ -5650,16 +5042,6 @@
       "patch": {
         "summary": "ApiAdminSettingsUpdate",
         "operationId": "api.admin.settings.update",
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/SettingsIn"
-              }
-            }
-          },
-          "required": true
-        },
         "responses": {
           "200": {
             "description": "Request fulfilled, document follows",
@@ -5671,44 +5053,6 @@
                 }
               }
             }
-          },
-          "400": {
-            "description": "Bad request syntax or unsupported method",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "properties": {
-                    "status_code": {
-                      "type": "integer"
-                    },
-                    "detail": {
-                      "type": "string"
-                    },
-                    "extra": {
-                      "additionalProperties": {},
-                      "type": [
-                        "null",
-                        "object",
-                        "array"
-                      ]
-                    }
-                  },
-                  "type": "object",
-                  "required": [
-                    "detail",
-                    "status_code"
-                  ],
-                  "description": "Validation Exception",
-                  "examples": [
-                    {
-                      "status_code": 400,
-                      "detail": "Bad Request",
-                      "extra": {}
-                    }
-                  ]
-                }
-              }
-            }
           }
         },
         "deprecated": false,
@@ -5716,7 +5060,17 @@
           {
             "bearerAuth": []
           }
-        ]
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SettingsIn"
+              }
+            }
+          }
+        }
       }
     },
     "/api/admin/media": {
@@ -5880,16 +5234,6 @@
       "post": {
         "summary": "ApiAdminBannersStore",
         "operationId": "api.admin.banners.store",
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/BannerIn"
-              }
-            }
-          },
-          "required": true
-        },
         "responses": {
           "201": {
             "description": "Document created, URL follows",
@@ -5901,44 +5245,6 @@
                 }
               }
             }
-          },
-          "400": {
-            "description": "Bad request syntax or unsupported method",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "properties": {
-                    "status_code": {
-                      "type": "integer"
-                    },
-                    "detail": {
-                      "type": "string"
-                    },
-                    "extra": {
-                      "additionalProperties": {},
-                      "type": [
-                        "null",
-                        "object",
-                        "array"
-                      ]
-                    }
-                  },
-                  "type": "object",
-                  "required": [
-                    "detail",
-                    "status_code"
-                  ],
-                  "description": "Validation Exception",
-                  "examples": [
-                    {
-                      "status_code": 400,
-                      "detail": "Bad Request",
-                      "extra": {}
-                    }
-                  ]
-                }
-              }
-            }
           }
         },
         "deprecated": false,
@@ -5946,7 +5252,17 @@
           {
             "bearerAuth": []
           }
-        ]
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/BannerIn"
+              }
+            }
+          }
+        }
       }
     },
     "/api/admin/banners/{banner}": {
@@ -5964,16 +5280,6 @@
             "deprecated": false
           }
         ],
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/BannerUpdateIn"
-              }
-            }
-          },
-          "required": true
-        },
         "responses": {
           "200": {
             "description": "Request fulfilled, document follows",
@@ -6030,7 +5336,17 @@
           {
             "bearerAuth": []
           }
-        ]
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/BannerUpdateIn"
+              }
+            }
+          }
+        }
       },
       "delete": {
         "summary": "ApiAdminBannersDestroy",
@@ -6121,16 +5437,6 @@
             "deprecated": false
           }
         ],
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/BannerUpdateIn"
-              }
-            }
-          },
-          "required": true
-        },
         "responses": {
           "200": {
             "description": "Request fulfilled, document follows",
@@ -6187,7 +5493,17 @@
           {
             "bearerAuth": []
           }
-        ]
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/BannerUpdateIn"
+              }
+            }
+          }
+        }
       }
     },
     "/api/admin/deals": {
@@ -6220,16 +5536,6 @@
       "post": {
         "summary": "ApiAdminDealsStore",
         "operationId": "api.admin.deals.store",
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/DealIn"
-              }
-            }
-          },
-          "required": true
-        },
         "responses": {
           "201": {
             "description": "Document created, URL follows",
@@ -6241,44 +5547,6 @@
                 }
               }
             }
-          },
-          "400": {
-            "description": "Bad request syntax or unsupported method",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "properties": {
-                    "status_code": {
-                      "type": "integer"
-                    },
-                    "detail": {
-                      "type": "string"
-                    },
-                    "extra": {
-                      "additionalProperties": {},
-                      "type": [
-                        "null",
-                        "object",
-                        "array"
-                      ]
-                    }
-                  },
-                  "type": "object",
-                  "required": [
-                    "detail",
-                    "status_code"
-                  ],
-                  "description": "Validation Exception",
-                  "examples": [
-                    {
-                      "status_code": 400,
-                      "detail": "Bad Request",
-                      "extra": {}
-                    }
-                  ]
-                }
-              }
-            }
           }
         },
         "deprecated": false,
@@ -6286,7 +5554,17 @@
           {
             "bearerAuth": []
           }
-        ]
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/DealIn"
+              }
+            }
+          }
+        }
       }
     },
     "/api/admin/deals/{deal}": {
@@ -6304,16 +5582,6 @@
             "deprecated": false
           }
         ],
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/DealUpdateIn"
-              }
-            }
-          },
-          "required": true
-        },
         "responses": {
           "200": {
             "description": "Request fulfilled, document follows",
@@ -6370,7 +5638,17 @@
           {
             "bearerAuth": []
           }
-        ]
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/DealUpdateIn"
+              }
+            }
+          }
+        }
       },
       "delete": {
         "summary": "ApiAdminDealsDestroy",
@@ -6461,16 +5739,6 @@
             "deprecated": false
           }
         ],
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/DealUpdateIn"
-              }
-            }
-          },
-          "required": true
-        },
         "responses": {
           "200": {
             "description": "Request fulfilled, document follows",
@@ -6527,7 +5795,17 @@
           {
             "bearerAuth": []
           }
-        ]
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/DealUpdateIn"
+              }
+            }
+          }
+        }
       }
     },
     "/api/admin/coupons": {
@@ -6560,16 +5838,6 @@
       "post": {
         "summary": "ApiAdminCouponsStore",
         "operationId": "api.admin.coupons.store",
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/CouponIn"
-              }
-            }
-          },
-          "required": true
-        },
         "responses": {
           "201": {
             "description": "Document created, URL follows",
@@ -6581,44 +5849,6 @@
                 }
               }
             }
-          },
-          "400": {
-            "description": "Bad request syntax or unsupported method",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "properties": {
-                    "status_code": {
-                      "type": "integer"
-                    },
-                    "detail": {
-                      "type": "string"
-                    },
-                    "extra": {
-                      "additionalProperties": {},
-                      "type": [
-                        "null",
-                        "object",
-                        "array"
-                      ]
-                    }
-                  },
-                  "type": "object",
-                  "required": [
-                    "detail",
-                    "status_code"
-                  ],
-                  "description": "Validation Exception",
-                  "examples": [
-                    {
-                      "status_code": 400,
-                      "detail": "Bad Request",
-                      "extra": {}
-                    }
-                  ]
-                }
-              }
-            }
           }
         },
         "deprecated": false,
@@ -6626,7 +5856,17 @@
           {
             "bearerAuth": []
           }
-        ]
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CouponIn"
+              }
+            }
+          }
+        }
       }
     },
     "/api/admin/coupons/{coupon}": {
@@ -6645,16 +5885,6 @@
             "deprecated": false
           }
         ],
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/CouponUpdateIn"
-              }
-            }
-          },
-          "required": true
-        },
         "responses": {
           "200": {
             "description": "Request fulfilled, document follows",
@@ -6711,7 +5941,17 @@
           {
             "bearerAuth": []
           }
-        ]
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CouponUpdateIn"
+              }
+            }
+          }
+        }
       },
       "patch": {
         "summary": "ApiAdminCouponsUpdate",
@@ -6728,16 +5968,6 @@
             "deprecated": false
           }
         ],
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/CouponUpdateIn"
-              }
-            }
-          },
-          "required": true
-        },
         "responses": {
           "200": {
             "description": "Request fulfilled, document follows",
@@ -6794,7 +6024,17 @@
           {
             "bearerAuth": []
           }
-        ]
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CouponUpdateIn"
+              }
+            }
+          }
+        }
       }
     },
     "/api/admin/orders": {
@@ -6917,16 +6157,6 @@
             "deprecated": false
           }
         ],
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/OrderStatusIn"
-              }
-            }
-          },
-          "required": true
-        },
         "responses": {
           "200": {
             "description": "Request fulfilled, document follows",
@@ -6983,7 +6213,17 @@
           {
             "bearerAuth": []
           }
-        ]
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/OrderStatusIn"
+              }
+            }
+          }
+        }
       }
     },
     "/api/admin/orders/{id}/refund": {
@@ -7225,89 +6465,6 @@
           "subject_type"
         ],
         "title": "ActivityOut"
-      },
-      "AddItemIn": {
-        "properties": {
-          "product_variant_id": {
-            "type": "integer"
-          },
-          "quantity": {
-            "type": "integer",
-            "default": 1
-          }
-        },
-        "type": "object",
-        "required": [
-          "product_variant_id"
-        ],
-        "title": "AddItemIn"
-      },
-      "AddressIn": {
-        "properties": {
-          "name": {
-            "oneOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ]
-          },
-          "line1": {
-            "oneOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ]
-          },
-          "line2": {
-            "oneOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ]
-          },
-          "city": {
-            "oneOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ]
-          },
-          "postal_code": {
-            "oneOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ]
-          },
-          "country": {
-            "oneOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ]
-          }
-        },
-        "type": "object",
-        "required": [],
-        "title": "AddressIn"
       },
       "AddressOut": {
         "properties": {
@@ -8256,57 +7413,6 @@
         ],
         "title": "AnnouncementOut"
       },
-      "ApplyCouponIn": {
-        "properties": {
-          "code": {
-            "type": "string"
-          }
-        },
-        "type": "object",
-        "required": [
-          "code"
-        ],
-        "title": "ApplyCouponIn"
-      },
-      "AssignRoleIn": {
-        "properties": {
-          "role": {
-            "type": "string"
-          }
-        },
-        "type": "object",
-        "required": [
-          "role"
-        ],
-        "title": "AssignRoleIn"
-      },
-      "BannerIn": {
-        "properties": {
-          "translations": {
-            "additionalProperties": {
-              "$ref": "#/components/schemas/BannerTextIn"
-            },
-            "type": "object"
-          },
-          "cta_to": {
-            "type": "string",
-            "default": "/catalog"
-          },
-          "sort": {
-            "type": "integer",
-            "default": 0
-          },
-          "active": {
-            "type": "boolean",
-            "default": true
-          }
-        },
-        "type": "object",
-        "required": [
-          "translations"
-        ],
-        "title": "BannerIn"
-      },
       "BannerOut": {
         "properties": {
           "id": {
@@ -8383,96 +7489,49 @@
         "title": "BannerOut"
       },
       "BannerTextIn": {
+        "title": "BannerTextIn",
+        "type": "object",
         "properties": {
           "title": {
             "type": "string"
           },
           "subtitle": {
-            "oneOf": [
+            "anyOf": [
               {
                 "type": "string"
               },
               {
                 "type": "null"
               }
-            ]
+            ],
+            "default": null
           },
           "chip": {
-            "oneOf": [
+            "anyOf": [
               {
                 "type": "string"
               },
               {
                 "type": "null"
               }
-            ]
+            ],
+            "default": null
           },
           "cta_label": {
-            "oneOf": [
+            "anyOf": [
               {
                 "type": "string"
               },
               {
                 "type": "null"
               }
-            ]
+            ],
+            "default": null
           }
         },
-        "type": "object",
         "required": [
           "title"
-        ],
-        "title": "BannerTextIn"
-      },
-      "BannerUpdateIn": {
-        "properties": {
-          "translations": {
-            "oneOf": [
-              {
-                "additionalProperties": {
-                  "$ref": "#/components/schemas/BannerTextIn"
-                },
-                "type": "object"
-              },
-              {
-                "type": "null"
-              }
-            ]
-          },
-          "cta_to": {
-            "oneOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ]
-          },
-          "sort": {
-            "oneOf": [
-              {
-                "type": "integer"
-              },
-              {
-                "type": "null"
-              }
-            ]
-          },
-          "active": {
-            "oneOf": [
-              {
-                "type": "boolean"
-              },
-              {
-                "type": "null"
-              }
-            ]
-          }
-        },
-        "type": "object",
-        "required": [],
-        "title": "BannerUpdateIn"
+        ]
       },
       "CartLineOut": {
         "properties": {
@@ -8576,35 +7635,6 @@
         ],
         "title": "CartOut"
       },
-      "CategoryIn": {
-        "properties": {
-          "translations": {
-            "additionalProperties": {
-              "$ref": "#/components/schemas/TranslationFieldsIn"
-            },
-            "type": "object"
-          },
-          "parent_id": {
-            "oneOf": [
-              {
-                "type": "integer"
-              },
-              {
-                "type": "null"
-              }
-            ]
-          },
-          "published": {
-            "type": "boolean",
-            "default": true
-          }
-        },
-        "type": "object",
-        "required": [
-          "translations"
-        ],
-        "title": "CategoryIn"
-      },
       "CategoryOut": {
         "properties": {
           "id": {
@@ -8635,248 +7665,25 @@
         ],
         "title": "CategoryOut"
       },
-      "CategoryUpdateIn": {
-        "properties": {
-          "translations": {
-            "oneOf": [
-              {
-                "additionalProperties": {
-                  "$ref": "#/components/schemas/TranslationFieldsIn"
-                },
-                "type": "object"
-              },
-              {
-                "type": "null"
-              }
-            ]
-          },
-          "parent_id": {
-            "oneOf": [
-              {
-                "type": "integer"
-              },
-              {
-                "type": "null"
-              }
-            ]
-          },
-          "published": {
-            "oneOf": [
-              {
-                "type": "boolean"
-              },
-              {
-                "type": "null"
-              }
-            ]
-          }
-        },
-        "type": "object",
-        "required": [],
-        "title": "CategoryUpdateIn"
-      },
-      "ChangePasswordIn": {
-        "properties": {
-          "current_password": {
-            "type": "string"
-          },
-          "password": {
-            "type": "string"
-          }
-        },
-        "type": "object",
-        "required": [
-          "current_password",
-          "password"
-        ],
-        "title": "ChangePasswordIn"
-      },
-      "CheckoutIn": {
-        "properties": {
-          "email": {
-            "oneOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ]
-          },
-          "address": {
-            "oneOf": [
-              {
-                "$ref": "#/components/schemas/AddressIn"
-              },
-              {
-                "type": "null"
-              }
-            ]
-          },
-          "address_id": {
-            "oneOf": [
-              {
-                "type": "integer"
-              },
-              {
-                "type": "null"
-              }
-            ]
-          },
-          "payment_method": {
-            "$ref": "#/components/schemas/PaymentMethod"
-          },
-          "shipping_method": {
-            "type": "string",
-            "default": "standard"
-          }
-        },
-        "type": "object",
-        "required": [],
-        "title": "CheckoutIn"
-      },
       "CountryCode": {
-        "type": "string",
-        "enum": [
-          "US",
-          "CA",
-          "GB",
-          "DE",
-          "FR",
-          "EG"
-        ],
         "title": "CountryCode",
-        "description": "Countries the shop ships to (ISO 3166-1 alpha-2) \u2014 a closed, validated set."
-      },
-      "CouponIn": {
-        "properties": {
-          "code": {
-            "type": "string"
-          },
-          "type": {
-            "$ref": "#/components/schemas/CouponType"
-          },
-          "value": {
-            "type": "integer"
-          },
-          "min_subtotal_cents": {
-            "type": "integer",
-            "default": 0
-          },
-          "usage_limit": {
-            "oneOf": [
-              {
-                "type": "integer"
-              },
-              {
-                "type": "null"
-              }
-            ]
-          },
-          "per_customer_limit": {
-            "oneOf": [
-              {
-                "type": "integer"
-              },
-              {
-                "type": "null"
-              }
-            ]
-          },
-          "announce": {
-            "type": "boolean",
-            "default": false
-          }
-        },
-        "type": "object",
-        "required": [
-          "code",
-          "type",
-          "value"
-        ],
-        "title": "CouponIn"
+        "description": "Countries the shop ships to (ISO 3166-1 alpha-2) \u2014 a closed, validated set.",
+        "enum": [
+          "CA",
+          "DE",
+          "EG",
+          "FR",
+          "GB",
+          "US"
+        ]
       },
       "CouponType": {
-        "type": "string",
-        "enum": [
-          "percent",
-          "fixed"
-        ],
         "title": "CouponType",
-        "description": "How a coupon discounts the order."
-      },
-      "CouponUpdateIn": {
-        "properties": {
-          "active": {
-            "oneOf": [
-              {
-                "type": "boolean"
-              },
-              {
-                "type": "null"
-              }
-            ]
-          },
-          "usage_limit": {
-            "oneOf": [
-              {
-                "type": "integer"
-              },
-              {
-                "type": "null"
-              }
-            ]
-          },
-          "per_customer_limit": {
-            "oneOf": [
-              {
-                "type": "integer"
-              },
-              {
-                "type": "null"
-              }
-            ]
-          },
-          "min_subtotal_cents": {
-            "oneOf": [
-              {
-                "type": "integer"
-              },
-              {
-                "type": "null"
-              }
-            ]
-          },
-          "announce": {
-            "oneOf": [
-              {
-                "type": "boolean"
-              },
-              {
-                "type": "null"
-              }
-            ]
-          }
-        },
-        "type": "object",
-        "required": [],
-        "title": "CouponUpdateIn"
-      },
-      "CredentialsIn": {
-        "properties": {
-          "email": {
-            "type": "string"
-          },
-          "password": {
-            "type": "string"
-          }
-        },
-        "type": "object",
-        "required": [
-          "email",
-          "password"
-        ],
-        "title": "CredentialsIn"
+        "description": "How a coupon discounts the order.",
+        "enum": [
+          "fixed",
+          "percent"
+        ]
       },
       "Currency": {
         "type": "string",
@@ -8885,34 +7692,6 @@
         ],
         "title": "Currency",
         "description": "Settlement currencies the shop can charge in (the catalog prices in USD today)."
-      },
-      "DealIn": {
-        "properties": {
-          "product_id": {
-            "type": "integer"
-          },
-          "percent_off": {
-            "type": "integer"
-          },
-          "starts_at": {
-            "type": "string"
-          },
-          "ends_at": {
-            "type": "string"
-          },
-          "active": {
-            "type": "boolean",
-            "default": true
-          }
-        },
-        "type": "object",
-        "required": [
-          "ends_at",
-          "percent_off",
-          "product_id",
-          "starts_at"
-        ],
-        "title": "DealIn"
       },
       "DealOut": {
         "properties": {
@@ -8949,65 +7728,6 @@
           "sold"
         ],
         "title": "DealOut"
-      },
-      "DealUpdateIn": {
-        "properties": {
-          "percent_off": {
-            "oneOf": [
-              {
-                "type": "integer"
-              },
-              {
-                "type": "null"
-              }
-            ]
-          },
-          "starts_at": {
-            "oneOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ]
-          },
-          "ends_at": {
-            "oneOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ]
-          },
-          "active": {
-            "oneOf": [
-              {
-                "type": "boolean"
-              },
-              {
-                "type": "null"
-              }
-            ]
-          }
-        },
-        "type": "object",
-        "required": [],
-        "title": "DealUpdateIn"
-      },
-      "ForgotPasswordIn": {
-        "properties": {
-          "email": {
-            "type": "string"
-          }
-        },
-        "type": "object",
-        "required": [
-          "email"
-        ],
-        "title": "ForgotPasswordIn"
       },
       "ForgotPasswordOut": {
         "properties": {
@@ -9150,18 +7870,6 @@
           "orders_placed"
         ],
         "title": "MetricsOut"
-      },
-      "NewsletterIn": {
-        "properties": {
-          "email": {
-            "type": "string"
-          }
-        },
-        "type": "object",
-        "required": [
-          "email"
-        ],
-        "title": "NewsletterIn"
       },
       "NewsletterSubscriberOut": {
         "properties": {
@@ -9426,28 +8134,6 @@
         "title": "OrderStatus",
         "description": "An order's lifecycle state."
       },
-      "OrderStatusIn": {
-        "properties": {
-          "status": {
-            "type": "string"
-          },
-          "tracking_number": {
-            "oneOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ]
-          }
-        },
-        "type": "object",
-        "required": [
-          "status"
-        ],
-        "title": "OrderStatusIn"
-      },
       "OrderTimelineOut": {
         "properties": {
           "status": {
@@ -9472,14 +8158,12 @@
         "title": "OrderTimelineOut"
       },
       "PaymentMethod": {
-        "type": "string",
-        "enum": [
-          "gateway",
-          "cod"
-        ],
         "title": "PaymentMethod",
         "description": "How the order is settled: the payment gateway after placing, or cash on delivery.",
-        "default": "gateway"
+        "enum": [
+          "cod",
+          "gateway"
+        ]
       },
       "PaymentOut": {
         "properties": {
@@ -9600,29 +8284,6 @@
           "per_page"
         ],
         "title": "ProductFeed"
-      },
-      "ProductIn": {
-        "properties": {
-          "category_id": {
-            "type": "integer"
-          },
-          "price_cents": {
-            "type": "integer"
-          },
-          "translations": {
-            "additionalProperties": {
-              "$ref": "#/components/schemas/TranslationFieldsIn"
-            },
-            "type": "object"
-          }
-        },
-        "type": "object",
-        "required": [
-          "category_id",
-          "price_cents",
-          "translations"
-        ],
-        "title": "ProductIn"
       },
       "ProductOut": {
         "properties": {
@@ -9758,43 +8419,6 @@
         ],
         "title": "ProductPage"
       },
-      "ProfileIn": {
-        "properties": {
-          "name": {
-            "oneOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ]
-          },
-          "email": {
-            "oneOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ]
-          },
-          "phone": {
-            "oneOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ]
-          }
-        },
-        "type": "object",
-        "required": [],
-        "title": "ProfileIn"
-      },
       "QueuedCookie": {
         "properties": {
           "name": {
@@ -9890,46 +8514,6 @@
         "title": "RefundStatus",
         "description": "A refund's state, mirrored from the gateway (K15) \u2014 the reverse of PaymentStatus."
       },
-      "RegisterIn": {
-        "properties": {
-          "name": {
-            "type": "string"
-          },
-          "email": {
-            "type": "string"
-          },
-          "password": {
-            "type": "string"
-          }
-        },
-        "type": "object",
-        "required": [
-          "email",
-          "name",
-          "password"
-        ],
-        "title": "RegisterIn"
-      },
-      "ResetPasswordIn": {
-        "properties": {
-          "email": {
-            "type": "string"
-          },
-          "token": {
-            "type": "string"
-          },
-          "password": {
-            "type": "string"
-          }
-        },
-        "type": "object",
-        "required": [
-          "email",
-          "password",
-          "token"
-        ],
-        "title": "ResetPasswordIn"
-      },
       "Response": {
         "properties": {
           "content": {},
@@ -9959,32 +8543,6 @@
         "type": "object",
         "required": [],
         "title": "Response"
-      },
-      "ReviewIn": {
-        "properties": {
-          "rating": {
-            "type": "integer"
-          },
-          "body": {
-            "type": "string"
-          },
-          "title": {
-            "oneOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ]
-          }
-        },
-        "type": "object",
-        "required": [
-          "body",
-          "rating"
-        ],
-        "title": "ReviewIn"
       },
       "ReviewListOut": {
         "properties": {
@@ -10117,68 +8675,6 @@
         ],
         "title": "RoleOut"
       },
-      "SavedAddressIn": {
-        "properties": {
-          "name": {
-            "type": "string"
-          },
-          "line1": {
-            "type": "string"
-          },
-          "city": {
-            "type": "string"
-          },
-          "postal_code": {
-            "type": "string"
-          },
-          "country": {
-            "$ref": "#/components/schemas/CountryCode"
-          },
-          "label": {
-            "oneOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ]
-          },
-          "line2": {
-            "oneOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ]
-          },
-          "phone": {
-            "oneOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ]
-          },
-          "is_default": {
-            "type": "boolean",
-            "default": false
-          }
-        },
-        "type": "object",
-        "required": [
-          "city",
-          "country",
-          "line1",
-          "name",
-          "postal_code"
-        ],
-        "title": "SavedAddressIn"
-      },
       "SavedAddressOut": {
         "properties": {
           "id": {
@@ -10248,21 +8744,6 @@
         ],
         "title": "SavedAddressOut"
       },
-      "SettingsIn": {
-        "properties": {
-          "values": {
-            "additionalProperties": {
-              "type": "string"
-            },
-            "type": "object"
-          }
-        },
-        "type": "object",
-        "required": [
-          "values"
-        ],
-        "title": "SettingsIn"
-      },
       "SettingsOut": {
         "properties": {
           "values": {
@@ -10297,43 +8778,6 @@
           "rate_cents"
         ],
         "title": "ShippingMethodOut"
-      },
-      "StockAdjustIn": {
-        "properties": {
-          "set": {
-            "oneOf": [
-              {
-                "type": "integer"
-              },
-              {
-                "type": "null"
-              }
-            ]
-          },
-          "delta": {
-            "oneOf": [
-              {
-                "type": "integer"
-              },
-              {
-                "type": "null"
-              }
-            ]
-          },
-          "reason": {
-            "oneOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ]
-          }
-        },
-        "type": "object",
-        "required": [],
-        "title": "StockAdjustIn"
       },
       "TokenOut": {
         "properties": {
@@ -10372,110 +8816,6 @@
           "name"
         ],
         "title": "Translate"
-      },
-      "TranslationFieldsIn": {
-        "properties": {
-          "name": {
-            "type": "string"
-          },
-          "description": {
-            "oneOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ]
-          }
-        },
-        "type": "object",
-        "required": [
-          "name"
-        ],
-        "title": "TranslationFieldsIn"
-      },
-      "UpdateItemIn": {
-        "properties": {
-          "quantity": {
-            "type": "integer"
-          }
-        },
-        "type": "object",
-        "required": [
-          "quantity"
-        ],
-        "title": "UpdateItemIn"
-      },
-      "UpdateProductIn": {
-        "properties": {
-          "category_id": {
-            "oneOf": [
-              {
-                "type": "integer"
-              },
-              {
-                "type": "null"
-              }
-            ]
-          },
-          "price_cents": {
-            "oneOf": [
-              {
-                "type": "integer"
-              },
-              {
-                "type": "null"
-              }
-            ]
-          },
-          "status": {
-            "oneOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ]
-          },
-          "published": {
-            "oneOf": [
-              {
-                "type": "boolean"
-              },
-              {
-                "type": "null"
-              }
-            ]
-          },
-          "featured": {
-            "oneOf": [
-              {
-                "type": "boolean"
-              },
-              {
-                "type": "null"
-              }
-            ]
-          },
-          "translations": {
-            "oneOf": [
-              {
-                "additionalProperties": {
-                  "$ref": "#/components/schemas/TranslationFieldsIn"
-                },
-                "type": "object"
-              },
-              {
-                "type": "null"
-              }
-            ]
-          }
-        },
-        "type": "object",
-        "required": [],
-        "title": "UpdateProductIn"
       },
       "UserOut": {
         "properties": {
@@ -10546,30 +8886,6 @@
         ],
         "title": "UserRolesOut"
       },
-      "VariantIn": {
-        "properties": {
-          "sku": {
-            "type": "string"
-          },
-          "name": {
-            "type": "string"
-          },
-          "price_adjustment_cents": {
-            "type": "integer",
-            "default": 0
-          },
-          "stock": {
-            "type": "integer",
-            "default": 0
-          }
-        },
-        "type": "object",
-        "required": [
-          "name",
-          "sku"
-        ],
-        "title": "VariantIn"
-      },
       "VariantOut": {
         "properties": {
           "id": {
@@ -10598,122 +8914,6 @@
         ],
         "title": "VariantOut"
       },
-      "VariantUpdateIn": {
-        "properties": {
-          "sku": {
-            "oneOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ]
-          },
-          "name": {
-            "oneOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ]
-          },
-          "price_adjustment_cents": {
-            "oneOf": [
-              {
-                "type": "integer"
-              },
-              {
-                "type": "null"
-              }
-            ]
-          }
-        },
-        "type": "object",
-        "required": [],
-        "title": "VariantUpdateIn"
-      },
-      "VendorIn": {
-        "properties": {
-          "name": {
-            "type": "string"
-          },
-          "published": {
-            "type": "boolean",
-            "default": true
-          }
-        },
-        "type": "object",
-        "required": [
-          "name"
-        ],
-        "title": "VendorIn"
-      },
-      "VendorUpdateIn": {
-        "properties": {
-          "name": {
-            "oneOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ]
-          },
-          "published": {
-            "oneOf": [
-              {
-                "type": "boolean"
-              },
-              {
-                "type": "null"
-              }
-            ]
-          }
-        },
-        "type": "object",
-        "required": [],
-        "title": "VendorUpdateIn"
-      },
-      "VerifyEmailIn": {
-        "properties": {
-          "id": {
-            "type": "integer"
-          },
-          "token": {
-            "type": "string"
-          }
-        },
-        "type": "object",
-        "required": [
-          "id",
-          "token"
-        ],
-        "title": "VerifyEmailIn"
-      },
-      "WebhookIn": {
-        "properties": {
-          "id": {
-            "type": "string"
-          },
-          "type": {
-            "type": "string"
-          },
-          "data": {
-            "additionalProperties": {},
-            "type": "object"
-          }
-        },
-        "type": "object",
-        "required": [
-          "id",
-          "type"
-        ],
-        "title": "WebhookIn"
-      },
       "WebhookOut": {
         "properties": {
           "status": {
@@ -10737,6 +8937,1102 @@
           "saved"
         ],
         "title": "WishlistToggleOut"
+      },
+      "CredentialsIn": {
+        "title": "CredentialsIn",
+        "type": "object",
+        "properties": {
+          "email": {
+            "type": "string"
+          },
+          "password": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "email",
+          "password"
+        ]
+      },
+      "RegisterIn": {
+        "title": "RegisterIn",
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "email": {
+            "type": "string"
+          },
+          "password": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "name",
+          "email",
+          "password"
+        ]
+      },
+      "ForgotPasswordIn": {
+        "title": "ForgotPasswordIn",
+        "type": "object",
+        "properties": {
+          "email": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "email"
+        ]
+      },
+      "ResetPasswordIn": {
+        "title": "ResetPasswordIn",
+        "type": "object",
+        "properties": {
+          "email": {
+            "type": "string"
+          },
+          "token": {
+            "type": "string"
+          },
+          "password": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "email",
+          "token",
+          "password"
+        ]
+      },
+      "VerifyEmailIn": {
+        "title": "VerifyEmailIn",
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer"
+          },
+          "token": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "token"
+        ]
+      },
+      "AddItemIn": {
+        "title": "AddItemIn",
+        "type": "object",
+        "properties": {
+          "product_variant_id": {
+            "type": "integer"
+          },
+          "quantity": {
+            "type": "integer",
+            "default": 1
+          }
+        },
+        "required": [
+          "product_variant_id"
+        ]
+      },
+      "UpdateItemIn": {
+        "title": "UpdateItemIn",
+        "type": "object",
+        "properties": {
+          "quantity": {
+            "type": "integer"
+          }
+        },
+        "required": [
+          "quantity"
+        ]
+      },
+      "ApplyCouponIn": {
+        "title": "ApplyCouponIn",
+        "type": "object",
+        "properties": {
+          "code": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "code"
+        ]
+      },
+      "NewsletterIn": {
+        "title": "NewsletterIn",
+        "type": "object",
+        "properties": {
+          "email": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "email"
+        ]
+      },
+      "CheckoutIn": {
+        "title": "CheckoutIn",
+        "description": "Checkout submission: contact email (required for guests; defaults to the account email for\nsigned-in customers) + shipping address \u2014 inline, or a saved address-book id (owned), plus\nthe payment method (gateway = pay after placing; cod = collect on delivery) and the shipping\nmethod CODE (the rate is resolved server-side from it \u2014 never sent by the client, DR-0064).",
+        "type": "object",
+        "properties": {
+          "email": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null
+          },
+          "address": {
+            "anyOf": [
+              {
+                "type": "null"
+              },
+              {
+                "$ref": "#/components/schemas/AddressIn"
+              }
+            ],
+            "default": null
+          },
+          "address_id": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null
+          },
+          "payment_method": {
+            "$ref": "#/components/schemas/PaymentMethod",
+            "default": "gateway"
+          },
+          "shipping_method": {
+            "type": "string",
+            "default": "standard"
+          }
+        },
+        "required": []
+      },
+      "AddressIn": {
+        "title": "AddressIn",
+        "description": "Shipping address as submitted \u2014 every field optional at the parse layer so the Validator\ncan return field-level 422s (not a shapeless 400).",
+        "type": "object",
+        "properties": {
+          "name": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null
+          },
+          "line1": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null
+          },
+          "line2": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null
+          },
+          "city": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null
+          },
+          "postal_code": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null
+          },
+          "country": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null
+          }
+        },
+        "required": []
+      },
+      "WebhookIn": {
+        "title": "WebhookIn",
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "type": {
+            "type": "string"
+          },
+          "data": {
+            "type": "object",
+            "default": {}
+          }
+        },
+        "required": [
+          "id",
+          "type"
+        ]
+      },
+      "ProfileIn": {
+        "title": "ProfileIn",
+        "type": "object",
+        "properties": {
+          "name": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null
+          },
+          "email": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null
+          },
+          "phone": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null
+          }
+        },
+        "required": []
+      },
+      "ChangePasswordIn": {
+        "title": "ChangePasswordIn",
+        "type": "object",
+        "properties": {
+          "current_password": {
+            "type": "string"
+          },
+          "password": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "current_password",
+          "password"
+        ]
+      },
+      "ReviewIn": {
+        "title": "ReviewIn",
+        "type": "object",
+        "properties": {
+          "rating": {
+            "type": "integer"
+          },
+          "body": {
+            "type": "string"
+          },
+          "title": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null
+          }
+        },
+        "required": [
+          "rating",
+          "body"
+        ]
+      },
+      "SavedAddressIn": {
+        "title": "SavedAddressIn",
+        "description": "Create/update a saved address-book entry (validated at the controller).",
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "line1": {
+            "type": "string"
+          },
+          "city": {
+            "type": "string"
+          },
+          "postal_code": {
+            "type": "string"
+          },
+          "country": {
+            "$ref": "#/components/schemas/CountryCode"
+          },
+          "label": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null
+          },
+          "line2": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null
+          },
+          "phone": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null
+          },
+          "is_default": {
+            "type": "boolean",
+            "default": false
+          }
+        },
+        "required": [
+          "name",
+          "line1",
+          "city",
+          "postal_code",
+          "country"
+        ]
+      },
+      "ProductIn": {
+        "title": "ProductIn",
+        "type": "object",
+        "properties": {
+          "category_id": {
+            "type": "integer"
+          },
+          "price_cents": {
+            "type": "integer"
+          },
+          "translations": {
+            "type": "object",
+            "additionalProperties": {
+              "$ref": "#/components/schemas/TranslationFieldsIn"
+            }
+          }
+        },
+        "required": [
+          "category_id",
+          "price_cents",
+          "translations"
+        ]
+      },
+      "TranslationFieldsIn": {
+        "title": "TranslationFieldsIn",
+        "description": "One locale's content for a product/category.",
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "description": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null
+          }
+        },
+        "required": [
+          "name"
+        ]
+      },
+      "UpdateProductIn": {
+        "title": "UpdateProductIn",
+        "type": "object",
+        "properties": {
+          "category_id": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null
+          },
+          "price_cents": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null
+          },
+          "status": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null
+          },
+          "published": {
+            "anyOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null
+          },
+          "featured": {
+            "anyOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null
+          },
+          "translations": {
+            "anyOf": [
+              {
+                "type": "object",
+                "additionalProperties": {
+                  "$ref": "#/components/schemas/TranslationFieldsIn"
+                }
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null
+          }
+        },
+        "required": []
+      },
+      "CategoryIn": {
+        "title": "CategoryIn",
+        "type": "object",
+        "properties": {
+          "translations": {
+            "type": "object",
+            "additionalProperties": {
+              "$ref": "#/components/schemas/TranslationFieldsIn"
+            }
+          },
+          "parent_id": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null
+          },
+          "published": {
+            "type": "boolean",
+            "default": true
+          }
+        },
+        "required": [
+          "translations"
+        ]
+      },
+      "CategoryUpdateIn": {
+        "title": "CategoryUpdateIn",
+        "type": "object",
+        "properties": {
+          "translations": {
+            "anyOf": [
+              {
+                "type": "object",
+                "additionalProperties": {
+                  "$ref": "#/components/schemas/TranslationFieldsIn"
+                }
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null
+          },
+          "parent_id": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null
+          },
+          "published": {
+            "anyOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null
+          }
+        },
+        "required": []
+      },
+      "VendorIn": {
+        "title": "VendorIn",
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "published": {
+            "type": "boolean",
+            "default": true
+          }
+        },
+        "required": [
+          "name"
+        ]
+      },
+      "VendorUpdateIn": {
+        "title": "VendorUpdateIn",
+        "type": "object",
+        "properties": {
+          "name": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null
+          },
+          "published": {
+            "anyOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null
+          }
+        },
+        "required": []
+      },
+      "VariantIn": {
+        "title": "VariantIn",
+        "type": "object",
+        "properties": {
+          "sku": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "price_adjustment_cents": {
+            "type": "integer",
+            "default": 0
+          },
+          "stock": {
+            "type": "integer",
+            "default": 0
+          }
+        },
+        "required": [
+          "sku",
+          "name"
+        ]
+      },
+      "VariantUpdateIn": {
+        "title": "VariantUpdateIn",
+        "type": "object",
+        "properties": {
+          "sku": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null
+          },
+          "name": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null
+          },
+          "price_adjustment_cents": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null
+          }
+        },
+        "required": []
+      },
+      "StockAdjustIn": {
+        "title": "StockAdjustIn",
+        "description": "Exactly one of ``set`` (absolute) or ``delta`` (shift); ``reason`` lands in the audit log.",
+        "type": "object",
+        "properties": {
+          "set": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null
+          },
+          "delta": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null
+          },
+          "reason": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null
+          }
+        },
+        "required": []
+      },
+      "AssignRoleIn": {
+        "title": "AssignRoleIn",
+        "type": "object",
+        "properties": {
+          "role": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "role"
+        ]
+      },
+      "SettingsIn": {
+        "title": "SettingsIn",
+        "type": "object",
+        "properties": {
+          "values": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "string"
+            }
+          }
+        },
+        "required": [
+          "values"
+        ]
+      },
+      "BannerIn": {
+        "title": "BannerIn",
+        "type": "object",
+        "properties": {
+          "translations": {
+            "type": "object",
+            "additionalProperties": {
+              "$ref": "#/components/schemas/BannerTextIn"
+            }
+          },
+          "cta_to": {
+            "type": "string",
+            "default": "/catalog"
+          },
+          "sort": {
+            "type": "integer",
+            "default": 0
+          },
+          "active": {
+            "type": "boolean",
+            "default": true
+          }
+        },
+        "required": [
+          "translations"
+        ]
+      },
+      "BannerUpdateIn": {
+        "title": "BannerUpdateIn",
+        "type": "object",
+        "properties": {
+          "translations": {
+            "anyOf": [
+              {
+                "type": "object",
+                "additionalProperties": {
+                  "$ref": "#/components/schemas/BannerTextIn"
+                }
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null
+          },
+          "cta_to": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null
+          },
+          "sort": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null
+          },
+          "active": {
+            "anyOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null
+          }
+        },
+        "required": []
+      },
+      "DealIn": {
+        "title": "DealIn",
+        "type": "object",
+        "properties": {
+          "product_id": {
+            "type": "integer"
+          },
+          "percent_off": {
+            "type": "integer"
+          },
+          "starts_at": {
+            "type": "string"
+          },
+          "ends_at": {
+            "type": "string"
+          },
+          "active": {
+            "type": "boolean",
+            "default": true
+          }
+        },
+        "required": [
+          "product_id",
+          "percent_off",
+          "starts_at",
+          "ends_at"
+        ]
+      },
+      "DealUpdateIn": {
+        "title": "DealUpdateIn",
+        "type": "object",
+        "properties": {
+          "percent_off": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null
+          },
+          "starts_at": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null
+          },
+          "ends_at": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null
+          },
+          "active": {
+            "anyOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null
+          }
+        },
+        "required": []
+      },
+      "CouponIn": {
+        "title": "CouponIn",
+        "type": "object",
+        "properties": {
+          "code": {
+            "type": "string"
+          },
+          "type": {
+            "$ref": "#/components/schemas/CouponType"
+          },
+          "value": {
+            "type": "integer"
+          },
+          "min_subtotal_cents": {
+            "type": "integer",
+            "default": 0
+          },
+          "usage_limit": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null
+          },
+          "per_customer_limit": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null
+          },
+          "announce": {
+            "type": "boolean",
+            "default": false
+          }
+        },
+        "required": [
+          "code",
+          "type",
+          "value"
+        ]
+      },
+      "CouponUpdateIn": {
+        "title": "CouponUpdateIn",
+        "type": "object",
+        "properties": {
+          "active": {
+            "anyOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null
+          },
+          "usage_limit": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null
+          },
+          "per_customer_limit": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null
+          },
+          "min_subtotal_cents": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null
+          },
+          "announce": {
+            "anyOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null
+          }
+        },
+        "required": []
+      },
+      "OrderStatusIn": {
+        "title": "OrderStatusIn",
+        "type": "object",
+        "properties": {
+          "status": {
+            "type": "string"
+          },
+          "tracking_number": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null
+          }
+        },
+        "required": [
+          "status"
+        ]
       }
     },
     "securitySchemes": {
