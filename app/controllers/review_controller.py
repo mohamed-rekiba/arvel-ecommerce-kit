@@ -29,21 +29,13 @@ def _current_user() -> User:
     return user
 
 
-def _status(review: Review) -> ReviewStatus:
-    return (
-        review.status
-        if isinstance(review.status, ReviewStatus)
-        else ReviewStatus(review.status)
-    )
-
-
 def _out(review: Review, author: str | None = None) -> ReviewOut:
     return ReviewOut(
         id=review.id,
         rating=review.rating,
         title=review.title,
         body=review.body,
-        status=_status(review),
+        status=review.status,
         author=author,
         created_at=_iso(review.created_at),
     )
@@ -178,7 +170,7 @@ async def admin_index(
             rating=r.rating,
             title=r.title,
             body=r.body,
-            status=_status(r),
+            status=r.status,
         )
         for r in reviews
     ]
@@ -195,7 +187,7 @@ async def moderate(request: Request, id: Review) -> AdminReviewOut:
         abort(404, trans("shop.errors.unknown_decision"))
     review = id
     target = ReviewStatus.APPROVED if decision == "approve" else ReviewStatus.REJECTED
-    previous = _status(review)
+    previous = review.status
     if target is not previous:
         async with DB.transaction():
             product = (
@@ -229,5 +221,5 @@ async def moderate(request: Request, id: Review) -> AdminReviewOut:
         rating=review.rating,
         title=review.title,
         body=review.body,
-        status=_status(review),
+        status=review.status,
     )

@@ -16,14 +16,6 @@ from app.models.payment import Payment
 from app.models.refund import Refund
 
 
-def _status(order: Order) -> OrderStatus:
-    return (
-        order.status
-        if isinstance(order.status, OrderStatus)
-        else OrderStatus(order.status)
-    )
-
-
 async def initiate_refund(order: Order) -> Refund:
     """Refund the order's SUCCEEDED payment in full.
 
@@ -39,7 +31,7 @@ async def initiate_refund(order: Order) -> Refund:
         locked = await Order.where("id", order.id).lock_for_update().first()
         if locked is None:
             abort(404, trans("shop.errors.order_not_found"))
-        current = _status(locked)
+        current = locked.status
         if not can_transition(current, OrderStatus.REFUND_PENDING):
             raise ValidationException(
                 {
@@ -107,7 +99,7 @@ async def initiate_refund(order: Order) -> Refund:
             await refund.save()
             retry_locked = await Order.where("id", locked.id).lock_for_update().first()
             if retry_locked is not None:
-                retry_current = _status(retry_locked)
+                retry_current = retry_locked.status
                 if can_transition(retry_current, OrderStatus.PAID):
                     retry_locked.status = OrderStatus.PAID
                     await retry_locked.save()

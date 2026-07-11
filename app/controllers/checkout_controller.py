@@ -559,11 +559,7 @@ async def cancel(request: Request) -> OrderOut:
             if variant is not None:
                 variant.stock = variant.stock + item.quantity
                 await variant.save()
-        before = (
-            locked.status
-            if isinstance(locked.status, OrderStatus)
-            else OrderStatus(locked.status)
-        )
+        before = locked.status  # cast by Order.__casts__
         locked.status = OrderStatus.CANCELLED
         await locked.save()
         await log_transition(locked, before, OrderStatus.CANCELLED)

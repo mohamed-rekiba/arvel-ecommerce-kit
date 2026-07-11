@@ -51,11 +51,7 @@ async def pay(request: Request) -> PaymentOut:
     method = getattr(order, "payment_method", None) or "gateway"
     if str(method) == "cod" or getattr(method, "value", "") == "cod":
         abort(422, trans("shop.errors.order_is_cod"))
-    status = (
-        order.status
-        if isinstance(order.status, OrderStatus)
-        else OrderStatus(order.status)
-    )
+    status = order.status  # cast by Order.__casts__
     if status is not OrderStatus.PENDING:
         raise ValidationException(
             {"order": [trans("shop.errors.order_already_status", status=status.value)]},
@@ -107,11 +103,7 @@ async def webhook(request: Request, data: WebhookIn) -> WebhookOut:
                 await payment.save()
                 order = await Order.find(payment.order_id)
                 if order is not None:
-                    current = (
-                        order.status
-                        if isinstance(order.status, OrderStatus)
-                        else OrderStatus(order.status)
-                    )
+                    current = order.status  # cast by Order.__casts__
                     if can_transition(current, OrderStatus.PAID):
                         order.status = OrderStatus.PAID
                         await order.save()
@@ -150,11 +142,7 @@ async def webhook(request: Request, data: WebhookIn) -> WebhookOut:
                     await Order.where("id", refund.order_id).lock_for_update().first()
                 )
                 if order is not None:
-                    current = (
-                        order.status
-                        if isinstance(order.status, OrderStatus)
-                        else OrderStatus(order.status)
-                    )
+                    current = order.status  # cast by Order.__casts__
                     if can_transition(current, OrderStatus.REFUNDED):
                         refund.status = RefundStatus.SUCCEEDED
                         await refund.save()
