@@ -83,8 +83,6 @@ import type {
   ApiCartItemsRemove400,
   ApiCartItemsUpdate400,
   ApiCheckout400,
-  ApiDevGatewayCharges400,
-  ApiDevGatewayRefunds400,
   ApiEmailVerify400,
   ApiLogin400,
   ApiMediaConversion400,
@@ -127,10 +125,6 @@ import type {
   DealIn,
   DealOut,
   DealUpdateIn,
-  DevChargeIn,
-  DevChargeOut,
-  DevRefundIn,
-  DevRefundOut,
   ForgotPasswordIn,
   ForgotPasswordOut,
   GalleryImageOut,
@@ -2708,7 +2702,7 @@ export const getApiAdminProductsUpdatePutUrl = (product: string,) => {
 
 /**
  * Update a product — per-locale content, price, category, status, visibility.
- * ``authorize_resource`` below already 404'd a non-admin before this body runs (deny-as-404,
+ * the class's ``__resource_policy__`` already 404'd a non-admin before this body runs (deny-as-404,
  * same policy as destroy).
  * @summary ApiAdminProductsUpdate
  */
@@ -2755,7 +2749,7 @@ export const getApiAdminProductsDestroyUrl = (product: string,) => {
 
 /**
  * ARCHIVE a product (soft delete — order history intact, restorable;
- * ``authorize_resource`` below already 404'd a non-admin before this body runs).
+ * the class's ``__resource_policy__`` already 404'd a non-admin before this body runs).
  * @summary ApiAdminProductsDestroy
  */
 export const apiAdminProductsDestroy = async (product: string, options?: RequestInit): Promise<apiAdminProductsDestroyResponse> => {
@@ -2800,7 +2794,7 @@ export const getApiAdminProductsUpdatePatchUrl = (product: string,) => {
 
 /**
  * Update a product — per-locale content, price, category, status, visibility.
- * ``authorize_resource`` below already 404'd a non-admin before this body runs (deny-as-404,
+ * the class's ``__resource_policy__`` already 404'd a non-admin before this body runs (deny-as-404,
  * same policy as destroy).
  * @summary ApiAdminProductsUpdate
  */
@@ -4851,95 +4845,6 @@ export const apiAdminOrdersRefund = async (id: number, options?: RequestInit): P
     method: 'POST'
 
 
-  }
-);}
-
-
-
-export type apiDevGatewayChargesResponse201 = {
-  data: DevChargeOut
-  status: 201
-}
-
-export type apiDevGatewayChargesResponse400 = {
-  data: ApiDevGatewayCharges400
-  status: 400
-}
-
-export type apiDevGatewayChargesResponseSuccess = (apiDevGatewayChargesResponse201) & {
-  headers: Headers;
-};
-export type apiDevGatewayChargesResponseError = (apiDevGatewayChargesResponse400) & {
-  headers: Headers;
-};
-
-export type apiDevGatewayChargesResponse = (apiDevGatewayChargesResponseSuccess | apiDevGatewayChargesResponseError)
-
-export const getApiDevGatewayChargesUrl = () => {
-
-
-
-
-  return `/api/dev-gateway/charges`
-}
-
-/**
- * Accept a charge and queue the async success webhook (the PSP's notify leg).
- * @summary ApiDevGatewayCharges
- */
-export const apiDevGatewayCharges = async (devChargeIn: DevChargeIn, options?: RequestInit): Promise<apiDevGatewayChargesResponse> => {
-
-  return apiFetch<apiDevGatewayChargesResponse>(getApiDevGatewayChargesUrl(),
-  {
-    ...options,
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json', ...options?.headers },
-    body: JSON.stringify(devChargeIn)
-  }
-);}
-
-
-
-export type apiDevGatewayRefundsResponse201 = {
-  data: DevRefundOut
-  status: 201
-}
-
-export type apiDevGatewayRefundsResponse400 = {
-  data: ApiDevGatewayRefunds400
-  status: 400
-}
-
-export type apiDevGatewayRefundsResponseSuccess = (apiDevGatewayRefundsResponse201) & {
-  headers: Headers;
-};
-export type apiDevGatewayRefundsResponseError = (apiDevGatewayRefundsResponse400) & {
-  headers: Headers;
-};
-
-export type apiDevGatewayRefundsResponse = (apiDevGatewayRefundsResponseSuccess | apiDevGatewayRefundsResponseError)
-
-export const getApiDevGatewayRefundsUrl = () => {
-
-
-
-
-  return `/api/dev-gateway/refunds`
-}
-
-/**
- * Accept a reverse charge and queue the async ``charge.refunded`` webhook — the direct mirror
- * of ``create_charge`` (K15).
- * @summary ApiDevGatewayRefunds
- */
-export const apiDevGatewayRefunds = async (devRefundIn: DevRefundIn, options?: RequestInit): Promise<apiDevGatewayRefundsResponse> => {
-
-  return apiFetch<apiDevGatewayRefundsResponse>(getApiDevGatewayRefundsUrl(),
-  {
-    ...options,
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json', ...options?.headers },
-    body: JSON.stringify(devRefundIn)
   }
 );}
 

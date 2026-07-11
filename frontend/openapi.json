@@ -3621,7 +3621,7 @@
       },
       "put": {
         "summary": "ApiAdminProductsUpdate",
-        "description": "Update a product \u2014 per-locale content, price, category, status, visibility.\n``authorize_resource`` below already 404'd a non-admin before this body runs (deny-as-404,\nsame policy as destroy).",
+        "description": "Update a product \u2014 per-locale content, price, category, status, visibility.\nthe class's ``__resource_policy__`` already 404'd a non-admin before this body runs (deny-as-404,\nsame policy as destroy).",
         "operationId": "api.admin.products.update_put",
         "parameters": [
           {
@@ -3704,7 +3704,7 @@
       },
       "delete": {
         "summary": "ApiAdminProductsDestroy",
-        "description": "ARCHIVE a product (soft delete \u2014 order history intact, restorable;\n``authorize_resource`` below already 404'd a non-admin before this body runs).",
+        "description": "ARCHIVE a product (soft delete \u2014 order history intact, restorable;\nthe class's ``__resource_policy__`` already 404'd a non-admin before this body runs).",
         "operationId": "api.admin.products.destroy",
         "parameters": [
           {
@@ -3777,7 +3777,7 @@
       },
       "patch": {
         "summary": "ApiAdminProductsUpdate",
-        "description": "Update a product \u2014 per-locale content, price, category, status, visibility.\n``authorize_resource`` below already 404'd a non-admin before this body runs (deny-as-404,\nsame policy as destroy).",
+        "description": "Update a product \u2014 per-locale content, price, category, status, visibility.\nthe class's ``__resource_policy__`` already 404'd a non-admin before this body runs (deny-as-404,\nsame policy as destroy).",
         "operationId": "api.admin.products.update_patch",
         "parameters": [
           {
@@ -7061,144 +7061,6 @@
         ]
       }
     },
-    "/api/dev-gateway/charges": {
-      "post": {
-        "summary": "ApiDevGatewayCharges",
-        "description": "Accept a charge and queue the async success webhook (the PSP's notify leg).",
-        "operationId": "api.dev_gateway.charges",
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/DevChargeIn"
-              }
-            }
-          },
-          "required": true
-        },
-        "responses": {
-          "201": {
-            "description": "Document created, URL follows",
-            "headers": {},
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/DevChargeOut"
-                }
-              }
-            }
-          },
-          "400": {
-            "description": "Bad request syntax or unsupported method",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "properties": {
-                    "status_code": {
-                      "type": "integer"
-                    },
-                    "detail": {
-                      "type": "string"
-                    },
-                    "extra": {
-                      "additionalProperties": {},
-                      "type": [
-                        "null",
-                        "object",
-                        "array"
-                      ]
-                    }
-                  },
-                  "type": "object",
-                  "required": [
-                    "detail",
-                    "status_code"
-                  ],
-                  "description": "Validation Exception",
-                  "examples": [
-                    {
-                      "status_code": 400,
-                      "detail": "Bad Request",
-                      "extra": {}
-                    }
-                  ]
-                }
-              }
-            }
-          }
-        },
-        "deprecated": false
-      }
-    },
-    "/api/dev-gateway/refunds": {
-      "post": {
-        "summary": "ApiDevGatewayRefunds",
-        "description": "Accept a reverse charge and queue the async ``charge.refunded`` webhook \u2014 the direct mirror\nof ``create_charge`` (K15).",
-        "operationId": "api.dev_gateway.refunds",
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/DevRefundIn"
-              }
-            }
-          },
-          "required": true
-        },
-        "responses": {
-          "201": {
-            "description": "Document created, URL follows",
-            "headers": {},
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/DevRefundOut"
-                }
-              }
-            }
-          },
-          "400": {
-            "description": "Bad request syntax or unsupported method",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "properties": {
-                    "status_code": {
-                      "type": "integer"
-                    },
-                    "detail": {
-                      "type": "string"
-                    },
-                    "extra": {
-                      "additionalProperties": {},
-                      "type": [
-                        "null",
-                        "object",
-                        "array"
-                      ]
-                    }
-                  },
-                  "type": "object",
-                  "required": [
-                    "detail",
-                    "status_code"
-                  ],
-                  "description": "Validation Exception",
-                  "examples": [
-                    {
-                      "status_code": 400,
-                      "detail": "Bad Request",
-                      "extra": {}
-                    }
-                  ]
-                }
-              }
-            }
-          }
-        },
-        "deprecated": false
-      }
-    },
     "/": {
       "get": {
         "summary": "PublicRoot",
@@ -9134,74 +8996,6 @@
         "type": "object",
         "required": [],
         "title": "DealUpdateIn"
-      },
-      "DevChargeIn": {
-        "properties": {
-          "amount": {
-            "type": "integer"
-          },
-          "currency": {
-            "type": "string"
-          },
-          "order_id": {
-            "type": "integer"
-          }
-        },
-        "type": "object",
-        "required": [
-          "amount",
-          "currency",
-          "order_id"
-        ],
-        "title": "DevChargeIn"
-      },
-      "DevChargeOut": {
-        "properties": {
-          "id": {
-            "type": "string"
-          },
-          "client_secret": {
-            "type": "string"
-          }
-        },
-        "type": "object",
-        "required": [
-          "client_secret",
-          "id"
-        ],
-        "title": "DevChargeOut"
-      },
-      "DevRefundIn": {
-        "properties": {
-          "charge_id": {
-            "type": "string"
-          },
-          "amount": {
-            "type": "integer"
-          },
-          "order_id": {
-            "type": "integer"
-          }
-        },
-        "type": "object",
-        "required": [
-          "amount",
-          "charge_id",
-          "order_id"
-        ],
-        "title": "DevRefundIn"
-      },
-      "DevRefundOut": {
-        "properties": {
-          "id": {
-            "type": "string"
-          }
-        },
-        "type": "object",
-        "required": [
-          "id"
-        ],
-        "title": "DevRefundOut"
       },
       "ForgotPasswordIn": {
         "properties": {

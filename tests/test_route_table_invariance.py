@@ -15,27 +15,42 @@ _GOLDEN = Path(__file__).parent / "fixtures" / "route_table_golden.json"
 
 
 def _route_table() -> list[dict[str, Any]]:
+    import os
+
     from bootstrap.app import create_app
 
-    app = create_app()
-    app.as_asgi()  # runs bootstrap_app: loads routes/api.py onto the router singleton
-    router = app.make("router")
-
-    table = [
-        {
-            "methods": sorted(route.methods),
-            "path": route.path,
-            "name": route.name,
-            # order preserved: DR-0052 group composition is order-sensitive (a route can carry
-            # ["bearer","oidc"]), so sorting would discard information a regression could hide in.
-            "middleware": [mw.__qualname__ for mw in route.middlewares],
-            "security": list(route.security),
-            "status_code": route.status_code,
-            "group": route.group,
-            "domain": route.domain,
-        }
-        for route in router.routes()
-    ]
+    # Freeze the PRODUCTION route surface. The debug-only dev-gateway routes register only when
+    # `app.debug` is true (routes/api.py), so leaving APP_DEBUG ambient would make this check
+    # depend on the runner's environment — passing under a dev `.env` (debug on) but failing in
+    # CI (debug off). Force debug off so the table is deterministic everywhere, and generate the
+    # golden the same way.
+    prev = os.environ.get("APP_DEBUG")
+    os.environ["APP_DEBUG"] = "false"
+    try:
+        app = create_app()
+        app.as_asgi()  # runs bootstrap_app: loads routes/api.py onto the router singleton
+        router = app.make("router")
+        table = [
+            {
+                "methods": sorted(route.methods),
+                "path": route.path,
+                "name": route.name,
+                # order preserved: DR-0052 group composition is order-sensitive (a route can
+                # carry ["bearer","oidc"]), so sorting would discard information a regression
+                # could hide in.
+                "middleware": [mw.__qualname__ for mw in route.middlewares],
+                "security": list(route.security),
+                "status_code": route.status_code,
+                "group": route.group,
+                "domain": route.domain,
+            }
+            for route in router.routes()
+        ]
+    finally:
+        if prev is None:
+            os.environ.pop("APP_DEBUG", None)
+        else:
+            os.environ["APP_DEBUG"] = prev
     table.sort(key=lambda r: (r["path"], r["name"] or "", tuple(r["methods"])))
     return table
 

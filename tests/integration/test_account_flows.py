@@ -17,13 +17,19 @@ pytestmark = pytest.mark.integration
 
 
 def _link_from_mail(api: str, subject_part: str) -> str:
-    """Fetch the newest Mailpit message matching the subject and pull the first link out of it."""
+    """Fetch the newest Mailpit message matching the subject and pull the first link out of it.
+
+    The href is HTML-unescaped: the themed-markdown mailables render `&` in a URL as the correct
+    `&amp;` entity (valid HTML — every mail client decodes it back), so we do the same decode a
+    client does before parsing the query, rather than splitting on the literal `&amp;`."""
+    import html as _html
+
     messages = httpx.get(f"{api}/api/v1/messages").json()["messages"]
     match = next(m for m in messages if subject_part in m["Subject"])
     body = httpx.get(f"{api}/api/v1/message/{match['ID']}").json()["HTML"]
     href = re.search(r'href="([^"]+)"', body)
     assert href, body
-    return href.group(1)
+    return _html.unescape(href.group(1))
 
 
 def _link_query(link: str) -> dict[str, str]:

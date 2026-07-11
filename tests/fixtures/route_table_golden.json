@@ -1102,30 +1102,6 @@
     "methods": [
       "POST"
     ],
-    "path": "/api/dev-gateway/charges",
-    "name": "api.dev_gateway.charges",
-    "middleware": [],
-    "security": [],
-    "status_code": null,
-    "group": "api",
-    "domain": null
-  },
-  {
-    "methods": [
-      "POST"
-    ],
-    "path": "/api/dev-gateway/refunds",
-    "name": "api.dev_gateway.refunds",
-    "middleware": [],
-    "security": [],
-    "status_code": null,
-    "group": "api",
-    "domain": null
-  },
-  {
-    "methods": [
-      "POST"
-    ],
     "path": "/api/email/verification-notification",
     "name": "api.email.verification.send",
     "middleware": [
