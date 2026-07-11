@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.6.1](https://github.com/mohamed-rekiba/arvel-ecommerce-kit/compare/v0.6.0...v0.6.1) (2026-07-11)
+
+
+### Bug Fixes
+
+* **ci:** pin the OpenAPI contract to canonical env — deterministic across .env ([1622f6c](https://github.com/mohamed-rekiba/arvel-ecommerce-kit/commit/1622f6cc970b8f0916ece2854f78879c30f207e3))
+* **ci:** validate the production route surface + HTML-unescape mailed links ([d003609](https://github.com/mohamed-rekiba/arvel-ecommerce-kit/commit/d0036094213f2d0350b26757d9096303ab4d33ee))
+
 ## [0.6.0](https://github.com/mohamed-rekiba/arvel-ecommerce-kit/compare/v0.5.0...v0.6.0) (2026-07-11)
 
 
