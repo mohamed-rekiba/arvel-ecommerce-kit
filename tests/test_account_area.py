@@ -354,6 +354,8 @@ def test_invoice_renders_server_side_html(client) -> None:
     html = page.text
     assert f"#{order['id']}" in html and "Widget" in html and "Cara Buyer" in html
     assert "Invoice" in html
+    # the status badge header must be the word, not the raw i18n key (regression guard)
+    assert "Status:" in html and "shop.invoice.status" not in html
 
     # localized (fr) and guarded (rival 404, guest 401)
     fr = client.get(
@@ -361,6 +363,7 @@ def test_invoice_renders_server_side_html(client) -> None:
         headers={**cara, "Accept-Language": "fr"},
     )
     assert "Facture" in fr.text
+    assert "Statut:" in fr.text
     assert (
         client.get(f"/api/orders/{order['id']}/invoice", headers=rival).status_code
         == 404

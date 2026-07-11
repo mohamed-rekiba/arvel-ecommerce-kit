@@ -133,7 +133,7 @@ class CategoryController(Controller):
         slug = Str.slug(translations["en"]["name"] or "")
         if await _slug_taken(Category, slug):
             raise ValidationException(
-                {"slug": ["A category with this slug already exists."]}
+                {"slug": [trans("shop.errors.category_slug_exists")]}
             )
         if data.parent_id is not None:
             await Category.find_or_fail(data.parent_id)
@@ -165,7 +165,7 @@ class CategoryController(Controller):
         if data.parent_id is not None:
             if data.parent_id == category.id:
                 raise ValidationException(
-                    {"parent_id": ["A category can't parent itself."]}
+                    {"parent_id": [trans("shop.errors.category_self_parent")]}
                 )
             await Category.find_or_fail(data.parent_id)
             category.parent_id = data.parent_id
@@ -250,7 +250,7 @@ class VendorController(Controller):
         slug = Str.slug(data.name)
         if await _slug_taken(Vendor, slug):
             raise ValidationException(
-                {"slug": ["A vendor with this slug already exists."]}
+                {"slug": [trans("shop.errors.vendor_slug_exists")]}
             )
         vendor = await Vendor.create(
             name=data.name, slug=slug, published=data.published

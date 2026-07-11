@@ -45,7 +45,8 @@
     "total": "Total",
     "footer": "Merci d'avoir choisi ArvelShop — construit sur le framework arvel.",
     "gateway": "Payé en ligne (passerelle)",
-    "cod": "Paiement à la livraison"
+    "cod": "Paiement à la livraison",
+    "status_heading": "Statut"
   },
   "checkout": {
     "unverified_email": "Veuillez vérifier votre adresse e-mail avant de passer commande."
@@ -122,6 +123,10 @@
     "shipping_method_unavailable": "« {code} » n'est pas un mode de livraison disponible.",
     "coupon_percent_range": "Un coupon en pourcentage doit être de 1 à 100.",
     "deal_percent_range": "Une promotion doit être de 1 à 90 %.",
-    "ship_country_required": "Un pays de livraison est requis."
+    "ship_country_required": "Un pays de livraison est requis.",
+    "category_slug_exists": "Une catégorie avec ce slug existe déjà.",
+    "category_self_parent": "Une catégorie ne peut pas être son propre parent.",
+    "vendor_slug_exists": "Un vendeur avec ce slug existe déjà.",
+    "tracking_required": "Un numéro de suivi est requis pour expédier une commande."
   }
 }

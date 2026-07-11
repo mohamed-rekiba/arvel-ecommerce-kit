@@ -45,7 +45,8 @@
     "total": "Total",
     "footer": "Thank you for shopping with ArvelShop — built on the arvel framework.",
     "gateway": "Paid online (gateway)",
-    "cod": "Cash on delivery"
+    "cod": "Cash on delivery",
+    "status_heading": "Status"
   },
   "checkout": {
     "unverified_email": "Please verify your email address before placing an order."
@@ -122,6 +123,10 @@
     "shipping_method_unavailable": "'{code}' is not an available shipping method.",
     "coupon_percent_range": "A percent coupon must be 1–100.",
     "deal_percent_range": "A deal must be 1–90 percent off.",
-    "ship_country_required": "A shipping country is required."
+    "ship_country_required": "A shipping country is required.",
+    "category_slug_exists": "A category with this slug already exists.",
+    "category_self_parent": "A category can't parent itself.",
+    "vendor_slug_exists": "A vendor with this slug already exists.",
+    "tracking_required": "A tracking number is required to ship an order."
   }
 }

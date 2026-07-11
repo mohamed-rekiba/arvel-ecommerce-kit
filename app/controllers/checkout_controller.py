@@ -519,11 +519,7 @@ async def cancel(request: Request) -> OrderOut:
     (e.g. the order ships between this read and the lock) is caught by that path's own guard, not
     by this dispatch."""
     order = await resolve_owned_order(request, int(request.path_param("id")))
-    current = (
-        order.status
-        if isinstance(order.status, OrderStatus)
-        else OrderStatus(order.status)
-    )
+    current = order.status  # cast by Order.__casts__
     if current is OrderStatus.PAID:
         from app.services.refund_service import initiate_refund
 
@@ -543,11 +539,7 @@ async def cancel(request: Request) -> OrderOut:
         locked = await Order.where("id", order.id).lock_for_update().first()
         if locked is None:
             abort(404, trans("shop.errors.order_not_found"))
-        current = (
-            locked.status
-            if isinstance(locked.status, OrderStatus)
-            else OrderStatus(locked.status)
-        )
+        current = locked.status  # cast by Order.__casts__
         if not can_transition(current, OrderStatus.CANCELLED):
             raise ValidationException(
                 {
@@ -741,11 +733,7 @@ async def update_status(request: Request, id: Order, data: OrderStatusIn) -> Ord
         raise ValidationException(
             {"status": [trans("shop.errors.unknown_status", status=data.status)]}
         ) from None
-    current = (
-        order.status
-        if isinstance(order.status, OrderStatus)
-        else OrderStatus(order.status)
-    )
+    current = order.status  # cast by Order.__casts__
     if (
         OrderStatus.REFUND_PENDING in (target, current)
         or target is OrderStatus.REFUNDED
@@ -789,7 +777,7 @@ async def update_status(request: Request, id: Order, data: OrderStatusIn) -> Ord
         tracking = (data.tracking_number or "").strip()
         if not tracking:
             raise ValidationException(
-                {"tracking_number": ["A tracking number is required to ship an order."]}
+                {"tracking_number": [trans("shop.errors.tracking_required")]}
             )
         order.tracking_number = tracking
     order.status = target

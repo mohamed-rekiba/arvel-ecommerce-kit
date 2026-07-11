@@ -17,7 +17,7 @@ from app.i18n import active_locale, trans_in
 # the flat invoice UI strings under shop.invoice.* (status labels + payment methods are nested)
 _LABELS = (
     "invoice",
-    "status",
+    "status_heading",  # shop.invoice.status is the nested value-label map, not the header word
     "bill_to",
     "payment",
     "item",
@@ -46,17 +46,9 @@ async def show(request: Request) -> Response:
     items = await order.items().get()
     locale = active_locale()
     t: dict[str, str] = {k: trans_in(locale, f"shop.invoice.{k}") for k in _LABELS}
-    status = (
-        order.status
-        if isinstance(order.status, OrderStatus)
-        else OrderStatus(order.status)
-    )
-    raw_method = getattr(order, "payment_method", None) or PaymentMethod.GATEWAY
-    method = (
-        raw_method
-        if isinstance(raw_method, PaymentMethod)
-        else PaymentMethod(str(raw_method))
-    )
+    # status/payment_method are cast to their enums by Order.__casts__
+    status: OrderStatus = order.status
+    method: PaymentMethod = order.payment_method
     # the translator returns the key itself on a miss, so an unmapped status degrades to a readable
     # fallback instead of 500-ing the invoice
     t["status_label"] = trans_in(locale, f"shop.invoice.status.{status.value}")
