@@ -1,5 +1,6 @@
 <script setup lang="ts">
 // Invoice opens in a new tab with the receipt token in the URL — a browser tab can't send bearer headers.
+import { currentLocale } from '../../../lib/i18n'
 import { onMounted, ref } from 'vue'
 import { type Order, api, formatPrice } from '../../api'
 import { type MessageKey, t } from '../../locale'
@@ -20,7 +21,7 @@ async function load() {
 }
 
 function placedAt(order: Order): string {
-  return order.placed_at ? new Date(order.placed_at).toLocaleDateString() : '—'
+  return order.placed_at ? new Date(order.placed_at).toLocaleDateString(currentLocale()) : '—'
 }
 
 const cancellable = (o: Order) => o.status === 'pending' || o.status === 'paid'

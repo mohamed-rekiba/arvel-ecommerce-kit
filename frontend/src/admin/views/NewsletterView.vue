@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { currentLocale } from '../../lib/i18n'
 import Button from 'primevue/button'
 import Column from 'primevue/column'
 import DataTable from 'primevue/datatable'
@@ -37,7 +38,7 @@ function exportCsv() {
 }
 
 function fmtDate(iso: string | null): string {
-  return iso ? new Date(iso).toLocaleDateString() : '—'
+  return iso ? new Date(iso).toLocaleDateString(currentLocale()) : '—'
 }
 
 onMounted(load)

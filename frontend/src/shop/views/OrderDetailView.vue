@@ -1,5 +1,6 @@
 <script setup lang="ts">
 // Cancelled is a terminal branch: the timeline collapses to placed → cancelled, skipping the rest.
+import { currentLocale } from '../../lib/i18n'
 import { computed, onBeforeUnmount, onMounted, ref } from 'vue'
 import { useRoute } from 'vue-router'
 import { type Order, api, formatPrice, orderTokens } from '../api'
@@ -37,7 +38,7 @@ function stepLabel(status: string): string {
   return t(`order.step_${status}` as MessageKey)
 }
 function stepTime(at: string | null): string {
-  return at ? new Date(at).toLocaleString() : ''
+  return at ? new Date(at).toLocaleString(currentLocale()) : ''
 }
 
 function stopPolling() {
