@@ -1,15 +1,14 @@
 """Store settings + newsletter — the public reads and the admin management surface."""
 
 from arvel import abort
+from app.auth.require import require_user as _admin
 from arvel.http import Request
-from arvel.support import current_user
 from arvel.validation import ValidationException, Validator
 
 from app.controllers.serializers import iso as _iso
 from app.enums import Permission
 from app.i18n import active_locale, trans
 from app.models.newsletter_subscriber import NewsletterSubscriber
-from app.models.user import User
 from app.schemas import (
     MessageOut,
     NewsletterIn,
@@ -34,13 +33,6 @@ async def subscribe(request: Request, data: NewsletterIn) -> MessageOut:
     if await NewsletterSubscriber.where("email", email).first() is None:
         await NewsletterSubscriber.create(email=email, locale=active_locale())
     return MessageOut(message="Subscribed.")
-
-
-def _admin() -> User:
-    user: User | None = current_user.get()
-    if user is None:
-        abort(401, trans("shop.errors.unauthenticated"))
-    return user
 
 
 async def admin_settings(request: Request) -> SettingsOut:

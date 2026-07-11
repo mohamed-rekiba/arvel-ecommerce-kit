@@ -2,6 +2,7 @@
 APPROVED reviews and the denormalized aggregate."""
 
 from arvel import DB, abort
+from app.auth.require import require_user as _current_user
 from app.i18n import trans
 from arvel.activitylog import activity
 from arvel.http import Request
@@ -20,13 +21,6 @@ from app.schemas import AdminReviewOut, ReviewIn, ReviewListOut, ReviewOut
 
 # Only a delivered purchase earns a review — the customer has actually received the product.
 _REVIEWABLE_STATUSES = {OrderStatus.DELIVERED}
-
-
-def _current_user() -> User:
-    user: User | None = current_user.get()
-    if user is None:
-        abort(401, trans("shop.errors.unauthenticated"))
-    return user
 
 
 def _out(review: Review, author: str | None = None) -> ReviewOut:

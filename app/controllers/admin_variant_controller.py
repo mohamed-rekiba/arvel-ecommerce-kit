@@ -5,10 +5,10 @@ SELECT..FOR UPDATE so concurrent changes serialize deterministically.
 """
 
 from arvel import DB, abort
+from app.auth.require import require_user as _current_user
 from app.i18n import trans
 from arvel.activitylog import activity
 from arvel.http import Request
-from arvel.support import current_user
 from arvel.validation import ValidationException, Validator
 
 from app.models.cart_item import CartItem
@@ -23,13 +23,6 @@ from app.schemas import (
     VariantOut,
     VariantUpdateIn,
 )
-
-
-def _current_user() -> User:
-    user: User | None = current_user.get()
-    if user is None:
-        abort(401, trans("shop.errors.unauthenticated"))
-    return user
 
 
 def _out(variant: ProductVariant) -> VariantOut:

@@ -15,6 +15,7 @@ from arvel.auth import Role
 from arvel.http import Request
 from arvel.support import current_user
 
+from app.auth.require import require_user as _current_user
 from app.controllers.serializers import iso as _iso
 from app.enums import Permission
 from app.models.user import User
@@ -27,17 +28,6 @@ async def _require(permission: Permission) -> User:
         abort(401, trans("shop.errors.unauthenticated"))
     if not await user.can(permission.value):
         abort(403, trans("shop.errors.insufficient_permissions"))
-    return user
-
-
-def _current_user() -> User:
-    """The acting admin, for routes whose roles.manage check now lives in the route's Authorize
-    middleware (DR-0055) — this only fetches the causer for the audit log, it doesn't authorize."""
-    user: User | None = current_user.get()
-    if user is None:
-        abort(
-            401, trans("shop.errors.unauthenticated")
-        )  # unreachable post-Authorize; keeps `user` narrowed
     return user
 
 

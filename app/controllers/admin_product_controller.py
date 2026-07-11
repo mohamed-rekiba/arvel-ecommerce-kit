@@ -14,7 +14,7 @@ from arvel import abort
 from arvel.auth.middleware import Authorize
 from arvel.http import Request
 from arvel.routing import Controller, ControllerMiddleware
-from arvel.support import Str, current_user
+from arvel.support import Str
 from arvel.validation import ValidationException, Validator
 
 from arvel.activitylog import activity
@@ -25,7 +25,6 @@ from app.models.media import AppMedia
 from app.models.category import Category
 from app.models.product import IMAGES, Product
 from app.models.product_variant import ProductVariant
-from app.models.user import User
 from app.schemas import (
     AdminProductDetailOut,
     AdminProductOut,
@@ -38,12 +37,7 @@ from app.schemas import (
 )
 
 
-def _current_user() -> User:
-    # The Authenticate route middleware guarantees a user is present (401'd otherwise).
-    user: User | None = current_user.get()
-    if user is None:
-        abort(401, trans("shop.errors.unauthenticated"))
-    return user
+from app.auth.require import require_user as _current_user
 
 
 _SORTS: dict[str, tuple[str, str]] = {

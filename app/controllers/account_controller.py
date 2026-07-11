@@ -4,16 +4,15 @@ Phone is stored via the `encrypted` cast (ciphertext at rest); password checks g
 `hashed` cast + Hasher.
 """
 
-from arvel import abort
 from app.i18n import trans
 from arvel.auth.flows import email_verification_token, verify_email_token
 from arvel.dates import Date
 from arvel.http import Request
 from arvel.security import Hasher
-from arvel.support import current_user
 from arvel.support.facades import Config, Mail
 from arvel.validation import ValidationException, Validator
 
+from app.auth.require import require_user
 from app.mail.verify_email import VerifyEmail
 from app.models.user import User
 from app.schemas import (
@@ -23,13 +22,6 @@ from app.schemas import (
     UserOut,
     VerifyEmailIn,
 )
-
-
-def _me(request: Request) -> User:
-    user: User | None = current_user.get()
-    if user is None:
-        abort(401, trans("shop.errors.unauthenticated"))
-    return user
 
 
 async def avatar_url(user: User, conversion: str = "profile") -> str | None:
@@ -62,7 +54,7 @@ async def _send_verification(user: User) -> None:
 async def update_profile(request: Request, data: ProfileIn) -> UserOut:
     """Update name/email/phone. Changing the email un-verifies the account and re-sends the
     verification link to the NEW address."""
-    user = _me(request)
+    user = require_user()
     payload = {
         "name": data.name if data.name is not None else user.name,
         "email": data.email if data.email is not None else user.email,
@@ -94,7 +86,7 @@ async def update_profile(request: Request, data: ProfileIn) -> UserOut:
 
 async def change_password(request: Request, data: ChangePasswordIn) -> MessageOut:
     """Set a new password — only with the current one in hand (credential-change confirmation)."""
-    user = _me(request)
+    user = require_user()
     if len(data.password) < 8:
         raise ValidationException(
             {"password": [trans("shop.errors.password_too_short")]}
@@ -110,7 +102,7 @@ async def change_password(request: Request, data: ChangePasswordIn) -> MessageOu
 
 async def send_verification(request: Request) -> MessageOut:
     """(Re-)send the verification link to the account email."""
-    user = _me(request)
+    user = require_user()
     if user.email_verified_at is not None:
         return MessageOut(message="Your email is already verified.")
     await _send_verification(user)
@@ -145,7 +137,7 @@ async def upload_avatar(request: Request) -> UserOut:
     from app.models.user import AVATAR
     from app.services.product_image_service import ProductImageService
 
-    user = _me(request)
+    user = require_user()
     upload = await request.file("image")
     if upload is None:
         raise ValidationException({"image": [trans("shop.errors.image_required")]})

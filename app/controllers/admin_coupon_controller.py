@@ -6,27 +6,18 @@ and vendor — this converts to ``api_resource`` + a declared ``Authorize`` per 
 rather than ``authorize_resource``.
 """
 
-from arvel import abort
+from app.auth.require import require_user as _current_user
 from app.i18n import trans
 from arvel.activitylog import activity
 from arvel.auth.middleware import Authorize
 from arvel.http import Request
 from arvel.routing import Controller, ControllerMiddleware
-from arvel.support import current_user
 from arvel.validation import ValidationException
 
 from app.enums import CouponType, Permission
 from app.models.coupon import Coupon
-from app.models.user import User
 from app.schemas import AdminCouponOut, CouponIn, CouponUpdateIn
 from app.services.coupon_service import normalize_code
-
-
-def _current_user() -> User:
-    user: User | None = current_user.get()
-    if user is None:
-        abort(401, trans("shop.errors.unauthenticated"))
-    return user
 
 
 def _out(coupon: Coupon) -> AdminCouponOut:

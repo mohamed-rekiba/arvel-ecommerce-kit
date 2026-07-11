@@ -6,31 +6,22 @@ a declared ``Authorize`` per action rather than ``authorize_resource`` (K5/DR-00
 """
 
 from typing import Any
+from app.auth.require import require_user as _current_user
 from app.i18n import trans
 
-from arvel import abort
 from arvel.activitylog import activity
 from arvel.auth.middleware import Authorize
 from arvel.dates import Date
 from arvel.http import Request
 from arvel.routing import Controller, ControllerMiddleware
-from arvel.support import current_user
 from arvel.validation import ValidationException
 
 from app.controllers.serializers import iso as _iso
 from app.enums import Permission
 from app.models.deal import Deal
 from app.models.product import Product
-from app.models.user import User
 from app.schemas import AdminDealOut, DealIn, DealUpdateIn
 from app.services import deal_service
-
-
-def _current_user() -> User:
-    user: User | None = current_user.get()
-    if user is None:
-        abort(401, trans("shop.errors.unauthenticated"))
-    return user
 
 
 def _validate_percent(percent_off: int) -> None:

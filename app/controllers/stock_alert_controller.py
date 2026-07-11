@@ -1,23 +1,14 @@
 """Back-in-stock subscriptions — 'notify me' on a sold-out variant; the restock fan-out lives in
 stock_alert_service (invoked by the admin stock adjustment on the 0→positive edge)."""
 
-from arvel import abort
+from app.auth.require import require_user as _current_user
 from app.i18n import trans
 from arvel.http import Request
-from arvel.support import current_user
 from arvel.validation import ValidationException
 
 from app.models.product_variant import ProductVariant
 from app.models.stock_alert import StockAlert
-from app.models.user import User
 from app.schemas import MessageOut
-
-
-def _current_user() -> User:
-    user: User | None = current_user.get()
-    if user is None:
-        abort(401, trans("shop.errors.unauthenticated"))
-    return user
 
 
 async def subscribe(request: Request) -> MessageOut:

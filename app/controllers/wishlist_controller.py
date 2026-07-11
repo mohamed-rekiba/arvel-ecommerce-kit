@@ -1,29 +1,19 @@
 """Customer wishlist API — a signed-in customer's saved products (list + toggle). Bearer-guarded;
 a customer only ever sees/edits their own saved items."""
 
-from arvel import abort
-from app.i18n import trans
+from app.auth.require import require_user as _customer
 from arvel.http import Request
-from arvel.support import current_user
 
 from typing import Any
 
 from app.controllers.catalog_controller import product_out
 from app.models.product import Product
-from app.models.user import User
 from app.models.wishlist_item import WishlistItem
 from app.schemas import ProductOut, WishlistToggleOut
 
 
 def _in_locale(query: Any) -> Any:
     return query.in_locale()
-
-
-def _customer() -> User:
-    user: User | None = current_user.get()
-    if user is None:
-        abort(401, trans("shop.errors.unauthenticated"))
-    return user
 
 
 async def index(request: Request) -> list[ProductOut]:

@@ -10,19 +10,19 @@ name or force a 403→404 contract flip these resources never asked for.
 """
 
 from arvel import abort
+from app.auth.require import require_user as _current_user
 from app.i18n import trans
 from arvel.activitylog import activity
 from arvel.auth.middleware import Authorize
 from arvel.http import Request
 from arvel.routing import Controller, ControllerMiddleware
-from arvel.support import Str, current_user
+from arvel.support import Str
 from arvel.validation import ValidationException
 
 from app.controllers.admin_product_controller import validated_translations
 from app.enums import Permission
 from app.models.category import Category
 from app.models.product import Product
-from app.models.user import User
 from app.models.vendor import Vendor
 from app.schemas import (
     AdminCategoryOut,
@@ -35,13 +35,6 @@ from app.schemas import (
     VendorUpdateIn,
 )
 from app.services.catalog_visibility_service import CatalogVisibilityService
-
-
-def _current_user() -> User:
-    user: User | None = current_user.get()
-    if user is None:
-        abort(401, trans("shop.errors.unauthenticated"))
-    return user
 
 
 def _category_out(category: Category, *, is_visible: bool = False) -> AdminCategoryOut:

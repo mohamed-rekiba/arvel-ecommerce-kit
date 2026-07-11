@@ -2,20 +2,18 @@
 locale with an en fallback) and the admin CRUD + image upload that manages it."""
 
 from typing import Any, cast
+from app.auth.require import require_user as _current_user
 
-from arvel import abort
 from arvel.activitylog import activity
 from arvel.auth.middleware import Authorize
 from arvel.http import Request
 from arvel.routing import Controller, ControllerMiddleware
-from arvel.support import current_user
 from arvel.validation import ValidationException
 
 from app.enums import Permission
 from app.i18n import DEFAULT_LOCALE, SUPPORTED_LOCALES, active_locale, trans
 from app.models.media import AppMedia
 from app.models.banner import HERO, Banner
-from app.models.user import User
 from app.schemas import (
     AdminBannerOut,
     BannerIn,
@@ -59,13 +57,6 @@ async def index(request: Request) -> list[BannerOut]:
 
 
 # --- admin ---
-
-
-def _current_user() -> User:
-    user: User | None = current_user.get()
-    if user is None:
-        abort(401, trans("shop.errors.unauthenticated"))
-    return user
 
 
 def _validated_translations(
