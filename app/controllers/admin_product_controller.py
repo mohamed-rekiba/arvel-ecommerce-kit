@@ -160,7 +160,7 @@ class AdminProductController(Controller):
     """The five admin product CRUD actions. index/show carry a declared ``Authorize(CATALOG_VIEW)``
     (``ProductPolicy.view``/``viewAny`` are public no-ops — the storefront contract — so without
     this middleware admin listing would be wide open); store/update/destroy carry no middleware of
-    their own because ``authorize_resource(Product)`` below already guards them against the policy
+    their own because the class's ``__resource_policy__ = Product`` already guards them against the policy
     (create→403, update/delete→404) — declaring both would be double-enforcement for no benefit
     (K5/DR-0056). ``update`` registers through this class's normal ``Router.resource()`` wiring —
     it used to be pulled out into an explicit PUT-only route because arvel's resource generator
@@ -168,6 +168,12 @@ class AdminProductController(Controller):
     one-operationId-per-operation OpenAPI check; that's fixed at the framework level now
     (DR-0057), so `update` needs no carve-out and accepts both verbs like a normal resource
     action."""
+
+    # store→create (403), update/delete→update/delete (404, deny_as_not_found) — see
+    # ProductPolicy. Wraps every resource action, including `update` (DR-0057 removed the
+    # reason it used to be pulled out of this wiring). Declarative form of
+    # ``authorize_resource(Product)``, beside ``middleware()`` where it reads as class config.
+    __resource_policy__ = Product
 
     @classmethod
     def middleware(cls) -> list[ControllerMiddleware]:
@@ -300,7 +306,7 @@ class AdminProductController(Controller):
         self, request: Request, product: Product, data: UpdateProductIn
     ) -> AdminProductOut:
         """Update a product — per-locale content, price, category, status, visibility.
-        ``authorize_resource`` below already 404'd a non-admin before this body runs (deny-as-404,
+        the class's ``__resource_policy__`` already 404'd a non-admin before this body runs (deny-as-404,
         same policy as destroy)."""
         user = _current_user()
         translations = validated_translations(data.translations)
@@ -357,7 +363,7 @@ class AdminProductController(Controller):
 
     async def destroy(self, request: Request, product: Product) -> MessageOut:
         """ARCHIVE a product (soft delete — order history intact, restorable;
-        ``authorize_resource`` below already 404'd a non-admin before this body runs)."""
+        the class's ``__resource_policy__`` already 404'd a non-admin before this body runs)."""
         user = _current_user()
         await (
             activity()
@@ -368,12 +374,6 @@ class AdminProductController(Controller):
         )
         await product.delete()
         return MessageOut(message=trans("shop.messages.deleted"))
-
-
-# store→create (403), update/delete→update/delete (404, deny_as_not_found) — see ProductPolicy.
-# Wraps every resource action, including `update` (DR-0057 removed the reason it used to be
-# pulled out of this wiring).
-AdminProductController.authorize_resource(Product)
 
 
 async def restore(request: Request) -> AdminProductOut:

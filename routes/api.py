@@ -268,19 +268,16 @@ with Route.group(prefix="/admin", name="api.admin."):
         # and Litestar's OpenAPI export rejected two operations sharing one operationId
         # (DR-0057 fix 1). That's fixed at the framework level now — `update` registers through
         # api_resource like every other action, accepting both verbs.
-        _products = admin_products.AdminProductController()
-        Route.api_resource("products", _products)
+        Route.api_resource("products", admin_products.AdminProductController)
 
         # Admin categories + vendors (the retrievability dimensions; catalog.* authority).
         # K5: route generation + per-action Authorize both fold into CategoryController/
         # VendorController (DR-0056 — no per-object policy, so api_resource + declared
         # Controller.middleware, not authorize_resource). `update` folds in too now (DR-0057) —
         # see the products comment above for why it no longer needs to be pulled out.
-        _categories = taxonomy.CategoryController()
-        Route.api_resource("categories", _categories)
+        Route.api_resource("categories", taxonomy.CategoryController)
 
-        _vendors = taxonomy.VendorController()
-        Route.api_resource("vendors", _vendors)
+        Route.api_resource("vendors", taxonomy.VendorController)
 
         # Admin variants + stock (nested under the product; catalog.update authority).
         Route.get(
@@ -369,17 +366,14 @@ with Route.group(prefix="/admin", name="api.admin."):
         Route.post(
             "/banners/{id:int}/image", banners.upload_image, name="banners.image"
         ).middleware(Authorize(Permission.CATALOG_UPDATE.value))
-        _banners = banners.BannerController()
-        Route.api_resource("banners", _banners)
+        Route.api_resource("banners", banners.BannerController)
 
         # Admin deals (K5): index/store/update/destroy fold into DealController (DR-0057).
-        _deals = admin_deals.DealController()
-        Route.api_resource("deals", _deals)
+        Route.api_resource("deals", admin_deals.DealController)
 
         # Admin coupons (K5): index/store/update fold into CouponController (no destroy — see
         # CouponController's docstring).
-        _coupons = admin_coupons.CouponController()
-        Route.api_resource("coupons", _coupons)
+        Route.api_resource("coupons", admin_coupons.CouponController)
 
         # Admin orders. show/status carry Authorize (DR-0055) — see the products.image comment
         # above for why a class-level admin check has to move ahead of route-model binding.
