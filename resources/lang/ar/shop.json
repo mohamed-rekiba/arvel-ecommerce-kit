@@ -133,7 +133,8 @@
     "category_slug_exists": "توجد فئة بهذا المُعرّف بالفعل.",
     "category_self_parent": "لا يمكن أن تكون الفئة أصلاً لنفسها.",
     "vendor_slug_exists": "يوجد بائع بهذا المُعرّف بالفعل.",
-    "tracking_required": "رقم التتبع مطلوب لشحن الطلب."
+    "tracking_required": "رقم التتبع مطلوب لشحن الطلب.",
+    "no_product_create": "لا يمكنك إنشاء منتجات."
   },
   "messages": {
     "logged_out": "تم تسجيل الخروج.",

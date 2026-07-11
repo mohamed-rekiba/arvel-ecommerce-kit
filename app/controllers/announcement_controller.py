@@ -25,10 +25,6 @@ async def show(request: Request) -> AnnouncementOut:
             continue
         if coupon.ends_at is not None and now > coupon.ends_at:
             continue
-        kind = (
-            coupon.type
-            if isinstance(coupon.type, CouponType)
-            else CouponType(coupon.type)
-        )
+        kind: CouponType = coupon.type  # __casts__ guarantees the enum
         return AnnouncementOut(code=coupon.code, type=kind, value=coupon.value)
     abort(404, trans("shop.errors.nothing_announced"))

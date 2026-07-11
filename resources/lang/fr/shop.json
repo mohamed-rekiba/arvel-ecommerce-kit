@@ -133,7 +133,8 @@
     "category_slug_exists": "Une catégorie avec ce slug existe déjà.",
     "category_self_parent": "Une catégorie ne peut pas être son propre parent.",
     "vendor_slug_exists": "Un vendeur avec ce slug existe déjà.",
-    "tracking_required": "Un numéro de suivi est requis pour expédier une commande."
+    "tracking_required": "Un numéro de suivi est requis pour expédier une commande.",
+    "no_product_create": "Vous ne pouvez pas créer de produits."
   },
   "messages": {
     "logged_out": "Déconnecté.",

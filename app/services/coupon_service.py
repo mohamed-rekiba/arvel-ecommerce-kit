@@ -56,9 +56,7 @@ async def enforce_per_customer_limit(
 def discount_cents(coupon: Coupon, subtotal_cents: int) -> int:
     """The discount this coupon takes off ``subtotal_cents`` — never more than the subtotal itself.
     Computed with Money (half-up rounding on the percentage) rather than integer floor math."""
-    kind = (
-        coupon.type if isinstance(coupon.type, CouponType) else CouponType(coupon.type)
-    )
+    kind: CouponType = coupon.type  # __casts__ guarantees the enum
     subtotal = Money(subtotal_cents, Currency.USD.value)
     if kind is CouponType.PERCENT:
         off = subtotal.times(Decimal(coupon.value) / Decimal(100))

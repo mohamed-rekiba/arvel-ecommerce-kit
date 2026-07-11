@@ -9,6 +9,7 @@ from typing import Any
 from arvel.auth.gate import GateResponse
 
 from app.enums import Permission
+from app.i18n import trans
 
 
 class ProductPolicy:
@@ -26,7 +27,7 @@ class ProductPolicy:
             Permission.CATALOG_CREATE.value
         ):
             return GateResponse.allow()
-        return GateResponse.deny("You may not create products.")
+        return GateResponse.deny(trans("shop.errors.no_product_create"))
 
     async def update(self, user: Any, *_: Any) -> GateResponse:
         if user is not None and await user.has_permission_to(

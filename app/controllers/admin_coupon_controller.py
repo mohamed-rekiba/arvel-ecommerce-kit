@@ -21,9 +21,7 @@ from app.services.coupon_service import normalize_code
 
 
 def _out(coupon: Coupon) -> AdminCouponOut:
-    kind = (
-        coupon.type if isinstance(coupon.type, CouponType) else CouponType(coupon.type)
-    )
+    kind: CouponType = coupon.type  # __casts__ guarantees the enum
     return AdminCouponOut(
         id=coupon.id,
         code=coupon.code,
