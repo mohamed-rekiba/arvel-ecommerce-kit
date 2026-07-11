@@ -11,7 +11,7 @@ from arvel.auth.password_reset import PasswordBroker, PasswordResetStatus
 from arvel.auth.tokens import TokenGuard, create_token
 from arvel.http import Request
 from arvel.support.facades import Config, Mail
-from arvel.validation import ValidationException, Validator
+from arvel.validation import ValidationException
 
 from app.controllers.cart_controller import merge_guest_cart
 from app.mail.verify_email import VerifyEmail
@@ -42,17 +42,6 @@ def _password_broker() -> PasswordBroker:
 
 async def register(request: Request, data: RegisterIn) -> TokenOut:
     """Register a customer and issue a scoped API token."""
-    payload = {"name": data.name, "email": data.email, "password": data.password}
-    validator = Validator(
-        payload,
-        {
-            "name": "required|string",
-            "email": "required|email",
-            "password": "required|string|min:8",  # nosec B105
-        },
-    )
-    if validator.fails():
-        raise ValidationException(validator.errors())
     if await User.where("email", data.email).first() is not None:
         raise ValidationException({"email": [trans("shop.errors.email_taken")]})
     from app.i18n import active_locale

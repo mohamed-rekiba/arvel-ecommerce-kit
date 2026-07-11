@@ -1,7 +1,7 @@
 """Store settings + newsletter — the public reads and the admin management surface."""
 
 from arvel.http import Request
-from arvel.validation import ValidationException, Validator
+from arvel.validation import ValidationException
 
 from app.controllers.serializers import iso as _iso
 from app.i18n import active_locale, trans
@@ -23,10 +23,7 @@ async def public_settings(request: Request) -> SettingsOut:
 
 async def subscribe(request: Request, data: NewsletterIn) -> MessageOut:
     """Idempotent newsletter signup — re-subscribing an existing email is a friendly 200."""
-    email = data.email.strip().lower()
-    validator = Validator({"email": email}, {"email": "required|email"})
-    if validator.fails():
-        raise ValidationException(dict(validator.errors()))
+    email = data.email  # normalized by NewsletterIn.prepare_for_validation
     if await NewsletterSubscriber.where("email", email).first() is None:
         await NewsletterSubscriber.create(email=email, locale=active_locale())
     return MessageOut(message=trans("shop.messages.subscribed"))

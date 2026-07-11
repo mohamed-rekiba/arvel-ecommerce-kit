@@ -15,7 +15,7 @@ from arvel.auth.middleware import Authorize
 from arvel.http import Request
 from arvel.routing import Controller, ControllerMiddleware
 from arvel.support import Str
-from arvel.validation import ValidationException, Validator
+from arvel.validation import ValidationException
 
 from arvel.activitylog import activity
 
@@ -265,15 +265,6 @@ class AdminProductController(Controller):
     async def store(self, request: Request, data: ProductIn) -> AdminProductOut:
         """Create a product (admins only) with per-locale content (en required)."""
         user = _current_user()
-        validator = Validator(
-            {"category_id": data.category_id, "price_cents": data.price_cents},
-            {
-                "category_id": "required|integer",
-                "price_cents": "required|integer|min:0",
-            },
-        )
-        if validator.fails():
-            raise ValidationException(validator.errors())
         translations = validated_translations(data.translations)
         if translations is None:  # ProductIn.translations is required
             abort(500, "Product translations missing after validation.")

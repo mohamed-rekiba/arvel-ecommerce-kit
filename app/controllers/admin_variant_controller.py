@@ -9,7 +9,7 @@ from app.auth.require import require_user as _current_user
 from app.i18n import trans
 from arvel.activitylog import activity
 from arvel.http import Request
-from arvel.validation import ValidationException, Validator
+from arvel.validation import ValidationException
 
 from app.models.cart_item import CartItem
 from app.models.order_item import OrderItem
@@ -65,14 +65,6 @@ async def store(request: Request, id: Product, data: VariantIn) -> VariantOut:
     user = _current_user()
     product = id
     await _authorize(user, product)
-    validator = Validator(
-        {"sku": data.sku, "name": data.name},
-        {"sku": "required|string", "name": "required|string"},
-    )
-    if validator.fails():
-        raise ValidationException(validator.errors())
-    if data.stock < 0:
-        raise ValidationException({"stock": [trans("shop.errors.stock_negative")]})
     if await _sku_taken(product.id, data.sku):
         raise ValidationException({"sku": [trans("shop.errors.sku_exists")]})
     variant = await ProductVariant.create(

@@ -80,7 +80,6 @@
     "file_not_image": "الملف ليس صورة صالحة.",
     "image_required": "ملف الصورة مطلوب.",
     "sku_exists": "رمز SKU هذا موجود بالفعل لهذا المنتج.",
-    "stock_negative": "لا يمكن أن يكون المخزون سالبًا.",
     "stock_would_go_negative": "لا يمكن أن يصبح المخزون سالبًا.",
     "price_negative": "لا يمكن أن يكون السعر سالبًا.",
     "value_not_positive": "يجب أن تكون القيمة موجبة.",

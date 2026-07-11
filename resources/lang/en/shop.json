@@ -80,7 +80,6 @@
     "file_not_image": "The file is not a valid image.",
     "image_required": "An image file is required.",
     "sku_exists": "This SKU already exists on the product.",
-    "stock_negative": "Stock can't be negative.",
     "stock_would_go_negative": "Stock can't go negative.",
     "price_negative": "The price can't be negative.",
     "value_not_positive": "The value must be positive.",

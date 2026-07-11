@@ -99,6 +99,15 @@ def test_variant_crud_and_stock_adjustment(client) -> None:
     assert created.status_code == 201, created.text
     variant_id = created.json()["id"]
 
+    # negative starting stock → 422 (VariantIn's min:0 rule, run by the injected lifecycle)
+    negative = client.post(
+        "/api/admin/products/1/variants",
+        json={"sku": "TEE-NEG", "name": "Neg", "stock": -1},
+        headers=admin,
+    )
+    assert negative.status_code == 422
+    assert "stock" in negative.json()["errors"]
+
     # duplicate SKU on the same product → 422
     dup = client.post(
         "/api/admin/products/1/variants",

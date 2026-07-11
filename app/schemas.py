@@ -8,7 +8,7 @@ from __future__ import annotations
 
 from typing import Any
 
-from arvel import Schema
+from arvel import FormRequest, Schema
 
 from app.enums import (
     CountryCode,
@@ -192,10 +192,18 @@ class AdminCategoryPage(Schema):
 # --- auth ---
 
 
-class RegisterIn(Schema):
+class RegisterIn(FormRequest):
     name: str
     email: str
     password: str
+
+    @classmethod
+    def rules(cls) -> dict[str, str | list[Any]]:
+        return {
+            "name": "required|string",
+            "email": "required|email",
+            "password": "required|string|min:8",  # nosec B105
+        }
 
 
 class CredentialsIn(Schema):
@@ -413,8 +421,17 @@ class AdminBannerOut(Schema):
     image_url: str | None
 
 
-class NewsletterIn(Schema):
+class NewsletterIn(FormRequest):
     email: str
+
+    @classmethod
+    def prepare_for_validation(cls, data: dict[str, Any]) -> dict[str, Any]:
+        data["email"] = str(data.get("email", "")).strip().lower()
+        return data
+
+    @classmethod
+    def rules(cls) -> dict[str, str | list[Any]]:
+        return {"email": "required|email"}
 
 
 class NewsletterSubscriberOut(Schema):
@@ -468,12 +485,19 @@ class TranslationFieldsIn(Schema):
     description: str | None = None
 
 
-class ProductIn(Schema):
+class ProductIn(FormRequest):
     category_id: int
     price_cents: int
     translations: dict[
         str, TranslationFieldsIn
     ]  # locale → content; locales are whitelisted
+
+    @classmethod
+    def rules(cls) -> dict[str, str | list[Any]]:
+        return {
+            "category_id": "required|integer",
+            "price_cents": "required|integer|min:0",
+        }
 
 
 class UpdateProductIn(Schema):
@@ -787,11 +811,19 @@ class VendorUpdateIn(Schema):
     published: bool | None = None
 
 
-class VariantIn(Schema):
+class VariantIn(FormRequest):
     sku: str
     name: str
     price_adjustment_cents: int = 0
     stock: int = 0
+
+    @classmethod
+    def rules(cls) -> dict[str, str | list[Any]]:
+        return {
+            "sku": "required|string",
+            "name": "required|string",
+            "stock": "integer|min:0",
+        }
 
 
 class VariantUpdateIn(Schema):
