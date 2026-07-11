@@ -87,9 +87,7 @@ onMounted(load)
         <Column :header="t('coupons.value')" header-style="width: 7rem">
           <template #body="{ data }">
             <Tag
-              :value="
-                data.type === 'percent' ? `−${data.value}%` : `−${formatPrice(data.value)}`
-              "
+              :value="data.type === 'percent' ? `−${data.value}%` : `−${formatPrice(data.value)}`"
               severity="warn"
             />
           </template>
