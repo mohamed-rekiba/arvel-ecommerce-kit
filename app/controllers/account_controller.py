@@ -48,7 +48,9 @@ async def _send_verification(user: User) -> None:
     token = email_verification_token(
         user.id, user.email, str(Config.get("app.key", ""))
     )
-    await Mail.to(user.email).send(VerifyEmail(user.id, token))
+    await Mail.to(user.email).send(
+        VerifyEmail(user.id, token, locale=str(getattr(user, "locale", None) or "en"))
+    )
 
 
 async def update_profile(request: Request, data: ProfileIn) -> UserOut:

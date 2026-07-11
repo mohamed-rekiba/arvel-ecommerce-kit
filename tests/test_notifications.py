@@ -125,3 +125,11 @@ def test_guest_checkout_without_email_is_rejected(client, faked_mail) -> None:
     assert resp.status_code == 422
     assert "email" in resp.json()["errors"]
     faked_mail.assert_nothing_sent()
+
+
+def test_order_confirmation_money_follows_locale_and_currency(client) -> None:
+    # Money.format, not a hand-rolled f"${...}": en → $19.99, fr → 19,99 (with $US)
+    en = OrderConfirmation(7, 1999, currency="USD", locale="en").build()
+    assert "$19.99" in en._html
+    fr = OrderConfirmation(7, 1999, currency="USD", locale="fr").build()
+    assert "19,99" in fr._html

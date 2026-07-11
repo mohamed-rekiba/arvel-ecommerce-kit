@@ -10,7 +10,11 @@ from arvel.auth.password_reset import PasswordResetRequested
 from arvel.support.facades import Mail
 
 from app.mail.password_reset import PasswordReset
+from app.models.user import User
 
 
 async def send_password_reset(event: PasswordResetRequested) -> None:
-    await Mail.to(event.email).send(PasswordReset(event.email, event.token))
+    # the broker only carries email+token; render in the account's stored locale
+    user = await User.where("email", event.email).first()
+    locale = str(getattr(user, "locale", None) or "en")
+    await Mail.to(event.email).send(PasswordReset(event.email, event.token, locale))

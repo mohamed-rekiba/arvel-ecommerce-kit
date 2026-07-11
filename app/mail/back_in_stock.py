@@ -1,7 +1,9 @@
-"""Back-in-stock email — links straight to the product page."""
+"""Back-in-stock email — links straight to the product page (themed markdown button)."""
 
 from arvel.mail import Mailable
 from arvel.support.facades import Config
+
+from app.i18n import trans_in
 
 
 class BackInStock(Mailable):
@@ -23,8 +25,6 @@ class BackInStock(Mailable):
             Config.get("app.frontend_url") or "http://localhost:5173"
         ).rstrip("/")
         link = f"{frontend}/products/{self.product_slug}"
-        from app.i18n import trans_in
-
         self.subject(
             trans_in(
                 self.locale,
@@ -38,5 +38,5 @@ class BackInStock(Mailable):
             "shop.mail.back_in_stock.body",
             product=f"{self.product_name} ({self.variant_name})",
         )
-        self.html(f'<h1>{title}</h1><p>{body} <a href="{link}">→</a></p>')
+        self.markdown(f"# {title}\n\n{body}\n\n[button: {title}]({link})\n")
         return self

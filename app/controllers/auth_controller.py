@@ -58,7 +58,9 @@ async def register(request: Request, data: RegisterIn) -> TokenOut:
     verification = email_verification_token(
         user.id, user.email, str(Config.get("app.key", ""))
     )
-    await Mail.to(user.email).send(VerifyEmail(user.id, verification))
+    await Mail.to(user.email).send(
+        VerifyEmail(user.id, verification, locale=str(user.locale or "en"))
+    )
     token, _ = await create_token(user, name="customer", abilities=[CUSTOMER_ABILITY])
     return TokenOut(token=token)
 

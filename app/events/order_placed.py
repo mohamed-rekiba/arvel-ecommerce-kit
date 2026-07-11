@@ -11,4 +11,7 @@ class OrderPlaced:
     user_id: int | None
     total_cents: int
     contact_email: str  # captured at checkout — guests get their confirmation too
+    currency: str = (
+        "USD"  # the order's currency — Money.format needs it, not a hardcoded $
+    )
     locale: str = "en"  # the buyer's request locale — mail renders in their language

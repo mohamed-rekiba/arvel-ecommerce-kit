@@ -15,6 +15,19 @@
       "subject": "De retour en stock : {product}",
       "title": "Il est de retour !",
       "body": "{product} est à nouveau disponible — dans la limite du stock."
+    },
+    "reset": {
+      "subject": "Réinitialisez votre mot de passe Arvel Shop",
+      "title": "Réinitialisez votre mot de passe",
+      "action": "Choisir un nouveau mot de passe",
+      "expires": "Ce lien expire dans 1 heure.",
+      "ignore": "Si vous n'êtes pas à l'origine de cette demande, ignorez ce message."
+    },
+    "verify": {
+      "subject": "Vérifiez votre adresse e-mail",
+      "title": "Vous y êtes presque",
+      "action": "Vérifier votre adresse e-mail",
+      "expires": "Ce lien expire dans 24 heures."
     }
   },
   "notif": {

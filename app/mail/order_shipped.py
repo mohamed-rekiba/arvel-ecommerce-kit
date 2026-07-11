@@ -21,8 +21,11 @@ class OrderShipped(Mailable):
         )
         title = trans_in(self.locale, "shop.mail.shipped.title")
         body = trans_in(self.locale, "shop.mail.shipped.body", order=self.order_id)
-        html = f"<h1>{title}</h1><p>{body}</p>"
+        md = f"# {title}\n\n{body}\n"
         if self.tracking_number:
-            html += f"<p>{trans_in(self.locale, 'shop.mail.shipped.tracking', tracking=self.tracking_number)}</p>"
-        self.html(html)
+            tracking = trans_in(
+                self.locale, "shop.mail.shipped.tracking", tracking=self.tracking_number
+            )
+            md += f"\n{tracking}\n"
+        self.markdown(md)
         return self

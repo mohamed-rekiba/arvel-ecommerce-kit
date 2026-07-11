@@ -436,6 +436,7 @@ async def checkout(request: Request, data: CheckoutIn) -> OrderOut:
             user_id=order.user_id,
             total_cents=order.total_cents,
             contact_email=order.contact_email,
+            currency=order.currency.value,
             locale=active_locale(),
         ),
     )

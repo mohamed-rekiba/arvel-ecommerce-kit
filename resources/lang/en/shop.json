@@ -15,6 +15,19 @@
       "subject": "Back in stock: {product}",
       "title": "It's back!",
       "body": "{product} is available again — while it lasts."
+    },
+    "reset": {
+      "subject": "Reset your Arvel Shop password",
+      "title": "Reset your password",
+      "action": "Choose a new password",
+      "expires": "This link expires in 1 hour.",
+      "ignore": "If you didn't ask for this, you can ignore it."
+    },
+    "verify": {
+      "subject": "Verify your email address",
+      "title": "Almost there",
+      "action": "Verify your email address",
+      "expires": "This link expires in 24 hours."
     }
   },
   "notif": {
