@@ -13,6 +13,7 @@ from arvel.validation import ValidationException, Validator
 
 from app.controllers.cart_controller import line_presentation, resolve_cart
 from app.controllers.serializers import iso as _iso
+from app.auth.require import require_user
 from app.i18n import active_locale, trans
 from app.controllers.order_access import resolve_owned_order
 from app.enums import (
@@ -578,9 +579,7 @@ async def orders_placed_count(request: Request) -> MetricsOut:
 
 async def my_orders(request: Request) -> list[OrderOut]:
     """The authenticated user's orders (newest first)."""
-    user = current_user.get()
-    if user is None:
-        abort(401, trans("shop.errors.unauthenticated"))
+    user = require_user()
     orders = await Order.where("user_id", user.id).order_by("id", "desc").get()
     return [await _order_out(o, await o.items().get()) for o in orders]
 

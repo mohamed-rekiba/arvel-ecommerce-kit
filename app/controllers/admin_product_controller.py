@@ -107,7 +107,7 @@ def _admin_product_out(
         id=product.id,
         slug=product.slug,
         translations=product.translations,
-        status=ProductStatus(product.status).value,
+        status=product.status.value,  # __casts__ guarantees the enum
         published=bool(product.published),
         featured=bool(getattr(product, "featured", False)),
         is_visible=is_visible,
@@ -243,7 +243,7 @@ class AdminProductController(Controller):
             id=product.id,
             slug=product.slug,
             translations=product.translations,
-            status=ProductStatus(product.status).value,
+            status=product.status.value,  # __casts__ guarantees the enum
             published=bool(product.published),
             featured=bool(getattr(product, "featured", False)),
             is_visible=bool(getattr(product, "is_visible", False)),

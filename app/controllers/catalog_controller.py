@@ -8,7 +8,6 @@ from arvel.media import Media
 
 from app.models.media import AppMedia
 
-from app.enums import ProductStatus
 from app.controllers.serializers import iso as _iso
 from app.i18n import active_locale
 from app.models.category import Category
@@ -104,7 +103,7 @@ async def product_out(p: Product, deal: Any | None = None) -> ProductOut:
         rating_count=rating_count,
         price_cents=p.price_cents,
         currency=p.currency,
-        status=ProductStatus(p.status).value,
+        status=p.status.value,  # __casts__ guarantees the enum
         featured=bool(getattr(p, "featured", False)),
         created_at=_iso(getattr(p, "created_at", None)),
         deal=deal_out(p, deal),
