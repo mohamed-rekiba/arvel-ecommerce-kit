@@ -109,6 +109,12 @@ jobs:
       # regenerate the exported OpenAPI doc + the orval client from the live API; if either
       # differs from what's committed, the single typed contract has silently drifted — fail.
       - name: openapi + client not drifted
+        # Pin the two env vars that shape the contract (APP_NAME → title, APP_DEBUG → the
+        # debug-only dev-gateway routes) to the canonical defaults, matching `make openapi`, so
+        # the check is deterministic and never depends on the runner's ambient env.
+        env:
+          APP_NAME: arvel-ecommerce-kit
+          APP_DEBUG: "false"
         run: |
           uv run arvel openapi:export frontend/openapi.json
           cd frontend && npm run api:generate
