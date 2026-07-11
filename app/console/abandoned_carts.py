@@ -21,7 +21,8 @@ async def sweep_abandoned_carts(
         .where("updated_at", "<", cutoff)
         .get()
     )
-    for cart in stale:
-        await CartItem.where("cart_id", cart.id).delete()
-        await cart.delete()
-    return len(stale)
+    ids = [cart.id for cart in stale]
+    if ids:  # two bulk deletes, not two per cart
+        await CartItem.where_in("cart_id", ids).delete()
+        await Cart.where_in("id", ids).delete()
+    return len(ids)

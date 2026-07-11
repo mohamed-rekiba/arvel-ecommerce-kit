@@ -17,13 +17,9 @@ async def subscribe(request: Request) -> MessageOut:
     variant = await ProductVariant.find_or_fail(int(request.path_param("id")))
     if variant.stock > 0:
         raise ValidationException({"variant": [trans("shop.errors.variant_in_stock")]})
-    existing = (
-        await StockAlert.where("product_variant_id", variant.id)
-        .where("user_id", user.id)
-        .first()
+    await StockAlert.first_or_create(
+        {"product_variant_id": variant.id, "user_id": user.id}
     )
-    if existing is None:
-        await StockAlert.create(product_variant_id=variant.id, user_id=user.id)
     return MessageOut(message=trans("shop.messages.stock_alert_created"))
 
 

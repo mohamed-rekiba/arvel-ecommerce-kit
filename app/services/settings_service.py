@@ -36,11 +36,6 @@ async def update_settings(values: dict[str, str]) -> dict[str, str]:
     for key, value in values.items():
         if key not in DEFAULTS:
             continue  # the controller validates; this is belt-and-suspenders
-        existing = await Setting.where("key", key).first()
-        if existing is None:
-            await Setting.create(key=key, value=value)
-        else:
-            existing.value = value
-            await existing.save()
+        await Setting.update_or_create({"key": key}, {"value": value})
     await Cache.forget(_CACHE_KEY)
     return await all_settings()

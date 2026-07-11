@@ -23,9 +23,10 @@ async def public_settings(request: Request) -> SettingsOut:
 
 async def subscribe(request: Request, data: NewsletterIn) -> MessageOut:
     """Idempotent newsletter signup — re-subscribing an existing email is a friendly 200."""
-    email = data.email  # normalized by NewsletterIn.prepare_for_validation
-    if await NewsletterSubscriber.where("email", email).first() is None:
-        await NewsletterSubscriber.create(email=email, locale=active_locale())
+    # normalized by NewsletterIn.prepare_for_validation; re-subscribing is a no-op
+    await NewsletterSubscriber.first_or_create(
+        {"email": data.email}, {"locale": active_locale()}
+    )
     return MessageOut(message=trans("shop.messages.subscribed"))
 
 
