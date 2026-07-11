@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.6.2](https://github.com/mohamed-rekiba/arvel-ecommerce-kit/compare/v0.6.1...v0.6.2) (2026-07-11)
+
+
+### Refactors
+
+* **realtime:** use the framework broadcast relay, drop the app-owned one ([cf189b6](https://github.com/mohamed-rekiba/arvel-ecommerce-kit/commit/cf189b6f1da4536d98b457a7ab0048ba8b5d4933))
+
 ## [0.6.1](https://github.com/mohamed-rekiba/arvel-ecommerce-kit/compare/v0.6.0...v0.6.1) (2026-07-11)
 
 
