@@ -119,6 +119,9 @@
     "default_copy_required": "Le contenu en {lang} est requis.",
     "unknown_settings": "Paramètre(s) inconnu(s) : {settings}.",
     "order_not_refundable": "Une commande {status} ne peut pas être remboursée.",
-    "shipping_method_unavailable": "« {code} » n'est pas un mode de livraison disponible."
+    "shipping_method_unavailable": "« {code} » n'est pas un mode de livraison disponible.",
+    "coupon_percent_range": "Un coupon en pourcentage doit être de 1 à 100.",
+    "deal_percent_range": "Une promotion doit être de 1 à 90 %.",
+    "ship_country_required": "Un pays de livraison est requis."
   }
 }

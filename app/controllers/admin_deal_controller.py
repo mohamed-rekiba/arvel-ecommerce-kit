@@ -35,7 +35,9 @@ def _current_user() -> User:
 
 def _validate_percent(percent_off: int) -> None:
     if not (1 <= percent_off <= 90):
-        raise ValidationException({"percent_off": ["A deal must be 1–90 percent off."]})
+        raise ValidationException(
+            {"percent_off": [trans("shop.errors.deal_percent_range")]}
+        )
 
 
 def _parse_when(value: str, field: str) -> Any:

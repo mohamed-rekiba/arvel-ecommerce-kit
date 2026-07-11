@@ -119,6 +119,9 @@
     "default_copy_required": "The {lang} copy is required.",
     "unknown_settings": "Unknown setting(s): {settings}.",
     "order_not_refundable": "A {status} order cannot be refunded.",
-    "shipping_method_unavailable": "'{code}' is not an available shipping method."
+    "shipping_method_unavailable": "'{code}' is not an available shipping method.",
+    "coupon_percent_range": "A percent coupon must be 1–100.",
+    "deal_percent_range": "A deal must be 1–90 percent off.",
+    "ship_country_required": "A shipping country is required."
   }
 }

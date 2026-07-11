@@ -119,6 +119,9 @@
     "default_copy_required": "المحتوى بلغة {lang} مطلوب.",
     "unknown_settings": "إعداد/إعدادات غير معروفة: {settings}.",
     "order_not_refundable": "لا يمكن استرداد طلب بحالة {status}.",
-    "shipping_method_unavailable": "'{code}' ليس وسيلة شحن متاحة."
+    "shipping_method_unavailable": "'{code}' ليس وسيلة شحن متاحة.",
+    "coupon_percent_range": "يجب أن يكون كوبون النسبة بين 1 و100.",
+    "deal_percent_range": "يجب أن يكون العرض بخصم من 1 إلى 90 بالمئة.",
+    "ship_country_required": "بلد الشحن مطلوب."
   }
 }

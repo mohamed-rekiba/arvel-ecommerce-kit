@@ -281,7 +281,9 @@ async def checkout(request: Request, data: CheckoutIn) -> OrderOut:
     # Guard rather than assert — asserts strip under -O, and this is a money/tax path.
     ship_country = ship_fields["ship_country"]
     if ship_country is None:
-        raise ValidationException({"ship_country": ["A shipping country is required."]})
+        raise ValidationException(
+            {"ship_country": [trans("shop.errors.ship_country_required")]}
+        )
     tax_rate_bps = await tax_service.resolve_rate_bps(ship_country)
     tax = _tax_cents(subtotal, tax_rate_bps)
     total = (

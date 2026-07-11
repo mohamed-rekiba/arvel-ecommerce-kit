@@ -80,7 +80,9 @@ class CouponController(Controller):
                 {"code": [trans("shop.errors.coupon_code_required")]}
             )
         if data.type is CouponType.PERCENT and not (1 <= data.value <= 100):
-            raise ValidationException({"value": ["A percent coupon must be 1–100."]})
+            raise ValidationException(
+                {"value": [trans("shop.errors.coupon_percent_range")]}
+            )
         if data.value <= 0:
             raise ValidationException(
                 {"value": [trans("shop.errors.value_not_positive")]}
