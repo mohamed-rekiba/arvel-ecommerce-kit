@@ -3,15 +3,11 @@
 Read-only: deletion stays with the owning resource (e.g. the product-gallery delete route)."""
 
 from collections.abc import Sequence
-from app.i18n import trans
 from typing import cast
 
-from arvel import abort
 from arvel.media import Media
-from arvel.support import current_user
 
 from app.controllers.serializers import iso as _iso
-from app.enums import Permission
 from app.models.media import AppMedia
 from app.models.banner import Banner
 from app.models.product import Product
@@ -52,9 +48,6 @@ def _thumb_conversion(model_type: str) -> str:
 
 
 async def index() -> list[MediaItemOut]:
-    user = current_user.get()
-    if user is None or not await user.can(Permission.CATALOG_VIEW.value):
-        abort(403, trans("shop.errors.no_media_browse"))
     rows = await AppMedia.order_by("id", "desc").get()
     labels = await _owner_labels(rows)
     out: list[MediaItemOut] = []

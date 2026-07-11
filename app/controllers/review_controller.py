@@ -10,7 +10,7 @@ from arvel.support import current_user
 from arvel.validation import ValidationException
 
 from app.controllers.serializers import iso as _iso
-from app.enums import OrderStatus, Permission, ReviewStatus
+from app.enums import OrderStatus, ReviewStatus
 from app.models.order import Order
 from app.models.order_item import OrderItem
 from app.models.product import Product
@@ -128,9 +128,6 @@ async def store(request: Request, data: ReviewIn) -> ReviewOut:
 async def admin_index(
     request: Request, status: str = "pending"
 ) -> list[AdminReviewOut]:
-    user = _current_user()
-    if not await user.can(Permission.REVIEWS_MODERATE.value):
-        abort(403, trans("shop.errors.no_reviews_moderate"))
     try:
         wanted = ReviewStatus(status)
     except ValueError:

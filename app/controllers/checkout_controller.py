@@ -20,7 +20,6 @@ from app.enums import (
     Currency,
     OrderStatus,
     PaymentStatus,
-    Permission,
     can_transition,
     PaymentMethod,
 )
@@ -588,9 +587,6 @@ async def my_orders(request: Request) -> list[OrderOut]:
 async def admin_orders_index(request: Request) -> list[OrderOut]:
     """List orders (newest first) for the back office, narrowed by ``?status=`` and searched
     by ``?q=`` (order id, or a case-insensitive contact-email fragment). Requires orders.view."""
-    user = current_user.get()
-    if user is None or not await user.can(Permission.ORDERS_VIEW.value):
-        abort(403, trans("shop.errors.no_orders_view"))
     query = Order.order_by("id", "desc")
     status = str(request.query("status", "") or "")
     if status:

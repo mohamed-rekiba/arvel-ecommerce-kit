@@ -309,14 +309,20 @@ with Route.group(prefix="/admin", name="api.admin."):
 
         # Admin user directory (users.view; role mutations stay on roles.manage). Authorize
         # (DR-0055) on the id-bound routes — see the products.image comment above for why.
-        Route.get("/users", admin_users.index, name="users.index")
+        Route.get("/users", admin_users.index, name="users.index").middleware(
+            Authorize(Permission.USERS_VIEW.value)
+        )
         Route.get("/users/{id:int}", admin_users.show, name="users.show").middleware(
             Authorize(Permission.USERS_VIEW.value)
         )
 
         # Admin RBAC + audit (roles.manage / audit.view; super-admin bypasses).
-        Route.get("/roles", rbac.roles_index, name="roles.index")
-        Route.get("/permissions", rbac.permissions_index, name="permissions.index")
+        Route.get("/roles", rbac.roles_index, name="roles.index").middleware(
+            Authorize(Permission.ROLES_MANAGE.value)
+        )
+        Route.get(
+            "/permissions", rbac.permissions_index, name="permissions.index"
+        ).middleware(Authorize(Permission.ROLES_MANAGE.value))
         Route.get(
             "/users/{id:int}/roles", rbac.user_roles, name="users.roles"
         ).middleware(Authorize(Permission.ROLES_MANAGE.value))
@@ -328,10 +334,14 @@ with Route.group(prefix="/admin", name="api.admin."):
             rbac.revoke_role,
             name="users.roles.revoke",
         ).status(200).middleware(Authorize(Permission.ROLES_MANAGE.value))
-        Route.get("/audit", rbac.audit_index, name="audit.index")
+        Route.get("/audit", rbac.audit_index, name="audit.index").middleware(
+            Authorize(Permission.AUDIT_VIEW.value)
+        )
 
         # Admin reviews. moderate carries Authorize (DR-0055).
-        Route.get("/reviews", reviews.admin_index, name="reviews.index")
+        Route.get("/reviews", reviews.admin_index, name="reviews.index").middleware(
+            Authorize(Permission.REVIEWS_MODERATE.value)
+        )
         Route.post(
             "/reviews/{id:int}/{decision:str}",
             reviews.moderate,
@@ -339,10 +349,18 @@ with Route.group(prefix="/admin", name="api.admin."):
         ).status(200).middleware(Authorize(Permission.REVIEWS_MODERATE.value))
 
         # Admin settings + media + newsletter.
-        Route.get("/settings", settings.admin_settings, name="settings")
-        Route.patch("/settings", settings.update_settings, name="settings.update")
-        Route.get("/media", media_library.index, name="media")
-        Route.get("/newsletter", settings.newsletter_index, name="newsletter")
+        Route.get("/settings", settings.admin_settings, name="settings").middleware(
+            Authorize(Permission.CATALOG_VIEW.value)
+        )
+        Route.patch(
+            "/settings", settings.update_settings, name="settings.update"
+        ).middleware(Authorize(Permission.CATALOG_UPDATE.value))
+        Route.get("/media", media_library.index, name="media").middleware(
+            Authorize(Permission.CATALOG_VIEW.value)
+        )
+        Route.get(
+            "/newsletter", settings.newsletter_index, name="newsletter"
+        ).middleware(Authorize(Permission.CATALOG_VIEW.value))
 
         # Admin banners: non-CRUD image upload stays an explicit route; index/store/update/destroy
         # (K5) fold into BannerController's declared Authorize — one consistent authz posture,
@@ -365,7 +383,9 @@ with Route.group(prefix="/admin", name="api.admin."):
 
         # Admin orders. show/status carry Authorize (DR-0055) — see the products.image comment
         # above for why a class-level admin check has to move ahead of route-model binding.
-        Route.get("/orders", checkout.admin_orders_index, name="orders.index")
+        Route.get(
+            "/orders", checkout.admin_orders_index, name="orders.index"
+        ).middleware(Authorize(Permission.ORDERS_VIEW.value))
         Route.get(
             "/orders/{id:int}", checkout.admin_order_show, name="orders.show"
         ).middleware(Authorize(Permission.ORDERS_VIEW.value))

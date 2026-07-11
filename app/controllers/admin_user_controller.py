@@ -4,21 +4,12 @@
 role mutations stay on the existing ``roles.manage`` endpoints. Responses expose ONLY the defined
 schema — never password hashes, tokens, or reset material."""
 
-from arvel import abort
-from app.auth.require import require_user as _current_user
-from app.i18n import trans
 from arvel.http import Request
 from app.controllers.account_controller import avatar_url
-from app.enums import Permission
 from app.models.address import Address
 from app.models.order import Order
 from app.models.user import User
 from app.schemas import AdminUserDetailOut, AdminUserOut, AdminUserPage
-
-
-async def _require_users_view(user: User) -> None:
-    if not await user.can(Permission.USERS_VIEW.value):
-        abort(403, trans("shop.errors.no_users_browse"))
 
 
 async def _user_out(user: User) -> AdminUserOut:
@@ -35,9 +26,8 @@ async def _user_out(user: User) -> AdminUserOut:
 async def index(
     request: Request, q: str = "", per_page: int = 20, page: int = 1
 ) -> AdminUserPage:
-    """Search + paginate the user directory (name/email substring)."""
-    viewer = _current_user()
-    await _require_users_view(viewer)
+    """Search + paginate the user directory (name/email substring); users.view via the
+    route's Authorize."""
     query = User.order_by("id")
     if q:
         like = f"%{q}%"

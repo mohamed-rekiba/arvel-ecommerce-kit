@@ -13,22 +13,11 @@ from arvel.activitylog import Activity, activity
 from arvel.auth import Permission as PermissionModel
 from arvel.auth import Role
 from arvel.http import Request
-from arvel.support import current_user
 
 from app.auth.require import require_user as _current_user
 from app.controllers.serializers import iso as _iso
-from app.enums import Permission
 from app.models.user import User
 from app.schemas import ActivityOut, AssignRoleIn, PermissionOut, RoleOut, UserRolesOut
-
-
-async def _require(permission: Permission) -> User:
-    user: User | None = current_user.get()
-    if user is None:
-        abort(401, trans("shop.errors.unauthenticated"))
-    if not await user.can(permission.value):
-        abort(403, trans("shop.errors.insufficient_permissions"))
-    return user
 
 
 async def _role_out(role: Any) -> RoleOut:
@@ -40,14 +29,12 @@ async def _role_out(role: Any) -> RoleOut:
 
 
 async def roles_index(request: Request) -> list[RoleOut]:
-    """List every role with the permissions it grants."""
-    await _require(Permission.ROLES_MANAGE)
+    """List every role with the permissions it grants (roles.manage via the route's Authorize)."""
     return [await _role_out(role) for role in await Role.all()]
 
 
 async def permissions_index(request: Request) -> list[PermissionOut]:
-    """List every permission in the system."""
-    await _require(Permission.ROLES_MANAGE)
+    """List every permission in the system (roles.manage via the route's Authorize)."""
     return [PermissionOut(id=p.id, name=p.name) for p in await PermissionModel.all()]
 
 
@@ -113,7 +100,6 @@ def _activity_out(row: Activity) -> ActivityOut:
 
 
 async def audit_index(request: Request) -> list[ActivityOut]:
-    """The most recent audit-log entries (audit.view)."""
-    await _require(Permission.AUDIT_VIEW)
+    """The most recent audit-log entries (audit.view via the route's Authorize)."""
     rows = await Activity.order_by("id", "desc").limit(50).get()
     return [_activity_out(row) for row in rows]

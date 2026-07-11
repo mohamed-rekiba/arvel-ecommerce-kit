@@ -1,12 +1,9 @@
 """Store settings + newsletter — the public reads and the admin management surface."""
 
-from arvel import abort
-from app.auth.require import require_user as _admin
 from arvel.http import Request
 from arvel.validation import ValidationException, Validator
 
 from app.controllers.serializers import iso as _iso
-from app.enums import Permission
 from app.i18n import active_locale, trans
 from app.models.newsletter_subscriber import NewsletterSubscriber
 from app.schemas import (
@@ -36,16 +33,10 @@ async def subscribe(request: Request, data: NewsletterIn) -> MessageOut:
 
 
 async def admin_settings(request: Request) -> SettingsOut:
-    user = _admin()
-    if not await user.can(Permission.CATALOG_VIEW.value):
-        abort(403, trans("shop.errors.no_catalog_access"))
     return SettingsOut(values=await settings_service.all_settings())
 
 
 async def update_settings(request: Request, data: SettingsIn) -> SettingsOut:
-    user = _admin()
-    if not await user.can(Permission.CATALOG_UPDATE.value):
-        abort(403, trans("shop.errors.no_catalog_access"))
     unknown = [k for k in data.values if k not in settings_service.DEFAULTS]
     if unknown:
         raise ValidationException(
@@ -62,9 +53,6 @@ async def update_settings(request: Request, data: SettingsIn) -> SettingsOut:
 
 
 async def newsletter_index(request: Request) -> list[NewsletterSubscriberOut]:
-    user = _admin()
-    if not await user.can(Permission.CATALOG_VIEW.value):
-        abort(403, trans("shop.errors.no_catalog_access"))
     rows = await NewsletterSubscriber.order_by("id", "desc").get()
     return [
         NewsletterSubscriberOut(
