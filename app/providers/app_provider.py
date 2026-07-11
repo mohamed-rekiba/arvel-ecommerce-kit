@@ -90,16 +90,6 @@ class AppServiceProvider(ServiceProvider):
             for permission in Permission:
                 _define(permission)
 
-        # Catalog visibility: a publish change on a product/category/vendor flags the views dirty;
-        # the scheduled refresh_if_dirty (routes/console.py) debounces + recomputes (model observers).
-        from app.models.category import Category
-        from app.models.vendor import Vendor
-        from app.observers.publish_observer import PublishObserver
-
-        observer = PublishObserver()
-        for model in (Product, Category, Vendor):
-            model.observe(observer)
-
         # Register event listeners.
         if self.app.bound("events"):
             from arvel.auth.password_reset import PasswordResetRequested

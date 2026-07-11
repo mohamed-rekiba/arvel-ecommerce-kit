@@ -1,5 +1,6 @@
 """The Category model — catalog taxonomy (supports nesting via self-reference)."""
 
+from app.observers.publish_observer import PublishObserver
 from typing import Any, ClassVar
 
 from arvel import Model
@@ -10,6 +11,9 @@ from app.i18n import DEFAULT_LOCALE, SUPPORTED_LOCALES, active_locale
 
 
 class Category(Model, SoftDeletes):
+    # Catalog visibility: a publish change flags the views dirty; the scheduled
+    # refresh_if_dirty (routes/console.py) debounces + recomputes.
+    __observers__: ClassVar[tuple[type, ...]] = (PublishObserver,)
     __table_name__ = "categories"
     __fields__: ClassVar[dict[str, type]] = {
         "slug": str,
