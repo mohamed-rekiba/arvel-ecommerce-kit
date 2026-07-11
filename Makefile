@@ -55,12 +55,18 @@ worker: ## Run a queue worker
 schedule: ## Run due scheduled tasks
 	uv run arvel schedule:run
 
+# The committed contract is the PRODUCTION surface, exported deterministically regardless of a
+# developer's local .env: APP_NAME drives the OpenAPI title and APP_DEBUG gates the debug-only
+# dev-gateway routes — pin both to the CI defaults so `make openapi` matches what CI regenerates
+# (CI has no .env). Without this a dev's `.env` (e.g. APP_NAME="Arvel Shop") drifts the contract.
+OPENAPI_ENV = APP_NAME=arvel-ecommerce-kit APP_DEBUG=false
+
 openapi: ## Export the OpenAPI document + regenerate the typed frontend client (orval)
-	uv run arvel openapi:export frontend/openapi.json
+	$(OPENAPI_ENV) uv run arvel openapi:export frontend/openapi.json
 	cd frontend && npm run api:generate
 
 openapi-check: ## Fail if the committed contract/client drifted from the live API (regen + git diff)
-	uv run arvel openapi:export frontend/openapi.json
+	$(OPENAPI_ENV) uv run arvel openapi:export frontend/openapi.json
 	cd frontend && npm run api:generate
 	@git diff --exit-code frontend/openapi.json frontend/src/api/gen > /dev/null \
 		|| { echo "OpenAPI contract/client is stale — run 'make openapi' and commit the result."; exit 1; }
