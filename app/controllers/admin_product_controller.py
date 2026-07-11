@@ -376,7 +376,7 @@ class AdminProductController(Controller):
             .log("deleted product")
         )
         await product.delete()
-        return MessageOut(message="Deleted.")
+        return MessageOut(message=trans("shop.messages.deleted"))
 
 
 # store→create (403), update/delete→update/delete (404, deny_as_not_found) — see ProductPolicy.

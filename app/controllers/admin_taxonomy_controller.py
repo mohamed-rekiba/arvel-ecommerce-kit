@@ -203,7 +203,7 @@ class CategoryController(Controller):
         )
         await category.delete()
         await CatalogVisibilityService.mark_dirty()
-        return MessageOut(message="Category deleted.")
+        return MessageOut(message=trans("shop.messages.category_deleted"))
 
 
 # --- vendors ---

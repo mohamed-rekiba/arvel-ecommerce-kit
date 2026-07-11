@@ -97,16 +97,16 @@ async def change_password(request: Request, data: ChangePasswordIn) -> MessageOu
         )
     user.password = data.password  # the `hashed` cast argon2-hashes on assignment
     await user.save()
-    return MessageOut(message="Password updated.")
+    return MessageOut(message=trans("shop.messages.password_updated"))
 
 
 async def send_verification(request: Request) -> MessageOut:
     """(Re-)send the verification link to the account email."""
     user = require_user()
     if user.email_verified_at is not None:
-        return MessageOut(message="Your email is already verified.")
+        return MessageOut(message=trans("shop.messages.email_already_verified"))
     await _send_verification(user)
-    return MessageOut(message="Verification email sent.")
+    return MessageOut(message=trans("shop.messages.verification_sent"))
 
 
 async def verify_email(request: Request, data: VerifyEmailIn) -> MessageOut:
@@ -127,7 +127,7 @@ async def verify_email(request: Request, data: VerifyEmailIn) -> MessageOut:
     if user.email_verified_at is None:
         user.email_verified_at = Date.now()
         await user.save()
-    return MessageOut(message="Email verified — welcome aboard!")
+    return MessageOut(message=trans("shop.messages.email_verified"))
 
 
 async def upload_avatar(request: Request) -> UserOut:

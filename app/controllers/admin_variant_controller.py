@@ -194,4 +194,4 @@ async def destroy(
         .log("deleted variant")
     )
     await variant.delete()
-    return MessageOut(message="Variant deleted.")
+    return MessageOut(message=trans("shop.messages.variant_deleted"))

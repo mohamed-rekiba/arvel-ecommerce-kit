@@ -128,5 +128,21 @@
     "category_self_parent": "A category can't parent itself.",
     "vendor_slug_exists": "A vendor with this slug already exists.",
     "tracking_required": "A tracking number is required to ship an order."
+  },
+  "messages": {
+    "logged_out": "Logged out.",
+    "password_reset": "Password has been reset.",
+    "reset_link_sent": "If that email exists, a reset link has been sent.",
+    "notifications_read": "All notifications marked as read.",
+    "password_updated": "Password updated.",
+    "email_already_verified": "Your email is already verified.",
+    "verification_sent": "Verification email sent.",
+    "email_verified": "Email verified — welcome aboard!",
+    "stock_alert_created": "We'll email you when it's back.",
+    "stock_alert_removed": "Alert removed.",
+    "deleted": "Deleted.",
+    "variant_deleted": "Variant deleted.",
+    "category_deleted": "Category deleted.",
+    "subscribed": "Subscribed."
   }
 }

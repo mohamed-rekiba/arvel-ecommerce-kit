@@ -24,7 +24,7 @@ async def subscribe(request: Request) -> MessageOut:
     )
     if existing is None:
         await StockAlert.create(product_variant_id=variant.id, user_id=user.id)
-    return MessageOut(message="We'll email you when it's back.")
+    return MessageOut(message=trans("shop.messages.stock_alert_created"))
 
 
 async def unsubscribe(request: Request) -> MessageOut:
@@ -34,4 +34,4 @@ async def unsubscribe(request: Request) -> MessageOut:
         .where("user_id", user.id)
         .delete()
     )
-    return MessageOut(message="Alert removed.")
+    return MessageOut(message=trans("shop.messages.stock_alert_removed"))

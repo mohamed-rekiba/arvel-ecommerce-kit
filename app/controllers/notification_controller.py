@@ -2,6 +2,7 @@
 signed-in customer (list + mark-all-read). Bearer-guarded; a customer only ever sees their own rows
 (Notifiable scopes by notifiable_type + id)."""
 
+from app.i18n import trans
 from typing import Any, cast
 from app.auth.require import require_user as _customer
 
@@ -32,4 +33,4 @@ async def index(request: Request) -> list[NotificationOut]:
 async def mark_read(request: Request) -> MessageOut:
     """Mark all of the customer's notifications as read."""
     await _customer().mark_all_notifications_as_read()
-    return MessageOut(message="All notifications marked as read.")
+    return MessageOut(message=trans("shop.messages.notifications_read"))

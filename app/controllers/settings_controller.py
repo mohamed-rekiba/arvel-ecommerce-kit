@@ -32,7 +32,7 @@ async def subscribe(request: Request, data: NewsletterIn) -> MessageOut:
         raise ValidationException(dict(validator.errors()))
     if await NewsletterSubscriber.where("email", email).first() is None:
         await NewsletterSubscriber.create(email=email, locale=active_locale())
-    return MessageOut(message="Subscribed.")
+    return MessageOut(message=trans("shop.messages.subscribed"))
 
 
 async def admin_settings(request: Request) -> SettingsOut:

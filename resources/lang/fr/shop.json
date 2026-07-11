@@ -128,5 +128,21 @@
     "category_self_parent": "Une catégorie ne peut pas être son propre parent.",
     "vendor_slug_exists": "Un vendeur avec ce slug existe déjà.",
     "tracking_required": "Un numéro de suivi est requis pour expédier une commande."
+  },
+  "messages": {
+    "logged_out": "Déconnecté.",
+    "password_reset": "Le mot de passe a été réinitialisé.",
+    "reset_link_sent": "Si cet e-mail existe, un lien de réinitialisation a été envoyé.",
+    "notifications_read": "Toutes les notifications ont été marquées comme lues.",
+    "password_updated": "Mot de passe mis à jour.",
+    "email_already_verified": "Votre e-mail est déjà vérifié.",
+    "verification_sent": "E-mail de vérification envoyé.",
+    "email_verified": "E-mail vérifié — bienvenue à bord !",
+    "stock_alert_created": "Nous vous enverrons un e-mail dès son retour en stock.",
+    "stock_alert_removed": "Alerte supprimée.",
+    "deleted": "Supprimé.",
+    "variant_deleted": "Variante supprimée.",
+    "category_deleted": "Catégorie supprimée.",
+    "subscribed": "Abonné."
   }
 }

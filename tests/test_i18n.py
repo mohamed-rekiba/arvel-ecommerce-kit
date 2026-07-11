@@ -108,3 +108,19 @@ def test_unsupported_locale_falls_back_to_default(client) -> None:  # type: igno
     # not in the whitelist → default-locale projection (and no SQL-path injection surface)
     de = client.get("/api/products", headers={"Accept-Language": "de"}).json()["data"]
     assert {p["translation"]["name"] for p in de} == {"Aurora Phone", "Field Lens"}
+
+
+def test_success_messages_follow_accept_language(client) -> None:  # type: ignore[no-untyped-def]
+    # success copy goes through the translator too — a French client gets the French toast
+    fr = client.post(
+        "/api/forgot-password",
+        json={"email": "nobody@example.com"},
+        headers={"Accept-Language": "fr"},
+    )
+    assert fr.status_code == 200
+    assert (
+        fr.json()["message"]
+        == "Si cet e-mail existe, un lien de réinitialisation a été envoyé."
+    )
+    en = client.post("/api/forgot-password", json={"email": "nobody@example.com"})
+    assert en.json()["message"] == "If that email exists, a reset link has been sent."

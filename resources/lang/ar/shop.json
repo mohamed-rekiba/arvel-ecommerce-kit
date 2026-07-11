@@ -128,5 +128,21 @@
     "category_self_parent": "لا يمكن أن تكون الفئة أصلاً لنفسها.",
     "vendor_slug_exists": "يوجد بائع بهذا المُعرّف بالفعل.",
     "tracking_required": "رقم التتبع مطلوب لشحن الطلب."
+  },
+  "messages": {
+    "logged_out": "تم تسجيل الخروج.",
+    "password_reset": "تمت إعادة تعيين كلمة المرور.",
+    "reset_link_sent": "إذا كان هذا البريد الإلكتروني موجودًا، فقد تم إرسال رابط إعادة التعيين.",
+    "notifications_read": "تم وضع علامة مقروء على جميع الإشعارات.",
+    "password_updated": "تم تحديث كلمة المرور.",
+    "email_already_verified": "بريدك الإلكتروني مُتحقق منه بالفعل.",
+    "verification_sent": "تم إرسال بريد التحقق.",
+    "email_verified": "تم التحقق من البريد الإلكتروني — أهلاً بك!",
+    "stock_alert_created": "سنراسلك عبر البريد الإلكتروني عند توفره مجددًا.",
+    "stock_alert_removed": "تمت إزالة التنبيه.",
+    "deleted": "تم الحذف.",
+    "variant_deleted": "تم حذف المتغير.",
+    "category_deleted": "تم حذف الفئة.",
+    "subscribed": "تم الاشتراك."
   }
 }

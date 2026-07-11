@@ -80,7 +80,7 @@ async def logout(request: Request) -> MessageOut:
     if token is None:
         abort(401, trans("shop.errors.unauthenticated"))
     await token.delete()
-    return MessageOut(message="Logged out.")
+    return MessageOut(message=trans("shop.messages.logged_out"))
 
 
 async def forgot_password(
@@ -90,9 +90,7 @@ async def forgot_password(
     # the broker stores a hashed token + fires PasswordResetRequested (the listener emails the link);
     # its INVALID_USER/RESET_THROTTLED status stays internal — the response never reveals it (DR-0033).
     await _password_broker().send_reset_link(data.email)
-    return ForgotPasswordOut(
-        message="If that email exists, a reset link has been sent."
-    )
+    return ForgotPasswordOut(message=trans("shop.messages.reset_link_sent"))
 
 
 async def _set_password(user: Any, new_password: str) -> None:
@@ -113,4 +111,4 @@ async def reset_password(request: Request, data: ResetPasswordIn) -> MessageOut:
     )
     if status is not PasswordResetStatus.RESET_SUCCESS:
         raise ValidationException({"token": [trans("shop.errors.reset_token_invalid")]})
-    return MessageOut(message="Password has been reset.")
+    return MessageOut(message=trans("shop.messages.password_reset"))
