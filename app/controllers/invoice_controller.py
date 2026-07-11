@@ -12,6 +12,8 @@ from app.controllers.cart_controller import line_presentation
 from app.controllers.order_access import resolve_owned_order
 from app.controllers.serializers import iso as _iso
 from app.enums import OrderStatus, PaymentMethod
+from arvel.support import Money
+
 from app.i18n import active_locale, trans_in
 
 # the flat invoice UI strings under shop.invoice.* (status labels + payment methods are nested)
@@ -33,8 +35,9 @@ _LABELS = (
 )
 
 
-def _money(cents: int) -> str:
-    return f"${cents / 100:,.2f}"
+def _money(cents: int, currency: str, locale: str) -> str:
+    # locale-aware, currency-correct — the same Money.format the confirmation mail uses
+    return Money(cents, currency).format(locale)
 
 
 async def show(request: Request) -> Response:
@@ -45,6 +48,7 @@ async def show(request: Request) -> Response:
     )
     items = await order.items().get()
     locale = active_locale()
+    currency = order.currency.value  # __casts__ guarantees the enum
     t: dict[str, str] = {k: trans_in(locale, f"shop.invoice.{k}") for k in _LABELS}
     # status/payment_method are cast to their enums by Order.__casts__
     status: OrderStatus = order.status
@@ -60,8 +64,8 @@ async def show(request: Request) -> Response:
             "name": i.product_name,
             "variant": i.variant_name,
             "qty": i.quantity,
-            "unit": _money(i.unit_price_cents),
-            "total": _money(i.unit_price_cents * i.quantity),
+            "unit": _money(i.unit_price_cents, currency, locale),
+            "total": _money(i.unit_price_cents * i.quantity, currency, locale),
             "image": looks.get(i.product_variant_id, ("", "", None))[2],
         }
         for i in items
@@ -85,13 +89,13 @@ async def show(request: Request) -> Response:
             },
             "lines": lines,
             "money": {
-                "subtotal": _money(order.subtotal_cents),
-                "shipping": _money(order.shipping_cents),
-                "tax": _money(order.tax_cents),
-                "discount": _money(order.discount_cents)
+                "subtotal": _money(order.subtotal_cents, currency, locale),
+                "shipping": _money(order.shipping_cents, currency, locale),
+                "tax": _money(order.tax_cents, currency, locale),
+                "discount": _money(order.discount_cents, currency, locale)
                 if order.discount_cents
                 else None,
-                "total": _money(order.total_cents),
+                "total": _money(order.total_cents, currency, locale),
             },
         },
     ).render()
