@@ -4,6 +4,7 @@ Product images use arvel's **media library** (``HasMedia``): images attach to th
 collection and each upload generates ``thumb`` + ``preview`` conversions automatically.
 """
 
+from app.policies.product_policy import ProductPolicy
 from app.observers.publish_observer import PublishObserver
 from typing import Any, ClassVar, TypedDict
 
@@ -42,6 +43,10 @@ class Product(HasMedia, Searchable, Model, SoftDeletes):
     # Catalog visibility: a publish change flags the views dirty; the scheduled
     # refresh_if_dirty (routes/console.py) debounces + recomputes.
     __observers__: ClassVar[tuple[type, ...]] = (PublishObserver,)
+
+    # Gate authorization — the declarative, typed form (resolve_policy prefers it over
+    # imperative gate.policy() registration).
+    __policy__: ClassVar[type] = ProductPolicy
     __table_name__ = "products"
     __media_model__ = ProductMedia  # gallery items expose url/thumb/preview (media.md → extending Media)
     __fields__: ClassVar[dict[str, type]] = {

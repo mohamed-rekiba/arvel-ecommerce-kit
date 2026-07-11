@@ -58,13 +58,10 @@ class AppServiceProvider(ServiceProvider):
 
         Feature.define("promoted-deals", _promoted_deals_segment)
 
-        # Register authorization policies on the app-bound Gate.
-        from app.models.product import Product
-        from app.policies.product_policy import ProductPolicy
-
+        # Product's policy is declared on the model (__policy__ — the Gate's preferred,
+        # typed form); only the Gate-wide hooks and ability defines are wired here.
         if self.app.bound("gate"):
             gate = self.app.make("gate")
-            gate.policy(Product, ProductPolicy())
 
             # super-admin bypasses every ability (a gate before-hook → auto-grant).
             from app.enums import Permission, RoleName
