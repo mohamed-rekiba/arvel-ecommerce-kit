@@ -167,8 +167,10 @@ def test_webhook_is_idempotent(client) -> None:
     assert client.get("/api/orders", headers=headers).json()[0]["status"] == "paid"
 
 
-def test_webhook_malformed_is_400(client) -> None:
-    assert _post_webhook(client, {"id": "x"}).status_code == 400
+def test_webhook_malformed_is_422(client) -> None:
+    # a malformed body fails validation → 422 (the framework's uniform validation status; the body is
+    # now decoded in the request pipeline, not by the transport layer, so it's one consistent code).
+    assert _post_webhook(client, {"id": "x"}).status_code == 422
 
 
 def test_webhook_without_valid_signature_is_rejected(client) -> None:
