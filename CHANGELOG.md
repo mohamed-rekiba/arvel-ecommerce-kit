@@ -1,5 +1,52 @@
 # Changelog
 
+## [0.5.0](https://github.com/mohamed-rekiba/arvel-ecommerce-kit/compare/v0.4.1...v0.5.0) (2026-07-11)
+
+
+### Features
+
+* compute checkout tax from the shipping jurisdiction ([4cd4cb6](https://github.com/mohamed-rekiba/arvel-ecommerce-kit/commit/4cd4cb609112a9e6affb4b27376a553448a44b57))
+* gate a storefront experiment behind a feature flag ([238ed49](https://github.com/mohamed-rekiba/arvel-ecommerce-kit/commit/238ed495451db21933af75ea77bc9eaaa144c73d))
+* make webhook delivery fail terminally on timeout ([84d758b](https://github.com/mohamed-rekiba/arvel-ecommerce-kit/commit/84d758be9beb44e0621cc23bbf6ff9d1a034b8b1))
+* push live order and stock updates over broadcasting instead of polling ([44c0b70](https://github.com/mohamed-rekiba/arvel-ecommerce-kit/commit/44c0b708b526181013a518662aefe9105314213b))
+* rate-limit the back-in-stock notification per customer ([4490bd6](https://github.com/mohamed-rekiba/arvel-ecommerce-kit/commit/4490bd6a5b40a3cc58b467b973da4408c5a3c07a))
+* refund a paid order through the gateway on cancellation ([34b87cc](https://github.com/mohamed-rekiba/arvel-ecommerce-kit/commit/34b87ccc9fbcc95e6013f45e807cfceca0ba4d6f))
+* require a verified email for signed-in checkout ([b0d5264](https://github.com/mohamed-rekiba/arvel-ecommerce-kit/commit/b0d52640df060040d448ffb6cdfae91a1ca9cbcc))
+* route console output through the framework handle; prove the scheduler fires ([d495189](https://github.com/mohamed-rekiba/arvel-ecommerce-kit/commit/d495189376c98a638ca8d9a084dc960693b138db))
+* server-computed shipping rates by method, with tracking on ship ([fa9e029](https://github.com/mohamed-rekiba/arvel-ecommerce-kit/commit/fa9e0293e36c37fb5b05ff6d42dbde0eb7c7689c))
+
+
+### Bug Fixes
+
+* cast Order.payment_method to the PaymentMethod enum ([23b9f5d](https://github.com/mohamed-rekiba/arvel-ecommerce-kit/commit/23b9f5d39f8339099d7d7c9b47a1e16ae11478b8))
+* collapse the order tracker for refunded orders ([01d0c50](https://github.com/mohamed-rekiba/arvel-ecommerce-kit/commit/01d0c509f0b097e97481ac0b4092d1962c69a79f))
+* render the invoice through the framework translator, not controller dicts ([2dc8a4e](https://github.com/mohamed-rekiba/arvel-ecommerce-kit/commit/2dc8a4e41033d10faa398133ae110bce54e5825f))
+* satisfy strict mypy and bandit on the checkout money path ([22810ad](https://github.com/mohamed-rekiba/arvel-ecommerce-kit/commit/22810ad5270d30d5e71b1d7cd724b3e5e62199d7))
+* save a newly-typed checkout address to the customer's book ([eac1404](https://github.com/mohamed-rekiba/arvel-ecommerce-kit/commit/eac14046563865282cf4027eb236f5329493b575))
+
+
+### Performance
+
+* serve public settings stale-while-revalidate ([2ec3a01](https://github.com/mohamed-rekiba/arvel-ecommerce-kit/commit/2ec3a0125a40801c5c96959038f2928be67961cd))
+
+
+### Refactors
+
+* bind admin resources on the route; enforce admin authz in the pipeline ([bef9f48](https://github.com/mohamed-rekiba/arvel-ecommerce-kit/commit/bef9f480dc1d252d977a0c76350fce974f05f132))
+* express admin CRUD as api_resource + authorize_resource ([85a2177](https://github.com/mohamed-rekiba/arvel-ecommerce-kit/commit/85a217751262162e23dc4712e2920259af30dbc8))
+* express the route tree as groups, not repeated per-route chains ([f981304](https://github.com/mohamed-rekiba/arvel-ecommerce-kit/commit/f981304ad7ac2d904c44380e7c429832f4ee58a9))
+* one shared media serving-URL rule ([06cd3f6](https://github.com/mohamed-rekiba/arvel-ecommerce-kit/commit/06cd3f6fcdc5e97cfbbc1de9c11c57369dfc0e9a))
+* put the serving-URL rule on the media model, not helpers ([c665cd8](https://github.com/mohamed-rekiba/arvel-ecommerce-kit/commit/c665cd80caf4d90c1ac7f28f6ecf67dc4a81d01f))
+* trust the ORM enum casts instead of re-casting in controllers ([8c347e7](https://github.com/mohamed-rekiba/arvel-ecommerce-kit/commit/8c347e72598b87b1ecf2775f8eee7adccadb6472))
+
+
+### Documentation
+
+* describe capabilities generically, not by upstream project name ([f241a90](https://github.com/mohamed-rekiba/arvel-ecommerce-kit/commit/f241a90951271da902fc03e39d7fd2dc5cb965bc))
+* document the design system and enforce it live (DESIGN.md + a11y gate) ([e33ea62](https://github.com/mohamed-rekiba/arvel-ecommerce-kit/commit/e33ea6261af015251e0f6c2b9645b16e10396150))
+* drop the last upstream-project name from a gitignore comment ([081c780](https://github.com/mohamed-rekiba/arvel-ecommerce-kit/commit/081c780843ef11fdc188b59bb1f8b130431b1ed5))
+* finish the brand-name scrub in bootstrap docstrings ([5ef4d75](https://github.com/mohamed-rekiba/arvel-ecommerce-kit/commit/5ef4d75df933af1bb5bb8c21eb8e8cf1097a77e0))
+
 ## [0.4.1](https://github.com/mohamed-rekiba/arvel-ecommerce-kit/compare/v0.4.0...v0.4.1) (2026-07-08)
 
 
