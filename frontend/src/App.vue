@@ -2,6 +2,30 @@
 // A 503 from any API call (arvel down) swaps in the maintenance screen until a retry succeeds.
 import { onMounted, ref } from 'vue'
 
+import { makeT } from './lib/i18n'
+
+// App.vue is the shared root (shop and admin each own their message chunks), so the maintenance
+// strings live in a tiny colocated map rather than dragging either section's map in here.
+const t = makeT({
+  en: {
+    'maintenance.title': 'Back in a moment',
+    'maintenance.body': "We're doing a little maintenance. Your cart is safe — try again shortly.",
+    'maintenance.retry': 'Try again'
+  },
+  fr: {
+    'maintenance.title': 'De retour dans un instant',
+    'maintenance.body':
+      'Nous effectuons une petite maintenance. Votre panier est en sécurité — réessayez sous peu.',
+    'maintenance.retry': 'Réessayer'
+  },
+  ar: {
+    'maintenance.title': 'سنعود بعد لحظات',
+    'maintenance.body':
+      'نقوم بأعمال صيانة بسيطة. سلة التسوق الخاصة بك بأمان — حاول مجددًا بعد قليل.',
+    'maintenance.retry': 'حاول مرة أخرى'
+  }
+})
+
 const down = ref(false)
 
 async function retry() {
@@ -27,9 +51,9 @@ onMounted(() => {
   <div v-if="down" class="maintenance" role="alert">
     <div class="maintenance__card">
       <p class="maintenance__mark">⏸</p>
-      <h1>Back in a moment</h1>
-      <p>We're doing a little maintenance. Your cart is safe — try again shortly.</p>
-      <button class="maintenance__retry" @click="retry">Try again</button>
+      <h1>{{ t('maintenance.title') }}</h1>
+      <p>{{ t('maintenance.body') }}</p>
+      <button class="maintenance__retry" @click="retry">{{ t('maintenance.retry') }}</button>
     </div>
   </div>
   <RouterView v-else />
