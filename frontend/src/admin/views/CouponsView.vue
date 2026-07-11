@@ -8,7 +8,7 @@ import Tag from 'primevue/tag'
 import ToggleSwitch from 'primevue/toggleswitch'
 import { computed, onMounted, ref } from 'vue'
 import { useRouter } from 'vue-router'
-import { ApiError, api } from '../api'
+import { ApiError, api, formatPrice } from '../api'
 import type { AdminCouponOut } from '../../api/gen/models'
 import { t } from '../locale'
 
@@ -88,7 +88,7 @@ onMounted(load)
           <template #body="{ data }">
             <Tag
               :value="
-                data.type === 'percent' ? `−${data.value}%` : `−$${(data.value / 100).toFixed(2)}`
+                data.type === 'percent' ? `−${data.value}%` : `−${formatPrice(data.value)}`
               "
               severity="warn"
             />
