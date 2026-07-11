@@ -4956,7 +4956,7 @@
     "/api/admin/users": {
       "get": {
         "summary": "ApiAdminUsersIndex",
-        "description": "Search + paginate the user directory (name/email substring).",
+        "description": "Search + paginate the user directory (name/email substring); users.view via the\nroute's Authorize.",
         "operationId": "api.admin.users.index",
         "parameters": [
           {
@@ -5133,7 +5133,7 @@
     "/api/admin/roles": {
       "get": {
         "summary": "ApiAdminRolesIndex",
-        "description": "List every role with the permissions it grants.",
+        "description": "List every role with the permissions it grants (roles.manage via the route's Authorize).",
         "operationId": "api.admin.roles.index",
         "responses": {
           "200": {
@@ -5162,7 +5162,7 @@
     "/api/admin/permissions": {
       "get": {
         "summary": "ApiAdminPermissionsIndex",
-        "description": "List every permission in the system.",
+        "description": "List every permission in the system (roles.manage via the route's Authorize).",
         "operationId": "api.admin.permissions.index",
         "responses": {
           "200": {
@@ -5433,7 +5433,7 @@
     "/api/admin/audit": {
       "get": {
         "summary": "ApiAdminAuditIndex",
-        "description": "The most recent audit-log entries (audit.view).",
+        "description": "The most recent audit-log entries (audit.view via the route's Authorize).",
         "operationId": "api.admin.audit.index",
         "responses": {
           "200": {

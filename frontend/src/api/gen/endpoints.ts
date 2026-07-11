@@ -3479,7 +3479,8 @@ export const getApiAdminUsersIndexUrl = (params?: ApiAdminUsersIndexParams,) => 
 }
 
 /**
- * Search + paginate the user directory (name/email substring).
+ * Search + paginate the user directory (name/email substring); users.view via the
+ * route's Authorize.
  * @summary ApiAdminUsersIndex
  */
 export const apiAdminUsersIndex = async (params?: ApiAdminUsersIndexParams, options?: RequestInit): Promise<apiAdminUsersIndexResponse> => {
@@ -3562,7 +3563,7 @@ export const getApiAdminRolesIndexUrl = () => {
 }
 
 /**
- * List every role with the permissions it grants.
+ * List every role with the permissions it grants (roles.manage via the route's Authorize).
  * @summary ApiAdminRolesIndex
  */
 export const apiAdminRolesIndex = async ( options?: RequestInit): Promise<apiAdminRolesIndexResponse> => {
@@ -3599,7 +3600,7 @@ export const getApiAdminPermissionsIndexUrl = () => {
 }
 
 /**
- * List every permission in the system.
+ * List every permission in the system (roles.manage via the route's Authorize).
  * @summary ApiAdminPermissionsIndex
  */
 export const apiAdminPermissionsIndex = async ( options?: RequestInit): Promise<apiAdminPermissionsIndexResponse> => {
@@ -3774,7 +3775,7 @@ export const getApiAdminAuditIndexUrl = () => {
 }
 
 /**
- * The most recent audit-log entries (audit.view).
+ * The most recent audit-log entries (audit.view via the route's Authorize).
  * @summary ApiAdminAuditIndex
  */
 export const apiAdminAuditIndex = async ( options?: RequestInit): Promise<apiAdminAuditIndexResponse> => {
