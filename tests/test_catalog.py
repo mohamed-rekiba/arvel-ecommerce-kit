@@ -251,3 +251,35 @@ def test_translation_carries_the_winning_locale(client) -> None:
 
     categories = client.get("/api/categories", headers={"accept-language": "en"}).json()
     assert categories and all(c["translation"]["locale"] == "en" for c in categories)
+
+
+def test_translation_locale_is_empty_when_no_translation_exists(client) -> None:
+    """A row with NEITHER the requested nor the default locale serves an empty translation —
+    and must say so (locale ""), not claim the default locale was served."""
+    import asyncio as _asyncio
+
+    from arvel.database import ConnectionResolver as _CR
+
+    async def seed_empty() -> None:
+        db = _CR({"default": {"url": os.environ["DATABASE_URL"]}})
+        Product.set_connection(db)
+        Category.set_connection(db)
+        shirts = await Category.where(slug="shirts").first()
+        await Product.create(
+            category_id=shirts.id,
+            translations={},  # no locale at all
+            slug="untranslated",
+            price_cents=500,
+            currency="USD",
+            status=ProductStatus.ACTIVE,
+            published=True,
+        )
+
+    _asyncio.run(seed_empty())
+
+    data = client.get(
+        "/api/products?per_page=50", headers={"accept-language": "en"}
+    ).json()["data"]
+    by_slug = {p["slug"]: p["translation"] for p in data}
+    assert by_slug["untranslated"]["locale"] == ""  # honest: nothing was served
+    assert by_slug["untranslated"]["name"] == ""
