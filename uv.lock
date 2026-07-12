@@ -257,7 +257,7 @@ wheels = [
 
 [[package]]
 name = "arvel"
-version = "0.61.0"
+version = "0.62.0"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "anyio" },
@@ -276,21 +276,39 @@ dependencies = [
     { name = "typer" },
     { name = "whenever" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/e2/ee/875198a6c648fc8c8cdd2e89c26d5e1e82ee72deb19be9adf31f03749197/arvel-0.61.0.tar.gz", hash = "sha256:369852e82c9bab002a32b8af69492395de35c62e68234ca9bbc115939890ad6b", size = 1365898, upload-time = "2026-07-11T17:36:09.148Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/b9/51/ce02c12d26198d2fab42b5016b7494ca960a203a36902a31db32a7cfd724/arvel-0.62.0.tar.gz", hash = "sha256:1ae7186d2ff01f7a14255e351efa8afae44462b36f0403a0780e07a22f6aff38", size = 1383146, upload-time = "2026-07-12T01:04:06.819Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/99/94/f9a7784eeea287530103b59a3901e751dce48836fe258b65faf3cd267c37/arvel-0.61.0-py3-none-any.whl", hash = "sha256:4950e6f8f133b937f6ef2e05cae0b1f2f905b6c85f58bab51fdc2ecda1ad3bc8", size = 565075, upload-time = "2026-07-11T17:36:07.17Z" },
+    { url = "https://files.pythonhosted.org/packages/f9/80/9b07135e949ab456884c401931de4645b2f16539b681dd40afa6dcb44887/arvel-0.62.0-py3-none-any.whl", hash = "sha256:ff6fbc0e06441c330707f7cf364b9495eaf2e31e7640872e9bac97253cde5da3", size = 573735, upload-time = "2026-07-12T01:04:04.906Z" },
 ]
 
 [package.optional-dependencies]
 i18n = [
     { name = "babel" },
 ]
+image = [
+    { name = "pillow" },
+]
+jwt = [
+    { name = "pyjwt" },
+]
+mail = [
+    { name = "aiosmtplib" },
+    { name = "markdown-it-py" },
+]
 oidc = [
     { name = "pyjwt", extra = ["crypto"] },
+]
+postgres = [
+    { name = "alembic" },
+    { name = "asyncpg" },
+    { name = "sqlalchemy", extra = ["asyncio"] },
 ]
 queue-amqp = [
     { name = "taskiq" },
     { name = "taskiq-aio-pika" },
+]
+redis = [
+    { name = "redis" },
 ]
 s3 = [
     { name = "s3fs" },
@@ -322,13 +340,16 @@ telemetry = [
     { name = "prometheus-client" },
     { name = "sentry-sdk" },
 ]
+view = [
+    { name = "jinja2" },
+]
 
 [[package]]
 name = "arvel-ecommerce-kit"
-version = "0.6.1"
+version = "0.6.2"
 source = { virtual = "." }
 dependencies = [
-    { name = "arvel", extra = ["i18n", "oidc", "queue-amqp", "s3", "search", "standard", "telemetry"] },
+    { name = "arvel", extra = ["i18n", "image", "jwt", "mail", "oidc", "postgres", "queue-amqp", "redis", "s3", "search", "standard", "telemetry", "view"] },
 ]
 
 [package.optional-dependencies]
@@ -349,7 +370,7 @@ dev = [
 [package.metadata]
 requires-dist = [
     { name = "aiosqlite", marker = "extra == 'dev'", specifier = ">=0.22.1" },
-    { name = "arvel", extras = ["standard", "i18n", "oidc", "s3", "telemetry", "search", "queue-amqp"] },
+    { name = "arvel", extras = ["standard", "postgres", "redis", "queue-amqp", "view", "mail", "image", "i18n", "jwt", "oidc", "s3", "telemetry", "search"] },
     { name = "bandit", marker = "extra == 'dev'", specifier = ">=1.9.4" },
     { name = "faker", marker = "extra == 'dev'", specifier = ">=40.26.0" },
     { name = "mypy", marker = "extra == 'dev'", specifier = ">=2.1.0" },
@@ -406,11 +427,11 @@ wheels = [
 
 [[package]]
 name = "asttokens"
-version = "3.0.1"
+version = "3.0.2"
 source = { registry = "https://pypi.org/simple" }
-sdist = { url = "https://files.pythonhosted.org/packages/be/a5/8e3f9b6771b0b408517c82d97aed8f2036509bc247d46114925e32fe33f0/asttokens-3.0.1.tar.gz", hash = "sha256:71a4ee5de0bde6a31d64f6b13f2293ac190344478f081c3d1bccfcf5eacb0cb7", size = 62308, upload-time = "2025-11-15T16:43:48.578Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/25/1e/faf0f247f6f881b98fc4d6d07e14085cb89d13665084e6d6ac1dc2c03d0b/asttokens-3.0.2.tar.gz", hash = "sha256:3ecdbd8f2cc195f53ccada3a613538bb5f9ef6f6869129f13e03c30a677b8fe2", size = 63136, upload-time = "2026-07-12T03:31:49.084Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/d2/39/e7eaf1799466a4aef85b6a4fe7bd175ad2b1c6345066aa33f1f58d4b18d0/asttokens-3.0.1-py3-none-any.whl", hash = "sha256:15a3ebc0f43c2d0a50eeafea25e19046c68398e487b9f1f5b517f7c0f40f976a", size = 27047, upload-time = "2025-11-15T16:43:16.109Z" },
+    { url = "https://files.pythonhosted.org/packages/d4/2b/04b8a15f3a1c77bc79ddf5c73875327f34b4fa75982df2b76e45e402d364/asttokens-3.0.2-py3-none-any.whl", hash = "sha256:9da13157f5b28becde0bd374fc677dcd3c290614264eff096f167c469cd9f933", size = 28702, upload-time = "2026-07-12T03:31:47.542Z" },
 ]
 
 [[package]]

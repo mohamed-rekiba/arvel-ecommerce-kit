@@ -2,7 +2,7 @@
 name = "arvel-ecommerce-kit"
 version = "0.6.2"
 requires-python = ">=3.14"
-dependencies = ["arvel[standard,i18n,oidc,s3,telemetry,search,queue-amqp]"]
+dependencies = ["arvel[standard,postgres,redis,queue-amqp,view,mail,image,i18n,jwt,oidc,s3,telemetry,search]"]
 
 [project.optional-dependencies]
 # aiosqlite: the suite runs on in-process sqlite (see conftest). uv doesn't reliably install it from
@@ -21,6 +21,10 @@ dev = [
     # the real-service integration tier (tests/integration, `make test-integration`)
     "testcontainers>=4.14.2",
 ]
+
+# --- UV --------------------------------------------------------
+[tool.uv]
+compile-bytecode = true
 
 # --- Types (G3) -----------------------------------------------------------
 [tool.mypy]
