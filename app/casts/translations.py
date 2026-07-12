@@ -59,12 +59,14 @@ class LocaleMapCast:
 
 
 class TranslationCast:
-    """A single locale's object `{name, description}` (a `translations->'<loc>'` projection) → `Translate`."""
+    """A single locale's object `{name, description}` (a `translations->'<loc>'` projection) →
+    `Translate`. The sibling `translation_locale` projection says which locale the COALESCE
+    served (requested, or the default fallback) — surfaced so API consumers can tell."""
 
     def get(
         self, model: Any, key: str, value: Any, attributes: dict[str, Any]
     ) -> Translate:
-        return _translate("", _load(value))
+        return _translate(str(attributes.get("translation_locale") or ""), _load(value))
 
     def set(self, model: Any, key: str, value: Any, attributes: dict[str, Any]) -> Any:
         return value

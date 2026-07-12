@@ -205,3 +205,18 @@ def test_products_feed_is_drift_free_when_a_row_is_inserted_mid_scroll(client) -
     assert set(page1_slugs).isdisjoint(page2_slugs)
     assert "aero-shirt-05a" not in page2_slugs
     assert page2_slugs == [f"aero-shirt-{i:02d}" for i in range(10, 20)]
+
+
+def test_translation_carries_the_winning_locale(client) -> None:
+    """The storefront projection reports WHICH locale it served: the requested one when present,
+    the default when the fallback fired — `""` tells an API consumer nothing."""
+    products = client.get("/api/products", headers={"accept-language": "en"}).json()["data"]
+    assert products and all(p["translation"]["locale"] == "en" for p in products)
+
+    # every seeded product has only `en` content → a French request serves the en fallback
+    # and says so, instead of pretending the payload is locale-less
+    fallback = client.get("/api/products", headers={"accept-language": "fr"}).json()["data"]
+    assert fallback and all(p["translation"]["locale"] == "en" for p in fallback)
+
+    categories = client.get("/api/categories", headers={"accept-language": "en"}).json()
+    assert categories and all(c["translation"]["locale"] == "en" for c in categories)

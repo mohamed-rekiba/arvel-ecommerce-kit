@@ -49,8 +49,15 @@ class Category(Model, SoftDeletes):
     def scope_in_locale(self, query: Any, locale: str | None = None) -> Any:
         """Project only the active locale's object as `translation` (not the whole translations map)."""
         loc = locale if locale in SUPPORTED_LOCALES else active_locale()
-        return query.select_raw(Category._LOCALE_COLUMNS).select_raw(
-            f"COALESCE(translations->'{loc}', translations->'{DEFAULT_LOCALE}') AS translation"
+        return (
+            query.select_raw(Category._LOCALE_COLUMNS)
+            .select_raw(
+                f"COALESCE(translations->'{loc}', translations->'{DEFAULT_LOCALE}') AS translation"
+            )
+            .select_raw(  # which locale won — the cast surfaces it as Translate.locale
+                f"CASE WHEN translations->'{loc}' IS NOT NULL THEN '{loc}' "
+                f"ELSE '{DEFAULT_LOCALE}' END AS translation_locale"
+            )
         )
 
     def products(self) -> Any:
