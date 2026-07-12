@@ -209,14 +209,43 @@ def test_products_feed_is_drift_free_when_a_row_is_inserted_mid_scroll(client) -
 
 def test_translation_carries_the_winning_locale(client) -> None:
     """The storefront projection reports WHICH locale it served: the requested one when present,
-    the default when the fallback fired — `""` tells an API consumer nothing."""
-    products = client.get("/api/products", headers={"accept-language": "en"}).json()["data"]
+    the default when the fallback fired — `""` tells an API consumer nothing. One product carries
+    real `fr` content so the requested-locale branch is distinguished from the fallback branch
+    (an en-only catalog would let a hardcoded default pass every assertion)."""
+    import asyncio as _asyncio
+
+    from arvel.database import ConnectionResolver as _CR
+
+    async def seed_fr() -> None:
+        db = _CR({"default": {"url": os.environ["DATABASE_URL"]}})
+        Product.set_connection(db)
+        Category.set_connection(db)
+        shirts = await Category.where(slug="shirts").first()
+        await Product.create(
+            category_id=shirts.id,
+            translations={"en": {"name": "Bilingue"}, "fr": {"name": "Bilingue FR"}},
+            slug="bilingue",
+            price_cents=1000,
+            currency="USD",
+            status=ProductStatus.ACTIVE,
+            published=True,
+        )
+
+    _asyncio.run(seed_fr())
+
+    products = client.get("/api/products?per_page=50", headers={"accept-language": "en"}).json()[
+        "data"
+    ]
     assert products and all(p["translation"]["locale"] == "en" for p in products)
 
-    # every seeded product has only `en` content → a French request serves the en fallback
-    # and says so, instead of pretending the payload is locale-less
-    fallback = client.get("/api/products", headers={"accept-language": "fr"}).json()["data"]
-    assert fallback and all(p["translation"]["locale"] == "en" for p in fallback)
+    # the requested-locale branch: the bilingual product serves fr and SAYS fr;
+    # en-only products serve the en fallback and say so
+    fr = client.get("/api/products?per_page=50", headers={"accept-language": "fr"}).json()["data"]
+    by_slug = {p["slug"]: p["translation"] for p in fr}
+    assert by_slug["bilingue"]["locale"] == "fr"
+    assert by_slug["bilingue"]["name"] == "Bilingue FR"
+    en_only = [t for slug, t in by_slug.items() if slug != "bilingue"]
+    assert en_only and all(t["locale"] == "en" for t in en_only)
 
     categories = client.get("/api/categories", headers={"accept-language": "en"}).json()
     assert categories and all(c["translation"]["locale"] == "en" for c in categories)
