@@ -1,5 +1,17 @@
 # Changelog
 
+## [0.7.0](https://github.com/mohamed-rekiba/arvel-ecommerce-kit/compare/v0.6.2...v0.7.0) (2026-07-12)
+
+
+### Features
+
+* enhance the dependencies ([74ebcfe](https://github.com/mohamed-rekiba/arvel-ecommerce-kit/commit/74ebcfe4b20703ed8c21711a308d3226185480d1))
+
+
+### Bug Fixes
+
+* **catalog:** the translation projection reports which locale it served ([f84769e](https://github.com/mohamed-rekiba/arvel-ecommerce-kit/commit/f84769e35b8d9bd7a689c7dfb1e6ab379197d054))
+
 ## [0.6.2](https://github.com/mohamed-rekiba/arvel-ecommerce-kit/compare/v0.6.1...v0.6.2) (2026-07-11)
 
 
