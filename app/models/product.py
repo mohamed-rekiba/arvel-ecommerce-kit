@@ -91,8 +91,15 @@ class Product(HasMedia, Searchable, Model, SoftDeletes):
         """Project ONLY the active locale's object as `translation` (Translate cast), not the whole
         translations map — `translations->'<locale>'` with a fallback to the default locale."""
         loc = locale if locale in SUPPORTED_LOCALES else active_locale()
-        return query.select_raw(Product._LOCALE_COLUMNS).select_raw(
-            f"COALESCE(translations->'{loc}', translations->'{DEFAULT_LOCALE}') AS translation"
+        return (
+            query.select_raw(Product._LOCALE_COLUMNS)
+            .select_raw(
+                f"COALESCE(translations->'{loc}', translations->'{DEFAULT_LOCALE}') AS translation"
+            )
+            .select_raw(  # which locale won — the cast surfaces it as Translate.locale
+                f"CASE WHEN translations->'{loc}' IS NOT NULL THEN '{loc}' "
+                f"ELSE '{DEFAULT_LOCALE}' END AS translation_locale"
+            )
         )
 
     def register_media_conversions(self) -> list[MediaConversion]:
