@@ -257,7 +257,7 @@ wheels = [
 
 [[package]]
 name = "arvel"
-version = "0.62.0"
+version = "0.63.0"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "anyio" },
@@ -274,11 +274,12 @@ dependencies = [
     { name = "python-ulid" },
     { name = "structlog" },
     { name = "typer" },
+    { name = "typing-extensions" },
     { name = "whenever" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/b9/51/ce02c12d26198d2fab42b5016b7494ca960a203a36902a31db32a7cfd724/arvel-0.62.0.tar.gz", hash = "sha256:1ae7186d2ff01f7a14255e351efa8afae44462b36f0403a0780e07a22f6aff38", size = 1383146, upload-time = "2026-07-12T01:04:06.819Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/5f/0c/b956d4db0ac240a85ca640ff1e264fae2d992628bd4ba58259496b808c59/arvel-0.63.0.tar.gz", hash = "sha256:caf93c9b1fe135ad457f568f9f3c67a3a58e61fcfa9f2cebe2c4e9f2b490d601", size = 1399310, upload-time = "2026-07-12T11:50:01.155Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/f9/80/9b07135e949ab456884c401931de4645b2f16539b681dd40afa6dcb44887/arvel-0.62.0-py3-none-any.whl", hash = "sha256:ff6fbc0e06441c330707f7cf364b9495eaf2e31e7640872e9bac97253cde5da3", size = 573735, upload-time = "2026-07-12T01:04:04.906Z" },
+    { url = "https://files.pythonhosted.org/packages/82/ad/86d4ed457deb6dfa38afe385bea4faceaf6d0412a845b0b1c5561cef94c1/arvel-0.63.0-py3-none-any.whl", hash = "sha256:b8f2547b318e836a7c827bd06ca0883de43912d3e54adf1c084bf1429b81f79b", size = 577853, upload-time = "2026-07-12T11:49:59.353Z" },
 ]
 
 [package.optional-dependencies]
@@ -317,20 +318,9 @@ search = [
     { name = "meilisearch" },
 ]
 standard = [
-    { name = "aiosmtplib" },
-    { name = "alembic" },
-    { name = "asyncpg" },
     { name = "granian", extra = ["reload"] },
     { name = "ipython" },
-    { name = "jinja2" },
     { name = "litestar" },
-    { name = "markdown-it-py" },
-    { name = "pillow" },
-    { name = "pyjwt" },
-    { name = "redis" },
-    { name = "sqlalchemy", extra = ["asyncio"] },
-    { name = "taskiq" },
-    { name = "taskiq-redis" },
     { name = "uvicorn" },
 ]
 telemetry = [
@@ -346,7 +336,7 @@ view = [
 
 [[package]]
 name = "arvel-ecommerce-kit"
-version = "0.6.2"
+version = "0.7.0"
 source = { virtual = "." }
 dependencies = [
     { name = "arvel", extra = ["i18n", "image", "jwt", "mail", "oidc", "postgres", "queue-amqp", "redis", "s3", "search", "standard", "telemetry", "view"] },
@@ -2428,19 +2418,6 @@ source = { registry = "https://pypi.org/simple" }
 sdist = { url = "https://files.pythonhosted.org/packages/47/90/47a627696e53bfdcacabc3e8c05b73bf1424685bcb5f17209cb8b12da1bf/taskiq_dependencies-1.5.7.tar.gz", hash = "sha256:0d3b240872ef152b719153b9526d866d2be978aeeaea6600e878414babc2dcb4", size = 14875, upload-time = "2025-02-26T22:07:39.876Z" }
 wheels = [
     { url = "https://files.pythonhosted.org/packages/99/6d/4a012f2de002c2e93273f5e7d3e3feea02f7fdbb7b75ca2ca1dd10703091/taskiq_dependencies-1.5.7-py3-none-any.whl", hash = "sha256:6fcee5d159bdb035ef915d4d848826169b6f06fe57cc2297a39b62ea3e76036f", size = 13801, upload-time = "2025-02-26T22:07:38.622Z" },
-]
-
-[[package]]
-name = "taskiq-redis"
-version = "1.2.3"
-source = { registry = "https://pypi.org/simple" }
-dependencies = [
-    { name = "redis" },
-    { name = "taskiq" },
-]
-sdist = { url = "https://files.pythonhosted.org/packages/99/09/8476b1b12db94d53eb8d0a5e8ffffd453af7626d477bfbd8ab12bf1d3445/taskiq_redis-1.2.3.tar.gz", hash = "sha256:da427db1f68bb71ee90d93c416b82d1bf4a1ed4087f4b0f95b61bf6d8bba3e67", size = 14657, upload-time = "2026-06-23T01:09:07.783Z" }
-wheels = [
-    { url = "https://files.pythonhosted.org/packages/68/93/64d90e5ff71b0dbb3c5dc74d62fd74361586b972b4eb49b6a84c06b01091/taskiq_redis-1.2.3-py3-none-any.whl", hash = "sha256:bcab686287e23e0b9922e7809783ef2af8e8e8ce833e790308af40e96f67d549", size = 20904, upload-time = "2026-06-23T01:09:06.822Z" },
 ]
 
 [[package]]

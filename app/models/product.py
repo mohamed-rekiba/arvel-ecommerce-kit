@@ -94,7 +94,8 @@ class Product(HasMedia, Searchable, Model, SoftDeletes):
         return (
             query.select_raw(Product._LOCALE_COLUMNS)
             .select_raw(
-                # the trailing '{{}}' keeps the projection NULL-free: a NULL column value
+                # the trailing '{}' literal (f-string-escaped below) keeps the projection
+                # NULL-free: a NULL column value
                 # bypasses model casts entirely, so an untranslated row would serialize as
                 # null instead of an (honest) empty Translate
                 f"COALESCE(translations->'{loc}', translations->'{DEFAULT_LOCALE}', '{{}}') "
