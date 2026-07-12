@@ -233,14 +233,16 @@ def test_translation_carries_the_winning_locale(client) -> None:
 
     _asyncio.run(seed_fr())
 
-    products = client.get("/api/products?per_page=50", headers={"accept-language": "en"}).json()[
-        "data"
-    ]
+    products = client.get(
+        "/api/products?per_page=50", headers={"accept-language": "en"}
+    ).json()["data"]
     assert products and all(p["translation"]["locale"] == "en" for p in products)
 
     # the requested-locale branch: the bilingual product serves fr and SAYS fr;
     # en-only products serve the en fallback and say so
-    fr = client.get("/api/products?per_page=50", headers={"accept-language": "fr"}).json()["data"]
+    fr = client.get(
+        "/api/products?per_page=50", headers={"accept-language": "fr"}
+    ).json()["data"]
     by_slug = {p["slug"]: p["translation"] for p in fr}
     assert by_slug["bilingue"]["locale"] == "fr"
     assert by_slug["bilingue"]["name"] == "Bilingue FR"
