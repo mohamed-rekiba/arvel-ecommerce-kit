@@ -52,11 +52,17 @@ class Category(Model, SoftDeletes):
         return (
             query.select_raw(Category._LOCALE_COLUMNS)
             .select_raw(
-                f"COALESCE(translations->'{loc}', translations->'{DEFAULT_LOCALE}') AS translation"
+                # the trailing '{{}}' keeps the projection NULL-free: a NULL column value
+                # bypasses model casts entirely, so an untranslated row would serialize as
+                # null instead of an (honest) empty Translate
+                f"COALESCE(translations->'{loc}', translations->'{DEFAULT_LOCALE}', '{{}}') "
+                f"AS translation"
             )
-            .select_raw(  # which locale won — the cast surfaces it as Translate.locale
+            .select_raw(  # which locale won — the cast surfaces it as Translate.locale;
+                # a row with NO translation at all reports '' (honest), never a claimed default
                 f"CASE WHEN translations->'{loc}' IS NOT NULL THEN '{loc}' "
-                f"ELSE '{DEFAULT_LOCALE}' END AS translation_locale"
+                f"WHEN translations->'{DEFAULT_LOCALE}' IS NOT NULL THEN '{DEFAULT_LOCALE}' "
+                f"ELSE '' END AS translation_locale"
             )
         )
 
