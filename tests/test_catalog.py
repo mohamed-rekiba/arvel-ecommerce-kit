@@ -212,12 +212,9 @@ def test_translation_carries_the_winning_locale(client) -> None:
     the default when the fallback fired — `""` tells an API consumer nothing. One product carries
     real `fr` content so the requested-locale branch is distinguished from the fallback branch
     (an en-only catalog would let a hardcoded default pass every assertion)."""
-    import asyncio as _asyncio
-
-    from arvel.database import ConnectionResolver as _CR
 
     async def seed_fr() -> None:
-        db = _CR({"default": {"url": os.environ["DATABASE_URL"]}})
+        db = ConnectionResolver({"default": {"url": os.environ["DATABASE_URL"]}})
         Product.set_connection(db)
         Category.set_connection(db)
         shirts = await Category.where(slug="shirts").first()
@@ -230,8 +227,9 @@ def test_translation_carries_the_winning_locale(client) -> None:
             status=ProductStatus.ACTIVE,
             published=True,
         )
+        await db.dispose()
 
-    _asyncio.run(seed_fr())
+    asyncio.run(seed_fr())
 
     products = client.get(
         "/api/products?per_page=50", headers={"accept-language": "en"}
@@ -256,12 +254,9 @@ def test_translation_carries_the_winning_locale(client) -> None:
 def test_translation_locale_is_empty_when_no_translation_exists(client) -> None:
     """A row with NEITHER the requested nor the default locale serves an empty translation —
     and must say so (locale ""), not claim the default locale was served."""
-    import asyncio as _asyncio
-
-    from arvel.database import ConnectionResolver as _CR
 
     async def seed_empty() -> None:
-        db = _CR({"default": {"url": os.environ["DATABASE_URL"]}})
+        db = ConnectionResolver({"default": {"url": os.environ["DATABASE_URL"]}})
         Product.set_connection(db)
         Category.set_connection(db)
         shirts = await Category.where(slug="shirts").first()
@@ -274,8 +269,9 @@ def test_translation_locale_is_empty_when_no_translation_exists(client) -> None:
             status=ProductStatus.ACTIVE,
             published=True,
         )
+        await db.dispose()
 
-    _asyncio.run(seed_empty())
+    asyncio.run(seed_empty())
 
     data = client.get(
         "/api/products?per_page=50", headers={"accept-language": "en"}
