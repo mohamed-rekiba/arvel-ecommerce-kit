@@ -13,8 +13,11 @@ subtree instead of repeated on every route (DR-0052 lets a group carry ``secure=
 
 from arvel import Route, Schema, abort, config
 from arvel.auth.middleware import Authenticate, Authorize
+from arvel.auth.throttle import LoginRateLimiter
 from arvel.auth.tokens import TokenGuard, create_token
 from arvel.http import Request
+from arvel.http.exceptions import HttpException
+from arvel.kernel import app
 from arvel.security import Hasher
 
 from app.controllers import account_controller as account
@@ -57,12 +60,36 @@ async def health(request: Request) -> HealthStatus:
     return HealthStatus(status="ok")
 
 
+def _login_limiter() -> LoginRateLimiter:
+    """Per-credential brute-force lockout (5 failures / 15 min by default, cleared on success),
+    counted over the app cache. This sits on top of the api group's generic per-IP request
+    throttle: that caps request *volume*; this stops password guessing against one account."""
+    return LoginRateLimiter(app().make("cache"))
+
+
+def _login_key(request: Request, email: str) -> str:
+    # Bucket by email AND client IP: an attacker guessing one account must both know the email and
+    # stay on one IP, and one attacker can't lock a victim out of every network by hammering their
+    # email. The limiter normalises casing/whitespace, so variants share the bucket.
+    return f"{email}|{request.ip() or ''}"
+
+
 async def login(request: Request, data: CredentialsIn) -> TokenOut:
     """Verify credentials and issue a personal access token (merging any guest cart the request
     carries — build-a-cart-then-sign-in must never strand items)."""
+    limiter = _login_limiter()
+    key = _login_key(request, data.email)
+    if await limiter.too_many_attempts(key):
+        raise HttpException(
+            429,
+            "Too many login attempts. Try again later.",
+            headers={"Retry-After": str(await limiter.available_in(key))},
+        )
     user = await User.where("email", data.email).first()
     if user is None or not Hasher().check(data.password, user.password):
+        await limiter.record_failure(key)
         abort(401, "Invalid credentials")
+    await limiter.clear(key)  # a good login resets the counter — one bad day isn't a lockout
     await cart.merge_guest_cart(request, user)
     from app.i18n import active_locale
 
