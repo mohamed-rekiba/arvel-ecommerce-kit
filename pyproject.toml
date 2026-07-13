@@ -10,14 +10,14 @@ dependencies = ["arvel[standard,postgres,redis,queue-amqp,view,mail,image,i18n,j
 dev = [
     "aiosqlite>=0.22.1",
     "bandit>=1.9.4",
-    "faker>=40.26.0",
-    "mypy>=2.1.0",
+    "faker>=40.28.1",
+    "mypy>=2.2.0",
     "pip-audit>=2.10.1",
     "pre-commit>=4.6.0",
     "pyright>=1.1.411",
     "pytest>=9.1.1",
     "pytest-asyncio>=1.4.0",
-    "ruff>=0.15.20",
+    "ruff>=0.15.21",
     # the real-service integration tier (tests/integration, `make test-integration`)
     "testcontainers>=4.14.2",
 ]
