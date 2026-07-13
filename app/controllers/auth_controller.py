@@ -50,7 +50,7 @@ async def register(request: Request, data: RegisterIn) -> TokenOut:
         name=data.name,
         email=data.email,
         password=data.password,
-        locale=active_locale(),
+        mail_locale=active_locale(),
     )
     await merge_guest_cart(
         request, user
@@ -59,7 +59,7 @@ async def register(request: Request, data: RegisterIn) -> TokenOut:
         user.id, user.email, str(Config.get("app.key", ""))
     )
     await Mail.to(user.email).send(
-        VerifyEmail(user.id, verification, locale=str(user.locale or "en"))
+        VerifyEmail(user.id, verification, locale=str(user.mail_locale or "en"))
     )
     token, _ = await create_token(user, name="customer", abilities=[CUSTOMER_ABILITY])
     return TokenOut(token=token)

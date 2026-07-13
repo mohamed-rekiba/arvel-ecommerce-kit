@@ -26,7 +26,7 @@ class User(HasMedia, Authenticatable, HasRoles, Notifiable, Model):
         "password": str,
         "phone": str,
         "role": str,
-        "locale": str,
+        "mail_locale": str,
     }
     __fillable__: ClassVar[list[str]] = [
         "name",
@@ -34,7 +34,7 @@ class User(HasMedia, Authenticatable, HasRoles, Notifiable, Model):
         "password",
         "phone",
         "role",
-        "locale",
+        "mail_locale",
     ]
     __hidden__: ClassVar[list[str]] = ["password"]
     __casts__: ClassVar[dict[str, Any]] = {

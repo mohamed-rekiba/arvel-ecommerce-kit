@@ -67,8 +67,8 @@ async def login(request: Request, data: CredentialsIn) -> TokenOut:
     from app.i18n import active_locale
 
     locale = active_locale()
-    if getattr(user, "locale", None) != locale:
-        user.locale = (
+    if getattr(user, "mail_locale", None) != locale:
+        user.mail_locale = (
             locale  # the sign-in language becomes the mail/notification language
         )
         await user.save()

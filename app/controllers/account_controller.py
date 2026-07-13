@@ -40,7 +40,7 @@ async def user_out(user: User) -> UserOut:
         phone=user.phone,
         email_verified=user.email_verified_at is not None,
         avatar_url=await avatar_url(user),
-        locale=str(getattr(user, "locale", None) or "en"),
+        locale=str(getattr(user, "mail_locale", None) or "en"),
     )
 
 
@@ -49,7 +49,9 @@ async def _send_verification(user: User) -> None:
         user.id, user.email, str(Config.get("app.key", ""))
     )
     await Mail.to(user.email).send(
-        VerifyEmail(user.id, token, locale=str(getattr(user, "locale", None) or "en"))
+        VerifyEmail(
+            user.id, token, locale=str(getattr(user, "mail_locale", None) or "en")
+        )
     )
 
 

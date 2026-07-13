@@ -43,7 +43,7 @@ async def _seed(url: str) -> dict[str, int]:
             email="amina@example.com",
             password="secret-amina",
             role=UserRole.CUSTOMER,
-            locale="en",
+            mail_locale="en",
         )
         await amina.mark_email_as_verified()
         bilal = await User.create(
@@ -51,7 +51,7 @@ async def _seed(url: str) -> dict[str, int]:
             email="bilal@example.com",
             password="secret-bilal",
             role=UserRole.CUSTOMER,
-            locale="ar",
+            mail_locale="ar",
         )
         await bilal.mark_email_as_verified()
         cat = await Category.create(
