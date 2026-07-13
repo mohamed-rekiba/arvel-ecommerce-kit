@@ -24,7 +24,9 @@ def client(tmp_path, monkeypatch):
         db = ConnectionResolver({"default": {"url": url}})
         await Migrator(db).run(discover_migrations(["database/migrations"]))
         User.set_connection(db)
-        await User.create(name="Victim", email="victim@example.com", password="correct-horse")
+        await User.create(
+            name="Victim", email="victim@example.com", password="correct-horse"
+        )
         await User.create(name="Other", email="other@example.com", password="hunter2")
         User.set_connection(None)
         await db.dispose()
@@ -60,7 +62,9 @@ def test_lockout_is_per_account_not_global(client) -> None:
 def test_a_good_login_before_the_cap_clears_the_counter(client) -> None:
     for _ in range(4):  # one below the cap
         assert _attempt(client, "victim@example.com", "wrong").status_code == 401
-    assert _attempt(client, "victim@example.com", "correct-horse").status_code == 200  # clears
+    assert (
+        _attempt(client, "victim@example.com", "correct-horse").status_code == 200
+    )  # clears
     # counter reset: four more failures don't lock (would if the good login hadn't cleared it)
     for _ in range(4):
         assert _attempt(client, "victim@example.com", "wrong").status_code == 401
