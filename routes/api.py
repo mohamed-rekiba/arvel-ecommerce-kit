@@ -12,13 +12,13 @@ subtree instead of repeated on every route (DR-0052 lets a group carry ``secure=
 """
 
 from arvel import Route, Schema, abort, config
+from arvel.auth import verify_credentials
 from arvel.auth.middleware import Authenticate, Authorize
 from arvel.auth.throttle import LoginRateLimiter
 from arvel.auth.tokens import TokenGuard, create_token
 from arvel.http import Request
 from arvel.http.exceptions import HttpException
 from arvel.kernel import app
-from arvel.security import Hasher
 
 from app.controllers import account_controller as account
 from app.controllers import admin_controller as admin
@@ -86,7 +86,9 @@ async def login(request: Request, data: CredentialsIn) -> TokenOut:
             headers={"Retry-After": str(await limiter.available_in(key))},
         )
     user = await User.where("email", data.email).first()
-    if user is None or not Hasher().check(data.password, user.password):
+    # verify_credentials burns a dummy hash for an unknown user (no timing enumeration) and runs
+    # the check off the event loop — never the inline sync Hasher().check(), which leaks both.
+    if not await verify_credentials(user, data.password):
         await limiter.record_failure(key)
         abort(401, "Invalid credentials")
     await limiter.clear(
