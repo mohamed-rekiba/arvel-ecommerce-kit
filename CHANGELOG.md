@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.7.1](https://github.com/mohamed-rekiba/arvel-ecommerce-kit/compare/v0.7.0...v0.7.1) (2026-07-13)
+
+
+### Bug Fixes
+
+* **catalog:** an untranslated row reports an honest empty locale, never null ([a85b534](https://github.com/mohamed-rekiba/arvel-ecommerce-kit/commit/a85b53428f38349fabc60bc91f3cdeacbb5ee460))
+
 ## [0.7.0](https://github.com/mohamed-rekiba/arvel-ecommerce-kit/compare/v0.6.2...v0.7.0) (2026-07-12)
 
 
