@@ -28,11 +28,11 @@ class OrderShippedNotification(Notification, ShouldQueue):
         return OrderShipped(
             self.order_id,
             self.tracking_number,
-            locale=str(getattr(notifiable, "locale", None) or "en"),
+            locale=str(getattr(notifiable, "mail_locale", None) or "en"),
         )
 
     def to_array(self, notifiable: Any) -> dict[str, Any]:
-        locale = str(getattr(notifiable, "locale", None) or "en")
+        locale = str(getattr(notifiable, "mail_locale", None) or "en")
         return {
             "order_id": self.order_id,
             "tracking_number": self.tracking_number,

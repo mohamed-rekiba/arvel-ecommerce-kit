@@ -54,7 +54,7 @@ class AppServiceProvider(ServiceProvider):
         from arvel.features import Feature
 
         def _promoted_deals_segment(user: Any) -> bool:
-            return getattr(user, "locale", None) == "en"
+            return getattr(user, "mail_locale", None) == "en"
 
         Feature.define("promoted-deals", _promoted_deals_segment)
 

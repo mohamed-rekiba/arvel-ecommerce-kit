@@ -50,11 +50,11 @@ class BackInStockNotification(Notification, ShouldQueue):
             self.product_name,
             self.product_slug,
             self.variant_name,
-            locale=str(getattr(notifiable, "locale", None) or "en"),
+            locale=str(getattr(notifiable, "mail_locale", None) or "en"),
         )
 
     def to_array(self, notifiable: Any) -> dict[str, Any]:
-        locale = str(getattr(notifiable, "locale", None) or "en")
+        locale = str(getattr(notifiable, "mail_locale", None) or "en")
         return {
             "product_slug": self.product_slug,
             "message": trans_in(

@@ -15,7 +15,11 @@ class CreateUsersTable(Migration):
             t.string("password")
             # PII stored via arvel's `encrypted` cast — ciphertext at rest, so text-sized
             t.text("phone").nullable()
-            t.string("locale", 5).default(value="en")  # mail/notification language
+            t.string("mail_locale", 5).default(
+                value="en"
+            )  # last sign-in language for async
+            # mail/notifications — deliberately NOT named `locale`/`preferred_locale`, which
+            # arvel treats as a UI-locale preference; the storefront follows Accept-Language
             t.string("role").default(
                 value="customer"
             ).index()  # customer | admin (UserRole)
