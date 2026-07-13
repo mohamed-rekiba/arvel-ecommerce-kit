@@ -49,12 +49,15 @@ class AppServiceProvider(ServiceProvider):
     def boot(self) -> None:
         """Boot-time wiring (runs after every provider has registered)."""
         # K14 — "promoted-deals": the storefront's Deals-of-the-Day rail ordered by best-discount
-        # first for an English-locale shopper (an i18n-gated rollout), soonest-ending-first
-        # otherwise. A guest (scope None) resolves to the control.
+        # first for a shopper browsing in English (an i18n-gated rollout), soonest-ending-first
+        # otherwise. Keyed on the LIVE request locale (what they're reading now), not a persisted
+        # sign-in value — mail_locale is the mail language, not the UI language. Guest → control.
         from arvel.features import Feature
 
+        from app.i18n import active_locale
+
         def _promoted_deals_segment(user: Any) -> bool:
-            return getattr(user, "mail_locale", None) == "en"
+            return user is not None and active_locale() == "en"
 
         Feature.define("promoted-deals", _promoted_deals_segment)
 

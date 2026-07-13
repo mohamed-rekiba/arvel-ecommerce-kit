@@ -183,10 +183,22 @@ def test_promoted_deals_flag_gates_order_and_flips_at_runtime(
             client, "bilal@example.com", "secret-bilal", accept_language="ar"
         )
 
-        amina_order = [d["id"] for d in client.get("/api/deals", headers=amina).json()]
-        bilal_order = [d["id"] for d in client.get("/api/deals", headers=bilal).json()]
-        assert amina_order == variant_order  # enabled segment (locale=en) → variant
-        assert bilal_order == control_order  # control segment (locale=ar) → control
+        # the segment keys on the LIVE request locale (Accept-Language on THIS request), not the
+        # stored mail_locale — so the deals read carries the language the shopper is browsing in.
+        amina_order = [
+            d["id"]
+            for d in client.get(
+                "/api/deals", headers={**amina, "Accept-Language": "en"}
+            ).json()
+        ]
+        bilal_order = [
+            d["id"]
+            for d in client.get(
+                "/api/deals", headers={**bilal, "Accept-Language": "ar"}
+            ).json()
+        ]
+        assert amina_order == variant_order  # browsing en → variant
+        assert bilal_order == control_order  # browsing ar → control
         assert amina_order != bilal_order  # non-vacuous: the two orders actually differ
 
         # runtime toggle, out-of-band: flip AMINA'S OWN scope (not activate_for_everyone — the
