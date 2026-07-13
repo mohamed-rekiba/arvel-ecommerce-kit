@@ -89,7 +89,9 @@ async def login(request: Request, data: CredentialsIn) -> TokenOut:
     if user is None or not Hasher().check(data.password, user.password):
         await limiter.record_failure(key)
         abort(401, "Invalid credentials")
-    await limiter.clear(key)  # a good login resets the counter — one bad day isn't a lockout
+    await limiter.clear(
+        key
+    )  # a good login resets the counter — one bad day isn't a lockout
     await cart.merge_guest_cart(request, user)
     from app.i18n import active_locale
 
