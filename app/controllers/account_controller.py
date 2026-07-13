@@ -95,7 +95,7 @@ async def change_password(request: Request, data: ChangePasswordIn) -> MessageOu
         raise ValidationException(
             {"password": [trans("shop.errors.password_too_short")]}
         )
-    if not Hasher().check(data.current_password, user.password):
+    if not await Hasher().check_async(data.current_password, user.password):
         raise ValidationException(
             {"current_password": [trans("shop.errors.password_mismatch")]}
         )
