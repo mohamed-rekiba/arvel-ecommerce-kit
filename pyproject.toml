@@ -2,7 +2,10 @@
 name = "arvel-ecommerce-kit"
 version = "0.7.2"
 requires-python = ">=3.14"
-dependencies = ["arvel[standard,postgres,redis,queue-amqp,view,mail,image,i18n,jwt,oidc,s3,telemetry,search]"]
+dependencies = [
+    "arvel[standard,postgres,redis,queue-amqp,view,mail,image,i18n,jwt,oidc,s3,telemetry,search]",
+    "arvel-ai[httpx]",
+]
 
 [project.optional-dependencies]
 # aiosqlite: the suite runs on in-process sqlite (see conftest). uv doesn't reliably install it from
@@ -57,6 +60,7 @@ exclude_dirs = ["node_modules", ".venv", "tests", "database"]
 # Local dev tracks framework source directly (clone `arvel` as a sibling dir before `uv sync`) since
 # this kit often depends on unreleased arvel changes. Docker installs the published version instead.
 arvel = { path = "../arvel", editable = true }
+arvel-ai = { path = "../arvel-ai", editable = true }
 
 [tool.pytest.ini_options]
 asyncio_mode = "auto"

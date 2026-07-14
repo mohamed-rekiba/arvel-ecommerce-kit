@@ -32,6 +32,7 @@ from app.controllers import invoice_controller as invoice
 from app.controllers import settings_controller as settings
 from app.controllers import deal_controller as deals
 from app.controllers import admin_product_controller as admin_products
+from app.controllers import ai_copy_controller as ai_copy
 from app.controllers import admin_rbac_controller as rbac
 from app.controllers import admin_taxonomy_controller as taxonomy
 from app.controllers import admin_user_controller as admin_users
@@ -272,6 +273,12 @@ with Route.group(prefix="/admin", name="api.admin."):
         Route.post(
             "/products/{id:int}/image", media.upload_image, name="products.image"
         ).middleware(Authorize(Permission.CATALOG_UPDATE.value))
+        # AI-drafted copy suggestion (arvel-ai gateway) — same permission as editing
+        Route.post(
+            "/products/{slug:str}/copy-draft",
+            ai_copy.copy_draft,
+            name="products.copy_draft",
+        ).status(200).middleware(Authorize(Permission.CATALOG_UPDATE.value))
         Route.delete(
             "/products/{id:int}/media/{media_id:int}",
             media.delete_image,

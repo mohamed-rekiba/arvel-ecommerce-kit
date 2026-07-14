@@ -456,11 +456,45 @@ requires-dist = [
 provides-extras = ["2fa", "all", "azure", "console", "dev", "docs", "gcs", "http", "i18n", "image", "jwt", "mail", "media", "mysql", "notifications", "oauth", "oidc", "postgres", "queue", "queue-amqp", "queue-redis", "redis", "s3", "search", "server", "sqlite", "standard", "supabase", "telemetry", "test-integration", "vector", "video", "view"]
 
 [[package]]
+name = "arvel-ai"
+version = "0.1.0"
+source = { editable = "../arvel-ai" }
+dependencies = [
+    { name = "arvel" },
+    { name = "msgspec" },
+]
+
+[package.optional-dependencies]
+httpx = [
+    { name = "httpx" },
+]
+
+[package.metadata]
+requires-dist = [
+    { name = "arvel", editable = "../arvel" },
+    { name = "httpx", marker = "extra == 'httpx'" },
+    { name = "litellm", marker = "extra == 'litellm'" },
+    { name = "msgspec" },
+]
+provides-extras = ["litellm", "httpx"]
+
+[package.metadata.requires-dev]
+dev = [
+    { name = "httpx" },
+    { name = "import-linter" },
+    { name = "mypy" },
+    { name = "pytest" },
+    { name = "pytest-asyncio" },
+    { name = "ruff" },
+]
+
+[[package]]
 name = "arvel-ecommerce-kit"
 version = "0.7.1"
 source = { virtual = "." }
 dependencies = [
     { name = "arvel", extra = ["i18n", "image", "jwt", "mail", "oidc", "postgres", "queue-amqp", "redis", "s3", "search", "standard", "telemetry", "view"] },
+    { name = "arvel-ai", extra = ["httpx"] },
 ]
 
 [package.optional-dependencies]
@@ -482,6 +516,7 @@ dev = [
 requires-dist = [
     { name = "aiosqlite", marker = "extra == 'dev'", specifier = ">=0.22.1" },
     { name = "arvel", extras = ["standard", "postgres", "redis", "queue-amqp", "view", "mail", "image", "i18n", "jwt", "oidc", "s3", "telemetry", "search"], editable = "../arvel" },
+    { name = "arvel-ai", extras = ["httpx"], editable = "../arvel-ai" },
     { name = "bandit", marker = "extra == 'dev'", specifier = ">=1.9.4" },
     { name = "faker", marker = "extra == 'dev'", specifier = ">=40.28.1" },
     { name = "mypy", marker = "extra == 'dev'", specifier = ">=2.2.0" },
