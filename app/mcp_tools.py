@@ -17,4 +17,5 @@ async def product_status(slug: str) -> str:
     product = await Product.where("slug", slug).first()
     if product is None or not product.published:
         return "product not found"
-    return f"{product.slug}: status={product.status}, price_cents={product.price_cents}"
+    # .value, not the raw enum member — this is a public summary
+    return f"{product.slug}: status={product.status.value}, price_cents={product.price_cents}"

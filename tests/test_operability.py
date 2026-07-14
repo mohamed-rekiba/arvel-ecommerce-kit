@@ -39,7 +39,7 @@ def test_maintenance_mode_gates_everything_but_health(client) -> None:
         assert "maintenance" in down.json()["message"].lower()
         assert "Retry-After" in down.headers
         # the liveness probe answers regardless (app.maintenance_except)
-        assert client.get("/api/health").status_code == 200
+        assert client.get("/health").status_code == 200
 
         portal.call(maintenance.up)
         assert client.get("/api/products").status_code == 200
