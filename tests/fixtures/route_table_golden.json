@@ -15,6 +15,18 @@
     "methods": [
       "GET"
     ],
+    "path": "/.well-known/oauth-protected-resource",
+    "name": "ai.mcp.metadata",
+    "middleware": [],
+    "security": [],
+    "status_code": null,
+    "group": null,
+    "domain": null
+  },
+  {
+    "methods": [
+      "GET"
+    ],
     "path": "/api/account/addresses",
     "name": "api.account.addresses.index",
     "middleware": [
@@ -746,6 +758,23 @@
   },
   {
     "methods": [
+      "POST"
+    ],
+    "path": "/api/admin/products/{slug:str}/copy-draft",
+    "name": "api.admin.products.copy_draft",
+    "middleware": [
+      "Authenticate",
+      "Authorize('catalog.update')"
+    ],
+    "security": [
+      "bearer"
+    ],
+    "status_code": 200,
+    "group": "api",
+    "domain": null
+  },
+  {
+    "methods": [
       "GET"
     ],
     "path": "/api/admin/reviews",
@@ -1135,18 +1164,6 @@
     "middleware": [],
     "security": [],
     "status_code": 200,
-    "group": "api",
-    "domain": null
-  },
-  {
-    "methods": [
-      "GET"
-    ],
-    "path": "/api/health",
-    "name": "api.health",
-    "middleware": [],
-    "security": [],
-    "status_code": null,
     "group": "api",
     "domain": null
   },
@@ -1563,6 +1580,42 @@
     "middleware": [
       "Authenticate"
     ],
+    "security": [],
+    "status_code": null,
+    "group": null,
+    "domain": null
+  },
+  {
+    "methods": [
+      "GET"
+    ],
+    "path": "/health",
+    "name": "health",
+    "middleware": [],
+    "security": [],
+    "status_code": null,
+    "group": null,
+    "domain": null
+  },
+  {
+    "methods": [
+      "GET"
+    ],
+    "path": "/livez",
+    "name": "health.live",
+    "middleware": [],
+    "security": [],
+    "status_code": null,
+    "group": null,
+    "domain": null
+  },
+  {
+    "methods": [
+      "POST"
+    ],
+    "path": "/mcp",
+    "name": "ai.mcp",
+    "middleware": [],
     "security": [],
     "status_code": null,
     "group": null,
