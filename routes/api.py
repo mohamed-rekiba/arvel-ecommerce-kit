@@ -11,7 +11,7 @@ subtree instead of repeated on every route (DR-0052 lets a group carry ``secure=
 ``middleware=``, so enforcement and its documentation can't drift apart).
 """
 
-from arvel import Route, Schema, abort, config
+from arvel import Route, abort, config
 from arvel.auth import verify_credentials
 from arvel.auth.middleware import Authenticate, Authorize
 from arvel.auth.throttle import LoginRateLimiter
@@ -49,15 +49,6 @@ from app.controllers import payment_controller as payment
 from app.enums import Permission
 from app.models.user import User
 from app.schemas import CredentialsIn, TokenOut, UserOut
-
-
-class HealthStatus(Schema):
-    status: str
-
-
-async def health(request: Request) -> HealthStatus:
-    """Liveness probe."""
-    return HealthStatus(status="ok")
 
 
 def _login_limiter() -> LoginRateLimiter:
@@ -122,7 +113,6 @@ async def me(request: Request) -> UserOut:
     return await user_out(user)
 
 
-Route.get("/health", health, name="api.health")
 Route.post("/login", login, name="api.login").status(
     200
 )  # action, not a resource creation
