@@ -202,14 +202,14 @@ wheels = [
 
 [[package]]
 name = "anyio"
-version = "4.14.1"
+version = "4.14.2"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "idna" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/3b/72/5562aabb8dd7181e8e860622a38bea08d17842b99ecd4c91f84ac95251b0/anyio-4.14.1.tar.gz", hash = "sha256:8d648a3544c1a700e3ff78615cd679e4c5c3f149904287e73687b2596963629e", size = 254831, upload-time = "2026-06-24T20:56:06.017Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/61/cc/a381afa6efea9f496eff839d4a6a1aed3bfafc7b3ab4b0d1b243a12573dd/anyio-4.14.2.tar.gz", hash = "sha256:cfa139f3ed1a23ee8f88a145ddb5ac7605b8bbfd8592baacd7ce3d8bb4313c7f", size = 260176, upload-time = "2026-07-12T20:29:07.082Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/b0/7b/90df4a0a816d98d6ea26f559d87836d494a2cf1fcf063be67df50a7bcc30/anyio-4.14.1-py3-none-any.whl", hash = "sha256:4e5533c5b8ff0a24f5d7a176cbe6877129cd183893f66b537f8f227d10527d72", size = 124875, upload-time = "2026-06-24T20:56:04.413Z" },
+    { url = "https://files.pythonhosted.org/packages/da/35/f2287558c17e29fafc8ef3daf819bb9834061cfa43bff8014f7df7f63bdc/anyio-4.14.2-py3-none-any.whl", hash = "sha256:9f505dda5ac9f0c8309b5e8bd445a8c2bf7246f3ce950121e45ea15bc41d1494", size = 125813, upload-time = "2026-07-12T20:29:05.763Z" },
 ]
 
 [[package]]
@@ -257,8 +257,7 @@ wheels = [
 
 [[package]]
 name = "arvel"
-version = "0.62.0"
-source = { registry = "https://pypi.org/simple" }
+source = { editable = "../arvel" }
 dependencies = [
     { name = "anyio" },
     { name = "cashews" },
@@ -274,11 +273,8 @@ dependencies = [
     { name = "python-ulid" },
     { name = "structlog" },
     { name = "typer" },
+    { name = "typing-extensions" },
     { name = "whenever" },
-]
-sdist = { url = "https://files.pythonhosted.org/packages/b9/51/ce02c12d26198d2fab42b5016b7494ca960a203a36902a31db32a7cfd724/arvel-0.62.0.tar.gz", hash = "sha256:1ae7186d2ff01f7a14255e351efa8afae44462b36f0403a0780e07a22f6aff38", size = 1383146, upload-time = "2026-07-12T01:04:06.819Z" }
-wheels = [
-    { url = "https://files.pythonhosted.org/packages/f9/80/9b07135e949ab456884c401931de4645b2f16539b681dd40afa6dcb44887/arvel-0.62.0-py3-none-any.whl", hash = "sha256:ff6fbc0e06441c330707f7cf364b9495eaf2e31e7640872e9bac97253cde5da3", size = 573735, upload-time = "2026-07-12T01:04:04.906Z" },
 ]
 
 [package.optional-dependencies]
@@ -317,21 +313,13 @@ search = [
     { name = "meilisearch" },
 ]
 standard = [
-    { name = "aiosmtplib" },
+    { name = "aiosqlite" },
     { name = "alembic" },
-    { name = "asyncpg" },
     { name = "granian", extra = ["reload"] },
     { name = "ipython" },
     { name = "jinja2" },
     { name = "litestar" },
-    { name = "markdown-it-py" },
-    { name = "pillow" },
-    { name = "pyjwt" },
-    { name = "redis" },
     { name = "sqlalchemy", extra = ["asyncio"] },
-    { name = "taskiq" },
-    { name = "taskiq-redis" },
-    { name = "uvicorn" },
 ]
 telemetry = [
     { name = "opentelemetry-exporter-otlp-proto-http" },
@@ -343,6 +331,129 @@ telemetry = [
 view = [
     { name = "jinja2" },
 ]
+
+[package.metadata]
+requires-dist = [
+    { name = "adlfs", marker = "extra == 'all'", specifier = ">=2026.5.0" },
+    { name = "adlfs", marker = "extra == 'azure'", specifier = ">=2026.5.0" },
+    { name = "aiosmtplib", marker = "extra == 'all'", specifier = ">=5.1.2" },
+    { name = "aiosmtplib", marker = "extra == 'mail'", specifier = ">=5.1.2" },
+    { name = "aiosqlite", marker = "extra == 'all'", specifier = ">=0.22.1" },
+    { name = "aiosqlite", marker = "extra == 'sqlite'", specifier = ">=0.22.1" },
+    { name = "aiosqlite", marker = "extra == 'standard'", specifier = ">=0.22.1" },
+    { name = "alembic", marker = "extra == 'all'", specifier = ">=1.18.5" },
+    { name = "alembic", marker = "extra == 'mysql'", specifier = ">=1.18.5" },
+    { name = "alembic", marker = "extra == 'postgres'", specifier = ">=1.18.5" },
+    { name = "alembic", marker = "extra == 'sqlite'", specifier = ">=1.18.5" },
+    { name = "alembic", marker = "extra == 'standard'", specifier = ">=1.18.5" },
+    { name = "anyio", specifier = ">=4.14.2" },
+    { name = "apprise", marker = "extra == 'all'", specifier = ">=1.12.0" },
+    { name = "apprise", marker = "extra == 'notifications'", specifier = ">=1.12.0" },
+    { name = "asyncmy", marker = "extra == 'all'", specifier = ">=0.2.11" },
+    { name = "asyncmy", marker = "extra == 'mysql'", specifier = ">=0.2.11" },
+    { name = "asyncpg", marker = "extra == 'all'", specifier = ">=0.31.0" },
+    { name = "asyncpg", marker = "extra == 'postgres'", specifier = ">=0.31.0" },
+    { name = "authlib", marker = "extra == 'all'", specifier = ">=1.7.2" },
+    { name = "authlib", marker = "extra == 'oauth'", specifier = ">=1.7.2" },
+    { name = "av", marker = "extra == 'all'", specifier = ">=18.0.0" },
+    { name = "av", marker = "extra == 'video'", specifier = ">=18.0.0" },
+    { name = "babel", marker = "extra == 'all'", specifier = ">=2.18.0" },
+    { name = "babel", marker = "extra == 'i18n'", specifier = ">=2.18.0" },
+    { name = "bandit", marker = "extra == 'dev'", specifier = ">=1.9.4" },
+    { name = "cashews", specifier = ">=7.5.0" },
+    { name = "coverage", marker = "extra == 'dev'", specifier = ">=7.15.1" },
+    { name = "cryptography", specifier = ">=49.0.0" },
+    { name = "faker", marker = "extra == 'dev'", specifier = ">=40.28.1" },
+    { name = "fsspec", specifier = ">=2026.6.0" },
+    { name = "gcsfs", marker = "extra == 'all'", specifier = ">=2026.7.0" },
+    { name = "gcsfs", marker = "extra == 'gcs'", specifier = ">=2026.7.0" },
+    { name = "granian", extras = ["reload"], marker = "extra == 'all'", specifier = ">=2.7.9" },
+    { name = "granian", extras = ["reload"], marker = "extra == 'server'", specifier = ">=2.7.9" },
+    { name = "granian", extras = ["reload"], marker = "extra == 'standard'", specifier = ">=2.7.9" },
+    { name = "httpx", specifier = ">=0.28.1" },
+    { name = "httpx-oauth", marker = "extra == 'all'", specifier = ">=0.17.0" },
+    { name = "httpx-oauth", marker = "extra == 'oauth'", specifier = ">=0.17.0" },
+    { name = "hypothesis", marker = "extra == 'dev'", specifier = ">=6.156.6" },
+    { name = "import-linter", marker = "extra == 'dev'", specifier = ">=2.13" },
+    { name = "inflection", specifier = ">=0.5.1" },
+    { name = "ipython", marker = "extra == 'all'", specifier = ">=9.15.0" },
+    { name = "ipython", marker = "extra == 'console'", specifier = ">=9.15.0" },
+    { name = "ipython", marker = "extra == 'dev'", specifier = ">=9.15.0" },
+    { name = "ipython", marker = "extra == 'standard'", specifier = ">=9.15.0" },
+    { name = "itsdangerous", specifier = ">=2.2.0" },
+    { name = "jinja2", marker = "extra == 'all'", specifier = ">=3.1.6" },
+    { name = "jinja2", marker = "extra == 'standard'", specifier = ">=3.1.6" },
+    { name = "jinja2", marker = "extra == 'view'", specifier = ">=3.1.6" },
+    { name = "litestar", marker = "extra == 'all'", specifier = ">=2.24.0" },
+    { name = "litestar", marker = "extra == 'http'", specifier = ">=2.24.0" },
+    { name = "litestar", marker = "extra == 'standard'", specifier = ">=2.24.0" },
+    { name = "markdown-it-py", marker = "extra == 'all'", specifier = ">=4.2.0" },
+    { name = "markdown-it-py", marker = "extra == 'mail'", specifier = ">=4.2.0" },
+    { name = "meilisearch", marker = "extra == 'all'", specifier = ">=0.42.0" },
+    { name = "meilisearch", marker = "extra == 'search'", specifier = ">=0.42.0" },
+    { name = "moto", marker = "extra == 'dev'", specifier = ">=5.2.2" },
+    { name = "msgspec", specifier = ">=0.21.1" },
+    { name = "mypy", marker = "extra == 'dev'", specifier = ">=2.2.0" },
+    { name = "opentelemetry-exporter-otlp-proto-http", marker = "extra == 'all'", specifier = ">=1.43.0" },
+    { name = "opentelemetry-exporter-otlp-proto-http", marker = "extra == 'telemetry'", specifier = ">=1.43.0" },
+    { name = "opentelemetry-exporter-prometheus", marker = "extra == 'all'", specifier = ">=0.64b0" },
+    { name = "opentelemetry-exporter-prometheus", marker = "extra == 'telemetry'", specifier = ">=0.64b0" },
+    { name = "opentelemetry-sdk", marker = "extra == 'all'", specifier = ">=1.43.0" },
+    { name = "opentelemetry-sdk", marker = "extra == 'telemetry'", specifier = ">=1.43.0" },
+    { name = "pgvector", marker = "extra == 'all'", specifier = ">=0.5.0" },
+    { name = "pgvector", marker = "extra == 'vector'", specifier = ">=0.5.0" },
+    { name = "pillow", marker = "extra == 'all'", specifier = ">=12.3.0" },
+    { name = "pillow", marker = "extra == 'image'", specifier = ">=12.3.0" },
+    { name = "pillow", marker = "extra == 'media'", specifier = ">=12.3.0" },
+    { name = "pip-audit", marker = "extra == 'dev'", specifier = ">=2.10.1" },
+    { name = "polyfactory", marker = "extra == 'dev'", specifier = ">=3.3.0" },
+    { name = "pre-commit", marker = "extra == 'dev'", specifier = ">=4.6.0" },
+    { name = "prometheus-client", marker = "extra == 'all'", specifier = ">=0.25.0" },
+    { name = "prometheus-client", marker = "extra == 'telemetry'", specifier = ">=0.25.0" },
+    { name = "pwdlib", extras = ["argon2", "bcrypt"], specifier = ">=0.3.0" },
+    { name = "pyjwt", marker = "extra == 'all'", specifier = ">=2.13.0" },
+    { name = "pyjwt", marker = "extra == 'jwt'", specifier = ">=2.13.0" },
+    { name = "pyjwt", extras = ["crypto"], marker = "extra == 'all'", specifier = ">=2.13.0" },
+    { name = "pyjwt", extras = ["crypto"], marker = "extra == 'oidc'", specifier = ">=2.13.0" },
+    { name = "pyotp", marker = "extra == '2fa'", specifier = ">=2.10.0" },
+    { name = "pyotp", marker = "extra == 'all'", specifier = ">=2.10.0" },
+    { name = "pyright", marker = "extra == 'dev'", specifier = ">=1.1.411" },
+    { name = "pytest", marker = "extra == 'dev'", specifier = ">=9.1.1" },
+    { name = "pytest-asyncio", marker = "extra == 'dev'", specifier = ">=1.4.0" },
+    { name = "pytest-xdist", marker = "extra == 'dev'", specifier = ">=3.8.0" },
+    { name = "python-dotenv", specifier = ">=1.2.2" },
+    { name = "python-slugify", specifier = ">=8.0.4" },
+    { name = "python-ulid", specifier = ">=3.1.0" },
+    { name = "redis", marker = "extra == 'all'", specifier = ">=8.0.1" },
+    { name = "redis", marker = "extra == 'redis'", specifier = ">=8.0.1" },
+    { name = "ruff", marker = "extra == 'dev'", specifier = ">=0.15.21" },
+    { name = "s3fs", marker = "extra == 'all'", specifier = ">=2026.6.0" },
+    { name = "s3fs", marker = "extra == 's3'", specifier = ">=2026.6.0" },
+    { name = "sentry-sdk", marker = "extra == 'all'", specifier = ">=2.64.0" },
+    { name = "sentry-sdk", marker = "extra == 'telemetry'", specifier = ">=2.64.0" },
+    { name = "sqlalchemy", extras = ["asyncio"], marker = "extra == 'all'", specifier = ">=2.0.51" },
+    { name = "sqlalchemy", extras = ["asyncio"], marker = "extra == 'mysql'", specifier = ">=2.0.51" },
+    { name = "sqlalchemy", extras = ["asyncio"], marker = "extra == 'postgres'", specifier = ">=2.0.51" },
+    { name = "sqlalchemy", extras = ["asyncio"], marker = "extra == 'sqlite'", specifier = ">=2.0.51" },
+    { name = "sqlalchemy", extras = ["asyncio"], marker = "extra == 'standard'", specifier = ">=2.0.51" },
+    { name = "structlog", specifier = ">=26.1.0" },
+    { name = "supabase", marker = "extra == 'all'", specifier = ">=2.31.0" },
+    { name = "supabase", marker = "extra == 'supabase'", specifier = ">=2.31.0" },
+    { name = "taskiq", marker = "extra == 'all'", specifier = ">=0.12.4" },
+    { name = "taskiq", marker = "extra == 'queue'", specifier = ">=0.12.4" },
+    { name = "taskiq", marker = "extra == 'queue-amqp'", specifier = ">=0.12.4" },
+    { name = "taskiq", marker = "extra == 'queue-redis'", specifier = ">=0.12.4" },
+    { name = "taskiq-aio-pika", marker = "extra == 'all'", specifier = ">=0.6.0" },
+    { name = "taskiq-aio-pika", marker = "extra == 'queue-amqp'", specifier = ">=0.6.0" },
+    { name = "taskiq-redis", marker = "extra == 'all'", specifier = ">=1.2.3" },
+    { name = "taskiq-redis", marker = "extra == 'queue-redis'", specifier = ">=1.2.3" },
+    { name = "testcontainers", marker = "extra == 'test-integration'", specifier = ">=4.14.2" },
+    { name = "typer", specifier = ">=0.26.8" },
+    { name = "typing-extensions", specifier = ">=4.16.0" },
+    { name = "whenever", specifier = ">=0.10.2" },
+    { name = "zensical", marker = "extra == 'docs'", specifier = ">=0.0.50" },
+]
+provides-extras = ["2fa", "all", "azure", "console", "dev", "docs", "gcs", "http", "i18n", "image", "jwt", "mail", "media", "mysql", "notifications", "oauth", "oidc", "postgres", "queue", "queue-amqp", "queue-redis", "redis", "s3", "search", "server", "sqlite", "standard", "supabase", "telemetry", "test-integration", "vector", "video", "view"]
 
 [[package]]
 name = "arvel-ecommerce-kit"
@@ -370,7 +481,7 @@ dev = [
 [package.metadata]
 requires-dist = [
     { name = "aiosqlite", marker = "extra == 'dev'", specifier = ">=0.22.1" },
-    { name = "arvel", extras = ["standard", "postgres", "redis", "queue-amqp", "view", "mail", "image", "i18n", "jwt", "oidc", "s3", "telemetry", "search"] },
+    { name = "arvel", extras = ["standard", "postgres", "redis", "queue-amqp", "view", "mail", "image", "i18n", "jwt", "oidc", "s3", "telemetry", "search"], editable = "../arvel" },
     { name = "bandit", marker = "extra == 'dev'", specifier = ">=1.9.4" },
     { name = "faker", marker = "extra == 'dev'", specifier = ">=40.28.1" },
     { name = "mypy", marker = "extra == 'dev'", specifier = ">=2.2.0" },
@@ -1447,7 +1558,7 @@ wheels = [
 
 [[package]]
 name = "mypy"
-version = "2.2.0"
+version = "2.3.0"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "ast-serialize" },
@@ -1456,24 +1567,24 @@ dependencies = [
     { name = "pathspec" },
     { name = "typing-extensions" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/e9/7e/be536678c6ae49ef058aba4b483d8c7bc104f471479016066f345bc1f5f8/mypy-2.2.0.tar.gz", hash = "sha256:2cdd99d48590dce6f6b7f1961eda75386364398fcdaad86923bc0f0231bf9baf", size = 3950939, upload-time = "2026-07-08T01:37:27.335Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/12/af/4e516a05d3ca2eb9283e9ec45b2c02225c1514dd6da49fd3c9eaa6639370/mypy-2.3.0.tar.gz", hash = "sha256:465965d41cd9a2726694e983e8ce7113259327bec798115d1e1dfa2a52fb666e", size = 3988104, upload-time = "2026-07-13T11:34:53.387Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/73/32/0aa8d8d197023ca6040f7b25a486cb47037b6350b0d3bae657c8f85fb43f/mypy-2.2.0-cp314-cp314-macosx_10_15_x86_64.whl", hash = "sha256:1f6c3d76853071409ac58fc0aadfb276a22af5f190fdaa02152a858088a39ebd", size = 14926083, upload-time = "2026-07-08T01:36:02.365Z" },
-    { url = "https://files.pythonhosted.org/packages/e2/7c/35bbe0cb10e6699f90e988e537aaf4282a6c16e37f58848a242eb0a98bde/mypy-2.2.0-cp314-cp314-macosx_11_0_arm64.whl", hash = "sha256:bdaa177e80cc3292824d4ef3670b5b58771ee8d57c290e0c9c89e7968212332c", size = 13879985, upload-time = "2026-07-08T01:36:31.093Z" },
-    { url = "https://files.pythonhosted.org/packages/f9/0c/1597fbebd873e9b63452317740ae3dd32692cec5da180cc65acd96cd28cf/mypy-2.2.0-cp314-cp314-manylinux2014_aarch64.manylinux_2_17_aarch64.manylinux_2_28_aarch64.whl", hash = "sha256:80923e6d6e7878291f537ee11052f974954c20cb569798429a5dc265eb780b47", size = 14076883, upload-time = "2026-07-08T01:34:21.789Z" },
-    { url = "https://files.pythonhosted.org/packages/68/35/2ec021a83ec01b5d522639f78d8b36adade7fa4821db0f48fd6d82e861f3/mypy-2.2.0-cp314-cp314-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl", hash = "sha256:01f24bd465a09077c8d64be8f19a6646db467a55490fd315fe7871afe6bb9645", size = 15103567, upload-time = "2026-07-08T01:36:47.717Z" },
-    { url = "https://files.pythonhosted.org/packages/53/3a/8cb3529f6d6800c7d069935e5c83a05d80263847b8a947cf6b0b16a9e958/mypy-2.2.0-cp314-cp314-musllinux_1_2_x86_64.whl", hash = "sha256:db34595464869f474708e769413d1d739fc33a69850f253757b9a4cc20bc1fec", size = 15354641, upload-time = "2026-07-08T01:36:41.592Z" },
-    { url = "https://files.pythonhosted.org/packages/d6/4d/320bc9a9553f8a9db5e847ec5ded762ef7ed7403c76c4ba2e8181c80e2f0/mypy-2.2.0-cp314-cp314-pyemscripten_2026_0_wasm32.whl", hash = "sha256:b48092132c7b0ef4322773fecae62fc5b0bc339be348badeec8af502122a4a51", size = 7694355, upload-time = "2026-07-08T01:37:03.291Z" },
-    { url = "https://files.pythonhosted.org/packages/90/05/bf3b349e2f885cd3aab488111bb9049439c28bc028dac5073350d3df8fbe/mypy-2.2.0-cp314-cp314-win_amd64.whl", hash = "sha256:6fc0e98b95e31755ca06d89f75fafa7820fbb3ea2caace6d83cba17625cd0acb", size = 11329146, upload-time = "2026-07-08T01:35:38.318Z" },
-    { url = "https://files.pythonhosted.org/packages/41/a5/558b06e6cfe17ab88bb38f7b370b6bc68a74ba177c9e138db9748e422d2d/mypy-2.2.0-cp314-cp314-win_arm64.whl", hash = "sha256:bc73a5b4d40e8a3e6b12ef82eb0c90430964e34016a36c2aff4e3bfe37ba41f0", size = 10316586, upload-time = "2026-07-08T01:36:25.458Z" },
-    { url = "https://files.pythonhosted.org/packages/0b/21/f0b96f19a9b8ba111a45ffbe9508e818b7f6990469b38f6888943f7bfd3a/mypy-2.2.0-cp314-cp314t-macosx_10_15_x86_64.whl", hash = "sha256:6257bd4b4c0ae2148548b869a1ff3758e38645b92c8fe65eca401866c3c551c1", size = 15922565, upload-time = "2026-07-08T01:35:56.282Z" },
-    { url = "https://files.pythonhosted.org/packages/18/f2/1dbcb20b0865d5e992541450a8c73f2fcc90f8bd7d8a4b81313e16934870/mypy-2.2.0-cp314-cp314t-macosx_11_0_arm64.whl", hash = "sha256:dfa22b3ae862ac1ce76f5976ddd402651b5f090bcfd49c6d0484b8983a29eaf8", size = 14816515, upload-time = "2026-07-08T01:34:58.167Z" },
-    { url = "https://files.pythonhosted.org/packages/84/a2/18cce9c7d5b4d14010d1f13836da11b234dda917b17ca8671fc32c136997/mypy-2.2.0-cp314-cp314t-manylinux2014_aarch64.manylinux_2_17_aarch64.manylinux_2_28_aarch64.whl", hash = "sha256:30a430bf26fe8cf372f3933fbd83e633d6561868803645a20e4e6d4523f52a3b", size = 15272246, upload-time = "2026-07-08T01:37:08.72Z" },
-    { url = "https://files.pythonhosted.org/packages/ce/71/24d720c7924829bd675cbde2d0fa779f50abf676ca617f53d6a8bfef5fa7/mypy-2.2.0-cp314-cp314t-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl", hash = "sha256:d58655a60e823b1a4c9ebcda072897fb0193c2f3e6f8e7c433e152aa4cb00233", size = 16226295, upload-time = "2026-07-08T01:34:51.861Z" },
-    { url = "https://files.pythonhosted.org/packages/b7/5e/785730990fc863ad8340b4ab44ac4ca23270aecff92c180ccdf27f9f5869/mypy-2.2.0-cp314-cp314t-musllinux_1_2_x86_64.whl", hash = "sha256:d4452c955caf14e28bb046cbd0c3671272e6381630a8b81b0da9713558148890", size = 16493275, upload-time = "2026-07-08T01:35:09.337Z" },
-    { url = "https://files.pythonhosted.org/packages/93/33/55b1edf16f639f153972380d6977b81f65509c5b8f9c86b58b94b7990b03/mypy-2.2.0-cp314-cp314t-win_amd64.whl", hash = "sha256:68f5b7f7f755200f68c7181e3dfb28be9858162257690e539759c9f57721e388", size = 11749038, upload-time = "2026-07-08T01:35:50.071Z" },
-    { url = "https://files.pythonhosted.org/packages/61/36/67424748a4e65e97f0e05bf00df379dfb6c2d817f82cc3a4ce5c96d99beb/mypy-2.2.0-cp314-cp314t-win_arm64.whl", hash = "sha256:78d201accfafce3801d978f2b8dbbd473a9ce364cc0a0dfd9192fe47d977e129", size = 10704254, upload-time = "2026-07-08T01:37:17.971Z" },
-    { url = "https://files.pythonhosted.org/packages/28/cb/142c2097ca02c0d295b00625ff946808bdda65acda17d163c680d8a6a474/mypy-2.2.0-py3-none-any.whl", hash = "sha256:ecc138da861e932d1344214da4bae866b21900a9c2778824b51fe2fb47f5180e", size = 2726094, upload-time = "2026-07-08T01:34:00.075Z" },
+    { url = "https://files.pythonhosted.org/packages/a4/58/fa0ae047da911f540284009b4f44b96fe09d83c076d7c103e9d645f46303/mypy-2.3.0-cp314-cp314-macosx_10_15_x86_64.whl", hash = "sha256:ea317b060ce83e26050f8f9e4d7d6bf44ed7597c8ff9990bccffbb9d1d8522db", size = 14941909, upload-time = "2026-07-13T11:32:34.332Z" },
+    { url = "https://files.pythonhosted.org/packages/15/14/2ba1d61452d7c2a7fe12741e8d374e52b183476b07aa7f9e2a0d02b0720a/mypy-2.3.0-cp314-cp314-macosx_11_0_arm64.whl", hash = "sha256:094af99f92638aa92852326188b85a89e50f4a472f44827c03362228482f0762", size = 13967581, upload-time = "2026-07-13T11:30:00.587Z" },
+    { url = "https://files.pythonhosted.org/packages/ed/5a/483fb9e5ffbbb1a28dccc7b0a13d141b17ac769b6c9f488c0a0c63698962/mypy-2.3.0-cp314-cp314-manylinux2014_aarch64.manylinux_2_17_aarch64.manylinux_2_28_aarch64.whl", hash = "sha256:de121747278144fc9ae7caa2e978cf5df12aebc82933182f5b3b86081a30baef", size = 14168807, upload-time = "2026-07-13T11:28:48.6Z" },
+    { url = "https://files.pythonhosted.org/packages/ae/77/70d7a10732063beb74ad713682cf871e88f5c5fa39bfc8beff8a524bf9cb/mypy-2.3.0-cp314-cp314-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl", hash = "sha256:37fa4de896a84e2dc9200d91e614c22563b43d1a266789d4bbac7b22ebe6192b", size = 15200144, upload-time = "2026-07-13T11:31:25.283Z" },
+    { url = "https://files.pythonhosted.org/packages/56/72/766218ac783be4fdfcd699b90037b63017348a3e86fb2c1fbfb18302637d/mypy-2.3.0-cp314-cp314-musllinux_1_2_x86_64.whl", hash = "sha256:f1b3a98dfd21058bc759bb3337d5d1f61d0fdf9f3cf9c00f4291790fb5427bff", size = 15460389, upload-time = "2026-07-13T11:29:29.077Z" },
+    { url = "https://files.pythonhosted.org/packages/38/4e/8a9db7411ecb8ec0cb1fd05dba432f28bafffcd38b4e887714a4a0506689/mypy-2.3.0-cp314-cp314-pyemscripten_2026_0_wasm32.whl", hash = "sha256:944c665d984157cb96a679dfb7a4a81dd1d36b24b9c284b699514e6e626b82d4", size = 7753664, upload-time = "2026-07-13T11:29:08.147Z" },
+    { url = "https://files.pythonhosted.org/packages/65/4c/c3f8bfd6ed0e5e38b5a244403b27f821d433443df5a15a278417c10a3a3c/mypy-2.3.0-cp314-cp314-win_amd64.whl", hash = "sha256:4359424140d985192c778c1ce2c114a10c1ca58a381ed79cfa70d37df94b299f", size = 11417237, upload-time = "2026-07-13T11:33:47.467Z" },
+    { url = "https://files.pythonhosted.org/packages/3c/00/89a32eaf5ccf174bc4f90db0eaea5d70636c01b8d49f384bdab2e8834390/mypy-2.3.0-cp314-cp314-win_arm64.whl", hash = "sha256:3dd0bed92c4bdec57c42505b96416fb9e6a5aa7be84d2809bcd5f2ecec2860d7", size = 10389252, upload-time = "2026-07-13T11:31:43.81Z" },
+    { url = "https://files.pythonhosted.org/packages/31/56/104f93d69aa9f339b6b9d3b0a7faa699b8b466c942cf3ae86cc2a2ec0915/mypy-2.3.0-cp314-cp314t-macosx_10_15_x86_64.whl", hash = "sha256:691fdc37132b1ae628d834f672e74de83462d9fb4aff621835767fb43a8dd373", size = 16385495, upload-time = "2026-07-13T11:29:49.818Z" },
+    { url = "https://files.pythonhosted.org/packages/d2/03/f1d2123313f55efafdd27706960f43a771c62f1b68426c76043f3ab9ebf3/mypy-2.3.0-cp314-cp314t-macosx_11_0_arm64.whl", hash = "sha256:aec15d465d477558fd842757b487849007311cf3897849cdda0e3162ac0ac556", size = 15098155, upload-time = "2026-07-13T11:30:40.301Z" },
+    { url = "https://files.pythonhosted.org/packages/e5/5d/d5f9200399b445e81726c4f23becee33f233aee81c72680b1ef3a258b641/mypy-2.3.0-cp314-cp314t-manylinux2014_aarch64.manylinux_2_17_aarch64.manylinux_2_28_aarch64.whl", hash = "sha256:b352b7e49f5e6576009e8df730e1ff4f915cb565b851b396d2ffe2f5a6f5da88", size = 15514155, upload-time = "2026-07-13T11:34:38.569Z" },
+    { url = "https://files.pythonhosted.org/packages/cd/ce/69977c555f08faa3190cfde44189b89dbd56861b1ab97aa18fc5f3a2e4a3/mypy-2.3.0-cp314-cp314t-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl", hash = "sha256:1c6c6bf687b17f90dbfcad95b960d32eaa0154c00da45f03ab50bf8952e047fe", size = 16766351, upload-time = "2026-07-13T11:33:29.195Z" },
+    { url = "https://files.pythonhosted.org/packages/bc/92/6648b6caa3ab9e00f9ac0c2a78307805f873dd48139b24a6f6f7c3667bbf/mypy-2.3.0-cp314-cp314t-musllinux_1_2_x86_64.whl", hash = "sha256:f4ed18f111bfe2d599bca7468e7f9251042c1c2118f762c8de2766a56d773c60", size = 17043490, upload-time = "2026-07-13T11:30:53.927Z" },
+    { url = "https://files.pythonhosted.org/packages/7c/ab/0dc91d80f3f016634c68d451f294a97320fe903a9b6f90b9e57b3f7f1717/mypy-2.3.0-cp314-cp314t-win_amd64.whl", hash = "sha256:0b025a93cffb9781d231f232be07a17912f35f10a313c24f301c81e842870654", size = 12146869, upload-time = "2026-07-13T11:29:38.874Z" },
+    { url = "https://files.pythonhosted.org/packages/85/b5/4c964d02634ba81f4d1c84838e5c5b18ab06d13ed568960f5d6318495ccc/mypy-2.3.0-cp314-cp314t-win_arm64.whl", hash = "sha256:adebc76aab4f3495a88b41d48aa4aff0c03f2822501da76625afcca5975f19e5", size = 10965113, upload-time = "2026-07-13T11:28:07.056Z" },
+    { url = "https://files.pythonhosted.org/packages/2c/fa/fdc54fe583ba3cafbcedfb70eeeaf03849f75b1827a07096c7bd996f582d/mypy-2.3.0-py3-none-any.whl", hash = "sha256:6b1cdb579446b60432432b2b2403a6201b4b475a004d7f488511c9ba177c9e88", size = 2753292, upload-time = "2026-07-13T11:33:18.48Z" },
 ]
 
 [[package]]
@@ -2279,15 +2390,15 @@ wheels = [
 
 [[package]]
 name = "sentry-sdk"
-version = "2.64.0"
+version = "2.65.0"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "certifi" },
     { name = "urllib3" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/60/31/b7341f156a5f6f36f0b4845d6f1c28a2ae4799171dba7007f3a1e9b234b4/sentry_sdk-2.64.0.tar.gz", hash = "sha256:68be2c29e14ae310f8a39e1a79916b6d85c6cb41dcce789d14ff05fe293e4c55", size = 921020, upload-time = "2026-06-30T08:13:47.682Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/f1/1f/ed17a390348156ca99fe622b97cd7d2f1969b5f49df89084b0f28e7953e9/sentry_sdk-2.65.0.tar.gz", hash = "sha256:c94dc945d54bad49d4f20448b1e6b217ca2f92f46d05c3e83d41764af685c3d1", size = 932133, upload-time = "2026-07-13T11:33:19.92Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/36/a8/3fb9a4319efa3b26f5be0e90e6d8918df43fa7c7e977d26390f589501d82/sentry_sdk-2.64.0-py3-none-any.whl", hash = "sha256:715ea91ca860a819e8d8a50a7bde3a80d0df3b4ed7b6660a20fb9a2d084188f1", size = 498901, upload-time = "2026-06-30T08:13:45.566Z" },
+    { url = "https://files.pythonhosted.org/packages/21/3b/326ad4c03b5da89b5124c8890af66e8119c4d2e10abc0619e0d67d9f7c7f/sentry_sdk-2.65.0-py3-none-any.whl", hash = "sha256:3595169677a808e4d0e1ea6ffb89443459549c7a98392ed71c77c847182ab6bf", size = 503869, upload-time = "2026-07-13T11:33:17.71Z" },
 ]
 
 [[package]]
@@ -2431,19 +2542,6 @@ wheels = [
 ]
 
 [[package]]
-name = "taskiq-redis"
-version = "1.2.3"
-source = { registry = "https://pypi.org/simple" }
-dependencies = [
-    { name = "redis" },
-    { name = "taskiq" },
-]
-sdist = { url = "https://files.pythonhosted.org/packages/99/09/8476b1b12db94d53eb8d0a5e8ffffd453af7626d477bfbd8ab12bf1d3445/taskiq_redis-1.2.3.tar.gz", hash = "sha256:da427db1f68bb71ee90d93c416b82d1bf4a1ed4087f4b0f95b61bf6d8bba3e67", size = 14657, upload-time = "2026-06-23T01:09:07.783Z" }
-wheels = [
-    { url = "https://files.pythonhosted.org/packages/68/93/64d90e5ff71b0dbb3c5dc74d62fd74361586b972b4eb49b6a84c06b01091/taskiq_redis-1.2.3-py3-none-any.whl", hash = "sha256:bcab686287e23e0b9922e7809783ef2af8e8e8ce833e790308af40e96f67d549", size = 20904, upload-time = "2026-06-23T01:09:06.822Z" },
-]
-
-[[package]]
 name = "testcontainers"
 version = "4.14.2"
 source = { registry = "https://pypi.org/simple" }
@@ -2577,19 +2675,6 @@ source = { registry = "https://pypi.org/simple" }
 sdist = { url = "https://files.pythonhosted.org/packages/53/0c/06f8b233b8fd13b9e5ee11424ef85419ba0d8ba0b3138bf360be2ff56953/urllib3-2.7.0.tar.gz", hash = "sha256:231e0ec3b63ceb14667c67be60f2f2c40a518cb38b03af60abc813da26505f4c", size = 433602, upload-time = "2026-05-07T16:13:18.596Z" }
 wheels = [
     { url = "https://files.pythonhosted.org/packages/7f/3e/5db95bcf282c52709639744ca2a8b149baccf648e39c8cc87553df9eae0c/urllib3-2.7.0-py3-none-any.whl", hash = "sha256:9fb4c81ebbb1ce9531cce37674bbc6f1360472bc18ca9a553ede278ef7276897", size = 131087, upload-time = "2026-05-07T16:13:17.151Z" },
-]
-
-[[package]]
-name = "uvicorn"
-version = "0.51.0"
-source = { registry = "https://pypi.org/simple" }
-dependencies = [
-    { name = "click" },
-    { name = "h11" },
-]
-sdist = { url = "https://files.pythonhosted.org/packages/a2/65/b7c6c443ccc58678c91e1e973bbe2a878591538655d6e1d47f24ba1c51f3/uvicorn-0.51.0.tar.gz", hash = "sha256:f6f4b69b657c312f516dd2d268ab9ae6f254b11e4bac504f37b2ab58b24dd0b0", size = 94412, upload-time = "2026-07-08T10:59:05.962Z" }
-wheels = [
-    { url = "https://files.pythonhosted.org/packages/45/ec/dbb7e5a6b91f86bfb9eb7d2988a2730907b6a729875b949c7f022e8b88fa/uvicorn-0.51.0-py3-none-any.whl", hash = "sha256:5d38af6cd620f2ae3849fb44fd4879e0890aa1febe8d47eb355fb45d93fe6a5b", size = 73219, upload-time = "2026-07-08T10:59:04.44Z" },
 ]
 
 [[package]]

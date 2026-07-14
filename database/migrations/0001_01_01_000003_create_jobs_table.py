@@ -11,7 +11,9 @@ class CreateJobsTable(Migration):
             t.text("payload")
             t.integer("attempts")
             t.integer("reserved_at").nullable()
-            t.integer("reserved_until").nullable().index()  # effective visibility deadline
+            t.integer(
+                "reserved_until"
+            ).nullable().index()  # effective visibility deadline
             t.integer("available_at")
             t.integer("created_at")
 
