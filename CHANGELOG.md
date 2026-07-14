@@ -1,5 +1,15 @@
 # Changelog
 
+## [0.7.2](https://github.com/mohamed-rekiba/arvel-ecommerce-kit/compare/v0.7.1...v0.7.2) (2026-07-14)
+
+
+### Bug Fixes
+
+* **api:** narrow user to non-None after credential check ([b972750](https://github.com/mohamed-rekiba/arvel-ecommerce-kit/commit/b972750a343ee0a88fa917a4f79a69c66f67485b))
+* async password check + jobs.reserved_until column (round 2) ([9188f8c](https://github.com/mohamed-rekiba/arvel-ecommerce-kit/commit/9188f8ca6d6ef8d022e00fdc932d2a5735c61489))
+* **auth:** use arvel verify_credentials for login ([1911be5](https://github.com/mohamed-rekiba/arvel-ecommerce-kit/commit/1911be529c00371f8154faaf5e37413eecef0175))
+* resolve formatting issues ([d0c42e9](https://github.com/mohamed-rekiba/arvel-ecommerce-kit/commit/d0c42e9e1f428b814e0c837eac0bbee62960ccea))
+
 ## [0.7.1](https://github.com/mohamed-rekiba/arvel-ecommerce-kit/compare/v0.7.0...v0.7.1) (2026-07-13)
 
 
