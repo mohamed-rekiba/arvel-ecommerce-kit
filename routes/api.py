@@ -88,7 +88,9 @@ async def login(request: Request, data: CredentialsIn) -> TokenOut:
     user = await User.where("email", data.email).first()
     # verify_credentials burns a dummy hash for an unknown user (no timing enumeration) and runs
     # the check off the event loop — never the inline sync Hasher().check(), which leaks both.
-    if not await verify_credentials(user, data.password):
+    # verify_credentials is evaluated first (it always runs, burning the dummy hash for a missing
+    # user); `or user is None` then narrows user to non-None for the rest of the handler.
+    if not await verify_credentials(user, data.password) or user is None:
         await limiter.record_failure(key)
         abort(401, "Invalid credentials")
     await limiter.clear(
