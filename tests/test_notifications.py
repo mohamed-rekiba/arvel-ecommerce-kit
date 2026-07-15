@@ -1,4 +1,4 @@
-"""Mail — an order-confirmation email is sent (via an order.placed listener) on checkout. Uses
+"""Mail — an order-confirmation email is sent (via an OrderPlaced listener) on checkout. Uses
 arvel's mail fake so no real SMTP is touched, asserting the Mailable was dispatched.
 """
 
@@ -93,7 +93,7 @@ def test_checkout_sends_order_confirmation_email(client, faked_mail) -> None:
         client.post("/api/checkout", json=checkout_body(), headers=headers).status_code
         == 201
     )
-    # the order.placed listener emailed the confirmation (recorded by the fake, no SMTP)
+    # the OrderPlaced listener emailed the confirmation (recorded by the fake, no SMTP)
     faked_mail.assert_sent(OrderConfirmation)
     assert faked_mail.sent[0].order_id is not None
 

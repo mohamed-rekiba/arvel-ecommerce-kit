@@ -466,7 +466,7 @@ dependencies = [
 
 [package.metadata]
 requires-dist = [
-    { name = "arvel", editable = "../arvel" },
+    { name = "arvel" },
     { name = "litellm", marker = "extra == 'litellm'" },
     { name = "msgspec" },
     { name = "temporalio", marker = "extra == 'temporal'" },
@@ -479,6 +479,7 @@ dev = [
     { name = "import-linter" },
     { name = "mypy" },
     { name = "pre-commit" },
+    { name = "pyjwt", extras = ["crypto"] },
     { name = "pytest" },
     { name = "pytest-asyncio" },
     { name = "ruff" },
@@ -487,7 +488,7 @@ dev = [
 
 [[package]]
 name = "arvel-ecommerce-kit"
-version = "0.7.1"
+version = "0.7.2"
 source = { virtual = "." }
 dependencies = [
     { name = "arvel", extra = ["i18n", "image", "jwt", "mail", "oidc", "postgres", "queue-amqp", "redis", "s3", "search", "standard", "telemetry", "view"] },

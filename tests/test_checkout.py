@@ -1,5 +1,5 @@
 """Checkout & orders through the real served path. Exercises DB transactions (cart→order is
-atomic), events (order.placed → the listener bumps a cache counter), and the OrderStatus state
+atomic), events (OrderPlaced → the listener bumps a cache counter), and the OrderStatus state
 machine (valid transitions allowed, illegal ones 422), with admin-guarded status changes.
 """
 
@@ -109,7 +109,7 @@ def test_checkout_creates_order_clears_cart_and_fires_event(client) -> None:
 
     # the cart was cleared atomically with the order's creation
     assert client.get("/api/cart", headers=headers).json()["items"] == []
-    # the order.placed event fired and its listener bumped the metric (event → listener proven)
+    # the OrderPlaced event fired and its listener bumped the metric (event → listener proven)
     assert client.get("/api/metrics/orders-placed").json()["orders_placed"] == 1
     # the order shows up in the user's order list
     orders = client.get("/api/orders", headers=headers).json()
