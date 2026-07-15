@@ -27,6 +27,7 @@ config = {
         "path": "/mcp",
         "public_url": env("APP_URL", "http://localhost:8000"),
         "tools": ["app.mcp_tools"],
-        "auth": {"mode": "token", "token_env": "MCP_TOKEN"},
+        # token_env is the NAME of the env var holding the token, not a secret
+        "auth": {"mode": "token", "token_env": "MCP_TOKEN"},  # nosec B105
     },
 }

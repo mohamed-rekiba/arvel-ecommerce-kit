@@ -12,6 +12,7 @@ from arvel.http import Request
 from arvel_ai import AI
 
 from app.models.product import Product
+from app.schemas import Translate
 
 
 class CopyDraft(Schema):
@@ -23,8 +24,9 @@ async def copy_draft(request: Request) -> CopyDraft:
     slug = request.path_param("slug")
     product = await Product.where("slug", slug).first_or_fail()
     # translations casts to list[Translate] on the admin path
+    translations: list[Translate] = product.translations or []
     name = next(
-        (t.name for t in product.translations or [] if t.locale == "en" and t.name),
+        (t.name for t in translations if t.locale == "en" and t.name),
         product.slug,
     )
     draft: CopyDraft = await AI.structured(
