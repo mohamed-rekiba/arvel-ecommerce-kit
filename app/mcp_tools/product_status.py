@@ -1,4 +1,7 @@
-"""MCP tools this app exposes to AI agents (config: ai.mcp.tools).
+"""A product-status tool this app exposes to AI agents.
+
+Every module under ``app/mcp_tools/`` is autoloaded at boot, so this file is live
+the moment it exists — no config wiring needed.
 
 Least-privilege by design: narrow read-only lookups, never generic escapes.
 Tool arguments arrive schema-validated, but treat them like route input —

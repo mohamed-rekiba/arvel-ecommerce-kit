@@ -21,12 +21,12 @@ config = {
             "model": env("AI_MODEL_FAST", "claude-haiku-4-5"),
         },
     },
-    # MCP server: agents can query product status (see app/mcp_tools.py).
+    # MCP server: agents can query product status. Tools autoload from
+    # app/mcp_tools/ — drop a module in there and it's live (see that folder).
     "mcp": {
         "enabled": True,
         "path": "/mcp",
         "public_url": env("APP_URL", "http://localhost:8000"),
-        "tools": ["app.mcp_tools"],
         # token_env is the NAME of the env var holding the token, not a secret
         "auth": {"mode": "token", "token_env": "MCP_TOKEN"},  # nosec B105
     },
