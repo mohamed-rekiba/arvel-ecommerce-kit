@@ -11,6 +11,48 @@
     }
   ],
   "paths": {
+    "/health": {
+      "get": {
+        "summary": "Health",
+        "description": "Readiness: check every registered resource concurrently. ``200`` when nothing critical has\nfailed (degraded non-criticals included), ``503`` otherwise.",
+        "operationId": "health",
+        "responses": {
+          "200": {
+            "description": "Request fulfilled, document follows",
+            "headers": {},
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HealthReport"
+                }
+              }
+            }
+          }
+        },
+        "deprecated": false
+      }
+    },
+    "/livez": {
+      "get": {
+        "summary": "HealthLive",
+        "description": "Process-is-alive. No dependency checks \u2014 always ``200`` while the worker can serve.",
+        "operationId": "health.live",
+        "responses": {
+          "200": {
+            "description": "Request fulfilled, document follows",
+            "headers": {},
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/LivenessStatus"
+                }
+              }
+            }
+          }
+        },
+        "deprecated": false
+      }
+    },
     "/broadcasting/auth": {
       "post": {
         "summary": "BroadcastingAuth",
@@ -24,27 +66,6 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/Response"
-                }
-              }
-            }
-          }
-        },
-        "deprecated": false
-      }
-    },
-    "/api/health": {
-      "get": {
-        "summary": "ApiHealth",
-        "description": "Liveness probe.",
-        "operationId": "api.health",
-        "responses": {
-          "200": {
-            "description": "Request fulfilled, document follows",
-            "headers": {},
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HealthStatus"
                 }
               }
             }
@@ -2544,6 +2565,80 @@
                     "$ref": "#/components/schemas/GalleryImageOut"
                   },
                   "type": "array"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request syntax or unsupported method",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "status_code": {
+                      "type": "integer"
+                    },
+                    "detail": {
+                      "type": "string"
+                    },
+                    "extra": {
+                      "additionalProperties": {},
+                      "type": [
+                        "null",
+                        "object",
+                        "array"
+                      ]
+                    }
+                  },
+                  "type": "object",
+                  "required": [
+                    "detail",
+                    "status_code"
+                  ],
+                  "description": "Validation Exception",
+                  "examples": [
+                    {
+                      "status_code": 400,
+                      "detail": "Bad Request",
+                      "extra": {}
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        },
+        "deprecated": false,
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ]
+      }
+    },
+    "/api/admin/products/{slug}/copy-draft": {
+      "post": {
+        "summary": "ApiAdminProductsCopyDraft",
+        "operationId": "api.admin.products.copy_draft",
+        "parameters": [
+          {
+            "name": "slug",
+            "in": "path",
+            "schema": {
+              "type": "string"
+            },
+            "required": true,
+            "deprecated": false
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Request fulfilled, document follows",
+            "headers": {},
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CopyDraft"
                 }
               }
             }
@@ -6301,6 +6396,47 @@
         ]
       }
     },
+    "/mcp": {
+      "post": {
+        "summary": "AiMcp",
+        "operationId": "ai.mcp",
+        "responses": {
+          "201": {
+            "description": "Document created, URL follows",
+            "headers": {},
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Response"
+                }
+              }
+            }
+          }
+        },
+        "deprecated": false
+      }
+    },
+    "/.well-known/oauth-protected-resource": {
+      "get": {
+        "summary": "AiMcpMetadata",
+        "operationId": "ai.mcp.metadata",
+        "responses": {
+          "200": {
+            "description": "Request fulfilled, document follows",
+            "headers": {},
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": {},
+                  "type": "object"
+                }
+              }
+            }
+          }
+        },
+        "deprecated": false
+      }
+    },
     "/": {
       "get": {
         "summary": "PublicRoot",
@@ -7665,6 +7801,25 @@
         ],
         "title": "CategoryOut"
       },
+      "CopyDraft": {
+        "properties": {
+          "title": {
+            "type": "string"
+          },
+          "bullets": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          }
+        },
+        "type": "object",
+        "required": [
+          "bullets",
+          "title"
+        ],
+        "title": "CopyDraft"
+      },
       "CountryCode": {
         "title": "CountryCode",
         "description": "Countries the shop ships to (ISO 3166-1 alpha-2) \u2014 a closed, validated set.",
@@ -7765,7 +7920,30 @@
         ],
         "title": "GalleryImageOut"
       },
-      "HealthStatus": {
+      "HealthReport": {
+        "properties": {
+          "status": {
+            "type": "string"
+          },
+          "healthy": {
+            "type": "boolean"
+          },
+          "resources": {
+            "additionalProperties": {
+              "$ref": "#/components/schemas/ResourceHealth"
+            },
+            "type": "object"
+          }
+        },
+        "type": "object",
+        "required": [
+          "healthy",
+          "resources",
+          "status"
+        ],
+        "title": "HealthReport"
+      },
+      "LivenessStatus": {
         "properties": {
           "status": {
             "type": "string"
@@ -7775,7 +7953,7 @@
         "required": [
           "status"
         ],
-        "title": "HealthStatus"
+        "title": "LivenessStatus"
       },
       "MediaItemOut": {
         "properties": {
@@ -8513,6 +8691,32 @@
         ],
         "title": "RefundStatus",
         "description": "A refund's state, mirrored from the gateway (K15) \u2014 the reverse of PaymentStatus."
+      },
+      "ResourceHealth": {
+        "properties": {
+          "status": {
+            "type": "string"
+          },
+          "latency_ms": {
+            "type": "number"
+          },
+          "detail": {
+            "oneOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "type": "object",
+        "required": [
+          "latency_ms",
+          "status"
+        ],
+        "title": "ResourceHealth"
       },
       "Response": {
         "properties": {

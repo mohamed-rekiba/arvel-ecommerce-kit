@@ -14,6 +14,7 @@ export default defineConfig({
       mode: 'single',
       baseUrl: '',
       override: {
+        header: () => [], // Disables the generated header comment
         mutator: {
           path: './src/api/http.ts',
           name: 'apiFetch'

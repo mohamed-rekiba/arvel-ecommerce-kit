@@ -1,23 +1,29 @@
 import { createRouter, createWebHistory } from 'vue-router'
 import { installViewTransitions } from './lib/transitions'
 import ShopLayout from './shop/ShopLayout.vue'
-import DealsView from './shop/views/DealsView.vue'
 import HomeView from './shop/views/HomeView.vue'
-import CatalogView from './shop/views/CatalogView.vue'
-import ProductDetailView from './shop/views/ProductDetailView.vue'
-import CartView from './shop/views/CartView.vue'
-import CheckoutView from './shop/views/CheckoutView.vue'
-import OrderDetailView from './shop/views/OrderDetailView.vue'
-import ForgotPasswordView from './shop/views/ForgotPasswordView.vue'
-import ResetPasswordView from './shop/views/ResetPasswordView.vue'
-import VerifyEmailView from './shop/views/VerifyEmailView.vue'
-import AccountLayout from './shop/views/account/AccountLayout.vue'
-import ProfilePane from './shop/views/account/ProfilePane.vue'
-import OrdersPane from './shop/views/account/OrdersPane.vue'
-import AddressesPane from './shop/views/account/AddressesPane.vue'
-import WishlistPane from './shop/views/account/WishlistPane.vue'
-import SecurityPane from './shop/views/account/SecurityPane.vue'
-import NotificationsPane from './shop/views/account/NotificationsPane.vue'
+
+// The shell (ShopLayout) and the landing page (HomeView) load eagerly for a fast first paint;
+// every other storefront view is lazy, so a home visitor downloads only those two and each route
+// (catalog, product, cart, checkout, account, …) arrives on navigation.
+const shop = {
+  catalog: () => import('./shop/views/CatalogView.vue'),
+  deals: () => import('./shop/views/DealsView.vue'),
+  product: () => import('./shop/views/ProductDetailView.vue'),
+  cart: () => import('./shop/views/CartView.vue'),
+  checkout: () => import('./shop/views/CheckoutView.vue'),
+  order: () => import('./shop/views/OrderDetailView.vue'),
+  forgotPassword: () => import('./shop/views/ForgotPasswordView.vue'),
+  resetPassword: () => import('./shop/views/ResetPasswordView.vue'),
+  verifyEmail: () => import('./shop/views/VerifyEmailView.vue'),
+  accountLayout: () => import('./shop/views/account/AccountLayout.vue'),
+  profile: () => import('./shop/views/account/ProfilePane.vue'),
+  accountOrders: () => import('./shop/views/account/OrdersPane.vue'),
+  addresses: () => import('./shop/views/account/AddressesPane.vue'),
+  wishlist: () => import('./shop/views/account/WishlistPane.vue'),
+  security: () => import('./shop/views/account/SecurityPane.vue'),
+  notifications: () => import('./shop/views/account/NotificationsPane.vue')
+}
 
 // Lazy-loaded so a storefront visitor never downloads the admin chunk (Keycloak/OIDC client included).
 const admin = {
@@ -58,30 +64,30 @@ const router = createRouter({
       component: ShopLayout,
       children: [
         { path: '', name: 'home', component: HomeView },
-        { path: 'catalog', name: 'catalog', component: CatalogView },
-        { path: 'deals', name: 'deals', component: DealsView },
+        { path: 'catalog', name: 'catalog', component: shop.catalog },
+        { path: 'deals', name: 'deals', component: shop.deals },
         {
           path: 'products/:slug',
           name: 'product',
-          component: ProductDetailView,
+          component: shop.product,
           meta: { detail: true }
         },
-        { path: 'cart', name: 'cart', component: CartView },
+        { path: 'cart', name: 'cart', component: shop.cart },
         {
           path: 'checkout',
           name: 'checkout',
-          component: CheckoutView,
+          component: shop.checkout,
           meta: { detail: true }
         },
         {
           path: 'orders/:id',
           name: 'order',
-          component: OrderDetailView,
+          component: shop.order,
           meta: { detail: true }
         },
         {
           path: 'account',
-          component: AccountLayout,
+          component: shop.accountLayout,
           children: [
             {
               path: '',
@@ -91,47 +97,47 @@ const router = createRouter({
             {
               path: 'profile',
               name: 'account-profile',
-              component: ProfilePane
+              component: shop.profile
             },
-            { path: 'orders', name: 'account-orders', component: OrdersPane },
+            { path: 'orders', name: 'account-orders', component: shop.accountOrders },
             {
               path: 'addresses',
               name: 'account-addresses',
-              component: AddressesPane
+              component: shop.addresses
             },
             {
               path: 'wishlist',
               name: 'account-wishlist',
-              component: WishlistPane
+              component: shop.wishlist
             },
             {
               path: 'security',
               name: 'account-security',
-              component: SecurityPane
+              component: shop.security
             },
             {
               path: 'notifications',
               name: 'account-notifications',
-              component: NotificationsPane
+              component: shop.notifications
             }
           ]
         },
         {
           path: 'forgot-password',
           name: 'forgot-password',
-          component: ForgotPasswordView,
+          component: shop.forgotPassword,
           meta: { detail: true }
         },
         {
           path: 'reset-password',
           name: 'reset-password',
-          component: ResetPasswordView,
+          component: shop.resetPassword,
           meta: { detail: true }
         },
         {
           path: 'verify-email',
           name: 'verify-email',
-          component: VerifyEmailView,
+          component: shop.verifyEmail,
           meta: { detail: true }
         }
       ]

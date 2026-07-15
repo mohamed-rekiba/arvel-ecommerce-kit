@@ -11,7 +11,10 @@ if (process.env.VITEST) {
 }
 
 // One consolidated SPA (storefront + admin). In dev it proxies /api to the arvel server (arvel serve →
-// :8000). The admin section is split into its own chunk so a storefront visitor never downloads it.
+// :8000). The admin views are already lazy-loaded (router uses `() => import()`), so a storefront
+// visitor never downloads them — and each admin route splits into its own chunk, so opening the admin
+// login page doesn't pull in the whole (DataTable-heavy) admin bundle. Don't add a manualChunks rule
+// that collapses all of /src/admin/ back into one chunk; it defeats that per-route splitting.
 // K9: /broadcasting (arvel's channel-auth endpoint) and /ws (the BroadcastRelay) live outside
 // /api at the server's ASGI root, so they need their own proxy entries — /ws with `ws: true` for
 // the websocket upgrade. `vite preview` (the e2e harness) reuses this same `server.proxy` config.
@@ -23,16 +26,6 @@ export default defineConfig({
       '/api': { target: 'http://localhost:8000', changeOrigin: true },
       '/broadcasting': { target: 'http://localhost:8000', changeOrigin: true },
       '/ws': { target: 'http://localhost:8000', changeOrigin: true, ws: true }
-    }
-  },
-  build: {
-    rollupOptions: {
-      output: {
-        manualChunks(id) {
-          if (id.includes('/src/admin/')) return 'admin'
-          return undefined
-        }
-      }
     }
   },
   test: {
