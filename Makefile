@@ -1,4 +1,5 @@
 # arvel-ecommerce-kit — common tasks. `make help` lists them.
+RUN ?= uv run
 .DEFAULT_GOAL := help
 .PHONY: help install env up down setup migrate fresh seed bucket serve front front-build front-test worker schedule openapi openapi-check test test-integration typecheck lint check e2e hooks pre-commit clean
 
