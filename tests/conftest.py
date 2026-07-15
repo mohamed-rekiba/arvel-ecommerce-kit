@@ -4,6 +4,10 @@ import os
 
 # Force in-process cache/queue before any app boots, so tests don't depend on a dev's .env
 # pointing at real infra — arvel's load_dotenv(override=False) won't clobber these.
+# A default in-memory sqlite so the critical `database` resource connects for tests that boot
+# the app without seeding their own DB (test_example's module-level asgi_app, the relay ws tests);
+# tests that need seeded rows monkeypatch DATABASE_URL to a per-test sqlite file, which overrides.
+os.environ.setdefault("DATABASE_URL", "sqlite+aiosqlite:///:memory:")
 os.environ.setdefault("CACHE_STORE", "array")
 os.environ.setdefault("QUEUE_CONNECTION", "memory")
 os.environ.setdefault("BROADCAST_CONNECTION", "log")

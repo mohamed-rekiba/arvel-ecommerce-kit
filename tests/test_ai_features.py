@@ -75,9 +75,13 @@ def _admin(client):
 
 def test_copy_draft_via_gateway(client) -> None:
     fake = AI.fake()
-    fake.replies = ['{"title": "Warm Wool Socks", "bullets": ["Soft", "Durable", "Fair price"]}']
+    fake.replies = [
+        '{"title": "Warm Wool Socks", "bullets": ["Soft", "Durable", "Fair price"]}'
+    ]
 
-    out = client.post("/api/admin/products/wool-socks/copy-draft", headers=_admin(client))
+    out = client.post(
+        "/api/admin/products/wool-socks/copy-draft", headers=_admin(client)
+    )
     assert out.status_code == 200, out.text
     body = out.json()
     assert body["title"] == "Warm Wool Socks"
@@ -113,7 +117,9 @@ def test_mcp_metadata_document_is_public(client) -> None:
 def test_mcp_tools_list_and_call(client) -> None:
     headers = {"Authorization": "Bearer kit-test-mcp-token"}
     listed = client.post(
-        "/mcp", json={"jsonrpc": "2.0", "id": 1, "method": "tools/list"}, headers=headers
+        "/mcp",
+        json={"jsonrpc": "2.0", "id": 1, "method": "tools/list"},
+        headers=headers,
     ).json()
     assert any(t["name"] == "product_status" for t in listed["result"]["tools"])
 

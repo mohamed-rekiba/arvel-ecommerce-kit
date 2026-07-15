@@ -475,14 +475,16 @@ requires-dist = [
     { name = "httpx", marker = "extra == 'httpx'" },
     { name = "litellm", marker = "extra == 'litellm'" },
     { name = "msgspec" },
+    { name = "temporalio", marker = "extra == 'temporal'" },
 ]
-provides-extras = ["litellm", "httpx"]
+provides-extras = ["litellm", "httpx", "temporal"]
 
 [package.metadata.requires-dev]
 dev = [
     { name = "httpx" },
     { name = "import-linter" },
     { name = "mypy" },
+    { name = "pre-commit" },
     { name = "pytest" },
     { name = "pytest-asyncio" },
     { name = "ruff" },
