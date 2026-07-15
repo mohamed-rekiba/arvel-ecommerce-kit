@@ -5,7 +5,8 @@ from dataclasses import dataclass
 
 @dataclass
 class OrderPlaced:
-    """Payload for the ``order.placed`` event."""
+    """The order-placed payload. Dispatched as a class event; listeners in app/listeners/ that
+    type-hint ``handle(self, event: OrderPlaced)`` are auto-discovered and bound to it."""
 
     order_id: int
     user_id: int | None

@@ -429,9 +429,9 @@ async def checkout(request: Request, data: CheckoutIn) -> OrderOut:
                         country=country,
                     )
 
-    # the listener (record_order_metrics) reacts — the controller doesn't know about it
+    # the listeners (RecordOrderMetrics, ...) react — the controller doesn't know about them.
+    # Dispatched as a class event so the auto-discovered app/listeners/ classes bind by type.
     await Event.dispatch(
-        "order.placed",
         OrderPlaced(
             order_id=order.id,
             user_id=order.user_id,
@@ -439,7 +439,7 @@ async def checkout(request: Request, data: CheckoutIn) -> OrderOut:
             contact_email=order.contact_email,
             currency=order.currency.value,
             locale=active_locale(),
-        ),
+        )
     )
     return await _order_out(order, order_items)
 
@@ -570,7 +570,7 @@ async def cancel(request: Request) -> OrderOut:
 
 
 async def orders_placed_count(request: Request) -> MetricsOut:
-    """Order metrics bumped by the order.placed listeners (proves event→listener + the queued job)."""
+    """Order metrics bumped by the OrderPlaced listeners (proves event→listener + the queued job)."""
     return MetricsOut(
         orders_placed=int(await Cache.get(ORDERS_PLACED_KEY, 0)),
         orders_fulfilled=int(await Cache.get(ORDERS_FULFILLED_KEY, 0)),
