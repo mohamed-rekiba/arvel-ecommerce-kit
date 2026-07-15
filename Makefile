@@ -20,9 +20,9 @@ down: ## Stop all infrastructure
 setup: install env up ## One-shot: deps + .env + infra + key + migrate + seed
 	@echo "waiting for Postgres..." && until docker compose exec -T db pg_isready -U arvel -d arvel_ecommerce_kit >/dev/null 2>&1; do sleep 1; done
 	uv run arvel key:generate
-	uv run arvel migrate:fresh
+	uv run arvel migrate:fresh --force
 	uv run python tools/setup_bucket.py
-	uv run arvel db:seed
+	uv run arvel db:seed --force
 	@echo "\nReady. 'make serve' → http://127.0.0.1:8000 (API docs at /docs)"
 
 bucket: ## Ensure the S3/RustFS bucket exists + is public-read (product images are public)
@@ -32,10 +32,10 @@ migrate: ## Apply outstanding migrations
 	uv run arvel migrate
 
 fresh: ## Drop all tables, re-migrate, and re-seed
-	uv run arvel migrate:fresh && uv run arvel db:seed
+	uv run arvel migrate:fresh --force && uv run arvel db:seed --force
 
 seed: ## Seed demo data (downloads product images via the Http client)
-	uv run arvel db:seed
+	uv run arvel db:seed --force
 
 serve: ## Run the API dev server (http://127.0.0.1:8000)
 	uv run arvel serve --reload
@@ -89,9 +89,9 @@ e2e: ## Playwright checkout e2e: full infra + debug backend (LOCAL) + a queue wo
 	$(MAKE) up
 	@echo "waiting for Postgres..." && until docker compose exec -T db pg_isready -U arvel -d arvel_ecommerce_kit >/dev/null 2>&1; do sleep 1; done
 	uv run arvel key:generate
-	uv run arvel migrate:fresh
+	uv run arvel migrate:fresh --force
 	uv run python tools/setup_bucket.py
-	uv run arvel db:seed
+	uv run arvel db:seed --force
 	uv run arvel serve > /tmp/arvel-e2e-serve.log 2>&1 &
 	uv run arvel queue:work > /tmp/arvel-e2e-worker.log 2>&1 &
 	@echo "waiting for the API..." && until curl -sf http://127.0.0.1:8000/api/products >/dev/null 2>&1; do sleep 1; done
