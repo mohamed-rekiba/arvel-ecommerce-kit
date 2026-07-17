@@ -1,5 +1,18 @@
 # Changelog
 
+## [0.7.3](https://github.com/mohamed-rekiba/arvel-ecommerce-kit/compare/v0.7.2...v0.7.3) (2026-07-17)
+
+
+### Refactors
+
+* convert listeners to auto-discovered classes ([d0e2577](https://github.com/mohamed-rekiba/arvel-ecommerce-kit/commit/d0e25771aead10e415bc692311cc35ac056bbd54))
+* move the MCP tool into app/mcp_tools/ ([1b54ce9](https://github.com/mohamed-rekiba/arvel-ecommerce-kit/commit/1b54ce9053fda6d3ce5c0225530cc40d817b6a79))
+
+
+### Documentation
+
+* name the event OrderPlaced in test docstrings ([e50638b](https://github.com/mohamed-rekiba/arvel-ecommerce-kit/commit/e50638b909b05c12074d2d17521acac2b2e27412))
+
 ## [0.7.2](https://github.com/mohamed-rekiba/arvel-ecommerce-kit/compare/v0.7.1...v0.7.2) (2026-07-14)
 
 
